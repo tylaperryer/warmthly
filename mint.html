@@ -438,19 +438,28 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
+            
+            /* --- NEW STYLES FOR IMAGE --- */
+            background-image: url('coin.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            
+            /* REMOVE the conflicting 'background: linear-gradient...' line */
+            /* REMOVE the 'background: linear-gradient(135deg, #FFD700, #FFA500);' line */
+            
+            /* ADD: Centering for Matter.js and hiding the emoji text */
+            transform: translate(-50%, -50%); /* Crucial for Matter.js centering */
+            font-size: 0; /* Hide the emoji text */
+            line-height: 0; /* Hide the emoji text */
+            
             box-shadow: 0 2px 4px rgba(0,0,0,0.2), inset 0 -2px 2px rgba(0,0,0,0.1);
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             z-index: 10;
-            font-size: 20px;
-            line-height: 20px;
             display: flex;
-            align-items: center;
-            justify-content: center;
             user-select: none;
             pointer-events: auto;
-            transform: translate(-50%, -50%);
             will-change: transform;
       }
 
@@ -911,10 +920,7 @@
                         // For simplicity, we'll re-add the boundaries in setupPhysics on a full re-init if needed, 
                         // but for a simple resize, we'll just rely on the CSS container size.
                         // For a full physics update, the entire world would need to be reset, but that's complex.
-                        // For now, we'll rely on the initial boundaries being large enough.
-                        // A better fix is to ensure the pool area has a fixed size or the boundaries are updated.
-                        
-                        // For this instruction set, we will assume the initial boundaries are sufficient 
+                        // For now, we'll rely on the initial boundaries being sufficient 
                         // or that the user will handle the full physics world update on resize if necessary.
                   }
             }
@@ -1093,8 +1099,8 @@
                   
                   // Create new cent element
                   const cent = document.createElement('div');
-                  cent.className = 'cent emoji';
-                  cent.textContent = '🪙';
+                  cent.className = 'cent'; // Only 'cent' class is needed
+                  // cent.textContent = '🪙'; // Line removed to avoid emoji overlay
                   return cent;
             }
 
@@ -1169,7 +1175,8 @@
                   cent.style.top = '0';
                   cent.style.display = 'flex';
                   cent.style.opacity = '1';
-                  cent.style.fontSize = this.coinSize + 'px'; // Adjust emoji size
+                  // Note: font-size inline style is harmless without text content; emoji removed
+                  cent.style.fontSize = this.coinSize + 'px'; // This previously controlled emoji size
                   cent.style.lineHeight = this.coinSize + 'px';
                   cent.style.textAlign = 'center';
                   cent.style.justifyContent = 'center';
@@ -1205,7 +1212,6 @@
                   const cluster = document.createElement('div');
                   cluster.className = 'cent emoji';
                   cluster.style.fontSize = '24px';
-                  cluster.textContent = '🪙';
                   cluster.dataset.donationId = donationId;
                   cluster.dataset.isCluster = 'true';
                   cluster.dataset.count = totalCoins;
