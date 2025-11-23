@@ -438,13 +438,6 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            /* --- NEW STYLES FOR IMAGE --- */
-            background-image: url('coin.png'); /* *** UPDATED: Using 'coin.png' *** */
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2), inset 0 -2px 2px rgba(0,0,0,0.1);
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             z-index: 10;
@@ -457,7 +450,6 @@
 
       .cent:hover {
             transform: translate(-50%, -50%) scale(1.3);
-            box-shadow: 0 4px 8px rgba(255,140,66,0.4), inset 0 -2px 2px rgba(0,0,0,0.1);
             z-index: 100;
       }
 
@@ -465,6 +457,10 @@
             background: transparent;
             box-shadow: none;
             font-size: 18px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1;
       }
 
       /* Donation Tag */
@@ -1205,7 +1201,13 @@
                   // Create a cluster representation for large donations
                   const cluster = document.createElement('div');
                   cluster.className = 'cent emoji';
+                  cluster.textContent = '🪙';
                   cluster.style.fontSize = '24px';
+                  cluster.style.display = 'flex';
+                  cluster.style.alignItems = 'center';
+                  cluster.style.justifyContent = 'center';
+                  cluster.style.textAlign = 'center';
+                  cluster.style.lineHeight = '1';
                   cluster.dataset.donationId = donationId;
                   cluster.dataset.isCluster = 'true';
                   cluster.dataset.count = totalCoins;
@@ -1225,6 +1227,7 @@
                   const targetX = Math.random() * (this.poolWidth - 40) + 20;
                   const targetY = this.poolHeight - 40;
                   
+                  cluster.style.position = 'absolute';
                   cluster.style.left = targetX + 'px';
                   cluster.style.top = targetY + 'px';
                   
