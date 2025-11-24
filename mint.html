@@ -2681,71 +2681,81 @@
             }
 
             handleCentTouchStart(event, cent) {
-                  // Prevent browser default touch behavior (scrolling/zooming) to allow proper tap detection
-                  event.preventDefault();
+                  // If we are already dragging with Matter.js, do nothing
+                  if (this.isDragging) return;
                   
-                  // Store touch start info for tap detection
+                  // Stop Matter.js from immediately treating this as a drag
+                  event.stopPropagation();
+                  
+                  // Record the starting time and position of the touch
                   const touch = event.touches[0];
                   if (touch) {
                         cent._touchStartTime = Date.now();
                         cent._touchStartX = touch.clientX;
                         cent._touchStartY = touch.clientY;
                         cent._touchTarget = event.target;
+                        // Mark this as a potential tap. We'll verify this on touchend
                         cent._potentialTap = true;
                   }
             }
 
             handleCentTouchEnd(event, cent) {
-                  // Only handle if we have touch start data and it's a potential tap
-                  if (!cent._touchStartTime || !cent._potentialTap) {
+                  // If this wasn't a potential tap (e.g., a drag already started), do nothing
+                  if (!cent._potentialTap || !cent._touchStartTime) {
                         cent._touchStartTime = null;
+                        cent._potentialTap = false;
                         return;
                   }
                   
                   const touch = event.changedTouches[0];
                   if (!touch) {
                         cent._touchStartTime = null;
+                        cent._potentialTap = false;
                         return;
                   }
                   
+                  // It's no longer a potential tap, we are now deciding what it was
+                  cent._potentialTap = false;
+                  
                   const touchDuration = Date.now() - cent._touchStartTime;
-                  const deltaX = Math.abs(touch.clientX - (cent._touchStartX || 0));
-                  const deltaY = Math.abs(touch.clientY - (cent._touchStartY || 0));
+                  
+                  // Check if the finger moved significantly
+                  const deltaX = Math.abs(touch.clientX - (cent._touchStartX || touch.clientX));
+                  const deltaY = Math.abs(touch.clientY - (cent._touchStartY || touch.clientY));
                   
                   // Clear touch data
-                  const touchStartTime = cent._touchStartTime;
                   cent._touchStartTime = null;
                   cent._touchStartX = null;
                   cent._touchStartY = null;
-                  cent._potentialTap = false;
                   
-                  // If it was a quick tap (not a drag), show tooltip
-                  // More lenient thresholds for better mobile experience
-                  const isQuickTap = touchDuration < 500 && deltaX < 30 && deltaY < 30;
+                  // DEFINE A "TAP": A short touch that didn't move much
+                  const isTap = touchDuration < 250 && deltaX < 10 && deltaY < 10;
                   
-                  if (isQuickTap) {
-                        // Prevent Matter.js from handling this as a drag
+                  if (isTap) {
+                        // It was a tap! Prevent any other action
                         event.preventDefault();
                         event.stopPropagation();
                         event.stopImmediatePropagation();
                         
                         // Use requestAnimationFrame to ensure UI updates happen
                         requestAnimationFrame(() => {
-                              // If this cent's tag is already active, hide it
+                              // --- Mobile Toggle Logic ---
+                              // If this cent's tag is already open, close it
                               if (this.activeMobileTag === cent) {
                                     this.hideTag(cent);
                                     this.activeMobileTag = null;
                               } else {
-                                    // Hide any other active mobile tag
+                                    // If another cent's tag is open, close that one first
                                     if (this.activeMobileTag) {
                                           this.hideTag(this.activeMobileTag);
                                     }
-                                    // Show this cent's tag
+                                    // Now, show the new tag
                                     this.showTag(event, cent);
-                                    this.activeMobileTag = cent;
+                                    this.activeMobileTag = cent; // Remember which tag is open
                               }
                         });
                   }
+                  // If it wasn't a tap (it was a long press or a drag), do nothing and let Matter.js handle it
             }
 
             scheduleHideTag(cent) {
