@@ -137,6 +137,15 @@
             user-select: none;
             z-index: 1001;
       }
+
+      .top-left-heading .warmthly-link {
+            text-decoration: none;
+            color: #FF8C42;
+      }
+
+      .top-left-heading .mint-text {
+            color: #33CE79;
+      }
       
       .stoplight-container {
           position: fixed;
@@ -705,7 +714,10 @@
 <body class="fonts-loading">
   <div class="preload-fonts">.</div>
   
-  <div class="top-left-heading">Warmthly</div>
+  <div class="top-left-heading">
+    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
+    <span class="mint-text">Mint</span>
+  </div>
   
   <div class="stoplight-container">
     <div class="stoplight" id="stoplight">
@@ -866,6 +878,12 @@
                   this.engine = Engine.create();
                   this.world = this.engine.world;
                   this.world.gravity.y = 1; // Standard gravity
+
+                  // --- Physics Speed & Quality Adjustments ---
+                  this.engine.timing.timeScale = 1.2; // Run the simulation 20% faster than default
+                  this.engine.positionIterations = 10; // Increases simulation accuracy and stability
+                  this.engine.velocityIterations = 8;  // Same as above, for velocity
+                  // --- END Physics Adjustments ---
 
                   // 2. Add a mouse controller for dragging coins
                   const mouse = Mouse.create(this.pool);
