@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warmthly Email Sender</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f9; padding: 2rem; }
+    form { max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    input, textarea { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 100%; padding: 0.75rem; background: #FF8C42; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+    #status { margin-top: 1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <form id="email-form">
+    <h2>Send an Email from desk@warmthly.org</h2>
+    <label for="to">To:</label>
+    <input type="email" id="to" name="to" required>
+    <label for="subject">Subject:</label>
+    <input type="text" id="subject" name="subject" required>
+    <label for="body">Body:</label>
+    <textarea id="body" name="body" rows="10" required></textarea>
+    <button type="submit">Send Email</button>
+    <p id="status"></p>
+  </form>
+  <script>
+    const form = document.getElementById('email-form');
+    const statusEl = document.getElementById('status');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusEl.textContent = 'Sending...';
+      statusEl.style.color = 'black';
+      const formData = new FormData(form);
+      const data = {
+        to: formData.get('to'),
+        subject: formData.get('subject'),
+        body: formData.get('body'),
+      };
+      try {
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await response.json();
+        if (response.ok) {
+          statusEl.textContent = 'Success! Email sent.';
+          statusEl.style.color = 'green';
+          form.reset();
+        } else {
+          statusEl.textContent = `Error: ${result.error.message || 'Failed to send email.'}`;
+          statusEl.style.color = 'red';
+        }
+      } catch (error) {
+        statusEl.textContent = 'A network error occurred. Please try again.';
+        statusEl.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>
