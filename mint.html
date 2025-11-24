@@ -146,12 +146,42 @@
       .top-left-heading .mint-text {
             color: #33CE79;
       }
+
+      .header-right {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 1002;
+            pointer-events: auto;
+      }
+
+      .nav-link {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            color: #FF8C42;
+            text-decoration: none;
+            font-size: 1rem;
+            user-select: none;
+            transition: color 0.3s ease;
+      }
+
+      .nav-link:hover {
+            color: #e07a35;
+      }
+
+      .nav-link.nav-link-green {
+            color: #33CE79;
+      }
+
+      .nav-link.nav-link-green:hover {
+            color: #28a75e;
+      }
       
       .stoplight-container {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          z-index: 1002;
+          position: relative;
       }
 
       .stoplight {
@@ -218,7 +248,7 @@
 
       .stoplight-dot.red { background: #ff4757; }
       .stoplight-dot.yellow { background: #FF8C42; }
-      .stoplight-dot.green { background: #2ed573; }
+      .stoplight-dot.green { background: #33CE79; }
 
       .stoplight-container:hover .stoplight-dot.red,
       .stoplight.active .stoplight-dot.red { animation: stoplight-cycle-red 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
@@ -348,7 +378,7 @@
             border-radius: 10px;
             font-size: 0.85rem;
             font-weight: 600;
-            color: #2ed573;
+            color: #33CE79;
             /* --- MODIFICATION START: Add transform to fix choppy text rendering --- */
             transform: translateZ(0);
             /* --- MODIFICATION END --- */
@@ -357,7 +387,7 @@
       .embed-live-indicator .live-dot {
             width: 8px;
             height: 8px;
-            background: #2ed573;
+            background: #33CE79;
             border-radius: 50%;
             animation: pulse 0.8s infinite cubic-bezier(0.5,0,0.5,1);
       }
@@ -687,6 +717,14 @@
                   top: 15px;
                   left: 15px;
             }
+            .header-right {
+                  top: 15px;
+                  right: 15px;
+                  gap: 15px;
+            }
+            .nav-link {
+                  font-size: 0.9rem;
+            }
             .page-title { font-size: 1.5rem; }
             .main-text { font-size: 1rem; }
             .dropdown-menu { min-width: 180px; }
@@ -719,19 +757,22 @@
     <span class="mint-text">Mint</span>
   </div>
   
-  <div class="stoplight-container">
-    <div class="stoplight" id="stoplight">
-      <div class="stoplight-dot red"></div>
-      <div class="stoplight-dot yellow"></div>
-      <div class="stoplight-dot green"></div>
+  <div class="header-right">
+    <a href="https://mint.warmthly.org/research" class="nav-link nav-link-green" aria-label="View our research and methods">Research</a>
+    <div class="stoplight-container">
+      <div class="stoplight" id="stoplight">
+        <div class="stoplight-dot red"></div>
+        <div class="stoplight-dot yellow"></div>
+        <div class="stoplight-dot green"></div>
+      </div>
+      
+      <!-- --- MODIFICATION START: Removed 'Family' and 'Projects' links --- -->
+      <div class="dropdown-menu" id="dropdown-menu">
+        <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
+        <a href="https://accountability.warmthly.org/" class="dropdown-item">Accountability</a>
+      </div>
+      <!-- --- MODIFICATION END --- -->
     </div>
-    
-    <!-- --- MODIFICATION START: Removed 'Family' and 'Projects' links --- -->
-    <div class="dropdown-menu" id="dropdown-menu">
-      <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
-      <a href="https://accountability.warmthly.org/" class="dropdown-item">Accountability</a>
-    </div>
-    <!-- --- MODIFICATION END --- -->
   </div>
 
   <div class="container">
