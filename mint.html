@@ -4,9 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=0.75, user-scalable=yes" />
   <title>Mint - Warmthly</title>
+  <!-- Preconnect to essential domains for faster resource loading -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://www.warmthly.org">
   <link rel="preconnect" href="https://accountability.warmthly.org">
+  
+  <!-- Preload fonts for faster rendering -->
+  <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
+
   <style>
+      /* --- ANTI-FLASH AND PERFORMANCE FIXES --- */
+      /* 1. Set base background color immediately to prevent white flash */
+      html {
+            background-color: #fff6f1;
+      }
+      /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
+      body {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out;
+      }
+      /* 3. Fade in smoothly once fonts are ready */
+      body.fonts-loaded {
+            opacity: 1;
+            visibility: visible;
+      }
+      /* --- END ANTI-FLASH FIXES --- */
+
       /* Inline critical CSS for faster rendering */
       * {
             margin: 0;
@@ -19,7 +44,7 @@
             font-family: 'Cormorant Garamond';
             font-style: normal;
             font-weight: 700;
-            font-display: optional;
+            font-display: swap;
             src: url('https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2'  ) format('woff2');
       }
       
@@ -59,6 +84,13 @@
             overflow-y: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out;
+      }
+      body.fonts-loaded {
+            opacity: 1;
+            visibility: visible;
       }
       body::-webkit-scrollbar {
             display: none;
@@ -308,7 +340,7 @@
             border-radius: 10px;
             font-size: 0.85rem;
             font-weight: 600;
-            color: #33CE79;
+            color: #2ed573;
             /* --- MODIFICATION START: Add transform to fix choppy text rendering --- */
             transform: translateZ(0);
             /* --- MODIFICATION END --- */
@@ -317,7 +349,7 @@
       .embed-live-indicator .live-dot {
             width: 8px;
             height: 8px;
-            background: #33CE79;
+            background: #2ed573;
             border-radius: 50%;
             animation: pulse 0.8s infinite cubic-bezier(0.5,0,0.5,1);
       }
@@ -371,7 +403,7 @@
             border: 1px solid rgba(255,140,66,0.15);
             box-shadow: 0 8px 20px rgba(255,140,66,0.1);
             overflow: hidden;
-            cursor: crosshair;
+            cursor: grab;
       }
 
       /* Search Bar */
@@ -667,17 +699,14 @@
       }
   </style>
   
-  <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
-  
   <link rel="dns-prefetch" href="//warmthly.org">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 </head>
-<body>
+<body class="fonts-loading">
   <div class="preload-fonts">.</div>
   
-  <div class="top-left-heading">Warmthly <span style="color: #33CE79;">Mint</span></div>
+  <div class="top-left-heading">Warmthly</div>
   
   <div class="stoplight-container">
     <div class="stoplight" id="stoplight">
@@ -690,7 +719,6 @@
     <div class="dropdown-menu" id="dropdown-menu">
       <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
       <a href="https://accountability.warmthly.org/" class="dropdown-item">Accountability</a>
-      <a href="https://mint.warmthly.org/research" class="dropdown-item">Research</a>
     </div>
     <!-- --- MODIFICATION END --- -->
   </div>
@@ -802,6 +830,7 @@
                         totalDonors: 0,
                         donors: new Set()
                   };
+                  this.isDragging = false; // Track if user is currently dragging a coin
                   
                   this.init();
             }
@@ -832,16 +861,43 @@
             }
 
             setupPhysics() {
-                  const { Engine, Render, World, Bodies, Runner } = Matter;
+                  const { Engine, Render, World, Bodies, Runner, Mouse, MouseConstraint, Events } = Matter;
 
                   // 1. Create engine and world
                   this.engine = Engine.create();
                   this.world = this.engine.world;
                   this.world.gravity.y = 1; // Standard gravity
 
-                  // 2. Create renderer (optional, but useful for debugging)
-                  // We will use a custom renderer to apply Matter.js positions to our coin DOM elements.
-                  
+                  // 2. Add a mouse controller for dragging coins
+                  const mouse = Mouse.create(this.pool);
+                  const mouseConstraint = MouseConstraint.create(this.engine, {
+                        mouse: mouse,
+                        constraint: {
+                              stiffness: 0.8, // How rigid the "grab" is (higher = firmer grip)
+                              render: {
+                                    visible: false // Don't draw the grab line
+                              }
+                        }
+                  });
+
+                  World.add(this.world, mouseConstraint);
+
+                  // Listen for mouse events on the constraint
+                  Events.on(mouseConstraint, 'startdrag', (event) => {
+                        // Change cursor to "grabbing" when you pick up a coin
+                        this.pool.style.cursor = 'grabbing';
+                        this.isDragging = true; // A drag has started!
+                  });
+
+                  Events.on(mouseConstraint, 'enddrag', (event) => {
+                        // Change it back when you let go
+                        this.pool.style.cursor = 'grab';
+                        this.isDragging = false; // The drag has ended!
+                  });
+
+                  // Store mouse constraint for potential cleanup
+                  this.mouseConstraint = mouseConstraint;
+
                   // 3. Create boundaries (walls and floor)
                   const poolWidth = this.poolWidth;
                   const poolHeight = this.poolHeight;
@@ -1243,6 +1299,7 @@
 
 
             showTag(event, cent) {
+                  if (this.isDragging) return; // If dragging, do not show tooltip!
                   if (this.activeTags.has(cent)) return;
                   
                   const tag = document.createElement('div');
@@ -1492,6 +1549,19 @@
       }, observerOptions);
       
       sections.forEach(section => sectionObserver.observe(section));
+  </script>
+  
+  <!-- FontFaceObserver for robust font loading -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+  <script>
+    // --- FONT LOADING FIX ---
+    const cormorant = new FontFaceObserver('Cormorant Garamond');
+    const inter = new FontFaceObserver('Inter');
+    Promise.all([cormorant.load(), inter.load()]).then(function () {
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    });
+    // --- END FONT LOADING FIX ---
   </script>
 </body>
 </html>
