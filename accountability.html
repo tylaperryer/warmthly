@@ -2,32 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="theme-color" content="#fff6f1" />
+  <meta name="color-scheme" content="light" />
   <meta name="viewport" content="width=device-width, initial-scale=0.75, user-scalable=yes" />
   <title>Accountability - Warmthly</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://www.warmthly.org">
   <link rel="preconnect" href="https://accountability.warmthly.org">
   <style>
-      /* --- All styles are identical to the previous version --- */
+      /* --- ANTI-FLASH AND PERFORMANCE FIXES --- */
+      :root { color-scheme: light; }
+      html { background-color: #fff6f1; min-height: 100%; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+      html::-webkit-scrollbar { display: none; }
+      body { opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out; }
+      body.fonts-loaded { opacity: 1; visibility: visible; }
+      /* --- END ANTI-FLASH FIXES --- */
+
       * { margin: 0; padding: 0; box-sizing: border-box; }
       @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 700; font-display: swap; src: url('https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2' ) format('woff2'); }
       @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2' ) format('woff2'); }
       @font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2' ) format('woff2'); }
       
-      .fonts-loading { visibility: hidden; opacity: 0; transition: visibility 0s 0.5s, opacity 0.5s; }
-      .fonts-loaded { visibility: visible; opacity: 1; }
-
-      html { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
-      html::-webkit-scrollbar { display: none; }
       body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #2c2c2c; background: #fff6f1; min-height: 100vh; position: relative; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
       body::-webkit-scrollbar { display: none; }
       
-      body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 30%, rgba(255,140,66,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,182,193,0.12) 0%, transparent 50%), radial-gradient(circle at 40% 70%, rgba(173,216,230,0.1) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(144,238,144,0.08) 0%, transparent 50%), linear-gradient(135deg, #fff6f1 0%, #ffeee6 100%); z-index: -1; pointer-events: none; }
+      body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: radial-gradient(circle at 20% 30%, rgba(255,140,66,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,182,193,0.12) 0%, transparent 50%), radial-gradient(circle at 40% 70%, rgba(173,216,230,0.1) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(144,238,144,0.08) 0%, transparent 50%), linear-gradient(135deg, #fff6f1 0%, #ffeee6 100%); z-index: -1; pointer-events: none; }
       
       ::selection { background: #FF8C42; color: #FFFFFF; }
       
       .container { max-width: 800px; margin: 0 auto; padding: 120px 20px 40px; text-align: center; color: #2c2c2c; position: relative; z-index: 1; }
       
-      .top-left-heading { position: fixed; top: 20px; left: 20px; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 2rem; color: #FF8C42; user-select: none; z-index: 1001; text-decoration: none; }
+      .top-left-heading { position: fixed; top: 20px; left: 20px; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 2rem; color: #FF8C42; user-select: none; z-index: 1001; }
+      .top-left-heading .warmthly-link { text-decoration: none; color: #FF8C42; }
       
       .stoplight-container { position: fixed; top: 20px; right: 20px; z-index: 1002; }
       .stoplight { --tint-color: rgba(255,255,255,0.15); --blur-radius: 12px; --border-color: rgba(255,255,255,0.25); --highlight-color: rgba(255,255,255,0.4); --shadow-color: rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 3px; cursor: pointer; padding: 8px; position: relative; background: var(--tint-color); backdrop-filter: blur(var(--blur-radius)) saturate(1.2); -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05); transition: all 0.4s cubic-bezier(0.25,0.8,0.25,1); overflow: hidden; }
@@ -79,7 +85,9 @@
   <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
 </head>
 <body class="fonts-loading">
-  <a href="index.html" class="top-left-heading">Warmthly</a>
+  <div class="top-left-heading">
+    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
+  </div>
   
   <div class="stoplight-container">
     <div class="stoplight" id="stoplight">
@@ -150,7 +158,6 @@
     const inter = new FontFaceObserver('Inter');
 
     Promise.all([cormorant.load(), inter.load()]).then(function () {
-      document.body.classList.remove('fonts-loading');
       document.body.classList.add('fonts-loaded');
     });
     // ------------------------
