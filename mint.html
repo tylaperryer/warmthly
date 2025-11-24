@@ -1369,6 +1369,7 @@
                   this.centCreationTimeouts = []; // Store timeout IDs to cancel cent creation
                   this.scroogeDuck = null; // Reference to Scrooge McDuck duck element
                   this.scroogePopup = null; // Reference to Scrooge popup
+                  this.activeMobileTag = null; // Track which cent's tag is active on mobile
                   
                   this.init();
             }
@@ -1405,6 +1406,9 @@
                         exitFocusBtn.addEventListener('click', () => this.exitFocusMode());
                   }
                   
+                  // Setup click-outside handler for mobile tooltips
+                  this.setupMobileTooltipDismiss();
+                  
                   // Check if Airtable is configured
                   if (airtableConfig.apiKey && airtableConfig.apiKey !== 'YOUR_AIRTABLE_API_KEY') {
                         this.setupAirtableListener().catch(err => {
@@ -1417,6 +1421,23 @@
                   }
                   
                   this.setupPhysics();
+            }
+
+            setupMobileTooltipDismiss() {
+                  // On mobile, close tooltips when tapping outside
+                  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                  if (isTouchDevice) {
+                        document.addEventListener('click', (e) => {
+                              // Don't close if clicking on a cent or its tag
+                              const clickedCent = e.target.closest('.cent');
+                              const clickedTag = e.target.closest('.donation-tag');
+                              
+                              if (!clickedCent && !clickedTag && this.activeMobileTag) {
+                                    this.hideTag(this.activeMobileTag);
+                                    this.activeMobileTag = null;
+                              }
+                        }, true); // Use capture phase to catch events early
+                  }
             }
 
             setupLegend() {
@@ -1937,6 +1958,9 @@
                   this.isFocusMode = true;
                   this.focusedDonation = { ...donation, donationId };
                   
+                  // Clear active mobile tag
+                  this.activeMobileTag = null;
+                  
                   // Hide all existing tooltips when entering focus mode
                   this.cents.forEach(cent => {
                         this.hideTag(cent);
@@ -2065,12 +2089,18 @@
                   cent.setAttribute('role', 'img');
                   cent.setAttribute('aria-label', `Cent ${index + 1} of ${total} from ${donorName}`);
                   
-                  // Event listeners
+                  // Event listeners (for focus mode cents)
                   cent._mouseenterHandler = (e) => this.showTag(e, cent);
                   cent._mouseleaveHandler = () => this.scheduleHideTag(cent);
+                  cent._clickHandler = (e) => this.handleCentClick(e, cent);
+                  cent._touchHandler = (e) => this.handleCentTouch(e, cent);
                   
                   cent.addEventListener('mouseenter', cent._mouseenterHandler);
                   cent.addEventListener('mouseleave', cent._mouseleaveHandler);
+                  cent.addEventListener('click', cent._clickHandler);
+                  cent.addEventListener('touchstart', cent._touchHandler, { passive: true });
+                  cent.addEventListener('touchend', cent._touchHandler, { passive: false });
+                  cent.style.cursor = 'pointer';
                   cent.hasListeners = true;
                   
                   this.pool.appendChild(cent);
@@ -2370,13 +2400,18 @@
                   element.setAttribute('role', 'img');
                   element.setAttribute('aria-label', `${label} from ${donorName}, ${amountText}.`);
                   
-                  // Add event listeners for tooltips only (no click handler - use button in tooltip)
+                  // Add event listeners for tooltips (hover for desktop, click/touch for mobile)
                   element._mouseenterHandler = (e) => this.showTag(e, element);
                   element._mouseleaveHandler = () => this.scheduleHideTag(element);
+                  element._clickHandler = (e) => this.handleCentClick(e, element);
+                  element._touchHandler = (e) => this.handleCentTouch(e, element);
                   
                   element.addEventListener('mouseenter', element._mouseenterHandler);
                   element.addEventListener('mouseleave', element._mouseleaveHandler);
-                  element.style.cursor = 'default';
+                  element.addEventListener('click', element._clickHandler);
+                  element.addEventListener('touchstart', element._touchHandler, { passive: true });
+                  element.addEventListener('touchend', element._touchHandler, { passive: false });
+                  element.style.cursor = 'pointer'; // Change to pointer to indicate clickability
                   element.hasListeners = true;
                   
                   // Add the element to the DOM and the main 'cents' array
@@ -2434,7 +2469,25 @@
                         cent.removeEventListener('mouseleave', cent._mouseleaveHandler);
                         cent._mouseleaveHandler = null;
                   }
+                  if (cent._clickHandler) {
+                        cent.removeEventListener('click', cent._clickHandler);
+                        cent._clickHandler = null;
+                  }
+                  if (cent._touchHandler) {
+                        cent.removeEventListener('touchstart', cent._touchHandler);
+                        cent.removeEventListener('touchend', cent._touchHandler);
+                        cent._touchHandler = null;
+                  }
+                  // Clear touch tracking data
+                  cent._touchStartTime = null;
+                  cent._touchStartX = null;
+                  cent._touchStartY = null;
                   // Note: No keyboard handlers to remove - coins are not keyboard navigable
+                  
+                  // Clear active mobile tag if this is it
+                  if (this.activeMobileTag === cent) {
+                        this.activeMobileTag = null;
+                  }
                   
                   // Remove from active tags
                   if (this.activeTags.has(cent)) {
@@ -2531,11 +2584,24 @@
                   if (viewCentsButton) {
                         viewCentsButton.addEventListener('click', (e) => {
                               e.stopPropagation();
+                              e.preventDefault();
                               const id = viewCentsButton.getAttribute('data-donation-id');
                               if (id && data) {
+                                    // Clear active mobile tag when entering focus mode
+                                    this.activeMobileTag = null;
                                     this.enterFocusMode(data, id);
                               }
                         });
+                        // Also handle touch events for mobile
+                        viewCentsButton.addEventListener('touchend', (e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              const id = viewCentsButton.getAttribute('data-donation-id');
+                              if (id && data) {
+                                    this.activeMobileTag = null;
+                                    this.enterFocusMode(data, id);
+                              }
+                        }, { passive: false });
                   }
                   
                   // Append to pool container so it's inside the box
@@ -2602,10 +2668,97 @@
                   this.activeTags.set(cent, tag);
             }
 
+            handleCentClick(event, cent) {
+                  // On mobile, clicking a cent should toggle its tooltip
+                  // Prevent default to avoid conflicts with physics dragging
+                  if (this.isDragging) return;
+                  
+                  // Check if this is a touch device
+                  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                  
+                  if (isTouchDevice) {
+                        // Only handle if not already handled by touch event
+                        // Small delay to let touch event fire first
+                        setTimeout(() => {
+                              if (!this.isDragging) {
+                                    // If this cent's tag is already active, hide it
+                                    if (this.activeMobileTag === cent) {
+                                          this.hideTag(cent);
+                                          this.activeMobileTag = null;
+                                    } else {
+                                          // Hide any other active mobile tag
+                                          if (this.activeMobileTag) {
+                                                this.hideTag(this.activeMobileTag);
+                                          }
+                                          // Show this cent's tag
+                                          this.showTag(event, cent);
+                                          this.activeMobileTag = cent;
+                                    }
+                              }
+                        }, 50);
+                  }
+            }
+
+            handleCentTouch(event, cent) {
+                  // Handle touch events for mobile
+                  if (this.isDragging) return;
+                  
+                  if (event.type === 'touchstart') {
+                        // Store touch start info
+                        const touch = event.touches[0];
+                        if (touch) {
+                              cent._touchStartTime = Date.now();
+                              cent._touchStartX = touch.clientX;
+                              cent._touchStartY = touch.clientY;
+                        }
+                  } else if (event.type === 'touchend') {
+                        // Check if this was a tap (not a drag)
+                        if (!cent._touchStartTime) return;
+                        
+                        const touch = event.changedTouches[0];
+                        if (!touch) return;
+                        
+                        const touchDuration = Date.now() - cent._touchStartTime;
+                        const deltaX = Math.abs(touch.clientX - (cent._touchStartX || 0));
+                        const deltaY = Math.abs(touch.clientY - (cent._touchStartY || 0));
+                        
+                        // Clear touch data
+                        cent._touchStartTime = null;
+                        cent._touchStartX = null;
+                        cent._touchStartY = null;
+                        
+                        // If it was a quick tap (not a drag), show tooltip
+                        if (touchDuration < 300 && deltaX < 15 && deltaY < 15 && !this.isDragging) {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              
+                              // If this cent's tag is already active, hide it
+                              if (this.activeMobileTag === cent) {
+                                    this.hideTag(cent);
+                                    this.activeMobileTag = null;
+                              } else {
+                                    // Hide any other active mobile tag
+                                    if (this.activeMobileTag) {
+                                          this.hideTag(this.activeMobileTag);
+                                    }
+                                    // Show this cent's tag
+                                    this.showTag(event, cent);
+                                    this.activeMobileTag = cent;
+                              }
+                        }
+                  }
+            }
+
             scheduleHideTag(cent) {
                   // Cancel any existing timeout
                   if (cent._hideTagTimeout) {
                         clearTimeout(cent._hideTagTimeout);
+                  }
+                  
+                  // On mobile, don't auto-hide if this is the active mobile tag
+                  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                  if (isTouchDevice && this.activeMobileTag === cent) {
+                        return; // Don't auto-hide on mobile - user must tap elsewhere
                   }
                   
                   // Schedule hide with delay to allow moving mouse from cent to tag
@@ -2620,6 +2773,11 @@
                   if (cent._hideTagTimeout) {
                         clearTimeout(cent._hideTagTimeout);
                         cent._hideTagTimeout = null;
+                  }
+                  
+                  // Clear active mobile tag if this is it
+                  if (this.activeMobileTag === cent) {
+                        this.activeMobileTag = null;
                   }
                   
                   const tag = this.activeTags.get(cent);
