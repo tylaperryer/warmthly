@@ -18,7 +18,7 @@
   <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
   
-  <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚫</text></svg>">
+  <link rel="icon" href="warmthly.png" type="image/png">
 
   <style>
     /* --- ANTI-FLASH AND PERFORMANCE FIXES --- */
@@ -171,47 +171,6 @@
     document.addEventListener('click', (e) => { if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) { toggleMenu(); } });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isMenuOpen) { toggleMenu(); } });
     dropdownMenu.addEventListener('click', (e) => { e.stopPropagation(); });
-    
-    // --- DYNAMIC TEXT-BASED FAVICON GENERATOR ---
-    function setFavicon(useSpecialIcon = false) {
-        const character = 'W';
-        const font = 'Cormorant Garamond';
-        const color = useSpecialIcon ? '#33CE79' : '#FF8C42';
-        const rotation = useSpecialIcon ? 'rotate(180, 50, 50)' : '';
-        const svgContent = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                <style>
-                    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&display=swap');
-                </style>
-                <text
-                    x="50%"
-                    y="50%"
-                    dominant-baseline="central"
-                    text-anchor="middle"
-                    font-family="${font}, serif"
-                    font-weight="700"
-                    font-size="110"
-                    fill="${color}"
-                    transform="${rotation}"
-                >
-                    ${character}
-                </text>
-            </svg>
-        `;
-        const favicon = document.getElementById('favicon');
-        if (favicon) {
-            const encodedSvg = encodeURIComponent(svgContent.trim());
-            favicon.href = `data:image/svg+xml,${encodedSvg}`;
-        }
-    }
-    function isSpecialPage() {
-        const pageTitle = document.title.toLowerCase();
-        return pageTitle.includes('mint') || pageTitle.includes('research');
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-        setFavicon(isSpecialPage());
-    });
-    // --- END FAVICON GENERATOR ---
   </script>
 </body>
 </html>
