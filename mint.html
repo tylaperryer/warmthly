@@ -798,6 +798,8 @@
             pointer-events: auto;
             transform: translate(-50%, -50%);
             will-change: transform;
+            touch-action: manipulation; /* Improve touch responsiveness */
+            -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
       }
 
       .cent:hover {
@@ -1548,6 +1550,13 @@
                   Events.on(mouseConstraint, 'startdrag', (event) => {
                         // Track dragging state
                         this.isDragging = true; // A drag has started!
+                        
+                        // Mark all cents as not potential taps when dragging starts
+                        this.cents.forEach(cent => {
+                              if (cent._potentialTap) {
+                                    cent._potentialTap = false;
+                              }
+                        });
                   });
 
                   Events.on(mouseConstraint, 'enddrag', (event) => {
@@ -2092,15 +2101,16 @@
                   // Event listeners (for focus mode cents)
                   cent._mouseenterHandler = (e) => this.showTag(e, cent);
                   cent._mouseleaveHandler = () => this.scheduleHideTag(cent);
-                  cent._clickHandler = (e) => this.handleCentClick(e, cent);
-                  cent._touchHandler = (e) => this.handleCentTouch(e, cent);
+                  cent._touchStartHandler = (e) => this.handleCentTouchStart(e, cent);
+                  cent._touchEndHandler = (e) => this.handleCentTouchEnd(e, cent);
                   
                   cent.addEventListener('mouseenter', cent._mouseenterHandler);
                   cent.addEventListener('mouseleave', cent._mouseleaveHandler);
-                  cent.addEventListener('click', cent._clickHandler);
-                  cent.addEventListener('touchstart', cent._touchHandler, { passive: true });
-                  cent.addEventListener('touchend', cent._touchHandler, { passive: false });
+                  // Use capture phase to catch touch events before Matter.js
+                  cent.addEventListener('touchstart', cent._touchStartHandler, { passive: false, capture: true });
+                  cent.addEventListener('touchend', cent._touchEndHandler, { passive: false, capture: true });
                   cent.style.cursor = 'pointer';
+                  cent.style.touchAction = 'manipulation'; // Improve touch responsiveness
                   cent.hasListeners = true;
                   
                   this.pool.appendChild(cent);
@@ -2403,15 +2413,16 @@
                   // Add event listeners for tooltips (hover for desktop, click/touch for mobile)
                   element._mouseenterHandler = (e) => this.showTag(e, element);
                   element._mouseleaveHandler = () => this.scheduleHideTag(element);
-                  element._clickHandler = (e) => this.handleCentClick(e, element);
-                  element._touchHandler = (e) => this.handleCentTouch(e, element);
+                  element._touchStartHandler = (e) => this.handleCentTouchStart(e, element);
+                  element._touchEndHandler = (e) => this.handleCentTouchEnd(e, element);
                   
                   element.addEventListener('mouseenter', element._mouseenterHandler);
                   element.addEventListener('mouseleave', element._mouseleaveHandler);
-                  element.addEventListener('click', element._clickHandler);
-                  element.addEventListener('touchstart', element._touchHandler, { passive: true });
-                  element.addEventListener('touchend', element._touchHandler, { passive: false });
+                  // Use capture phase to catch touch events before Matter.js
+                  element.addEventListener('touchstart', element._touchStartHandler, { passive: false, capture: true });
+                  element.addEventListener('touchend', element._touchEndHandler, { passive: false, capture: true });
                   element.style.cursor = 'pointer'; // Change to pointer to indicate clickability
+                  element.style.touchAction = 'manipulation'; // Improve touch responsiveness
                   element.hasListeners = true;
                   
                   // Add the element to the DOM and the main 'cents' array
@@ -2469,19 +2480,20 @@
                         cent.removeEventListener('mouseleave', cent._mouseleaveHandler);
                         cent._mouseleaveHandler = null;
                   }
-                  if (cent._clickHandler) {
-                        cent.removeEventListener('click', cent._clickHandler);
-                        cent._clickHandler = null;
+                  if (cent._touchStartHandler) {
+                        cent.removeEventListener('touchstart', cent._touchStartHandler, { capture: true });
+                        cent._touchStartHandler = null;
                   }
-                  if (cent._touchHandler) {
-                        cent.removeEventListener('touchstart', cent._touchHandler);
-                        cent.removeEventListener('touchend', cent._touchHandler);
-                        cent._touchHandler = null;
+                  if (cent._touchEndHandler) {
+                        cent.removeEventListener('touchend', cent._touchEndHandler, { capture: true });
+                        cent._touchEndHandler = null;
                   }
                   // Clear touch tracking data
                   cent._touchStartTime = null;
                   cent._touchStartX = null;
                   cent._touchStartY = null;
+                  cent._potentialTap = null;
+                  cent._touchTarget = null;
                   // Note: No keyboard handlers to remove - coins are not keyboard navigable
                   
                   // Clear active mobile tag if this is it
@@ -2668,70 +2680,57 @@
                   this.activeTags.set(cent, tag);
             }
 
-            handleCentClick(event, cent) {
-                  // On mobile, clicking a cent should toggle its tooltip
-                  // Prevent default to avoid conflicts with physics dragging
-                  if (this.isDragging) return;
+            handleCentTouchStart(event, cent) {
+                  // Prevent browser default touch behavior (scrolling/zooming) to allow proper tap detection
+                  event.preventDefault();
                   
-                  // Check if this is a touch device
-                  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-                  
-                  if (isTouchDevice) {
-                        // Only handle if not already handled by touch event
-                        // Small delay to let touch event fire first
-                        setTimeout(() => {
-                              if (!this.isDragging) {
-                                    // If this cent's tag is already active, hide it
-                                    if (this.activeMobileTag === cent) {
-                                          this.hideTag(cent);
-                                          this.activeMobileTag = null;
-                                    } else {
-                                          // Hide any other active mobile tag
-                                          if (this.activeMobileTag) {
-                                                this.hideTag(this.activeMobileTag);
-                                          }
-                                          // Show this cent's tag
-                                          this.showTag(event, cent);
-                                          this.activeMobileTag = cent;
-                                    }
-                              }
-                        }, 50);
+                  // Store touch start info for tap detection
+                  const touch = event.touches[0];
+                  if (touch) {
+                        cent._touchStartTime = Date.now();
+                        cent._touchStartX = touch.clientX;
+                        cent._touchStartY = touch.clientY;
+                        cent._touchTarget = event.target;
+                        cent._potentialTap = true;
                   }
             }
 
-            handleCentTouch(event, cent) {
-                  // Handle touch events for mobile
-                  if (this.isDragging) return;
-                  
-                  if (event.type === 'touchstart') {
-                        // Store touch start info
-                        const touch = event.touches[0];
-                        if (touch) {
-                              cent._touchStartTime = Date.now();
-                              cent._touchStartX = touch.clientX;
-                              cent._touchStartY = touch.clientY;
-                        }
-                  } else if (event.type === 'touchend') {
-                        // Check if this was a tap (not a drag)
-                        if (!cent._touchStartTime) return;
-                        
-                        const touch = event.changedTouches[0];
-                        if (!touch) return;
-                        
-                        const touchDuration = Date.now() - cent._touchStartTime;
-                        const deltaX = Math.abs(touch.clientX - (cent._touchStartX || 0));
-                        const deltaY = Math.abs(touch.clientY - (cent._touchStartY || 0));
-                        
-                        // Clear touch data
+            handleCentTouchEnd(event, cent) {
+                  // Only handle if we have touch start data and it's a potential tap
+                  if (!cent._touchStartTime || !cent._potentialTap) {
                         cent._touchStartTime = null;
-                        cent._touchStartX = null;
-                        cent._touchStartY = null;
+                        return;
+                  }
+                  
+                  const touch = event.changedTouches[0];
+                  if (!touch) {
+                        cent._touchStartTime = null;
+                        return;
+                  }
+                  
+                  const touchDuration = Date.now() - cent._touchStartTime;
+                  const deltaX = Math.abs(touch.clientX - (cent._touchStartX || 0));
+                  const deltaY = Math.abs(touch.clientY - (cent._touchStartY || 0));
+                  
+                  // Clear touch data
+                  const touchStartTime = cent._touchStartTime;
+                  cent._touchStartTime = null;
+                  cent._touchStartX = null;
+                  cent._touchStartY = null;
+                  cent._potentialTap = false;
+                  
+                  // If it was a quick tap (not a drag), show tooltip
+                  // More lenient thresholds for better mobile experience
+                  const isQuickTap = touchDuration < 500 && deltaX < 30 && deltaY < 30;
+                  
+                  if (isQuickTap) {
+                        // Prevent Matter.js from handling this as a drag
+                        event.preventDefault();
+                        event.stopPropagation();
+                        event.stopImmediatePropagation();
                         
-                        // If it was a quick tap (not a drag), show tooltip
-                        if (touchDuration < 300 && deltaX < 15 && deltaY < 15 && !this.isDragging) {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              
+                        // Use requestAnimationFrame to ensure UI updates happen
+                        requestAnimationFrame(() => {
                               // If this cent's tag is already active, hide it
                               if (this.activeMobileTag === cent) {
                                     this.hideTag(cent);
@@ -2745,7 +2744,7 @@
                                     this.showTag(event, cent);
                                     this.activeMobileTag = cent;
                               }
-                        }
+                        });
                   }
             }
 
