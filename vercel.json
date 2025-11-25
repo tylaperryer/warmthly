@@ -29,20 +29,14 @@
     ],
     "rewrites": [
       {
-        "source": "/admin/emails",
-        "destination": "/admin/emails.html"
-      },
-      {
-        "source": "/vote",
-        "destination": "/vote.html"
-      },
-      {
-        "source": "/research",
-        "destination": "/research.html"
-      },
-      {
-        "source": "/post",
-        "destination": "/post.html"
+        "source": "/",
+        "has": [
+          {
+            "type": "host",
+            "value": "admin.warmthly.org"
+          }
+        ],
+        "destination": "/Admin/index.html"
       },
       {
         "source": "/:path*",
@@ -59,10 +53,56 @@
         "has": [
           {
             "type": "host",
-            "value": "admin.warmthly.org"
+            "value": "mint.warmthly.org"
           }
         ],
-        "destination": "/Admin/index.html"
+        "destination": "/mint.html"
+      },
+      {
+        "source": "/:path*",
+        "has": [
+          {
+            "type": "host",
+            "value": "mint.warmthly.org"
+          }
+        ],
+        "destination": "/mint.html"
+      },
+      {
+        "source": "/",
+        "has": [
+          {
+            "type": "host",
+            "value": "post.warmthly.org"
+          }
+        ],
+        "destination": "/post.html"
+      },
+      {
+        "source": "/:path*",
+        "has": [
+          {
+            "type": "host",
+            "value": "post.warmthly.org"
+          }
+        ],
+        "destination": "/post.html"
+      },
+      {
+        "source": "/admin/emails",
+        "destination": "/admin/emails.html"
+      },
+      {
+        "source": "/vote",
+        "destination": "/vote.html"
+      },
+      {
+        "source": "/research",
+        "destination": "/research.html"
+      },
+      {
+        "source": "/post",
+        "destination": "/post.html"
       }
     ]
   }
