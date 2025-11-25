@@ -1,9 +1,21 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
-    {
-      "source": "/admin/emails",
-      "destination": "/admin/emails.html"
-    }
-  ]
-}
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "source": "/admin/emails",
+        "destination": "/admin/emails.html"
+      },
+      {
+        "source": "/vote",
+        "destination": "/vote.html"
+      },
+      {
+        "source": "/research",
+        "destination": "/research.html"
+      },
+      {
+        "source": "/post",
+        "destination": "/post.html"
+      }
+    ]
+  }
