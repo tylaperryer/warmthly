@@ -2,8 +2,8 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/send",
-      "destination": "/send.html"
+      "source": "/admin/emails",
+      "destination": "/admin/emails.html"
     }
   ]
 }
