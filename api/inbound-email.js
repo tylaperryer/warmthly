@@ -1,32 +1,46 @@
-// /api/inbound-email.js
+import { createClient } from '@vercel/kv';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
-  // We only want to handle POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
+    // We don't need webhook verification for this step, let's keep it simple first.
     const event = req.body;
 
-    // Check if this is a received email event
     if (event.type === 'email.received') {
       const emailData = event.data;
-
-      console.log('Email Received:');
-      console.log('From:', emailData.from);
-      console.log('To:', emailData.to);
-      console.log('Subject:', emailData.subject);
       
-      // Here is where you would add logic in the future,
-      // such as saving the email to a database, forwarding it, etc.
+      // Connect to the Vercel KV database
+      const kv = createClient({
+        url: process.env.REDIS_URL,
+        // The token is part of the URL, so we don't need a separate token variable
+      });
+
+      // Create a simple object for the email
+      const emailToStore = {
+        id: emailData.email_id,
+        from: emailData.from,
+        to: emailData.to,
+        subject: emailData.subject,
+        receivedAt: emailData.created_at,
+      };
+
+      // Save the email to a list in the database.
+      // We use 'lpush' to add it to the beginning of a list called 'emails'.
+      await kv.lpush('emails', JSON.stringify(emailToStore));
+      
+      console.log('Email saved to KV store:', emailToStore.id);
     }
 
-    // Respond to Resend to acknowledge receipt of the webhook
-    res.status(200).json({ message: 'Webhook received successfully.' });
+    res.status(200).json({ message: 'Webhook processed.' });
+
   } catch (error) {
-    console.error('Webhook Error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error processing webhook:', error.message);
+    return res.status(400).json({ error: 'Error processing webhook.' });
   }
 }
-
