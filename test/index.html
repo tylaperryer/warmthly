@@ -384,60 +384,115 @@
       animate();
     }
 
-    function loadModel() {
+    async function loadModel() {
       const loader = new FBXLoader();
       const loadingEl = document.getElementById('loading');
       
-      // GitHub Releases direct download URL (allows CORS)
+      // GitHub Releases direct download URL
       const modelUrl = 'https://github.com/tylaperryer/warmthly/releases/download/warmthly/m4.chruch.fbx';
       
-      loader.load(
-        modelUrl,
-        (object) => {
-          // Center and scale the model
-          const box = new THREE.Box3().setFromObject(object);
-          const center = box.getCenter(new THREE.Vector3());
-          const size = box.getSize(new THREE.Vector3());
+      try {
+        loadingEl.textContent = 'Fetching model file...';
+        
+        // Fetch the file as a blob first (handles CORS and redirects better)
+        const response = await fetch(modelUrl, {
+          mode: 'cors',
+          credentials: 'omit'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        // Get content length for progress tracking
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
+        
+        // Read the response as a blob with progress tracking
+        const reader = response.body.getReader();
+        const chunks = [];
+        let receivedLength = 0;
+        
+        while (true) {
+          const { done, value } = await reader.read();
           
-          // Calculate scale to fit in view
-          const maxDim = Math.max(size.x, size.y, size.z);
-          const scale = 5 / maxDim;
-          object.scale.multiplyScalar(scale);
+          if (done) break;
           
-          // Center the model
-          object.position.sub(center.multiplyScalar(scale));
+          chunks.push(value);
+          receivedLength += value.length;
           
-          // Add to scene
-          scene.add(object);
-          model = object;
-          
-          // Adjust camera to view the model
-          const distance = maxDim * 1.5;
-          camera.position.set(distance, distance * 0.6, distance);
-          controls.target.copy(object.position);
-          controls.update();
-          
-          loadingEl.classList.add('hidden');
-          console.log('Model loaded successfully');
-        },
-        (progress) => {
-          if (progress.lengthComputable) {
-            const percent = (progress.loaded / progress.total * 100).toFixed(0);
+          if (total > 0) {
+            const percent = ((receivedLength / total) * 100).toFixed(0);
             loadingEl.textContent = `Loading 3D model... ${percent}%`;
           } else {
-            loadingEl.textContent = 'Loading 3D model...';
+            loadingEl.textContent = `Loading 3D model... ${(receivedLength / 1024 / 1024).toFixed(1)} MB`;
           }
-        },
-        (error) => {
-          console.error('Error loading FBX:', error);
-          const errorMsg = error.message || 'Unknown error';
-          loadingEl.innerHTML = `Error loading model: ${errorMsg}<br>
-            <small style="font-size: 0.9rem; opacity: 0.7;">
-              Check the browser console for more details.
-            </small>`;
-          loadingEl.style.color = '#ff4757';
         }
-      );
+        
+        // Combine chunks into a single blob
+        const blob = new Blob(chunks);
+        const objectUrl = URL.createObjectURL(blob);
+        
+        loadingEl.textContent = 'Processing 3D model...';
+        
+        // Load the FBX from the blob URL
+        loader.load(
+          objectUrl,
+          (object) => {
+            // Center and scale the model
+            const box = new THREE.Box3().setFromObject(object);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            
+            // Calculate scale to fit in view
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 5 / maxDim;
+            object.scale.multiplyScalar(scale);
+            
+            // Center the model
+            object.position.sub(center.multiplyScalar(scale));
+            
+            // Add to scene
+            scene.add(object);
+            model = object;
+            
+            // Adjust camera to view the model
+            const distance = maxDim * 1.5;
+            camera.position.set(distance, distance * 0.6, distance);
+            controls.target.copy(object.position);
+            controls.update();
+            
+            // Clean up blob URL
+            URL.revokeObjectURL(objectUrl);
+            
+            loadingEl.classList.add('hidden');
+            console.log('Model loaded successfully');
+          },
+          (progress) => {
+            // This progress callback might not fire with blob URLs, but keep it for compatibility
+            if (progress.lengthComputable) {
+              const percent = (progress.loaded / progress.total * 100).toFixed(0);
+              loadingEl.textContent = `Processing model... ${percent}%`;
+            }
+          },
+          (error) => {
+            URL.revokeObjectURL(objectUrl);
+            throw error;
+          }
+        );
+        
+      } catch (error) {
+        console.error('Error loading FBX:', error);
+        const errorMsg = error.message || 'Unknown error';
+        loadingEl.innerHTML = `Error loading model: ${errorMsg}<br>
+          <small style="font-size: 0.9rem; opacity: 0.7; margin-top: 10px; display: block;">
+            This might be a CORS issue. Try:<br>
+            1. Check if the GitHub Releases URL is accessible in your browser<br>
+            2. The file might be too large - consider converting to GLTF/GLB format<br>
+            3. Check browser console (F12) for detailed error messages
+          </small>`;
+        loadingEl.style.color = '#ff4757';
+      }
     }
 
     function animate() {
