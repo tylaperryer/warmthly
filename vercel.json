@@ -1,16 +1,9 @@
 {
-  "cleanUrls": true
-}
-{
-  "builds": [
+  "cleanUrls": true,
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "." }
-    },
-    {
-      "src": "/api/**/*.js",
-      "use": "@vercel/node"
+      "source": "/send",
+      "destination": "/send.html"
     }
   ]
 }
