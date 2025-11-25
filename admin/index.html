@@ -427,7 +427,15 @@
         });
 
         if (response.ok) {
-          sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+          const result = await response.json();
+          const token = result.token;
+          
+          if (token) {
+            // Store authentication token (JWT) instead of password
+            sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+            sessionStorage.setItem('warmthly-admin-token', token);
+          }
+          
           loginSection.style.display = 'none';
           adminContent.classList.add('active');
           passwordInput.value = '';
@@ -449,6 +457,7 @@
     logoutButton.addEventListener('click', function() {
       if (confirm('Are you sure you want to logout?')) {
         sessionStorage.removeItem('warmthly-admin-authenticated');
+        sessionStorage.removeItem('warmthly-admin-token');
         adminContent.classList.remove('active');
         loginSection.style.display = 'flex';
         passwordInput.focus();
