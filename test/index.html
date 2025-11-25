@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="theme-color" content="#fff6f1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.75, user-scalable=yes" />
+  <title>3D Model Viewer - Warmthly</title>
+
+  <!-- Preconnect to essential domains -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
+
+  <style>
+    /* Base styles matching index.html */
+    :root { color-scheme: light; }
+    html {
+      background-color: #fff6f1;
+      min-height: 100%;
+    }
+    body {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease-in-out;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body.fonts-loaded {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    @font-face { 
+      font-family: 'Cormorant Garamond'; 
+      font-style: normal; 
+      font-weight: 700; 
+      font-display: swap; 
+      src: url('https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2') format('woff2'); 
+    }
+    @font-face { 
+      font-family: 'Inter'; 
+      font-style: normal; 
+      font-weight: 400; 
+      font-display: swap; 
+      src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2') format('woff2'); 
+    }
+    @font-face { 
+      font-family: 'Inter'; 
+      font-style: normal; 
+      font-weight: 600; 
+      font-display: swap; 
+      src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2') format('woff2'); 
+    }
+
+    html { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+    html::-webkit-scrollbar { display: none; }
+    body { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      line-height: 1.7; 
+      color: #2c2c2c; 
+      background: #fff6f1; 
+      min-height: 100vh; 
+      position: relative; 
+      overflow-x: hidden; 
+      overflow-y: auto; 
+      scrollbar-width: none; 
+      -ms-overflow-style: none; 
+    }
+    body::-webkit-scrollbar { display: none; }
+    body::before { 
+      content: ''; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100vh; 
+      background: radial-gradient(circle at 20% 30%, rgba(255, 140, 66, 0.15) 0%, transparent 50%), 
+                  radial-gradient(circle at 80% 20%, rgba(255, 182, 193, 0.12) 0%, transparent 50%), 
+                  radial-gradient(circle at 40% 70%, rgba(173, 216, 230, 0.1) 0%, transparent 50%), 
+                  radial-gradient(circle at 90% 80%, rgba(144, 238, 144, 0.08) 0%, transparent 50%), 
+                  linear-gradient(135deg, #fff6f1 0%, #ffeee6 100%); 
+      z-index: -1; 
+      pointer-events: none; 
+    }
+    ::selection { background: #FF8C42; color: #FFFFFF; }
+
+    /* Header */
+    .header { 
+      position: fixed; 
+      top: 20px; 
+      left: 20px; 
+      right: 20px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      z-index: 1001; 
+      pointer-events: none; 
+    }
+    .header-left { pointer-events: auto; }
+    .header-right { display: flex; align-items: center; gap: 20px; pointer-events: auto; }
+    .brand-logo { 
+      font-family: 'Cormorant Garamond', Georgia, serif; 
+      font-weight: 700; 
+      font-size: 2rem; 
+      color: #FF8C42; 
+      user-select: none; 
+      text-decoration: none; 
+    }
+    .nav-link { 
+      font-family: 'Inter', sans-serif; 
+      font-weight: 600; 
+      color: #FF8C42; 
+      text-decoration: none; 
+      font-size: 1rem; 
+      user-select: none; 
+      transition: color 0.3s ease; 
+    }
+    .nav-link:hover { color: #e07a35; }
+
+    /* Main Container */
+    .container { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 100px 20px 40px; 
+      text-align: center; 
+      color: #2c2c2c; 
+      position: relative; 
+      z-index: 1; 
+    }
+    .page-title { 
+      font-family: 'Cormorant Garamond', Georgia, serif; 
+      font-size: 3.5rem; 
+      font-weight: 700; 
+      margin-bottom: 1rem; 
+      color: #FF8C42; 
+    }
+    .page-subtitle { 
+      font-size: 1.2rem; 
+      color: #2c2c2c; 
+      opacity: 0.8; 
+      font-weight: 400; 
+      margin-bottom: 3rem; 
+      font-family: 'Inter', sans-serif; 
+    }
+
+    /* 3D Viewer Container */
+    .viewer-section {
+      margin: 3rem 0;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 140, 66, 0.15);
+      padding: 20px;
+    }
+    .viewer-container {
+      position: relative;
+      width: 100%;
+      height: 600px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+    #canvas-container:active {
+      cursor: grabbing;
+    }
+
+    /* Controls */
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      align-items: center;
+    }
+    .control-button {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 140, 66, 0.3);
+      color: #FF8C42;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+    .control-button:hover {
+      background: rgba(255, 140, 66, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+    }
+    .control-button:active {
+      transform: translateY(0);
+    }
+
+    /* Loading indicator */
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1rem;
+      color: #FF8C42;
+      z-index: 10;
+    }
+    .loading.hidden {
+      display: none;
+    }
+
+    /* Info section */
+    .info-section {
+      text-align: left;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 140, 66, 0.15);
+      max-width: 800px;
+    }
+    .info-section h3 {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #FF8C42;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .info-section p {
+      opacity: 0.8;
+      line-height: 1.7;
+      margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) { 
+      .container { padding-top: 80px; } 
+      .page-title { font-size: 2.5rem; } 
+      .page-subtitle { font-size: 1rem; } 
+      .viewer-container { height: 400px; }
+      .controls { flex-direction: column; }
+      .control-button { width: 100%; max-width: 300px; }
+    }
+  </style>
+</head>
+<body class="fonts-loading">
+  <header class="header">
+    <div class="header-left">
+      <a href="index.html" class="brand-logo">Warmthly</a>
+    </div>
+    <div class="header-right">
+      <a href="index.html" class="nav-link">Home</a>
+    </div>
+  </header>
+  
+  <div class="container">
+    <h1 class="page-title">3D Model Viewer</h1>
+    <p class="page-subtitle">Explore the architectural model in interactive 3D</p>
+    
+    <div class="viewer-section">
+      <div class="viewer-container">
+        <div class="loading" id="loading">Loading 3D model...</div>
+        <div id="canvas-container"></div>
+      </div>
+      <div class="controls">
+        <button class="control-button" id="resetView">Reset View</button>
+        <button class="control-button" id="toggleWireframe">Toggle Wireframe</button>
+        <button class="control-button" id="toggleAutoRotate">Auto Rotate: OFF</button>
+        <button class="control-button" id="toggleLights">Toggle Lights</button>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>Controls</h3>
+      <p><strong>Mouse/Touch:</strong> Click and drag to rotate the model</p>
+      <p><strong>Scroll/Pinch:</strong> Zoom in and out</p>
+      <p><strong>Right-click + Drag:</strong> Pan the view</p>
+    </div>
+  </div>
+
+  <!-- FontFaceObserver for font loading -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+  
+  <script>
+    // Font loading
+    const cormorant = new FontFaceObserver('Cormorant Garamond');
+    const inter = new FontFaceObserver('Inter');
+    Promise.all([cormorant.load(), inter.load()]).then(function () {
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    });
+  </script>
+
+  <!-- Three.js and FBX Loader -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    
+    // 3D Scene Setup
+    let scene, camera, renderer, controls;
+    let model = null;
+    let autoRotate = false;
+    let wireframeMode = false;
+    let lightsEnabled = true;
+
+    function init() {
+      const container = document.getElementById('canvas-container');
+      
+      // Scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf5f5f5);
+      
+      // Camera
+      camera = new THREE.PerspectiveCamera(
+        45,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        10000
+      );
+      camera.position.set(0, 5, 10);
+      
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+      
+      // Controls
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.minDistance = 1;
+      controls.maxDistance = 100;
+      controls.enablePan = true;
+      
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      
+      const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight1.position.set(10, 10, 5);
+      directionalLight1.castShadow = true;
+      scene.add(directionalLight1);
+      
+      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+      directionalLight2.position.set(-10, 5, -5);
+      scene.add(directionalLight2);
+      
+      // Grid helper
+      const gridHelper = new THREE.GridHelper(20, 20, 0x888888, 0xcccccc);
+      scene.add(gridHelper);
+      
+      // Load FBX model
+      loadModel();
+      
+      // Handle window resize
+      window.addEventListener('resize', onWindowResize);
+      
+      // Animation loop
+      animate();
+    }
+
+    function loadModel() {
+      const loader = new FBXLoader();
+      const loadingEl = document.getElementById('loading');
+      
+      loader.load(
+        'm4 chruch.fbx',
+        (object) => {
+          // Center and scale the model
+          const box = new THREE.Box3().setFromObject(object);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+          
+          // Calculate scale to fit in view
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = 5 / maxDim;
+          object.scale.multiplyScalar(scale);
+          
+          // Center the model
+          object.position.sub(center.multiplyScalar(scale));
+          
+          // Add to scene
+          scene.add(object);
+          model = object;
+          
+          // Adjust camera to view the model
+          const distance = maxDim * 1.5;
+          camera.position.set(distance, distance * 0.6, distance);
+          controls.target.copy(object.position);
+          controls.update();
+          
+          loadingEl.classList.add('hidden');
+          console.log('Model loaded successfully');
+        },
+        (progress) => {
+          if (progress.lengthComputable) {
+            const percent = (progress.loaded / progress.total * 100).toFixed(0);
+            loadingEl.textContent = `Loading 3D model... ${percent}%`;
+          } else {
+            loadingEl.textContent = 'Loading 3D model...';
+          }
+        },
+        (error) => {
+          loadingEl.textContent = 'Error loading model. Please check the console.';
+          console.error('Error loading FBX:', error);
+        }
+      );
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      if (autoRotate && model) {
+        model.rotation.y += 0.005;
+      }
+      
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+      const container = document.getElementById('canvas-container');
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    // Control buttons
+    document.getElementById('resetView').addEventListener('click', () => {
+      if (model) {
+        camera.position.set(10, 5, 10);
+        controls.target.set(0, 0, 0);
+        controls.update();
+      }
+    });
+
+    document.getElementById('toggleWireframe').addEventListener('click', () => {
+      wireframeMode = !wireframeMode;
+      if (model) {
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.material.wireframe = wireframeMode;
+          }
+        });
+      }
+    });
+
+    document.getElementById('toggleAutoRotate').addEventListener('click', () => {
+      autoRotate = !autoRotate;
+      const btn = document.getElementById('toggleAutoRotate');
+      btn.textContent = `Auto Rotate: ${autoRotate ? 'ON' : 'OFF'}`;
+    });
+
+    document.getElementById('toggleLights').addEventListener('click', () => {
+      lightsEnabled = !lightsEnabled;
+      scene.traverse((child) => {
+        if (child.isLight) {
+          child.visible = lightsEnabled;
+        }
+      });
+    });
+
+    // Initialize when page loads
+    init();
+  </script>
+</body>
+</html>
+
