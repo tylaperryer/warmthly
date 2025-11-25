@@ -30,15 +30,16 @@
       min-height: 100%;
     }
     /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
-    body {
+    body.fonts-loading {
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.3s ease-in-out;
     }
     /* 3. Fade in smoothly once fonts are ready */
-    body.fonts-loaded {
+    body.fonts-loaded,
+    body:not(.fonts-loading) {
       opacity: 1;
       visibility: visible;
+      transition: opacity 0.2s ease-in-out;
     }
     /* --- END ANTI-FLASH FIXES --- */
 
@@ -362,10 +363,10 @@
       <p class="welcome-text">Manage your Warmthly administration tools and settings.</p>
       
       <ul class="admin-links">
-        <li><a href="/admin/emails.html">📧 Email Management (Send & View Received)</a></li>
-        <li><a href="#" onclick="alert('Coming soon!'); return false;">📊 Manage Donations</a></li>
-        <li><a href="#" onclick="alert('Coming soon!'); return false;">📚 Update Studies</a></li>
-        <li><a href="#" onclick="alert('Coming soon!'); return false;">📈 Site Analytics</a></li>
+        <li><a href="/admin/emails.html">Email Management (Send & View Received)</a></li>
+        <li><a href="#" onclick="alert('Coming soon!'); return false;">Manage Donations</a></li>
+        <li><a href="#" onclick="alert('Coming soon!'); return false;">Update Studies</a></li>
+        <li><a href="#" onclick="alert('Coming soon!'); return false;">Site Analytics</a></li>
       </ul>
 
       <button class="logout-button" id="logout-button">Logout</button>
@@ -376,9 +377,20 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
   <script>
     // --- FONT LOADING FIX ---
+    // Show content immediately if fonts are already loaded or fail to load
+    const fontLoadTimeout = setTimeout(function() {
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    }, 100); // Short timeout to prevent flash
+
     const cormorant = new FontFaceObserver('Cormorant Garamond');
     const inter = new FontFaceObserver('Inter');
     Promise.all([cormorant.load(), inter.load()]).then(function () {
+      clearTimeout(fontLoadTimeout);
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    }).catch(function() {
+      clearTimeout(fontLoadTimeout);
       document.body.classList.remove('fonts-loading');
       document.body.classList.add('fonts-loaded');
     });
