@@ -532,7 +532,7 @@
 
   <!-- Admin Content (Hidden by default) -->
   <div id="admin-content" class="admin-content">
-    <div class="container">
+  <div class="container">
       <a href="/admin" class="back-link">← Back to Admin Dashboard</a>
       <form id="email-form" novalidate>
         <h2>Send Email</h2>
@@ -572,7 +572,7 @@
 
         <button type="submit" id="submit-button">Send Email</button>
         <div id="status" role="status" aria-live="polite" aria-atomic="true"></div>
-      </form>
+    </form>
 
       <!-- Received Emails Section -->
       <div class="received-emails-section">
@@ -698,17 +698,17 @@
     function initializeEditor() {
       quill = new Quill('#editor', {
         theme: 'snow',
-        modules: {
-          toolbar: [
-            [{ 'header': [1, 2, false] }],
-            ['bold', 'italic', 'underline'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            ['link', 'image']
-          ]
+      modules: {
+        toolbar: [
+          [{ 'header': [1, 2, false] }],
+          ['bold', 'italic', 'underline'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          ['link', 'image']
+        ]
         },
         placeholder: 'Compose your email...'
       });
-    }
+      }
 
     // Email form handling
     const emailForm = document.getElementById('email-form');
@@ -894,10 +894,33 @@
         }
 
         if (!response.ok) {
-          throw new Error('Failed to fetch emails');
+          // Try to get error message from response
+          let errorMessage = 'Failed to fetch emails';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch (e) {
+            // If we can't parse the error, use the status text
+            errorMessage = response.statusText || errorMessage;
+          }
+          
+          // Show specific error messages
+          if (response.status === 500) {
+            emailsContainer.innerHTML = `<div class="empty-state" style="color: var(--error-color);">Server error: ${errorMessage}. Please check your Vercel environment variables (JWT_SECRET and REDIS_URL).</div>`;
+          } else {
+            emailsContainer.innerHTML = `<div class="empty-state" style="color: var(--error-color);">Error: ${errorMessage}</div>`;
+          }
+          return;
         }
 
         const emails = await response.json();
+
+        // Handle case where emails might not be an array
+        if (!Array.isArray(emails)) {
+          console.error('Unexpected response format:', emails);
+          emailsContainer.innerHTML = '<div class="empty-state" style="color: var(--error-color);">Unexpected response from server. Please try again.</div>';
+          return;
+        }
 
         if (emails.length === 0) {
           emailsContainer.innerHTML = '<div class="empty-state">No emails received yet. Incoming emails will appear here.</div>';
@@ -923,7 +946,9 @@
         }
       } catch (error) {
         console.error('Error loading emails:', error);
-        emailsContainer.innerHTML = '<div class="empty-state" style="color: var(--error-color);">Error loading emails. Please try again.</div>';
+        // Show more detailed error message
+        const errorMsg = error.message || 'Unknown error occurred';
+        emailsContainer.innerHTML = `<div class="empty-state" style="color: var(--error-color);">Error loading emails: ${errorMsg}. Please check your connection and try again.</div>`;
       } finally {
         refreshButton.disabled = false;
       }
