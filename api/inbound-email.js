@@ -1,4 +1,4 @@
-import { createClient } from '@vercel/kv';
+import { createClient } from 'redis';
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -79,6 +79,7 @@ export default async function handler(req, res) {
       const kv = createClient({
         url: process.env.REDIS_URL,
       });
+      await kv.connect();
 
       // Create a simple object for the email
       const emailToStore = {
