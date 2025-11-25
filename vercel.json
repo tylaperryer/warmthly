@@ -43,6 +43,26 @@
       {
         "source": "/post",
         "destination": "/post.html"
+      },
+      {
+        "source": "/:path*",
+        "has": [
+          {
+            "type": "host",
+            "value": "admin.warmthly.org"
+          }
+        ],
+        "destination": "/Admin/:path*"
+      },
+      {
+        "source": "/",
+        "has": [
+          {
+            "type": "host",
+            "value": "admin.warmthly.org"
+          }
+        ],
+        "destination": "/Admin/index.html"
       }
     ]
   }
