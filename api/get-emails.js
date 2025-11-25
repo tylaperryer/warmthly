@@ -34,12 +34,25 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Database is not configured.' });
     }
 
+    // Create KV client - Vercel KV uses token from URL
     const kv = createClient({
       url: process.env.REDIS_URL,
     });
 
     // Fetch the 100 most recent emails from the 'emails' list
-    const emails = await kv.lrange('emails', 0, 99);
+    // Handle case where list might not exist yet
+    let emails = [];
+    try {
+      emails = await kv.lrange('emails', 0, 99);
+    } catch (kvError) {
+      console.error('Error fetching from KV store:', kvError);
+      // If the list doesn't exist, return empty array instead of error
+      if (kvError.message && kvError.message.includes('WRONGTYPE')) {
+        emails = [];
+      } else {
+        throw kvError;
+      }
+    }
 
     // The emails are stored as strings, so we need to parse them back into objects
     // Handle case where emails array might be empty or contain invalid JSON
@@ -58,10 +71,31 @@ export default async function handler(req, res) {
     res.status(200).json(parsedEmails);
 
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError || error instanceof jwt.TokenExpiredError) {
-      return res.status(401).json({ error: 'Invalid or expired token.' });
+    // Handle JWT errors
+    if (error instanceof jwt.JsonWebTokenError) {
+      console.error('JWT verification error:', error.message);
+      return res.status(401).json({ error: 'Invalid token.' });
     }
-    console.error('Error fetching emails:', error);
-    res.status(500).json({ error: 'Failed to fetch emails.' });
+    if (error instanceof jwt.TokenExpiredError) {
+      console.error('JWT expired:', error.message);
+      return res.status(401).json({ error: 'Token expired. Please log in again.' });
+    }
+    
+    // Log the full error for debugging
+    console.error('Error fetching emails:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
+    // Return more specific error messages
+    if (error.message && error.message.includes('REDIS')) {
+      return res.status(500).json({ error: 'Database connection error. Please check REDIS_URL configuration.' });
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to fetch emails.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 }
