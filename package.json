@@ -1,5 +1,8 @@
 {
+  "name": "warmthly-email-sender",
+  "version": "1.0.0",
+  "private": true,
   "dependencies": {
-    "resend": "latest"
+    "resend": "^3.2.0"
   }
 }
