@@ -11,8 +11,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://mint.warmthly.org">
   <link rel="preconnect" href="https://post.warmthly.org">
-  <link rel="dns-prefetch" href="//www.youtube.com">
-  <link rel="dns-prefetch" href="//gofund.me">
 
   <!-- Preload fonts for faster rendering -->
   <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
@@ -210,7 +208,7 @@
     <p class="subtitle">Warmthly is a global movement to make empathy a measurable part of our systems.</p>
     <div class="video-section">
       <div class="video-container">
-        <iframe src="https://www.youtube.com/embed/kVausES-mjk" title="Warmthly Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        <iframe src="https://www.youtube-nocookie.com/embed/kVausES-mjk" title="Warmthly Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
     </div>
     <div class="method-section">
@@ -240,7 +238,15 @@
   <!-- Cookie Popup -->
   <button class="cookie-button" id="cookieButton" aria-label="Cookie information" style="display: none;">🥠</button>
   <div class="cookie-popup" id="cookiePopup" role="dialog" aria-label="Cookie information">
-    Cookies? What are those? We don't have those. What about Ai? We also don't have that. Sorry.
+    <div style="line-height: 1.6;">
+      <p><strong>Privacy Notice:</strong></p>
+      <p>We don't use tracking cookies or analytics. We only store locally:</p>
+      <ul style="text-align: left; margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.85rem;">
+        <li>Your preference that you've seen this message</li>
+        <li>Vote cooldown data if you vote (30 days)</li>
+      </ul>
+      <p style="font-size: 0.85rem; margin-top: 0.5rem;">No data is sent to third parties.</p>
+    </div>
   </div>
 
   <!-- FontFaceObserver for robust font loading -->
@@ -249,7 +255,19 @@
     // --- FONT LOADING FIX ---
     const cormorant = new FontFaceObserver('Cormorant Garamond');
     const inter = new FontFaceObserver('Inter');
+    // Add timeout to font loading to prevent page from never appearing
+    const fontLoadTimeout = setTimeout(() => {
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    }, 3000); // Fallback after 3 seconds
+
     Promise.all([cormorant.load(), inter.load()]).then(function () {
+      clearTimeout(fontLoadTimeout);
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    }).catch(function (error) {
+      clearTimeout(fontLoadTimeout);
+      console.warn('Font loading error:', error);
       document.body.classList.remove('fonts-loading');
       document.body.classList.add('fonts-loaded');
     });
