@@ -1,8 +1,9 @@
 {
-  "name": "warmthly-email-sender",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "resend": "^3.2.0"
+    "name": "warmthly-email-sender",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+      "resend": "^3.2.0",
+      "@vercel/kv": "^1.0.1"
+    }
   }
-}
