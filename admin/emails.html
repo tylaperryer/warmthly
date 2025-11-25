@@ -1,69 +1,626 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Warmthly Admin - Email Sender</title>
+  <meta charset="UTF-8" />
+  <meta name="theme-color" content="#fff6f1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Email Sender - Warmthly</title>
+
+  <!-- Preconnect to essential domains for faster resource loading -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.quilljs.com">
+  <link rel="dns-prefetch" href="//cdn.quilljs.com">
+
+  <!-- Preload fonts for faster rendering -->
+  <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
+
   <!-- Include the Quill library -->
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
   <style>
-    body { font-family: sans-serif; background: #f4f4f9; padding: 2rem; }
-    .container { max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1 ); }
-    input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; }
-    button { width: 100%; padding: 0.75rem; background: #FF8C42; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; margin-top: 1rem; }
-    #status { margin-top: 1rem; font-weight: bold; }
-    /* Style the editor */
-    #editor { height: 250px; margin-bottom: 1rem; }
+    /* --- ANTI-FLASH AND PERFORMANCE FIXES --- */
+    /* 1. Set base background color immediately to prevent white flash */
+    :root { 
+      color-scheme: light;
+      --warmthly-orange: #FF8C42;
+      --warmthly-background: #fff6f1;
+      --text-color: #2c2c2c;
+      --error-color: #D8000C;
+      --success-color: #2ed573;
+    }
+    html {
+      background-color: var(--warmthly-background);
+      min-height: 100%;
+    }
+    /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
+    body {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease-in-out;
+    }
+    /* 3. Fade in smoothly once fonts are ready */
+    body.fonts-loaded {
+      opacity: 1;
+      visibility: visible;
+    }
+    /* --- END ANTI-FLASH FIXES --- */
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+
+    @font-face { 
+      font-family: 'Cormorant Garamond'; 
+      font-style: normal; 
+      font-weight: 700; 
+      font-display: swap; 
+      src: url('https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2') format('woff2'); 
+    }
+    @font-face { 
+      font-family: 'Inter'; 
+      font-style: normal; 
+      font-weight: 400; 
+      font-display: swap; 
+      src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2') format('woff2'); 
+    }
+    @font-face { 
+      font-family: 'Inter'; 
+      font-style: normal; 
+      font-weight: 600; 
+      font-display: swap; 
+      src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2') format('woff2'); 
+    }
+
+    html { 
+      overflow-x: hidden; 
+      overflow-y: auto; 
+      scrollbar-width: none; 
+      -ms-overflow-style: none; 
+    }
+    html::-webkit-scrollbar { 
+      display: none; 
+    }
+
+    body { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      line-height: 1.7; 
+      color: var(--text-color); 
+      background: var(--warmthly-background); 
+      min-height: 100vh; 
+      position: relative; 
+      overflow-x: hidden; 
+      overflow-y: auto; 
+      scrollbar-width: none; 
+      -ms-overflow-style: none; 
+    }
+    body::-webkit-scrollbar { 
+      display: none; 
+    }
+
+    body::before { 
+      content: ''; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100vh; 
+      background: radial-gradient(circle at 20% 30%, rgba(255, 140, 66, 0.15) 0%, transparent 50%), 
+                  radial-gradient(circle at 80% 20%, rgba(255, 182, 193, 0.12) 0%, transparent 50%), 
+                  radial-gradient(circle at 40% 70%, rgba(173, 216, 230, 0.1) 0%, transparent 50%), 
+                  radial-gradient(circle at 90% 80%, rgba(144, 238, 144, 0.08) 0%, transparent 50%), 
+                  linear-gradient(135deg, #fff6f1 0%, #ffeee6 100%); 
+      z-index: -1; 
+      pointer-events: none; 
+    }
+
+    ::selection { 
+      background: var(--warmthly-orange); 
+      color: #FFFFFF; 
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1001;
+    }
+    .brand-logo { 
+      font-family: 'Cormorant Garamond', Georgia, serif; 
+      font-weight: 700; 
+      font-size: 2rem; 
+      color: var(--warmthly-orange); 
+      user-select: none; 
+      text-decoration: none; 
+      transition: color 0.3s ease;
+    }
+    .brand-logo:hover {
+      color: #e07a35;
+    }
+
+    /* Login Section */
+    .login-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .login-container {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .login-container h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      color: var(--warmthly-orange);
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    .login-container p {
+      margin-bottom: 1.5rem;
+      opacity: 0.8;
+      line-height: 1.6;
+    }
+    .password-input {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      transition: border-color 0.3s;
+      font-family: 'Inter', sans-serif;
+    }
+    .password-input:focus {
+      outline: none;
+      border-color: var(--warmthly-orange);
+    }
+    .submit-button {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: 600;
+      background-color: var(--warmthly-orange);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-family: 'Inter', sans-serif;
+    }
+    .submit-button:hover {
+      background-color: #e07a35;
+    }
+    .submit-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .error-message {
+      color: var(--error-color);
+      background-color: #FFD2D2;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    /* Admin Content */
+    .admin-content {
+      display: none;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 120px 20px 40px;
+      position: relative;
+      z-index: 1;
+    }
+    .admin-content.active {
+      display: block;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 140, 66, 0.15);
+    }
+
+    h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2rem;
+      color: var(--warmthly-orange);
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    input[type="email"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      transition: border-color 0.3s;
+      font-family: 'Inter', sans-serif;
+      background: white;
+    }
+
+    input[type="email"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--warmthly-orange);
+    }
+
+    /* Quill Editor Styling */
+    #editor {
+      height: 300px;
+      margin-bottom: 1rem;
+      background: white;
+      border-radius: 8px;
+    }
+    .ql-container {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+    .ql-toolbar {
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background-color: var(--warmthly-orange);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3);
+    }
+
+    button[type="submit"]:hover:not(:disabled) {
+      background-color: #e07a35;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 140, 66, 0.4);
+    }
+
+    button[type="submit"]:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #status {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      display: none;
+    }
+
+    #status.success {
+      display: block;
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    #status.error {
+      display: block;
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    #status.sending {
+      display: block;
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: var(--warmthly-orange);
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: #e07a35;
+    }
+
+    @media (max-width: 768px) {
+      .admin-content {
+        padding: 100px 15px 30px;
+      }
+      .container {
+        padding: 1.5rem;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
+      #editor {
+        height: 250px;
+      }
+    }
   </style>
 </head>
-<body>
-  <div class="container">
-    <form id="email-form">
-      <h2>Admin Email Sender</h2>
-      <label for="to">To:</label>
-      <input type="email" id="to" name="to" required>
-      <label for="subject">Subject:</label>
-      <input type="text" id="subject" name="subject" required>
-      <label for="body">Body:</label>
-      <!-- Create the editor container -->
-      <div id="editor"></div>
-      <button type="submit">Send Email</button>
-      <p id="status"></p>
-    </form>
+<body class="fonts-loading">
+  <!-- Header -->
+  <header class="header">
+    <a href="/" class="brand-logo">Warmthly</a>
+  </header>
+
+  <!-- Login Section (Visible by default) -->
+  <div id="login-section" class="login-section">
+    <div class="login-container">
+      <h1>Admin Access</h1>
+      <p>Enter the password to access the email sender.</p>
+      <form id="login-form">
+        <input 
+          type="password" 
+          id="password-input" 
+          class="password-input" 
+          placeholder="Password" 
+          required 
+          autocomplete="current-password"
+          aria-label="Admin password"
+        />
+        <button type="submit" class="submit-button">Unlock</button>
+      </form>
+      <div id="error-message" class="error-message" role="alert" aria-live="polite">
+        Incorrect password. Please try again.
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Content (Hidden by default) -->
+  <div id="admin-content" class="admin-content">
+    <div class="container">
+      <a href="/admin" class="back-link">← Back to Admin Dashboard</a>
+      <form id="email-form" novalidate>
+        <h2>Send Email</h2>
+        
+        <div class="form-group">
+          <label for="to">To: <span aria-label="required">*</span></label>
+          <input 
+            type="email" 
+            id="to" 
+            name="to" 
+            required 
+            autocomplete="email"
+            aria-required="true"
+            aria-describedby="to-error"
+          />
+          <span id="to-error" class="error-message" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Subject: <span aria-label="required">*</span></label>
+          <input 
+            type="text" 
+            id="subject" 
+            name="subject" 
+            required 
+            maxlength="200"
+            aria-required="true"
+            aria-describedby="subject-error"
+          />
+          <span id="subject-error" class="error-message" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="editor">Body: <span aria-label="required">*</span></label>
+          <div id="editor" role="textbox" aria-label="Email body" aria-required="true"></div>
+        </div>
+
+        <button type="submit" id="submit-button">Send Email</button>
+        <div id="status" role="status" aria-live="polite" aria-atomic="true"></div>
+      </form>
+    </div>
   </div>
 
   <!-- Include the Quill library JS -->
   <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
+  <!-- FontFaceObserver for robust font loading -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+
   <script>
-    // Initialize Quill editor
-    const quill = new Quill('#editor', {
-      theme: 'snow', // 'snow' is a clean, modern theme
-      modules: {
-        toolbar: [
-          [{ 'header': [1, 2, false] }],
-          ['bold', 'italic', 'underline'],
-          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-          ['link', 'image']
-        ]
+    // --- FONT LOADING FIX ---
+    const cormorant = new FontFaceObserver('Cormorant Garamond');
+    const inter = new FontFaceObserver('Inter');
+    Promise.all([cormorant.load(), inter.load()]).then(function () {
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    });
+    // --- END FONT LOADING FIX ---
+
+    // Authentication
+    const loginForm = document.getElementById('login-form');
+    const passwordInput = document.getElementById('password-input');
+    const loginSection = document.getElementById('login-section');
+    const adminContent = document.getElementById('admin-content');
+    const errorMessage = document.getElementById('error-message');
+
+    // Check if already authenticated (session storage)
+    const isAuthenticated = sessionStorage.getItem('warmthly-admin-authenticated') === 'true';
+    if (isAuthenticated) {
+      loginSection.style.display = 'none';
+      adminContent.classList.add('active');
+    }
+
+    loginForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const enteredPassword = passwordInput.value;
+      errorMessage.style.display = 'none';
+      
+      const submitButton = loginForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Verifying...';
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: enteredPassword }),
+        });
+
+        if (response.ok) {
+          sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+          loginSection.style.display = 'none';
+          adminContent.classList.add('active');
+          passwordInput.value = '';
+        } else {
+          errorMessage.style.display = 'block';
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      } catch (error) {
+        errorMessage.textContent = 'An error occurred. Please try again.';
+        errorMessage.style.display = 'block';
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Unlock';
       }
-    } );
+    });
 
-    const form = document.getElementById('email-form');
+    // Initialize Quill editor (only after authentication)
+    let quill = null;
+    if (isAuthenticated) {
+      initializeEditor();
+    } else {
+      // Initialize editor when authenticated
+      const observer = new MutationObserver((mutations) => {
+        if (adminContent.classList.contains('active') && !quill) {
+          initializeEditor();
+          observer.disconnect();
+        }
+      });
+      observer.observe(adminContent, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    function initializeEditor() {
+      quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            [{ 'header': [1, 2, false] }],
+            ['bold', 'italic', 'underline'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            ['link', 'image']
+          ]
+        },
+        placeholder: 'Compose your email...'
+      });
+    }
+
+    // Email form handling
+    const emailForm = document.getElementById('email-form');
     const statusEl = document.getElementById('status');
+    const submitButton = document.getElementById('submit-button');
 
-    form.addEventListener('submit', async (e) => {
+    emailForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      statusEl.textContent = 'Sending...';
-      statusEl.style.color = 'black';
+      
+      // Clear previous status
+      statusEl.className = '';
+      statusEl.textContent = '';
+      
+      // Validate form
+      const to = document.getElementById('to').value.trim();
+      const subject = document.getElementById('subject').value.trim();
+      const htmlBody = quill ? quill.root.innerHTML : '';
 
-      // Get the HTML content from the Quill editor
-      const htmlBody = quill.root.innerHTML;
+      let isValid = true;
+
+      // Validate email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const toError = document.getElementById('to-error');
+      if (!to || !emailRegex.test(to)) {
+        toError.textContent = 'Please enter a valid email address.';
+        toError.style.display = 'block';
+        isValid = false;
+      } else {
+        toError.textContent = '';
+        toError.style.display = 'none';
+      }
+
+      // Validate subject
+      const subjectError = document.getElementById('subject-error');
+      if (!subject) {
+        subjectError.textContent = 'Please enter an email subject.';
+        subjectError.style.display = 'block';
+        isValid = false;
+      } else {
+        subjectError.textContent = '';
+        subjectError.style.display = 'none';
+      }
+
+      // Validate body
+      const emptyPatterns = [
+        /^<p>\s*<\/p>$/i,
+        /^<p><br\s*\/?><\/p>$/i,
+        /^<p>\s*<br\s*\/?>\s*<\/p>$/i,
+        /^<p>&nbsp;<\/p>$/i,
+      ];
+      const trimmedBody = htmlBody.trim();
+      if (!trimmedBody || emptyPatterns.some(pattern => pattern.test(trimmedBody))) {
+        statusEl.className = 'error';
+        statusEl.textContent = 'Email body cannot be empty.';
+        isValid = false;
+      }
+
+      if (!isValid) {
+        return;
+      }
+
+      // Disable submit button
+      submitButton.disabled = true;
+      statusEl.className = 'sending';
+      statusEl.textContent = 'Sending email...';
 
       const data = {
-        to: document.getElementById('to').value,
-        subject: document.getElementById('subject').value,
-        // Send the rich HTML content as the body
+        to: to,
+        subject: subject,
         html: htmlBody,
       };
 
@@ -73,20 +630,40 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
+
         const result = await response.json();
+
         if (response.ok) {
-          statusEl.textContent = 'Success! Email sent.';
-          statusEl.style.color = 'green';
-          form.reset();
-          quill.setText(''); // Clear the editor
+          statusEl.className = 'success';
+          statusEl.textContent = 'Success! Email sent successfully.';
+          emailForm.reset();
+          if (quill) {
+            quill.setText('');
+          }
+          
+          // Clear form after 3 seconds
+          setTimeout(() => {
+            statusEl.className = '';
+            statusEl.textContent = '';
+          }, 3000);
         } else {
-          statusEl.textContent = `Error: ${result.error.message || 'Failed to send email.'}`;
-          statusEl.style.color = 'red';
+          statusEl.className = 'error';
+          statusEl.textContent = `Error: ${result.error?.message || 'Failed to send email. Please try again.'}`;
         }
       } catch (error) {
-        statusEl.textContent = 'A network error occurred. Please try again.';
-        statusEl.style.color = 'red';
+        statusEl.className = 'error';
+        statusEl.textContent = 'A network error occurred. Please check your connection and try again.';
+      } finally {
+        submitButton.disabled = false;
       }
+    });
+
+    // Clear error messages on input
+    document.getElementById('to').addEventListener('input', function() {
+      document.getElementById('to-error').style.display = 'none';
+    });
+    document.getElementById('subject').addEventListener('input', function() {
+      document.getElementById('subject-error').style.display = 'none';
     });
   </script>
 </body>
