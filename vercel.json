@@ -29,16 +29,6 @@
     ],
     "rewrites": [
       {
-        "source": "/",
-        "has": [
-          {
-            "type": "host",
-            "value": "admin.warmthly.org"
-          }
-        ],
-        "destination": "/Admin/index.html"
-      },
-      {
         "source": "/:path*",
         "has": [
           {
@@ -46,37 +36,7 @@
             "value": "admin.warmthly.org"
           }
         ],
-        "destination": "/Admin/:path*"
-      },
-      {
-        "source": "/",
-        "has": [
-          {
-            "type": "host",
-            "value": "mint.warmthly.org"
-          }
-        ],
-        "destination": "/mint.html"
-      },
-      {
-        "source": "/:path*",
-        "has": [
-          {
-            "type": "host",
-            "value": "mint.warmthly.org"
-          }
-        ],
-        "destination": "/mint.html"
-      },
-      {
-        "source": "/",
-        "has": [
-          {
-            "type": "host",
-            "value": "post.warmthly.org"
-          }
-        ],
-        "destination": "/post.html"
+        "destination": "/admin-app/:path*"
       },
       {
         "source": "/:path*",
@@ -86,7 +46,17 @@
             "value": "post.warmthly.org"
           }
         ],
-        "destination": "/post.html"
+        "destination": "/post/:path*"
+      },
+      {
+        "source": "/:path*",
+        "has": [
+          {
+            "type": "host",
+            "value": "mint.warmthly.org"
+          }
+        ],
+        "destination": "/mint/:path*"
       },
       {
         "source": "/admin/emails",
@@ -107,12 +77,27 @@
     ],
     "redirects": [
       {
+        "source": "/post/:path*",
+        "destination": "/",
+        "permanent": false
+      },
+      {
         "source": "/post",
         "destination": "/",
         "permanent": false
       },
       {
+        "source": "/mint/:path*",
+        "destination": "/",
+        "permanent": false
+      },
+      {
         "source": "/mint",
+        "destination": "/",
+        "permanent": false
+      },
+      {
+        "source": "/admin/:path*",
         "destination": "/",
         "permanent": false
       },
