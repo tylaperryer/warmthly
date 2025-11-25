@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   try {
     const { to, subject, body } = req.body;
     const { data, error } = await resend.emails.send({
-      from: 'The Warmthly Desk <desk@warmthly.org>',
+      from: 'The Warmthly Desk <desk@send.warmthly.org>',
       to: [to],
       subject: subject,
       html: `<p>${body}</p>`,
