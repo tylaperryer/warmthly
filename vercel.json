@@ -104,5 +104,22 @@
         "source": "/post",
         "destination": "/post.html"
       }
+    ],
+    "redirects": [
+      {
+        "source": "/post",
+        "destination": "/",
+        "permanent": false
+      },
+      {
+        "source": "/mint",
+        "destination": "/",
+        "permanent": false
+      },
+      {
+        "source": "/admin",
+        "destination": "/",
+        "permanent": false
+      }
     ]
   }
