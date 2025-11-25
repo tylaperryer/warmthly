@@ -36,15 +36,16 @@
       min-height: 100%;
     }
     /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
-    body {
+    body.fonts-loading {
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.3s ease-in-out;
     }
     /* 3. Fade in smoothly once fonts are ready */
-    body.fonts-loaded {
+    body.fonts-loaded,
+    body:not(.fonts-loading) {
       opacity: 1;
       visibility: visible;
+      transition: opacity 0.2s ease-in-out;
     }
     /* --- END ANTI-FLASH FIXES --- */
 
@@ -578,7 +579,7 @@
         <div class="section-header">
           <h2>Received Emails</h2>
           <button class="refresh-button" id="refresh-emails-button" aria-label="Refresh emails list">
-            🔄 Refresh
+            Refresh
           </button>
         </div>
         <div id="emails-container">
@@ -596,9 +597,20 @@
 
   <script>
     // --- FONT LOADING FIX ---
+    // Show content immediately if fonts are already loaded or fail to load
+    const fontLoadTimeout = setTimeout(function() {
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    }, 100); // Short timeout to prevent flash
+
     const cormorant = new FontFaceObserver('Cormorant Garamond');
     const inter = new FontFaceObserver('Inter');
     Promise.all([cormorant.load(), inter.load()]).then(function () {
+      clearTimeout(fontLoadTimeout);
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    }).catch(function() {
+      clearTimeout(fontLoadTimeout);
       document.body.classList.remove('fonts-loading');
       document.body.classList.add('fonts-loaded');
     });
@@ -638,6 +650,8 @@
           sessionStorage.setItem('warmthly-admin-authenticated', 'true');
           // Store password for API authentication (temporary, consider using JWT tokens in production)
           sessionStorage.setItem('warmthly-admin-password', enteredPassword);
+          // Store password in a way that persists across refreshes
+          sessionStorage.setItem('warmthly-admin-password-temp', enteredPassword);
           loginSection.style.display = 'none';
           adminContent.classList.add('active');
           passwordInput.value = '';
@@ -811,11 +825,19 @@
     const emailsContainer = document.getElementById('emails-container');
     const refreshButton = document.getElementById('refresh-emails-button');
 
+    // Helper function to get stored password (check both storage keys for compatibility)
+    function getStoredPassword() {
+      return sessionStorage.getItem('warmthly-admin-password') || 
+             sessionStorage.getItem('warmthly-admin-password-temp');
+    }
+
     // Load emails on page load if authenticated
     if (isAuthenticated) {
-      // Check if we have the password stored
-      const storedPassword = sessionStorage.getItem('warmthly-admin-password');
+      const storedPassword = getStoredPassword();
       if (storedPassword) {
+        // Ensure password is in both locations for consistency
+        sessionStorage.setItem('warmthly-admin-password', storedPassword);
+        sessionStorage.setItem('warmthly-admin-password-temp', storedPassword);
         loadReceivedEmails();
       } else {
         emailsContainer.innerHTML = '<div class="empty-state">Please refresh the page and log in again to view received emails.</div>';
@@ -825,8 +847,11 @@
     // Also load emails when admin content becomes active (after login)
     const adminObserver = new MutationObserver((mutations) => {
       if (adminContent.classList.contains('active')) {
-        const storedPassword = sessionStorage.getItem('warmthly-admin-password');
+        const storedPassword = getStoredPassword();
         if (storedPassword) {
+          // Ensure password is in both locations
+          sessionStorage.setItem('warmthly-admin-password', storedPassword);
+          sessionStorage.setItem('warmthly-admin-password-temp', storedPassword);
           loadReceivedEmails();
         }
       }
@@ -838,9 +863,14 @@
     });
 
     async function loadReceivedEmails() {
-      const password = sessionStorage.getItem('warmthly-admin-password');
+      const password = getStoredPassword();
       if (!password) {
-        emailsContainer.innerHTML = '<div class="empty-state">Authentication required. Please refresh and log in again.</div>';
+        // If authenticated but no password, user needs to re-login
+        if (isAuthenticated) {
+          emailsContainer.innerHTML = '<div class="empty-state">Session expired. Please refresh the page and log in again.</div>';
+        } else {
+          emailsContainer.innerHTML = '<div class="empty-state">Please log in to view received emails.</div>';
+        }
         return;
       }
 
