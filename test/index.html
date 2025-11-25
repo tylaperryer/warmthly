@@ -388,8 +388,12 @@
       const loader = new FBXLoader();
       const loadingEl = document.getElementById('loading');
       
+      // Google Drive direct download URL with CORS proxy
+      const driveUrl = 'https://drive.google.com/uc?export=download&id=1yGUMVsU4C-AvFbRJ1od5MpMEekjN3oWy';
+      const corsProxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(driveUrl);
+      
       loader.load(
-        'https://drive.google.com/uc?export=download&confirm=t&id=1yGUMVsU4C-AvFbRJ1od5MpMEekjN3oWy',
+        corsProxyUrl,
         (object) => {
           // Center and scale the model
           const box = new THREE.Box3().setFromObject(object);
@@ -426,8 +430,14 @@
           }
         },
         (error) => {
-          loadingEl.textContent = 'Error loading model. Please check the console.';
           console.error('Error loading FBX:', error);
+          const errorMsg = error.message || 'Unknown error';
+          loadingEl.innerHTML = `Error loading model: ${errorMsg}<br>
+            <small style="font-size: 0.9rem; opacity: 0.7;">
+              This might be a CORS issue. Google Drive blocks direct file loading.<br>
+              Check the browser console for more details.
+            </small>`;
+          loadingEl.style.color = '#ff4757';
         }
       );
     }
