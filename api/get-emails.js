@@ -1,5 +1,6 @@
 // /api/get-emails.js
 import { createClient } from '@vercel/kv';
+import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
   // Only allow GET requests
@@ -8,16 +9,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Basic authentication check - verify admin password from header
-    // This is a simple approach; for production, consider using JWT tokens
     const authHeader = req.headers.authorization;
-    const providedPassword = authHeader?.replace('Bearer ', '');
-    const correctPassword = process.env.ADMIN_PASSWORD;
-
-    if (!providedPassword || providedPassword !== correctPassword) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Authentication required.' });
     }
 
+    const token = authHeader.split(' ')[1];
+    
+    // Verify the token
+    const jwtSecret = process.env.JWT_SECRET;
+    
+    if (!jwtSecret) {
+      console.error('JWT_SECRET is not configured');
+      return res.status(500).json({ error: 'Authentication system not configured.' });
+    }
+
+    jwt.verify(token, jwtSecret);
+
+    // If verification is successful, proceed to fetch emails
     // Validate REDIS_URL is configured
     if (!process.env.REDIS_URL) {
       console.error('REDIS_URL is not configured');
@@ -48,8 +58,10 @@ export default async function handler(req, res) {
     res.status(200).json(parsedEmails);
 
   } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError || error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ error: 'Invalid or expired token.' });
+    }
     console.error('Error fetching emails:', error);
     res.status(500).json({ error: 'Failed to fetch emails.' });
   }
 }
-
