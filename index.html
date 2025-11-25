@@ -10,7 +10,7 @@
   <!-- Preconnect to essential domains for faster resource loading -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://mint.warmthly.org">
-  <link rel="preconnect" href="https://accountability.warmthly.org">
+  <link rel="preconnect" href="https://post.warmthly.org">
   <link rel="dns-prefetch" href="//www.youtube.com">
   <link rel="dns-prefetch" href="//gofund.me">
 
@@ -99,7 +99,90 @@
     .donate-button { background: #FF8C42; color: white; padding: 1rem 2.5rem; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3); margin-top: 1rem; font-family: 'Inter', sans-serif; }
     .donate-button:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 140, 66, 0.4); background: #e07a35; }
     .footer { margin-top: 4rem; opacity: 0.7; font-size: 0.9rem; }
-    @media (max-width: 768px) { .container { padding-top: 80px; } .header { flex-direction: row; align-items: center; } .brand-logo { position: static; } .header-right { position: static; } .logo { font-size: 2.5rem; margin-top: 60px; } .subtitle { font-size: 1rem; } .method-section { padding: 1.5rem; } .section-title { font-size: 1.5rem; } .method-step p { padding-left: 0; } }
+    
+    /* Cookie Popup */
+    .cookie-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.25);
+      font-size: 1.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.8);
+    }
+    
+    .cookie-button.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+    
+    .cookie-button:hover {
+      background: rgba(255,255,255,0.25);
+      transform: scale(1.1);
+    }
+    
+    .cookie-button:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.4);
+    }
+    
+    .cookie-popup {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      z-index: 1001;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #2c2c2c;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      max-width: 280px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px) scale(0.9);
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    
+    .cookie-popup.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+    
+    @media (max-width: 768px) { 
+      .container { padding-top: 80px; } 
+      .header { flex-direction: row; align-items: center; } 
+      .brand-logo { position: static; } 
+      .header-right { position: static; } 
+      .logo { font-size: 2.5rem; margin-top: 60px; } 
+      .subtitle { font-size: 1rem; } 
+      .method-section { padding: 1.5rem; } 
+      .section-title { font-size: 1.5rem; } 
+      .method-step p { padding-left: 0; }
+      .cookie-button { bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 1.5rem; }
+      .cookie-popup { bottom: 70px; right: 15px; max-width: calc(100vw - 30px); font-size: 0.85rem; padding: 0.9rem 1rem; }
+    }
   </style>
 </head>
 <body class="fonts-loading">
@@ -116,7 +199,7 @@
                 <div class="stoplight-dot green"></div>
             </div>
             <div class="dropdown-menu" id="dropdown-menu">
-                <a href="https://accountability.warmthly.org" class="dropdown-item">Accountability</a>
+                <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
             </div>
         </div>
     </div>
@@ -153,6 +236,12 @@
         <p>&copy; 2025 Warmthly. All rights reserved.</p>
     </footer>
   </div>
+  
+  <!-- Cookie Popup -->
+  <button class="cookie-button" id="cookieButton" aria-label="Cookie information" style="display: none;">🥠</button>
+  <div class="cookie-popup" id="cookiePopup" role="dialog" aria-label="Cookie information">
+    Cookies? What are those? We don't have those. What about Ai? We also don't have that. Sorry.
+  </div>
 
   <!-- FontFaceObserver for robust font loading -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
@@ -174,6 +263,58 @@
     document.addEventListener('click', (e) => { if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) { toggleMenu(); } });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isMenuOpen) { toggleMenu(); } });
     dropdownMenu.addEventListener('click', (e) => { e.stopPropagation(); });
+    
+    // Cookie Popup - First-time visitor only
+    const cookieButton = document.getElementById('cookieButton');
+    const cookiePopup = document.getElementById('cookiePopup');
+    
+    // Check if user has seen the cookie popup before
+    const hasSeenCookiePopup = localStorage.getItem('warmthly_cookie_popup_seen') === 'true';
+    
+    if (!hasSeenCookiePopup) {
+      // Show cookie button after a short delay
+      setTimeout(() => {
+        cookieButton.style.display = 'flex';
+        setTimeout(() => {
+          cookieButton.classList.add('visible');
+        }, 100);
+      }, 1000);
+      
+      // Click handler for cookie button
+      cookieButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        cookiePopup.classList.toggle('visible');
+      });
+      
+      // Hide popup when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!cookieButton.contains(e.target) && !cookiePopup.contains(e.target)) {
+          if (cookiePopup.classList.contains('visible')) {
+            cookiePopup.classList.remove('visible');
+            // Mark as seen and hide button
+            localStorage.setItem('warmthly_cookie_popup_seen', 'true');
+            setTimeout(() => {
+              cookieButton.classList.remove('visible');
+              setTimeout(() => {
+                cookieButton.style.display = 'none';
+              }, 300);
+            }, 200);
+          }
+        }
+      });
+      
+      // Also hide when clicking on popup itself
+      cookiePopup.addEventListener('click', (e) => {
+        cookiePopup.classList.remove('visible');
+        localStorage.setItem('warmthly_cookie_popup_seen', 'true');
+        setTimeout(() => {
+          cookieButton.classList.remove('visible');
+          setTimeout(() => {
+            cookieButton.style.display = 'none';
+          }, 300);
+        }, 200);
+      });
+    }
   </script>
 </body>
 </html>
