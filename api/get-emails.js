@@ -2,9 +2,84 @@
 import { createClient } from 'redis';
 import jwt from 'jsonwebtoken';
 
+// Create a reusable Redis client (will be reused across invocations in serverless)
+let redisClient = null;
+
+async function getRedisClient() {
+  console.log('[get-emails] getRedisClient called');
+  
+  // Check if we have an existing open connection
+  if (redisClient && redisClient.isOpen) {
+    console.log('[get-emails] Reusing existing Redis connection');
+    return redisClient;
+  }
+
+  // Validate REDIS_URL is configured
+  if (!process.env.REDIS_URL) {
+    console.error('[get-emails] REDIS_URL is not configured');
+    throw new Error('REDIS_URL is not configured');
+  }
+
+  console.log('[get-emails] Creating new Redis connection');
+  console.log('[get-emails] REDIS_URL format:', process.env.REDIS_URL.substring(0, 20) + '...');
+
+  // Create new client
+  redisClient = createClient({
+    url: process.env.REDIS_URL,
+    socket: {
+      reconnectStrategy: (retries) => {
+        if (retries > 3) {
+          console.error('[get-emails] Redis reconnection failed after 3 attempts');
+          return new Error('Redis reconnection failed');
+        }
+        return Math.min(retries * 100, 3000);
+      }
+    }
+  });
+
+  // Error handling
+  redisClient.on('error', (err) => {
+    console.error('[get-emails] Redis Client Error:', err);
+  });
+
+  redisClient.on('connect', () => {
+    console.log('[get-emails] Redis client connecting...');
+  });
+
+  redisClient.on('ready', () => {
+    console.log('[get-emails] Redis client ready');
+  });
+
+  // Connect if not already connected
+  if (!redisClient.isOpen) {
+    try {
+      console.log('[get-emails] Attempting to connect to Redis...');
+      await redisClient.connect();
+      console.log('[get-emails] Successfully connected to Redis');
+    } catch (connectError) {
+      console.error('[get-emails] Redis connection failed:', {
+        message: connectError.message,
+        stack: connectError.stack,
+        name: connectError.name
+      });
+      redisClient = null;
+      throw connectError;
+    }
+  }
+
+  return redisClient;
+}
+
 export default async function handler(req, res) {
+  console.log('[get-emails] Request received:', {
+    method: req.method,
+    timestamp: new Date().toISOString(),
+    hasAuth: !!req.headers.authorization
+  });
+
   // Only allow GET requests
   if (req.method !== 'GET') {
+    console.warn('[get-emails] Method not allowed:', req.method);
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
@@ -12,43 +87,46 @@ export default async function handler(req, res) {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.warn('[get-emails] Missing or invalid authorization header');
       return res.status(401).json({ error: 'Authentication required.' });
     }
 
     const token = authHeader.split(' ')[1];
+    console.log('[get-emails] Token extracted, length:', token?.length);
     
     // Verify the token
     const jwtSecret = process.env.JWT_SECRET;
     
     if (!jwtSecret) {
-      console.error('JWT_SECRET is not configured');
+      console.error('[get-emails] JWT_SECRET is not configured');
       return res.status(500).json({ error: 'Authentication system not configured.' });
     }
 
+    console.log('[get-emails] Verifying JWT token...');
     jwt.verify(token, jwtSecret);
+    console.log('[get-emails] JWT token verified successfully');
 
-    // If verification is successful, proceed to fetch emails
-    // Validate REDIS_URL is configured
-    if (!process.env.REDIS_URL) {
-      console.error('REDIS_URL is not configured');
-      return res.status(500).json({ error: 'Database is not configured.' });
-    }
-
-    // Create KV client - Vercel KV uses token from URL
-    const kv = createClient({
-      url: process.env.REDIS_URL,
-    });
-    await kv.connect();
+    // Get Redis client
+    console.log('[get-emails] Getting Redis client...');
+    const client = await getRedisClient();
 
     // Fetch the 100 most recent emails from the 'emails' list
-    // Handle case where list might not exist yet
+    console.log('[get-emails] Fetching emails from Redis list "emails"...');
     let emails = [];
     try {
-      emails = await kv.lrange('emails', 0, 99);
+      emails = await client.lRange('emails', 0, 99);
+      console.log('[get-emails] Successfully fetched', emails.length, 'emails from Redis');
     } catch (kvError) {
-      console.error('Error fetching from KV store:', kvError);
+      console.error('[get-emails] Error fetching from Redis:', {
+        message: kvError.message,
+        stack: kvError.stack,
+        name: kvError.name,
+        code: kvError.code
+      });
+      
       // If the list doesn't exist, return empty array instead of error
-      if (kvError.message && kvError.message.includes('WRONGTYPE')) {
+      if (kvError.message && (kvError.message.includes('WRONGTYPE') || kvError.message.includes('no such key'))) {
+        console.log('[get-emails] List does not exist yet, returning empty array');
         emails = [];
       } else {
         throw kvError;
@@ -56,42 +134,51 @@ export default async function handler(req, res) {
     }
 
     // The emails are stored as strings, so we need to parse them back into objects
-    // Handle case where emails array might be empty or contain invalid JSON
+    console.log('[get-emails] Parsing', emails.length, 'email strings...');
     const parsedEmails = emails
-      .map(email => {
+      .map((email, index) => {
         try {
           return JSON.parse(email);
         } catch (e) {
-          console.error('Error parsing email:', e);
+          console.error(`[get-emails] Error parsing email at index ${index}:`, e.message);
           return null;
         }
       })
-      .filter(email => email !== null)
-      .reverse(); // Reverse to show newest first (since lpush adds to beginning)
+      .filter(email => email !== null);
+    
+    console.log('[get-emails] Successfully parsed', parsedEmails.length, 'emails');
+    
+    // Reverse to show newest first (since lpush adds to beginning)
+    const reversedEmails = parsedEmails.reverse();
+    console.log('[get-emails] Returning', reversedEmails.length, 'emails to client');
 
-    res.status(200).json(parsedEmails);
+    res.status(200).json(reversedEmails);
 
   } catch (error) {
     // Handle JWT errors
     if (error instanceof jwt.JsonWebTokenError) {
-      console.error('JWT verification error:', error.message);
+      console.error('[get-emails] JWT verification error:', error.message);
       return res.status(401).json({ error: 'Invalid token.' });
     }
     if (error instanceof jwt.TokenExpiredError) {
-      console.error('JWT expired:', error.message);
+      console.error('[get-emails] JWT expired:', error.message);
       return res.status(401).json({ error: 'Token expired. Please log in again.' });
     }
     
     // Log the full error for debugging
-    console.error('Error fetching emails:', {
+    console.error('[get-emails] Unexpected error:', {
       message: error.message,
       stack: error.stack,
-      name: error.name
+      name: error.name,
+      code: error.code
     });
     
     // Return more specific error messages
     if (error.message && error.message.includes('REDIS')) {
-      return res.status(500).json({ error: 'Database connection error. Please check REDIS_URL configuration.' });
+      return res.status(500).json({ 
+        error: 'Database connection error. Please check REDIS_URL configuration.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
     
     res.status(500).json({ 
