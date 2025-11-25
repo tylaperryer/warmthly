@@ -647,14 +647,21 @@
         });
 
         if (response.ok) {
+          const result = await response.json();
+          const token = result.token;
+          
+          if (!token) {
+            throw new Error('No token received from server');
+          }
+          
+          // Store authentication token (JWT) instead of password
           sessionStorage.setItem('warmthly-admin-authenticated', 'true');
-          // Store password for API authentication (temporary, consider using JWT tokens in production)
-          sessionStorage.setItem('warmthly-admin-password', enteredPassword);
-          // Store password in a way that persists across refreshes
-          sessionStorage.setItem('warmthly-admin-password-temp', enteredPassword);
+          sessionStorage.setItem('warmthly-admin-token', token);
+          
           loginSection.style.display = 'none';
           adminContent.classList.add('active');
           passwordInput.value = '';
+          
           // Load emails after authentication
           if (adminContent.classList.contains('active')) {
             loadReceivedEmails();
@@ -825,19 +832,15 @@
     const emailsContainer = document.getElementById('emails-container');
     const refreshButton = document.getElementById('refresh-emails-button');
 
-    // Helper function to get stored password (check both storage keys for compatibility)
-    function getStoredPassword() {
-      return sessionStorage.getItem('warmthly-admin-password') || 
-             sessionStorage.getItem('warmthly-admin-password-temp');
+    // Helper function to get stored JWT token
+    function getStoredToken() {
+      return sessionStorage.getItem('warmthly-admin-token');
     }
 
     // Load emails on page load if authenticated
     if (isAuthenticated) {
-      const storedPassword = getStoredPassword();
-      if (storedPassword) {
-        // Ensure password is in both locations for consistency
-        sessionStorage.setItem('warmthly-admin-password', storedPassword);
-        sessionStorage.setItem('warmthly-admin-password-temp', storedPassword);
+      const token = getStoredToken();
+      if (token) {
         loadReceivedEmails();
       } else {
         emailsContainer.innerHTML = '<div class="empty-state">Please refresh the page and log in again to view received emails.</div>';
@@ -847,11 +850,8 @@
     // Also load emails when admin content becomes active (after login)
     const adminObserver = new MutationObserver((mutations) => {
       if (adminContent.classList.contains('active')) {
-        const storedPassword = getStoredPassword();
-        if (storedPassword) {
-          // Ensure password is in both locations
-          sessionStorage.setItem('warmthly-admin-password', storedPassword);
-          sessionStorage.setItem('warmthly-admin-password-temp', storedPassword);
+        const token = getStoredToken();
+        if (token) {
           loadReceivedEmails();
         }
       }
@@ -863,9 +863,9 @@
     });
 
     async function loadReceivedEmails() {
-      const password = getStoredPassword();
-      if (!password) {
-        // If authenticated but no password, user needs to re-login
+      const token = getStoredToken();
+      if (!token) {
+        // If authenticated but no token, user needs to re-login
         if (isAuthenticated) {
           emailsContainer.innerHTML = '<div class="empty-state">Session expired. Please refresh the page and log in again.</div>';
         } else {
@@ -881,15 +881,15 @@
         const response = await fetch('/api/get-emails', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${password}`
+            'Authorization': `Bearer ${token}`
           }
         });
 
         if (response.status === 401) {
-          // Authentication failed, clear session
+          // Token expired or invalid, clear session
           sessionStorage.removeItem('warmthly-admin-authenticated');
-          sessionStorage.removeItem('warmthly-admin-password');
-          emailsContainer.innerHTML = '<div class="empty-state">Authentication expired. Please refresh the page and log in again.</div>';
+          sessionStorage.removeItem('warmthly-admin-token');
+          emailsContainer.innerHTML = '<div class="empty-state">Session expired. Please refresh the page and log in again.</div>';
           return;
         }
 
