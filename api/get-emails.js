@@ -1,5 +1,5 @@
 // /api/get-emails.js
-import { createClient } from '@vercel/kv';
+import { createClient } from 'redis';
 import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
@@ -38,6 +38,7 @@ export default async function handler(req, res) {
     const kv = createClient({
       url: process.env.REDIS_URL,
     });
+    await kv.connect();
 
     // Fetch the 100 most recent emails from the 'emails' list
     // Handle case where list might not exist yet
