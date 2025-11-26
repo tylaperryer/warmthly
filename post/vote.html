@@ -222,6 +222,9 @@
     // ===================================================================
     
     // --- 1. PASTE YOUR FIREBASE CONFIGURATION HERE ---
+    // SECURITY NOTE: This Firebase configuration must be properly configured before deployment.
+    // Replace all placeholder values with your actual Firebase project credentials.
+    // If not configured, the voting feature will not work.
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -255,11 +258,34 @@
     });
     // ------------------------
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const voteRef = database.ref('dissolution/votes');
-    const VOTE_THRESHOLD = 100000;
+    // Initialize Firebase - validate configuration first
+    if (firebaseConfig.apiKey === "YOUR_API_KEY" || 
+        firebaseConfig.projectId === "YOUR_PROJECT_ID") {
+      console.error('[vote.html] Firebase configuration not set. Please configure firebaseConfig with your actual Firebase project credentials.');
+      // Show error to user if error element exists
+      const errorEl = document.getElementById('errorMessage');
+      if (errorEl) {
+        errorEl.textContent = 'Voting service is not configured. Please contact the administrator.';
+        errorEl.style.display = 'block';
+      }
+    } else {
+      try {
+        firebase.initializeApp(firebaseConfig);
+      } catch (error) {
+        console.error('[vote.html] Firebase initialization failed:', error);
+        const errorEl = document.getElementById('errorMessage');
+        if (errorEl) {
+          errorEl.textContent = 'Failed to initialize voting service. Please refresh the page.';
+          errorEl.style.display = 'block';
+        }
+      }
+    }
+    
+    // Only proceed if Firebase was initialized successfully
+    if (firebase.apps.length > 0) {
+      const database = firebase.database();
+      const voteRef = database.ref('dissolution/votes');
+      const VOTE_THRESHOLD = 100000;
 
     // Get DOM elements
     const voteCountText = document.getElementById('voteCountText');
@@ -286,8 +312,8 @@
       }
     }
 
-    // Listen for real-time updates to the vote count with error handling
-    voteRef.on('value', (snapshot) => {
+      // Listen for real-time updates to the vote count with error handling
+      voteRef.on('value', (snapshot) => {
       try {
         const votes = snapshot.val() || 0;
         voteCountText.textContent = `${votes.toLocaleString()} votes`;
@@ -298,10 +324,10 @@
         console.error('Error reading vote count:', error);
         showError('Could not connect to voting service. Please refresh the page.');
       }
-    }, (error) => {
-      console.error('Firebase connection error:', error);
-      showError('Could not connect to voting service. Please refresh the page.');
-    });
+      }, (error) => {
+        console.error('Firebase connection error:', error);
+        showError('Could not connect to voting service. Please refresh the page.');
+      });
 
     // --- REVISED Voting Logic: Universal 30-Day Cooldown ---
     // NOTE: This is a client-side implementation. For production, you MUST implement:
@@ -353,7 +379,7 @@
         
         try {
           // Use a transaction to safely increment the vote count
-          voteRef.transaction((currentVotes) => {
+            voteRef.transaction((currentVotes) => {
             return (currentVotes || 0) + 1;
           }, (error, committed, snapshot) => {
             if (error) {
@@ -395,8 +421,9 @@
         updateUIBasedOnVote();
     });
 
-    // Initial UI setup on page load
-    updateUIBasedOnVote();
+      // Initial UI setup on page load
+      updateUIBasedOnVote();
+    } // End of Firebase initialization check
 
     // Stoplight menu functionality with accessibility improvements
     const stoplight = document.getElementById('stoplight');
