@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="theme-color" content="#fff6f1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Your Data - Warmthly</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.warmthly.org">
+  <link rel="preconnect" href="https://post.warmthly.org">
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
+  <style>
+      :root { color-scheme: light; }
+      html { background-color: #fff6f1; min-height: 100%; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+      html::-webkit-scrollbar { display: none; }
+      body { opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out; }
+      body.fonts-loaded { opacity: 1; visibility: visible; }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 700; font-display: swap; src: url('https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2' ) format('woff2'); }
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2' ) format('woff2'); }
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2' ) format('woff2'); }
+      
+      body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #2c2c2c; background: #fff6f1; min-height: 100vh; position: relative; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+      body::-webkit-scrollbar { display: none; }
+      
+      body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: radial-gradient(circle at 20% 30%, rgba(255,140,66,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,182,193,0.12) 0%, transparent 50%), radial-gradient(circle at 40% 70%, rgba(173,216,230,0.1) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(144,238,144,0.08) 0%, transparent 50%), linear-gradient(135deg, #fff6f1 0%, #ffeee6 100%); z-index: -1; pointer-events: none; }
+      
+      ::selection { background: #FF8C42; color: #FFFFFF; }
+      
+      .container { max-width: 800px; margin: 0 auto; padding: 120px 20px 40px; text-align: center; color: #2c2c2c; position: relative; z-index: 1; }
+      
+      .top-left-heading { position: fixed; top: 20px; left: 20px; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 2rem; color: #FF8C42; user-select: none; z-index: 1001; }
+      .top-left-heading .warmthly-link { text-decoration: none; color: #FF8C42; }
+      
+      .stoplight-container { position: fixed; top: 20px; right: 20px; z-index: 1002; }
+      .stoplight { --tint-color: rgba(255,255,255,0.15); --blur-radius: 12px; --border-color: rgba(255,255,255,0.25); --highlight-color: rgba(255,255,255,0.4); --shadow-color: rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 3px; cursor: pointer; padding: 8px; position: relative; background: var(--tint-color); backdrop-filter: blur(var(--blur-radius)) saturate(1.2); -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05); transition: all 0.4s cubic-bezier(0.25,0.8,0.25,1); overflow: hidden; }
+      .stoplight-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; transition: opacity 0.4s cubic-bezier(0.25,0.8,0.25,1); z-index: 2; opacity: 0.3; }
+      .stoplight-dot.red { background: #ff4757; }
+      .stoplight-dot.yellow { background: #FF8C42; }
+      .stoplight-dot.green { background: #2ed573; }
+      .dropdown-menu { --tint-color: rgba(255,255,255,0.15); --blur-radius: 12px; --border-color: rgba(255,255,255,0.25); --highlight-color: rgba(255,255,255,0.4); --shadow-color: rgba(0,0,0,0.08); --text-color: #1c2526; position: absolute; top: 100%; right: 0; background: var(--tint-color); backdrop-filter: blur(var(--blur-radius)) saturate(1.2); -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2); border-radius: 18px; padding: 8px; margin-top: 12px; min-width: 200px; box-shadow: 0 8px 32px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); opacity: 0; visibility: hidden; transform: translateY(-12px) scale(0.94); transition: all 0.4s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
+      .dropdown-menu.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+      .dropdown-item { display: block; padding: 12px 16px; margin: 2px 0; color: var(--text-color); text-decoration: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 500; font-size: 0.95rem; transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1); border-radius: 10px; position: relative; z-index: 2; }
+      .dropdown-item:hover { color: #FF8C42; }
+      
+      .page-title { font-family: 'Inter', sans-serif; font-size: 1.8rem; color: #FF8C42; margin-bottom: 1rem; font-weight: 600; text-align: center; letter-spacing: 0.02em; }
+      .main-text { font-family: 'Inter', sans-serif; font-size: 1.1rem; margin-bottom: 3rem; opacity: 0.85; color: #2c2c2c; line-height: 1.7; text-align: left; }
+      
+      .section { background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0)); padding: 2.5rem; border-radius: 20px; border: 1px solid rgba(255,140,66,0.1); margin: 3rem 0; text-align: left; }
+      .section-title { font-family: 'Inter', sans-serif; font-size: 1.6rem; color: #FF8C42; margin-bottom: 1rem; font-weight: 600; text-align: center; }
+      .section p { opacity: 0.85; }
+      .section strong { font-weight: 600; color: #2c2c2c; }
+
+      .data-item { background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px; margin: 1rem 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+      .data-item strong { font-weight: 600; color: #2c2c2c; }
+      .data-item span { opacity: 0.8; }
+      .data-item button { background: rgba(255,140,66,0.15); border: 1px solid rgba(255,140,66,0.3); border-radius: 8px; padding: 0.5rem 1rem; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; color: #FF8C42; cursor: pointer; transition: all 0.3s ease; }
+      .data-item button:hover { background: rgba(255,140,66,0.25); }
+
+      .actions { display: flex; gap: 1rem; justify-content: center; margin: 2rem 0; flex-wrap: wrap; }
+      .actions button { background: rgba(255,255,255,0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 1rem 2rem; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; color: #2c2c2c; cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+      .actions button:hover { background: rgba(255,140,66,0.15); color: #FF8C42; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,140,66,0.15); }
+      .actions button.danger { background: rgba(255,71,87,0.1); border-color: rgba(255,71,87,0.3); color: #ff4757; }
+      .actions button.danger:hover { background: rgba(255,71,87,0.2); }
+
+      .transparency-note { background: rgba(255,140,66,0.1); padding: 1.5rem; border-radius: 12px; margin: 2rem 0; border: 1px solid rgba(255,140,66,0.2); }
+      .transparency-note p { margin: 0; }
+      .transparency-note a { color: #FF8C42; text-decoration: underline; }
+
+      @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      }
+      @media (max-width: 768px) {
+            .container { padding-top: 80px; padding-left: 15px; padding-right: 15px; }
+            .top-left-heading { font-size: 1.6rem; top: 15px; left: 15px; }
+            .stoplight-container { top: 15px; right: 15px; }
+            .page-title { font-size: 1.5rem; }
+            .main-text { font-size: 1rem; }
+            .section-title { font-size: 1.4rem; }
+            .data-item { flex-direction: column; align-items: flex-start; }
+      }
+  </style>
+  <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
+</head>
+<body class="fonts-loading">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="top-left-heading">
+    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
+  </div>
+  
+  <div class="stoplight-container">
+    <div class="stoplight" id="stoplight">
+      <div class="stoplight-dot red"></div>
+      <div class="stoplight-dot yellow"></div>
+      <div class="stoplight-dot green"></div>
+    </div>
+    <div class="dropdown-menu" id="dropdown-menu">
+      <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
+      <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
+      <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
+    </div>
+  </div>
+
+  <div class="container" id="main-content" role="main">
+    <h1 class="page-title">Your Data</h1>
+    <p class="main-text">
+      <b>Radical Transparency:</b> This is everything we store about you. If you see something we didn't mention, <a href="/post/report.html">report it</a>.
+    </p>
+
+    <div class="section">
+      <h2 class="section-title">What We Know About You</h2>
+      
+      <div class="data-item">
+        <strong>Cookie Popup Seen:</strong>
+        <span id="cookieData">Not stored</span>
+        <button onclick="deleteCookieData()">Delete</button>
+      </div>
+      
+      <div class="data-item">
+        <strong>Vote Data:</strong>
+        <span id="voteData">No vote recorded</span>
+        <button onclick="deleteVoteData()">Delete</button>
+      </div>
+      
+      <div class="data-item">
+        <strong>Report Submissions:</strong>
+        <span id="reportData">None</span>
+        <button onclick="viewReports()">View</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button onclick="exportAllData()">Export All My Data</button>
+      <button onclick="deleteAllData()" class="danger">Delete All My Data</button>
+    </div>
+
+    <div class="transparency-note">
+      <p><strong>Radical Transparency:</strong> This is everything we store about you. If you see something we didn't mention, <a href="/post/report.html">report it</a>.</p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+  <script>
+    const fontObserver = new FontFaceObserver('Inter');
+    fontObserver.load().then(() => {
+      document.body.classList.add('fonts-loaded');
+    }).catch(() => {
+      document.body.classList.add('fonts-loaded');
+    });
+
+    document.getElementById('stoplight').addEventListener('click', function() {
+      const menu = document.getElementById('dropdown-menu');
+      menu.classList.toggle('active');
+    });
+
+    // Placeholder functions
+    function deleteCookieData() { alert('Functionality coming soon'); }
+    function deleteVoteData() { alert('Functionality coming soon'); }
+    function viewReports() { alert('Functionality coming soon'); }
+    function exportAllData() { alert('Functionality coming soon'); }
+    function deleteAllData() { 
+      if (confirm('Are you sure you want to delete all your data? This cannot be undone.')) {
+        alert('Functionality coming soon');
+      }
+    }
+  </script>
+</body>
+</html>
+
