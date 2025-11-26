@@ -1,6 +1,6 @@
 {
   "trailingSlash": true,
-  "cleanUrls": true,
+  "cleanUrls": false,
   "headers": [
     {
       "source": "/(.*)",
@@ -47,7 +47,7 @@
           "value": "admin.warmthly.org"
         }
       ],
-      "destination": "/admin-app/:path*"
+      "destination": "/admin-app/:path*.html"
     },
     {
       "source": "/",
@@ -67,7 +67,7 @@
           "value": "post.warmthly.org"
         }
       ],
-      "destination": "/post/:path*"
+      "destination": "/post/:path*.html"
     },
     {
       "source": "/",
@@ -87,7 +87,7 @@
           "value": "mint.warmthly.org"
         }
       ],
-      "destination": "/mint/:path*"
+      "destination": "/mint/:path*.html"
     },
     {
       "source": "/admin/emails",
