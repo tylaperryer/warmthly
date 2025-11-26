@@ -1,16 +1,18 @@
 // /api/get-emails.js
 import { createClient } from 'redis';
 import jwt from 'jsonwebtoken';
+import { withRateLimit, apiRateLimitOptions } from './rate-limit.js';
+import logger from './logger.js';
 
 // Create a reusable Redis client (will be reused across invocations in serverless)
 let redisClient = null;
 
 async function getRedisClient() {
-  console.log('[get-emails] getRedisClient called');
+  logger.log('[get-emails] getRedisClient called');
   
   // Check if we have an existing open connection
   if (redisClient && redisClient.isOpen) {
-    console.log('[get-emails] Reusing existing Redis connection');
+    logger.log('[get-emails] Reusing existing Redis connection');
     return redisClient;
   }
 
@@ -20,8 +22,8 @@ async function getRedisClient() {
     throw new Error('REDIS_URL is not configured');
   }
 
-  console.log('[get-emails] Creating new Redis connection');
-  console.log('[get-emails] REDIS_URL format:', process.env.REDIS_URL.substring(0, 20) + '...');
+  logger.log('[get-emails] Creating new Redis connection');
+  logger.log('[get-emails] REDIS_URL format:', process.env.REDIS_URL.substring(0, 20) + '...');
 
   // Create new client
   redisClient = createClient({
@@ -43,19 +45,19 @@ async function getRedisClient() {
   });
 
   redisClient.on('connect', () => {
-    console.log('[get-emails] Redis client connecting...');
+    logger.log('[get-emails] Redis client connecting...');
   });
 
   redisClient.on('ready', () => {
-    console.log('[get-emails] Redis client ready');
+    logger.log('[get-emails] Redis client ready');
   });
 
   // Connect if not already connected
   if (!redisClient.isOpen) {
     try {
-      console.log('[get-emails] Attempting to connect to Redis...');
+      logger.log('[get-emails] Attempting to connect to Redis...');
       await redisClient.connect();
-      console.log('[get-emails] Successfully connected to Redis');
+      logger.log('[get-emails] Successfully connected to Redis');
     } catch (connectError) {
       console.error('[get-emails] Redis connection failed:', {
         message: connectError.message,
@@ -70,8 +72,8 @@ async function getRedisClient() {
   return redisClient;
 }
 
-export default async function handler(req, res) {
-  console.log('[get-emails] Request received:', {
+async function getEmailsHandler(req, res) {
+  logger.log('[get-emails] Request received:', {
     method: req.method,
     timestamp: new Date().toISOString(),
     hasAuth: !!req.headers.authorization
@@ -79,7 +81,7 @@ export default async function handler(req, res) {
 
   // Only allow GET requests
   if (req.method !== 'GET') {
-    console.warn('[get-emails] Method not allowed:', req.method);
+    logger.warn('[get-emails] Method not allowed:', req.method);
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
@@ -87,35 +89,35 @@ export default async function handler(req, res) {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.warn('[get-emails] Missing or invalid authorization header');
+      logger.warn('[get-emails] Missing or invalid authorization header');
       return res.status(401).json({ error: 'Authentication required.' });
     }
 
     const token = authHeader.split(' ')[1];
-    console.log('[get-emails] Token extracted, length:', token?.length);
+    logger.log('[get-emails] Token extracted, length:', token?.length);
     
     // Verify the token
     const jwtSecret = process.env.JWT_SECRET;
     
     if (!jwtSecret) {
-      console.error('[get-emails] JWT_SECRET is not configured');
+      logger.error('[get-emails] JWT_SECRET is not configured');
       return res.status(500).json({ error: 'Authentication system not configured.' });
     }
 
-    console.log('[get-emails] Verifying JWT token...');
+    logger.log('[get-emails] Verifying JWT token...');
     jwt.verify(token, jwtSecret);
-    console.log('[get-emails] JWT token verified successfully');
+    logger.log('[get-emails] JWT token verified successfully');
 
     // Get Redis client
-    console.log('[get-emails] Getting Redis client...');
+    logger.log('[get-emails] Getting Redis client...');
     const client = await getRedisClient();
 
     // Fetch the 100 most recent emails from the 'emails' list
-    console.log('[get-emails] Fetching emails from Redis list "emails"...');
+    logger.log('[get-emails] Fetching emails from Redis list "emails"...');
     let emails = [];
     try {
       emails = await client.lRange('emails', 0, 99);
-      console.log('[get-emails] Successfully fetched', emails.length, 'emails from Redis');
+      logger.log('[get-emails] Successfully fetched', emails.length, 'emails from Redis');
     } catch (kvError) {
       console.error('[get-emails] Error fetching from Redis:', {
         message: kvError.message,
@@ -126,7 +128,7 @@ export default async function handler(req, res) {
       
       // If the list doesn't exist, return empty array instead of error
       if (kvError.message && (kvError.message.includes('WRONGTYPE') || kvError.message.includes('no such key'))) {
-        console.log('[get-emails] List does not exist yet, returning empty array');
+        logger.log('[get-emails] List does not exist yet, returning empty array');
         emails = [];
       } else {
         throw kvError;
@@ -134,7 +136,7 @@ export default async function handler(req, res) {
     }
 
     // The emails are stored as strings, so we need to parse them back into objects
-    console.log('[get-emails] Parsing', emails.length, 'email strings...');
+    logger.log('[get-emails] Parsing', emails.length, 'email strings...');
     const parsedEmails = emails
       .map((email, index) => {
         try {
@@ -146,11 +148,11 @@ export default async function handler(req, res) {
       })
       .filter(email => email !== null);
     
-    console.log('[get-emails] Successfully parsed', parsedEmails.length, 'emails');
+    logger.log('[get-emails] Successfully parsed', parsedEmails.length, 'emails');
     
     // Reverse to show newest first (since lpush adds to beginning)
     const reversedEmails = parsedEmails.reverse();
-    console.log('[get-emails] Returning', reversedEmails.length, 'emails to client');
+    logger.log('[get-emails] Returning', reversedEmails.length, 'emails to client');
 
     res.status(200).json(reversedEmails);
 
@@ -187,3 +189,6 @@ export default async function handler(req, res) {
     });
   }
 }
+
+// Export handler with rate limiting
+export default withRateLimit(getEmailsHandler, apiRateLimitOptions);
