@@ -104,6 +104,10 @@
     {
       "source": "/post",
       "destination": "/post.html"
+    },
+    {
+      "source": "/test-mint",
+      "destination": "/mint/index.html"
     }
   ],
   "redirects": [
