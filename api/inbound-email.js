@@ -1,5 +1,6 @@
 import { createClient } from 'redis';
 import { Resend } from 'resend';
+import logger from './logger.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -7,11 +8,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 let redisClient = null;
 
 async function getRedisClient() {
-  console.log('[inbound-email] getRedisClient called');
+  logger.log('[inbound-email] getRedisClient called');
   
   // Check if we have an existing open connection
   if (redisClient && redisClient.isOpen) {
-    console.log('[inbound-email] Reusing existing Redis connection');
+    logger.log('[inbound-email] Reusing existing Redis connection');
     return redisClient;
   }
 
@@ -21,8 +22,8 @@ async function getRedisClient() {
     throw new Error('REDIS_URL is not configured');
   }
 
-  console.log('[inbound-email] Creating new Redis connection');
-  console.log('[inbound-email] REDIS_URL format:', process.env.REDIS_URL.substring(0, 20) + '...');
+  logger.log('[inbound-email] Creating new Redis connection');
+  logger.log('[inbound-email] REDIS_URL format:', process.env.REDIS_URL.substring(0, 20) + '...');
 
   // Create new client
   redisClient = createClient({
@@ -44,19 +45,19 @@ async function getRedisClient() {
   });
 
   redisClient.on('connect', () => {
-    console.log('[inbound-email] Redis client connecting...');
+    logger.log('[inbound-email] Redis client connecting...');
   });
 
   redisClient.on('ready', () => {
-    console.log('[inbound-email] Redis client ready');
+    logger.log('[inbound-email] Redis client ready');
   });
 
   // Connect if not already connected
   if (!redisClient.isOpen) {
     try {
-      console.log('[inbound-email] Attempting to connect to Redis...');
+      logger.log('[inbound-email] Attempting to connect to Redis...');
       await redisClient.connect();
-      console.log('[inbound-email] Successfully connected to Redis');
+      logger.log('[inbound-email] Successfully connected to Redis');
     } catch (connectError) {
       console.error('[inbound-email] Redis connection failed:', {
         message: connectError.message,
@@ -82,29 +83,29 @@ function getRawBody(req) {
 }
 
 export default async function handler(req, res) {
-  console.log('[inbound-email] Request received:', {
+  logger.log('[inbound-email] Request received:', {
     method: req.method,
     timestamp: new Date().toISOString(),
     hasHeaders: !!req.headers
   });
 
   if (req.method !== 'POST') {
-    console.warn('[inbound-email] Method not allowed:', req.method);
+    logger.warn('[inbound-email] Method not allowed:', req.method);
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
     // Get the raw body for signature verification
-    console.log('[inbound-email] Getting raw body...');
+    logger.log('[inbound-email] Getting raw body...');
     let rawBody;
     try {
       rawBody = await getRawBody(req);
-      console.log('[inbound-email] Raw body received, length:', rawBody.length);
+      logger.log('[inbound-email] Raw body received, length:', rawBody.length);
     } catch (bodyError) {
       console.error('[inbound-email] Error getting raw body:', bodyError.message);
       // Fallback: try to use req.body if it exists
       if (req.body) {
-        console.log('[inbound-email] Using req.body as fallback');
+        logger.log('[inbound-email] Using req.body as fallback');
         rawBody = Buffer.from(JSON.stringify(req.body));
       } else {
         throw new Error('Could not get request body');
@@ -116,51 +117,45 @@ export default async function handler(req, res) {
     const id = req.headers['svix-id'];
     const timestamp = req.headers['svix-timestamp'];
 
-    console.log('[inbound-email] Webhook headers:', {
+    logger.log('[inbound-email] Webhook headers:', {
       hasSignature: !!signature,
       hasId: !!id,
       hasTimestamp: !!timestamp
     });
 
-    // Verify the webhook signature if secret is configured
+    // Verify the webhook signature - required in production
     const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
-    let event;
+    
+    // Require webhook secret in production
+    if (!webhookSecret) {
+      console.error('[inbound-email] RESEND_WEBHOOK_SECRET is required in production');
+      return res.status(500).json({ error: 'Webhook verification not configured' });
+    }
 
-    if (webhookSecret) {
-      console.log('[inbound-email] Webhook secret found, verifying signature...');
-      try {
-        // Verify the webhook signature
-        event = resend.webhooks.verify({
-          body: rawBody,
-          headers: {
-            'svix-id': id,
-            'svix-timestamp': timestamp,
-            'svix-signature': signature,
-          },
-          secret: webhookSecret,
-        });
-        console.log('[inbound-email] Webhook signature verified successfully');
-      } catch (verifyError) {
-        console.error('[inbound-email] Webhook verification failed:', {
-          message: verifyError.message,
-          stack: verifyError.stack
-        });
-        return res.status(401).json({ error: 'Webhook verification failed.' });
-      }
-    } else {
-      // If no secret is configured, parse the body directly (less secure, but works for testing)
-      console.warn('[inbound-email] RESEND_WEBHOOK_SECRET not configured - webhook verification skipped');
-      try {
-        event = JSON.parse(rawBody.toString());
-        console.log('[inbound-email] Parsed event from body:', event?.type);
-      } catch (parseError) {
-        console.error('[inbound-email] Error parsing body:', parseError.message);
-        return res.status(400).json({ error: 'Invalid request body.' });
-      }
+    let event;
+    logger.log('[inbound-email] Webhook secret found, verifying signature...');
+    try {
+      // Verify the webhook signature
+      event = resend.webhooks.verify({
+        body: rawBody,
+        headers: {
+          'svix-id': id,
+          'svix-timestamp': timestamp,
+          'svix-signature': signature,
+        },
+        secret: webhookSecret,
+      });
+      logger.log('[inbound-email] Webhook signature verified successfully');
+    } catch (verifyError) {
+      console.error('[inbound-email] Webhook verification failed:', {
+        message: verifyError.message,
+        stack: verifyError.stack
+      });
+      return res.status(401).json({ error: 'Webhook verification failed.' });
     }
 
     // Log the incoming webhook for debugging
-    console.log('[inbound-email] Webhook event:', {
+    logger.log('[inbound-email] Webhook event:', {
       type: event?.type,
       hasData: !!event?.data,
       timestamp: new Date().toISOString()
@@ -169,7 +164,7 @@ export default async function handler(req, res) {
     if (event.type === 'email.received') {
       const emailData = event.data;
       
-      console.log('[inbound-email] Processing email.received event');
+      logger.log('[inbound-email] Processing email.received event');
       
       // Validate required fields
       if (!emailData) {
@@ -177,7 +172,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Email data is missing' });
       }
 
-      console.log('[inbound-email] Email data:', {
+      logger.log('[inbound-email] Email data:', {
         hasId: !!emailData.email_id,
         hasFrom: !!emailData.from,
         hasTo: !!emailData.to,
@@ -185,7 +180,7 @@ export default async function handler(req, res) {
       });
 
       // Get Redis client
-      console.log('[inbound-email] Getting Redis client...');
+      logger.log('[inbound-email] Getting Redis client...');
       const client = await getRedisClient();
 
       // Create a simple object for the email
@@ -197,7 +192,7 @@ export default async function handler(req, res) {
         receivedAt: emailData.created_at || new Date().toISOString(),
       };
 
-      console.log('[inbound-email] Email to store:', {
+      logger.log('[inbound-email] Email to store:', {
         id: emailToStore.id,
         from: emailToStore.from,
         to: emailToStore.to,
@@ -207,12 +202,12 @@ export default async function handler(req, res) {
       // Save the email to a list in the database.
       // We use 'lPush' to add it to the beginning of a list called 'emails'.
       try {
-        console.log('[inbound-email] Saving email to Redis list "emails"...');
+        logger.log('[inbound-email] Saving email to Redis list "emails"...');
         const emailJson = JSON.stringify(emailToStore);
         const result = await client.lPush('emails', emailJson);
-        console.log('[inbound-email] Email saved successfully, list length:', result);
+        logger.log('[inbound-email] Email saved successfully, list length:', result);
         
-        console.log('[inbound-email] Email saved to Redis:', {
+        logger.log('[inbound-email] Email saved to Redis:', {
           id: emailToStore.id,
           from: emailToStore.from,
           to: emailToStore.to,
@@ -228,7 +223,7 @@ export default async function handler(req, res) {
         throw saveError;
       }
     } else {
-      console.log('[inbound-email] Webhook event type not handled:', event.type);
+      logger.log('[inbound-email] Webhook event type not handled:', event.type);
     }
 
     res.status(200).json({ message: 'Webhook processed successfully.' });

@@ -6,13 +6,8 @@
   <meta name="color-scheme" content="light" />
   <meta name="viewport" content="width=device-width, initial-scale=0.75, user-scalable=yes" />
   <title>Research - Warmthly</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://www.warmthly.org">
   <link rel="preconnect" href="https://post.warmthly.org">
-  
-  <!-- Preload fonts for faster rendering -->
-  <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
   
   <!-- Favicon Set for All Devices -->
   <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
@@ -52,25 +47,33 @@
       @font-face {
             font-family: 'Cormorant Garamond';
             font-style: normal;
-            font-weight: 700;
+            font-weight: 300 700;
             font-display: swap;
-            src: url('https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2'  ) format('woff2');
+            src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype');
+      }
+      
+      @font-face {
+            font-family: 'Cormorant Garamond';
+            font-style: italic;
+            font-weight: 300 700;
+            font-display: swap;
+            src: url('/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf') format('truetype');
       }
       
       @font-face {
             font-family: 'Inter';
             font-style: normal;
-            font-weight: 400;
+            font-weight: 100 900;
             font-display: swap;
-            src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2'  ) format('woff2');
+            src: url('/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
       }
       
       @font-face {
             font-family: 'Inter';
-            font-style: normal;
-            font-weight: 600;
+            font-style: italic;
+            font-weight: 100 900;
             font-display: swap;
-            src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2'  ) format('woff2');
+            src: url('/fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype');
       }
       
       html {
@@ -566,8 +569,6 @@
       }
   </style>
   
-  <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
   
   <link rel="dns-prefetch" href="//warmthly.org">
 </head>
@@ -754,7 +755,25 @@
             leftText.textContent = spread.left.text;
             
             if (spread.left.image) {
-                  leftImage.innerHTML = `<img src="${spread.left.image}" alt="${spread.left.title}" style="max-width: 100%; height: auto; border-radius: 8px;">`;
+                  leftImage.textContent = '';
+                  const img = document.createElement('img');
+                  img.src = spread.left.image;
+                  // Create descriptive alt text combining title and context
+                  const altText = spread.left.title 
+                    ? `Image for ${spread.left.title}` 
+                    : 'Research page image';
+                  img.alt = altText;
+                  img.loading = 'lazy';
+                  img.decoding = 'async';
+                  img.style.maxWidth = '100%';
+                  img.style.height = 'auto';
+                  img.style.borderRadius = '8px';
+                  // Add error handling for failed image loads
+                  img.onerror = function() {
+                    this.style.display = 'none';
+                    leftImage.textContent = 'Image failed to load';
+                  };
+                  leftImage.appendChild(img);
             } else {
                   leftImage.textContent = 'Image placeholder - Add your image here';
             }
@@ -768,7 +787,25 @@
             rightText.textContent = spread.right.text;
             
             if (spread.right.image) {
-                  rightImage.innerHTML = `<img src="${spread.right.image}" alt="${spread.right.title}" style="max-width: 100%; height: auto; border-radius: 8px;">`;
+                  rightImage.textContent = '';
+                  const img = document.createElement('img');
+                  img.src = spread.right.image;
+                  // Create descriptive alt text combining title and context
+                  const altText = spread.right.title 
+                    ? `Image for ${spread.right.title}` 
+                    : 'Research page image';
+                  img.alt = altText;
+                  img.loading = 'lazy';
+                  img.decoding = 'async';
+                  img.style.maxWidth = '100%';
+                  img.style.height = 'auto';
+                  img.style.borderRadius = '8px';
+                  // Add error handling for failed image loads
+                  img.onerror = function() {
+                    this.style.display = 'none';
+                    rightImage.textContent = 'Image failed to load';
+                  };
+                  rightImage.appendChild(img);
             } else {
                   rightImage.textContent = 'Image placeholder - Add your image here';
             }
@@ -846,29 +883,25 @@
       });
   </script>
   
-  <!-- FontFaceObserver for robust font loading -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
   <script>
-    // --- FONT LOADING FIX ---
-    const cormorant = new FontFaceObserver('Cormorant Garamond');
-    const inter = new FontFaceObserver('Inter');
-    // Add timeout to font loading to prevent page from never appearing
-    const fontLoadTimeout = setTimeout(() => {
+    // --- NATIVE FONT LOADING ---
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      });
+      
+      // Fallback timeout
+      setTimeout(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      }, 3000);
+    } else {
+      // Fallback for older browsers
       document.body.classList.remove('fonts-loading');
       document.body.classList.add('fonts-loaded');
-    }, 3000); // Fallback after 3 seconds
-
-    Promise.all([cormorant.load(), inter.load()]).then(function () {
-      clearTimeout(fontLoadTimeout);
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    }).catch(function (error) {
-      clearTimeout(fontLoadTimeout);
-      console.warn('Font loading error:', error);
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    });
-    // --- END FONT LOADING FIX ---
+    }
+    // --- END FONT LOADING ---
   </script>
 </body>
 </html>

@@ -1,4 +1,6 @@
 import { Resend } from 'resend';
+import { withRateLimit, emailRateLimitOptions } from './rate-limit.js';
+import logger from './logger.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -37,7 +39,7 @@ function isValidEmail(email) {
   return emailRegex.test(email.trim());
 }
 
-export default async function handler(req, res) {
+async function sendEmailHandler(req, res) {
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: { message: 'Method Not Allowed' } });
@@ -46,7 +48,7 @@ export default async function handler(req, res) {
   try {
     // Validate API key is configured
     if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not configured');
+      logger.error('RESEND_API_KEY is not configured');
       return res.status(500).json({ error: { message: 'Email service is not configured. Please contact the administrator.' } });
     }
 
@@ -84,13 +86,16 @@ export default async function handler(req, res) {
     });
 
     if (error) {
-      console.error('Resend API error:', error);
+      logger.error('Resend API error:', error);
       return res.status(400).json({ error: { message: error.message || 'Failed to send email. Please try again.' } });
     }
 
     return res.status(200).json({ message: 'Email sent successfully!', data });
   } catch (error) {
-    console.error('Unexpected error in send-email handler:', error);
+    logger.error('Unexpected error in send-email handler:', error);
     return res.status(500).json({ error: { message: 'Internal Server Error. Please try again later.' } });
   }
 }
+
+// Export handler with rate limiting
+export default withRateLimit(sendEmailHandler, emailRateLimitOptions);

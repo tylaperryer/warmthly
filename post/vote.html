@@ -6,7 +6,6 @@
   <meta name="color-scheme" content="light" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Vote - Warmthly</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://www.warmthly.org">
   <link rel="preconnect" href="https://post.warmthly.org">
   
@@ -24,9 +23,10 @@
       /* --- END ANTI-FLASH FIXES --- */
 
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 700; font-display: swap; src: url('https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2' ) format('woff2'); }
-      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2' ) format('woff2'); }
-      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2' ) format('woff2'); }
+      @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype'); }
+      @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf') format('truetype'); }
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); }
+      @font-face { font-family: 'Inter'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype'); }
       
       body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #2c2c2c; background: #fff6f1; min-height: 100vh; position: relative; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
       body::-webkit-scrollbar { display: none; }
@@ -113,8 +113,6 @@
       }
   </style>
   
-  <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
 </head>
 <body class="fonts-loading">
   <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -173,9 +171,6 @@
   <!-- Firebase JavaScript SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <!-- FontFaceObserver for robust font loading -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
-
   <script>
     // ===================================================================
     // SECURITY IMPLEMENTATION GUIDE
@@ -222,6 +217,9 @@
     // ===================================================================
     
     // --- 1. PASTE YOUR FIREBASE CONFIGURATION HERE ---
+    // SECURITY NOTE: This Firebase configuration must be properly configured before deployment.
+    // Replace all placeholder values with your actual Firebase project credentials.
+    // If not configured, the voting feature will not work.
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -233,33 +231,53 @@
     };
     // ---------------------------------------------------
 
-    // --- FONT LOADING FIX ---
-    const cormorant = new FontFaceObserver('Cormorant Garamond');
-    const inter = new FontFaceObserver('Inter');
-    // Add timeout to font loading to prevent page from never appearing
-    const fontLoadTimeout = setTimeout(() => {
+    // --- NATIVE FONT LOADING ---
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      });
+      
+      // Fallback timeout
+      setTimeout(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      }, 3000);
+    } else {
+      // Fallback for older browsers
       document.body.classList.remove('fonts-loading');
       document.body.classList.add('fonts-loaded');
-    }, 3000); // Fallback after 3 seconds
+    }
+    // --- END FONT LOADING ---
 
-    Promise.all([cormorant.load(), inter.load()]).then(function () {
-      clearTimeout(fontLoadTimeout);
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    }).catch(function (error) {
-      clearTimeout(fontLoadTimeout);
-      console.warn('Font loading error:', error);
-      // Show page anyway if fonts fail to load
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    });
-    // ------------------------
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const voteRef = database.ref('dissolution/votes');
-    const VOTE_THRESHOLD = 100000;
+    // Initialize Firebase - validate configuration first
+    if (firebaseConfig.apiKey === "YOUR_API_KEY" || 
+        firebaseConfig.projectId === "YOUR_PROJECT_ID") {
+      console.error('[vote.html] Firebase configuration not set. Please configure firebaseConfig with your actual Firebase project credentials.');
+      // Show error to user if error element exists
+      const errorEl = document.getElementById('errorMessage');
+      if (errorEl) {
+        errorEl.textContent = 'Voting service is not configured. Please contact the administrator.';
+        errorEl.style.display = 'block';
+      }
+    } else {
+      try {
+        firebase.initializeApp(firebaseConfig);
+      } catch (error) {
+        console.error('[vote.html] Firebase initialization failed:', error);
+        const errorEl = document.getElementById('errorMessage');
+        if (errorEl) {
+          errorEl.textContent = 'Failed to initialize voting service. Please refresh the page.';
+          errorEl.style.display = 'block';
+        }
+      }
+    }
+    
+    // Only proceed if Firebase was initialized successfully
+    if (firebase.apps.length > 0) {
+      const database = firebase.database();
+      const voteRef = database.ref('dissolution/votes');
+      const VOTE_THRESHOLD = 100000;
 
     // Get DOM elements
     const voteCountText = document.getElementById('voteCountText');
@@ -286,8 +304,8 @@
       }
     }
 
-    // Listen for real-time updates to the vote count with error handling
-    voteRef.on('value', (snapshot) => {
+      // Listen for real-time updates to the vote count with error handling
+      voteRef.on('value', (snapshot) => {
       try {
         const votes = snapshot.val() || 0;
         voteCountText.textContent = `${votes.toLocaleString()} votes`;
@@ -298,10 +316,10 @@
         console.error('Error reading vote count:', error);
         showError('Could not connect to voting service. Please refresh the page.');
       }
-    }, (error) => {
-      console.error('Firebase connection error:', error);
-      showError('Could not connect to voting service. Please refresh the page.');
-    });
+      }, (error) => {
+        console.error('Firebase connection error:', error);
+        showError('Could not connect to voting service. Please refresh the page.');
+      });
 
     // --- REVISED Voting Logic: Universal 30-Day Cooldown ---
     // NOTE: This is a client-side implementation. For production, you MUST implement:
@@ -353,7 +371,7 @@
         
         try {
           // Use a transaction to safely increment the vote count
-          voteRef.transaction((currentVotes) => {
+            voteRef.transaction((currentVotes) => {
             return (currentVotes || 0) + 1;
           }, (error, committed, snapshot) => {
             if (error) {
@@ -395,8 +413,9 @@
         updateUIBasedOnVote();
     });
 
-    // Initial UI setup on page load
-    updateUIBasedOnVote();
+      // Initial UI setup on page load
+      updateUIBasedOnVote();
+    } // End of Firebase initialization check
 
     // Stoplight menu functionality with accessibility improvements
     const stoplight = document.getElementById('stoplight');

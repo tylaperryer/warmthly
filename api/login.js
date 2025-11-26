@@ -1,6 +1,21 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { withRateLimit, loginRateLimitOptions } from './rate-limit.js';
 
-export default async function handler(req, res) {
+// Constant-time comparison to prevent timing attacks
+function constantTimeCompare(a, b) {
+  // Handle null/undefined cases
+  if (!a || !b) return false;
+  if (a.length !== b.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'));
+  } catch (error) {
+    // If comparison fails for any reason, return false
+    return false;
+  }
+}
+
+async function loginHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -12,7 +27,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Admin password not configured.' });
   }
 
-  if (password === adminPassword) {
+  // Use constant-time comparison to prevent timing attacks
+  if (constantTimeCompare(password || '', adminPassword)) {
     // Password is correct, create a JWT
     const jwtSecret = process.env.JWT_SECRET;
     
@@ -32,3 +48,6 @@ export default async function handler(req, res) {
     res.status(401).json({ error: 'Incorrect password' });
   }
 }
+
+// Export handler with rate limiting
+export default withRateLimit(loginHandler, loginRateLimitOptions);
