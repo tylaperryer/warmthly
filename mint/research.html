@@ -754,7 +754,25 @@
             leftText.textContent = spread.left.text;
             
             if (spread.left.image) {
-                  leftImage.innerHTML = `<img src="${spread.left.image}" alt="${spread.left.title}" style="max-width: 100%; height: auto; border-radius: 8px;">`;
+                  leftImage.textContent = '';
+                  const img = document.createElement('img');
+                  img.src = spread.left.image;
+                  // Create descriptive alt text combining title and context
+                  const altText = spread.left.title 
+                    ? `Image for ${spread.left.title}` 
+                    : 'Research page image';
+                  img.alt = altText;
+                  img.loading = 'lazy';
+                  img.decoding = 'async';
+                  img.style.maxWidth = '100%';
+                  img.style.height = 'auto';
+                  img.style.borderRadius = '8px';
+                  // Add error handling for failed image loads
+                  img.onerror = function() {
+                    this.style.display = 'none';
+                    leftImage.textContent = 'Image failed to load';
+                  };
+                  leftImage.appendChild(img);
             } else {
                   leftImage.textContent = 'Image placeholder - Add your image here';
             }
@@ -768,7 +786,25 @@
             rightText.textContent = spread.right.text;
             
             if (spread.right.image) {
-                  rightImage.innerHTML = `<img src="${spread.right.image}" alt="${spread.right.title}" style="max-width: 100%; height: auto; border-radius: 8px;">`;
+                  rightImage.textContent = '';
+                  const img = document.createElement('img');
+                  img.src = spread.right.image;
+                  // Create descriptive alt text combining title and context
+                  const altText = spread.right.title 
+                    ? `Image for ${spread.right.title}` 
+                    : 'Research page image';
+                  img.alt = altText;
+                  img.loading = 'lazy';
+                  img.decoding = 'async';
+                  img.style.maxWidth = '100%';
+                  img.style.height = 'auto';
+                  img.style.borderRadius = '8px';
+                  // Add error handling for failed image loads
+                  img.onerror = function() {
+                    this.style.display = 'none';
+                    rightImage.textContent = 'Image failed to load';
+                  };
+                  rightImage.appendChild(img);
             } else {
                   rightImage.textContent = 'Image placeholder - Add your image here';
             }
