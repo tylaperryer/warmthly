@@ -4,351 +4,466 @@
   <meta charset="UTF-8" />
   <meta name="theme-color" content="#fff6f1" />
   <meta name="color-scheme" content="light" />
-  <meta name="viewport" content="width=device-width, initial-scale=0.75, user-scalable=yes" />
-  <title>Warmthly - Rehumanizing Our World</title>
-
-  <!-- Preconnect to essential domains for faster resource loading -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://mint.warmthly.org">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Vote - Warmthly</title>
+  <link rel="preconnect" href="https://www.warmthly.org">
   <link rel="preconnect" href="https://post.warmthly.org">
-
-  <!-- Preload fonts for faster rendering -->
-  <link rel="preload" href="https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
   
   <!-- Favicon Set for All Devices -->
   <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
-
   <style>
-    /* --- ANTI-FLASH AND PERFORMANCE FIXES --- */
-    /* 1. Set base background color immediately to prevent white flash */
-    :root { color-scheme: light; }
-    html {
-      background-color: #fff6f1;
-      min-height: 100%;
-    }
-    /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
-    body {
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease-in-out;
-    }
-    /* 3. Fade in smoothly once fonts are ready */
-    body.fonts-loaded {
-      opacity: 1;
-      visibility: visible;
-    }
-    /* --- END ANTI-FLASH FIXES --- */
+      /* --- ANTI-FLASH AND PERFORMANCE FIXES --- */
+      :root { color-scheme: light; }
+      html { background-color: #fff6f1; min-height: 100%; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+      html::-webkit-scrollbar { display: none; }
+      body { opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out; }
+      body.fonts-loaded { opacity: 1; visibility: visible; }
+      /* --- END ANTI-FLASH FIXES --- */
 
-    /* Your Original CSS - Minified and Combined for Performance */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 700; font-display: swap; src: url('https://fonts.gstatic.com/s/cormorantgaramond/v20/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_hg9KnTOig.woff2') format('woff2'); }
-    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2') format('woff2'); }
-    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2') format('woff2'); }
-    html { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
-    html::-webkit-scrollbar { display: none; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.7; color: #2c2c2c; background: #fff6f1; min-height: 100vh; position: relative; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
-    body::-webkit-scrollbar { display: none; }
-    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: radial-gradient(circle at 20% 30%, rgba(255, 140, 66, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 182, 193, 0.12) 0%, transparent 50%), radial-gradient(circle at 40% 70%, rgba(173, 216, 230, 0.1) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(144, 238, 144, 0.08) 0%, transparent 50%), linear-gradient(135deg, #fff6f1 0%, #ffeee6 100%); z-index: -1; pointer-events: none; }
-    ::selection { background: #FF8C42; color: #FFFFFF; }
-    .header { position: fixed; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1001; pointer-events: none; }
-    .header-left { pointer-events: auto; }
-    .header-right { display: flex; align-items: center; gap: 20px; pointer-events: auto; }
-    .brand-logo { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 2rem; color: #FF8C42; user-select: none; text-decoration: none; }
-    .nav-link { font-family: 'Inter', sans-serif; font-weight: 600; color: #FF8C42; text-decoration: none; font-size: 1rem; user-select: none; transition: color 0.3s ease; }
-    .nav-link:hover { color: #e07a35; }
-    .stoplight-container { position: relative; }
-    .stoplight { --tint-color: rgba(255,255,255,0.15); --blur-radius: 12px; --border-color: rgba(255,255,255,0.25); --highlight-color: rgba(255,255,255,0.4); --shadow-color: rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 3px; cursor: pointer; padding: 8px; position: relative; background: var(--tint-color); backdrop-filter: blur(var(--blur-radius)) saturate(1.2); -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05); transition: all 0.4s cubic-bezier(0.25,0.8,0.25,1); overflow: hidden; }
-    .stoplight::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%); pointer-events: none; z-index: 1; opacity: 0.7; }
-    .stoplight:hover, .stoplight.active { background: rgba(255,255,255,0.25); box-shadow: 0 8px 16px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -1px 1px rgba(0,0,0,0.1); }
-    .stoplight:hover::before, .stoplight.active::before { opacity: 1; }
-    .stoplight-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; transition: opacity 0.4s cubic-bezier(0.25,0.8,0.25,1); z-index: 2; opacity: 0.3; }
-    .stoplight-dot.red { background: #ff4757; }
-    .stoplight-dot.yellow { background: #FF8C42; }
-    .stoplight-dot.green { background: #2ed573; }
-    .stoplight-container:hover .stoplight-dot.red, .stoplight.active .stoplight-dot.red { animation: stoplight-cycle-red 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
-    .stoplight-container:hover .stoplight-dot.green, .stoplight.active .stoplight-dot.green { animation: stoplight-cycle-green 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
-    .stoplight-container:hover .stoplight-dot.yellow, .stoplight.active .stoplight-dot.yellow { animation: stoplight-cycle-yellow 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
-    @keyframes stoplight-cycle-red { 0%, 33.33% { opacity: 1; } 33.34%, 100% { opacity: 0.3; } }
-    @keyframes stoplight-cycle-green { 0%, 33.33% { opacity: 0.3; } 33.34%, 66.66% { opacity: 1; } 66.67%, 100% { opacity: 0.3; } }
-    @keyframes stoplight-cycle-yellow { 0%, 66.66% { opacity: 0.3; } 66.67%, 100% { opacity: 1; } }
-    .dropdown-menu { --tint-color: rgba(255,255,255,0.15); --blur-radius: 12px; --border-color: rgba(255,255,255,0.25); --highlight-color: rgba(255,255,255,0.4); --shadow-color: rgba(0,0,0,0.08); --text-color: #1c2526; position: absolute; top: 100%; right: 0; background: var(--tint-color); backdrop-filter: blur(var(--blur-radius)) saturate(1.2); -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2); border-radius: 18px; padding: 8px; margin-top: 12px; min-width: 200px; box-shadow: 0 8px 32px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); opacity: 0; visibility: hidden; transform: translateY(-12px) scale(0.94); transition: all 0.4s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
-    .dropdown-menu::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%); pointer-events: none; z-index: 1; opacity: 0.7; }
-    .dropdown-menu.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-    .dropdown-item { display: block; padding: 12px 16px; margin: 2px 0; color: var(--text-color); text-decoration: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 500; font-size: 0.95rem; transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1); border-radius: 10px; position: relative; z-index: 2; }
-    .dropdown-item:hover { color: #FF8C42; }
-    .container { max-width: 800px; margin: 0 auto; padding: 100px 20px 40px; text-align: center; color: #2c2c2c; position: relative; z-index: 1; }
-    .logo { font-family: 'Inter', sans-serif; font-size: 3.5rem; font-weight: 600; margin-bottom: 1rem; color: #FF8C42; }
-    .subtitle { font-size: 1.2rem; color: #2c2c2c; opacity: 0.8; font-weight: 400; margin-bottom: 3rem; font-family: 'Inter', sans-serif; }
-    .video-section { margin: 3rem 0; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); }
-    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; background: #000; border-radius: 20px; }
-    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 20px; }
-    .method-section { text-align: left; margin: 4rem auto; padding: 3rem; background: rgba(255, 255, 255, 0.2); border-radius: 20px; border: 1px solid rgba(255, 140, 66, 0.15); max-width: 700px; }
-    .method-section .section-title { font-family: 'Inter', sans-serif; font-size: 1.8rem; font-weight: 600; color: #FF8C42; margin-bottom: 1rem; text-align: center; }
-    .method-section .intro-paragraph { text-align: center; font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; }
-    .method-section .intro-paragraph strong { color: #2c2c2c; font-weight: 600; }
-    .method-step { margin-bottom: 2rem; }
-    .method-step:last-child { margin-bottom: 0; }
-    .method-step h3 { font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 600; color: #2c2c2c; margin-bottom: 0.5rem; }
-    .method-step h3 span { color: #FF8C42; margin-right: 0.5rem; }
-    .method-step p { opacity: 0.8; line-height: 1.7; padding-left: 2.2rem; }
-    .donate-button { background: #FF8C42; color: white; padding: 1rem 2.5rem; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3); margin-top: 1rem; font-family: 'Inter', sans-serif; }
-    .donate-button:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 140, 66, 0.4); background: #e07a35; }
-    .footer { margin-top: 4rem; opacity: 0.7; font-size: 0.9rem; }
-    
-    /* Cookie Popup */
-    .cookie-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.25);
-      font-size: 1.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      opacity: 0;
-      visibility: hidden;
-      transform: scale(0.8);
-    }
-    
-    .cookie-button.visible {
-      opacity: 1;
-      visibility: visible;
-      transform: scale(1);
-    }
-    
-    .cookie-button:hover {
-      background: rgba(255,255,255,0.25);
-      transform: scale(1.1);
-    }
-    
-    .cookie-button:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.4);
-    }
-    
-    /* Screen reader only text */
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border-width: 0;
-    }
-    
-    .cookie-popup {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      z-index: 1001;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.9rem;
-      line-height: 1.6;
-      color: #2c2c2c;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
-      max-width: 280px;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(10px) scale(0.9);
-      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-    }
-    
-    .cookie-popup.visible {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0) scale(1);
-    }
-    
-    @media (max-width: 768px) { 
-      .container { padding-top: 80px; } 
-      .header { flex-direction: row; align-items: center; } 
-      .brand-logo { position: static; } 
-      .header-right { position: static; } 
-      .logo { font-size: 2.5rem; margin-top: 60px; } 
-      .subtitle { font-size: 1rem; } 
-      .method-section { padding: 1.5rem; } 
-      .section-title { font-size: 1.5rem; } 
-      .method-step p { padding-left: 0; }
-      .cookie-button { bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 1.5rem; }
-      .cookie-popup { bottom: 70px; right: 15px; max-width: calc(100vw - 30px); font-size: 0.85rem; padding: 0.9rem 1rem; }
-    }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype'); }
+      @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf') format('truetype'); }
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); }
+      @font-face { font-family: 'Inter'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype'); }
+      
+      body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #2c2c2c; background: #fff6f1; min-height: 100vh; position: relative; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+      body::-webkit-scrollbar { display: none; }
+      
+      body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: radial-gradient(circle at 20% 30%, rgba(255,140,66,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,182,193,0.12) 0%, transparent 50%), radial-gradient(circle at 40% 70%, rgba(173,216,230,0.1) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(144,238,144,0.08) 0%, transparent 50%), linear-gradient(135deg, #fff6f1 0%, #ffeee6 100%); z-index: -1; pointer-events: none; }
+      
+      ::selection { background: #FF8C42; color: #FFFFFF; }
+      
+      .container { max-width: 800px; margin: 0 auto; padding: 120px 20px 40px; text-align: center; color: #2c2c2c; position: relative; z-index: 1; }
+      
+      .top-left-heading { position: fixed; top: 20px; left: 20px; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 2rem; color: #FF8C42; user-select: none; z-index: 1001; }
+      .top-left-heading .warmthly-link { text-decoration: none; color: #FF8C42; }
+      .top-left-heading .post-text { color: #ff4757; text-decoration: none; transition: color 0.3s ease; }
+      .top-left-heading .post-text:hover { color: #ee3542; }
+      
+      .stoplight-container { position: fixed; top: 20px; right: 20px; z-index: 1002; }
+      .stoplight { --tint-color: rgba(255,255,255,0.15); --blur-radius: 12px; --border-color: rgba(255,255,255,0.25); --highlight-color: rgba(255,255,255,0.4); --shadow-color: rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 3px; cursor: pointer; padding: 8px; position: relative; background: var(--tint-color); backdrop-filter: blur(var(--blur-radius)) saturate(1.2); -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05); transition: all 0.4s cubic-bezier(0.25,0.8,0.25,1); overflow: hidden; }
+      .stoplight::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%); pointer-events: none; z-index: 1; opacity: 0.7; transition: opacity 0.4s cubic-bezier(0.25,0.8,0.25,1); }
+      .stoplight:hover { background: rgba(255,255,255,0.25); box-shadow: 0 8px 16px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -1px 1px rgba(0,0,0,0.1); }
+      .stoplight:hover::before { opacity: 1; }
+      .stoplight-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; transition: opacity 0.4s cubic-bezier(0.25,0.8,0.25,1); z-index: 2; opacity: 0.3; }
+      .stoplight-dot.red { background: #ff4757; }
+      .stoplight-dot.yellow { background: #FF8C42; }
+      .stoplight-dot.green { background: #2ed573; }
+      .stoplight-container:hover .stoplight-dot.red { animation: stoplight-cycle-red 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
+      .stoplight-container:hover .stoplight-dot.green { animation: stoplight-cycle-green 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
+      .stoplight-container:hover .stoplight-dot.yellow { animation: stoplight-cycle-yellow 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
+      @keyframes stoplight-cycle-red { 0%, 33.33% { opacity: 1; } 33.34%, 100% { opacity: 0.3; } }
+      @keyframes stoplight-cycle-green { 0%, 33.33% { opacity: 0.3; } 33.34%, 66.66% { opacity: 1; } 66.67%, 100% { opacity: 0.3; } }
+      @keyframes stoplight-cycle-yellow { 0%, 66.66% { opacity: 0.3; } 66.67%, 100% { opacity: 1; } }
+      .dropdown-menu { --tint-color: rgba(255,255,255,0.15); --blur-radius: 12px; --border-color: rgba(255,255,255,0.25); --highlight-color: rgba(255,255,255,0.4); --shadow-color: rgba(0,0,0,0.08); --text-color: #1c2526; position: absolute; top: 100%; right: 0; background: var(--tint-color); backdrop-filter: blur(var(--blur-radius)) saturate(1.2); -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2); border-radius: 18px; padding: 8px; margin-top: 12px; min-width: 200px; box-shadow: 0 8px 32px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); opacity: 0; visibility: hidden; transform: translateY(-12px) scale(0.94); transition: all 0.4s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
+      .dropdown-menu::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%); pointer-events: none; z-index: 1; opacity: 0.7; }
+      .dropdown-menu.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+      .dropdown-item { display: block; padding: 12px 16px; margin: 2px 0; color: var(--text-color); text-decoration: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 500; font-size: 0.95rem; transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1); border-radius: 10px; position: relative; z-index: 2; }
+      .dropdown-item:hover { color: #FF8C42; }
+      .dropdown-item:first-child { margin-top: 0; }
+      .dropdown-item:last-child { margin-bottom: 0; }
+      
+      .page-title { font-family: 'Inter', sans-serif; font-size: 1.8rem; color: #FF8C42; margin-bottom: 1rem; font-weight: 600; text-align: center; letter-spacing: 0.02em; }
+      .main-text { font-family: 'Inter', sans-serif; font-size: 1.1rem; margin-bottom: 3rem; opacity: 0.85; color: #2c2c2c; line-height: 1.7; text-align: left; }
+      
+      .section { background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0)); padding: 2.5rem; border-radius: 20px; border: 1px solid rgba(255,140,66,0.1); margin: 3rem 0; text-align: left; }
+      .section-title { font-family: 'Inter', sans-serif; font-size: 1.6rem; color: #FF8C42; margin-bottom: 1rem; font-weight: 600; text-align: center; }
+      .section p { opacity: 0.85; }
+      .section strong { font-weight: 600; color: #2c2c2c; }
+
+      .progress-bar-container { width: 100%; background: rgba(255,140,66,0.1); border-radius: 10px; height: 20px; margin: 1.5rem 0; overflow: hidden; }
+      .progress-bar { width: 0%; height: 100%; background: #FF8C42; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+      
+      .vote-stats { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; opacity: 0.8; padding: 0 5px; }
+      
+      .vote-question { font-family: 'Inter', sans-serif; font-size: 1.6rem; color: #FF8C42; margin-bottom: 1.5rem; font-weight: 600; text-align: center; }
+      .vote-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; justify-content: center; align-items: center; }
+      
+      .vote-button { background: rgba(255,255,255,0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 1rem 2rem; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; color: #2c2c2c; cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+      .vote-button:hover { background: rgba(255,140,66,0.15); color: #FF8C42; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,140,66,0.15); }
+      .vote-button:disabled { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.3); cursor: not-allowed; transform: none; box-shadow: none; border-color: rgba(0,0,0,0.1); }
+      .vote-button:focus { outline: none; box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.4); }
+      .stoplight:focus { outline: none; }
+      
+      .vote-note { font-family: 'Inter', sans-serif; font-size: 0.9rem; color: #2c2c2c; opacity: 0.7; margin-top: 1.5rem; text-align: center; transition: all 0.3s ease; }
+      
+      /* Skip navigation link for accessibility - visually hidden until focused */
+      .skip-link { border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
+      .skip-link:focus { clip: auto; height: auto; margin: 0; overflow: visible; position: absolute; top: 10px; left: 10px; width: auto; z-index: 10000; background: #FF8C42; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; }
+      
+      /* Accessibility: Respect reduced motion preference */
+      @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      }
+      
+      /* Error message styling */
+      .error-message { background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.3); border-radius: 12px; padding: 1rem; margin: 1rem 0; color: #ff4757; font-family: 'Inter', sans-serif; font-size: 0.9rem; }
+      
+      @media (max-width: 768px) {
+            .container { padding-top: 80px; padding-left: 15px; padding-right: 15px; }
+            .top-left-heading { font-size: 1.6rem; top: 15px; left: 15px; }
+            .stoplight-container { top: 15px; right: 15px; }
+            .page-title { font-size: 1.5rem; }
+            .main-text { font-size: 1rem; }
+            .section-title { font-size: 1.4rem; }
+            .vote-question { font-size: 1.4rem; }
+            .vote-button { padding: 0.8rem 1.5rem; font-size: 1rem; }
+      }
   </style>
+  
 </head>
 <body class="fonts-loading">
-  <header class="header">
-    <div class="header-left">
-        <a href="https://www.warmthly.org" class="brand-logo">Warmthly</a>
-    </div>
-    <div class="header-right">
-        <a href="https://mint.warmthly.org" class="nav-link" aria-label="View our live transaction mint">Mint</a>
-        <div class="stoplight-container">
-            <div class="stoplight" id="stoplight">
-                <div class="stoplight-dot red"></div>
-                <div class="stoplight-dot yellow"></div>
-                <div class="stoplight-dot green"></div>
-            </div>
-            <div class="dropdown-menu" id="dropdown-menu">
-                <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
-            </div>
-        </div>
-    </div>
-  </header>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="top-left-heading">
+    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
+    <a href="https://post.warmthly.org" class="post-text">Post</a>
+  </div>
   
-  <div class="container">
-    <h1 class="logo">Rehumanize Our World.</h1>
-    <p class="subtitle">Warmthly is a global movement to make empathy a measurable part of our systems.</p>
-    <div class="video-section">
-      <div class="video-container">
-        <iframe src="https://www.youtube-nocookie.com/embed/kVausES-mjk" title="Warmthly Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-      </div>
+  <div class="stoplight-container">
+    <div class="stoplight" id="stoplight">
+      <div class="stoplight-dot red"></div>
+      <div class="stoplight-dot yellow"></div>
+      <div class="stoplight-dot green"></div>
     </div>
-    <div class="method-section">
-        <h2 class="section-title">Our Method</h2>
-        <p class="intro-paragraph">
-            <b>The room is part of the treatment.</b> A stressful room creates stressed patients. Our method is designed to prove this and make our systems more human, one space at a time.
+    <div class="dropdown-menu" id="dropdown-menu">
+      <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
+      <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
+      <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
+    </div>
+  </div>
+
+  <div class="container" id="main-content" role="main">
+    <h1 class="page-title">The Dissolution Vote</h1>
+    <p class="main-text">
+      Our commitment is to our mission and values: Transparency, Honesty, Humility, and Empathy. If we fail to uphold them, we believe we should cease to exist. This page is our community-held kill switch.
+    </p>
+
+    <div class="section">
+        <h2 class="section-title">A Legally Binding Promise</h2>
+        <p>
+            This is not a survey. The Dissolution Vote is a legally binding mechanism enshrined in the bylaws of our organization. Should the vote count reach <strong>100,000</strong>, it will trigger a formal, legally mandated process to dissolve Warmthly. All remaining assets will be transferred to a predetermined successor charity dedicated to mental health and empathy, ensuring our mission outlives our organization. Your vote is your power.
         </p>
-        <div class="method-step">
-            <h3><span>1. Redesign with Empathy</span></h3>
-            <p>We partner with institutions to introduce small, evidence-based environmental changes. By improving factors like light, color, and personalization, we create spaces that feel safer, calmer, and more human.</p>
-        </div>
-        <div class="method-step">
-            <h3><span>2. Measure the impact</span></h3>
-            <p>This isn't just about feeling good; it's about data. Using surveys and analysis, we measure the impact of our changes on stress levels and user satisfaction, providing concrete proof that empathy-first design works.</p>
-        </div>
-        <div class="method-step">
-            <h3><span>3. Share the Knowledge</span></h3>
-            <p>We publish our findings and methodologies as open-source "playbooks." This allows anyone, anywhere, to replicate our success, adapt our methods, and contribute to a more human-centered world.</p>
-        </div>
     </div>
-    <a href="https://gofund.me/fbf54e209" class="donate-button" target="_blank" rel="noopener noreferrer" aria-label="Donate to support Warmthly">🤍 Support the Mission</a>
-    <footer class="footer">
-        <p>&copy; 2025 Warmthly. All rights reserved.</p>
-    </footer>
+    
+    <div class="section">
+      <h2 class="section-title">Should Warmthly be dissolved?</h2>
+      
+      <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="vote-stats">
+          <span id="voteCountText">... votes</span>
+          <span>100,000 vote threshold</span>
+      </div>
+
+      <div class="vote-buttons" style="margin-top: 2rem;">
+        <button class="vote-button" id="yesButton" aria-label="Yes, dissolve Warmthly">Yes, dissolve.</button>
+        <button class="vote-button" id="noButton" aria-label="No, continue Warmthly">No, continue.</button>
+      </div>
+
+      <p class="vote-note" id="voteStatus">Please cast your vote.</p>
+      <div id="errorMessage" class="error-message" style="display: none;" role="alert" aria-live="polite"></div>
+    </div>
   </div>
   
-  <!-- Cookie Popup -->
-  <button class="cookie-button" id="cookieButton" aria-label="View privacy and cookie information" style="display: none;">
-    <span aria-hidden="true">🥠</span>
-    <span class="sr-only">Privacy & Cookie Information</span>
-  </button>
-  <div class="cookie-popup" id="cookiePopup" role="dialog" aria-label="Cookie information">
-    <div style="line-height: 1.6;">
-      <p><strong>Privacy Notice:</strong></p>
-      <p>We don't use tracking cookies or analytics. We only store locally:</p>
-      <ul style="text-align: left; margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.85rem;">
-        <li>Your preference that you've seen this message</li>
-        <li>Vote cooldown data if you vote (30 days)</li>
-      </ul>
-      <p style="font-size: 0.85rem; margin-top: 0.5rem;">No data is sent to third parties.</p>
-    </div>
-  </div>
-
-  <!-- FontFaceObserver for robust font loading -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+  <!-- Firebase JavaScript SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script>
-    // --- FONT LOADING FIX ---
-    const cormorant = new FontFaceObserver('Cormorant Garamond');
-    const inter = new FontFaceObserver('Inter');
-    // Add timeout to font loading to prevent page from never appearing
-    const fontLoadTimeout = setTimeout(() => {
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    }, 3000); // Fallback after 3 seconds
+    // ===================================================================
+    // SECURITY IMPLEMENTATION GUIDE
+    // ===================================================================
+    // 
+    // ⚠️ CRITICAL: The current implementation uses client-side localStorage
+    // and direct database writes, which are NOT secure for production.
+    // 
+    // To secure this voting system, you MUST implement:
+    // 
+    // 1. FIREBASE CLOUD FUNCTION (castVote)
+    //    - Create a Cloud Function that handles all vote counting server-side
+    //    - The function should:
+    //      a. Extract the user's IP address from the request
+    //      b. Check a 'vote_logs' collection to see if that IP voted in the last 30 days
+    //      c. If yes, return an error
+    //      d. If no, increment the vote count and log the IP + timestamp
+    //    - Example function structure:
+    //      exports.castVote = functions.https.onCall(async (data, context) => {
+    //        const ip = context.rawRequest.ip || context.rawRequest.connection.remoteAddress;
+    //        // Check vote_logs for IP
+    //        // If allowed, increment votes and log IP
+    //        // Return success/error
+    //      });
+    // 
+    // 2. SECURE DATABASE RULES
+    //    - Set Firebase Realtime Database rules to make 'dissolution/votes' read-only:
+    //      {
+    //        "rules": {
+    //          "dissolution": {
+    //            "votes": {
+    //              ".read": true,
+    //              ".write": false  // Only Cloud Functions can write
+    //            }
+    //          }
+    //        }
+    //      }
+    // 
+    // 3. UPDATE FRONTEND CODE
+    //    - Replace direct voteRef.transaction() calls with:
+    //      const castVote = firebase.functions().httpsCallable('castVote');
+    //      castVote({ vote: 'yes' }).then(result => { ... });
+    // 
+    // ===================================================================
+    
+    // --- 1. PASTE YOUR FIREBASE CONFIGURATION HERE ---
+    // SECURITY NOTE: This Firebase configuration must be properly configured before deployment.
+    // Replace all placeholder values with your actual Firebase project credentials.
+    // If not configured, the voting feature will not work.
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    // ---------------------------------------------------
 
-    Promise.all([cormorant.load(), inter.load()]).then(function () {
-      clearTimeout(fontLoadTimeout);
+    // --- NATIVE FONT LOADING ---
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      });
+      
+      // Fallback timeout
+      setTimeout(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      }, 3000);
+    } else {
+      // Fallback for older browsers
       document.body.classList.remove('fonts-loading');
       document.body.classList.add('fonts-loaded');
-    }).catch(function (error) {
-      clearTimeout(fontLoadTimeout);
-      console.warn('Font loading error:', error);
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
+    }
+    // --- END FONT LOADING ---
+
+    // Initialize Firebase - validate configuration first
+    if (firebaseConfig.apiKey === "YOUR_API_KEY" || 
+        firebaseConfig.projectId === "YOUR_PROJECT_ID") {
+      console.error('[vote.html] Firebase configuration not set. Please configure firebaseConfig with your actual Firebase project credentials.');
+      // Show error to user if error element exists
+      const errorEl = document.getElementById('errorMessage');
+      if (errorEl) {
+        errorEl.textContent = 'Voting service is not configured. Please contact the administrator.';
+        errorEl.style.display = 'block';
+      }
+    } else {
+      try {
+        firebase.initializeApp(firebaseConfig);
+      } catch (error) {
+        console.error('[vote.html] Firebase initialization failed:', error);
+        const errorEl = document.getElementById('errorMessage');
+        if (errorEl) {
+          errorEl.textContent = 'Failed to initialize voting service. Please refresh the page.';
+          errorEl.style.display = 'block';
+        }
+      }
+    }
+    
+    // Only proceed if Firebase was initialized successfully
+    if (firebase.apps.length > 0) {
+      const database = firebase.database();
+      const voteRef = database.ref('dissolution/votes');
+      const VOTE_THRESHOLD = 100000;
+
+    // Get DOM elements
+    const voteCountText = document.getElementById('voteCountText');
+    const progressBar = document.getElementById('progressBar');
+    const yesButton = document.getElementById('yesButton');
+    const noButton = document.getElementById('noButton');
+    const voteStatus = document.getElementById('voteStatus');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Helper function to show error
+    function showError(message) {
+      if (errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+        voteStatus.style.display = 'none';
+      }
+    }
+
+    // Helper function to hide error
+    function hideError() {
+      if (errorMessage) {
+        errorMessage.style.display = 'none';
+        voteStatus.style.display = 'block';
+      }
+    }
+
+      // Listen for real-time updates to the vote count with error handling
+      voteRef.on('value', (snapshot) => {
+      try {
+        const votes = snapshot.val() || 0;
+        voteCountText.textContent = `${votes.toLocaleString()} votes`;
+        const percentage = (votes / VOTE_THRESHOLD) * 100;
+        progressBar.style.width = `${Math.min(percentage, 100)}%`;
+        hideError();
+      } catch (error) {
+        console.error('Error reading vote count:', error);
+        showError('Could not connect to voting service. Please refresh the page.');
+      }
+      }, (error) => {
+        console.error('Firebase connection error:', error);
+        showError('Could not connect to voting service. Please refresh the page.');
+      });
+
+    // --- REVISED Voting Logic: Universal 30-Day Cooldown ---
+    // NOTE: This is a client-side implementation. For production, you MUST implement:
+    // 1. A Firebase Cloud Function (castVote) that handles all voting server-side
+    // 2. IP-based throttling in the Cloud Function
+    // 3. Secure database rules that prevent direct client writes
+    // See security notes below for implementation details.
+    
+    const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000;
+    let voteData = null;
+    try {
+      voteData = JSON.parse(localStorage.getItem('warmthly_vote_data'));
+    } catch (e) {
+      console.warn('Error reading vote data from localStorage:', e);
+      voteData = null;
+    }
+
+    function updateUIBasedOnVote() {
+        const now = new Date().getTime();
+        if (!voteData) {
+            voteStatus.textContent = "Please cast your vote.";
+            yesButton.disabled = false;
+            noButton.disabled = false;
+            return;
+        }
+
+        const timeSinceVote = now - voteData.timestamp;
+        if (timeSinceVote < thirtyDaysInMillis) {
+            // Still in cooldown period
+            yesButton.disabled = true;
+            noButton.disabled = true;
+            const daysRemaining = Math.ceil((thirtyDaysInMillis - timeSinceVote) / (1000 * 60 * 60 * 24));
+            voteStatus.textContent = `Thank you for your vote. You can cast a new vote in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}.`;
+        } else {
+            // Cooldown has expired
+            voteStatus.textContent = "Your previous vote cooldown has ended. You may cast a new vote.";
+            yesButton.disabled = false;
+            noButton.disabled = false;
+        }
+    }
+
+    // "Yes, dissolve" button - increments the vote count
+    yesButton.addEventListener('click', () => {
+        if (yesButton.disabled) return;
+        
+        // SECURITY NOTE: In production, this should call a Firebase Cloud Function instead
+        // Example: httpsCallable('castVote', { vote: 'yes' })
+        // The Cloud Function will handle IP throttling and vote counting server-side
+        
+        try {
+          // Use a transaction to safely increment the vote count
+            voteRef.transaction((currentVotes) => {
+            return (currentVotes || 0) + 1;
+          }, (error, committed, snapshot) => {
+            if (error) {
+              console.error('Transaction failed:', error);
+              showError('Failed to cast vote. Please try again.');
+              return;
+            }
+            if (committed) {
+              const now = new Date().getTime();
+              voteData = { vote: 'yes', timestamp: now };
+              try {
+                localStorage.setItem('warmthly_vote_data', JSON.stringify(voteData));
+              } catch (e) {
+                console.warn('Failed to save vote to localStorage:', e);
+              }
+              updateUIBasedOnVote();
+            }
+          });
+        } catch (error) {
+          console.error('Error casting vote:', error);
+          showError('Failed to cast vote. Please refresh and try again.');
+        }
     });
-    // --- END FONT LOADING FIX ---
 
+    // "No, continue" button - does not increment vote count, just records preference
+    noButton.addEventListener('click', () => {
+        if (noButton.disabled) return;
+        
+        // SECURITY NOTE: In production, this could optionally call a Cloud Function
+        // to track "no" votes separately for analytics, but it doesn't affect dissolution count
+        
+        const now = new Date().getTime();
+        voteData = { vote: 'no', timestamp: now };
+        try {
+          localStorage.setItem('warmthly_vote_data', JSON.stringify(voteData));
+        } catch (e) {
+          console.warn('Failed to save vote to localStorage:', e);
+        }
+        updateUIBasedOnVote();
+    });
+
+      // Initial UI setup on page load
+      updateUIBasedOnVote();
+    } // End of Firebase initialization check
+
+    // Stoplight menu functionality with accessibility improvements
     const stoplight = document.getElementById('stoplight');
     const dropdownMenu = document.getElementById('dropdown-menu');
     let isMenuOpen = false;
-    function toggleMenu() { isMenuOpen = !isMenuOpen; stoplight.classList.toggle('active', isMenuOpen); dropdownMenu.classList.toggle('active', isMenuOpen); }
-    stoplight.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
-    document.addEventListener('click', (e) => { if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) { toggleMenu(); } });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isMenuOpen) { toggleMenu(); } });
-    dropdownMenu.addEventListener('click', (e) => { e.stopPropagation(); });
     
-    // Cookie Popup - First-time visitor only
-    const cookieButton = document.getElementById('cookieButton');
-    const cookiePopup = document.getElementById('cookiePopup');
-    
-    // Check if user has seen the cookie popup before
-    const hasSeenCookiePopup = localStorage.getItem('warmthly_cookie_popup_seen') === 'true';
-    
-    if (!hasSeenCookiePopup) {
-      // Show cookie button after a short delay
-      setTimeout(() => {
-        cookieButton.style.display = 'flex';
-        setTimeout(() => {
-          cookieButton.classList.add('visible');
-        }, 100);
-      }, 1000);
-      
-      // Click handler for cookie button
-      cookieButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        cookiePopup.classList.toggle('visible');
-      });
-      
-      // Hide popup when clicking outside
-      document.addEventListener('click', (e) => {
-        if (!cookieButton.contains(e.target) && !cookiePopup.contains(e.target)) {
-          if (cookiePopup.classList.contains('visible')) {
-            cookiePopup.classList.remove('visible');
-            // Mark as seen and hide button
-            localStorage.setItem('warmthly_cookie_popup_seen', 'true');
-            setTimeout(() => {
-              cookieButton.classList.remove('visible');
-              setTimeout(() => {
-                cookieButton.style.display = 'none';
-              }, 300);
-            }, 200);
-          }
-        }
-      });
-      
-      // Also hide when clicking on popup itself
-      cookiePopup.addEventListener('click', (e) => {
-        cookiePopup.classList.remove('visible');
-        localStorage.setItem('warmthly_cookie_popup_seen', 'true');
-        setTimeout(() => {
-          cookieButton.classList.remove('visible');
-          setTimeout(() => {
-            cookieButton.style.display = 'none';
-          }, 300);
-        }, 200);
-      });
+    function toggleMenu() {
+      isMenuOpen = !isMenuOpen;
+      stoplight.classList.toggle('active', isMenuOpen);
+      dropdownMenu.classList.toggle('active', isMenuOpen);
+      stoplight.setAttribute('aria-expanded', isMenuOpen ? 'true' : 'false');
     }
+    
+    // Add keyboard support for stoplight
+    stoplight.setAttribute('role', 'button');
+    stoplight.setAttribute('tabindex', '0');
+    stoplight.setAttribute('aria-label', 'Open navigation menu');
+    stoplight.setAttribute('aria-expanded', 'false');
+    stoplight.setAttribute('aria-haspopup', 'true');
+    
+    stoplight.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+    
+    stoplight.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        toggleMenu();
+      }
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
+        toggleMenu();
+      }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isMenuOpen) {
+        toggleMenu();
+      }
+    });
+    
+    dropdownMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
   </script>
 </body>
 </html>
+
