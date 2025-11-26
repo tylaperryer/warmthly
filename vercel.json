@@ -30,6 +30,16 @@
   ],
   "rewrites": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.warmthly.org"
+        }
+      ],
+      "destination": "/admin-app"
+    },
+    {
       "source": "/:path*",
       "has": [
         {
@@ -40,6 +50,16 @@
       "destination": "/admin-app/:path*.html"
     },
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "post.warmthly.org"
+        }
+      ],
+      "destination": "/post"
+    },
+    {
       "source": "/:path*",
       "has": [
         {
@@ -48,6 +68,26 @@
         }
       ],
       "destination": "/post/:path*.html"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "mint.warmthly.org"
+        }
+      ],
+      "destination": "/mint"
+    },
+    {
+      "source": "/research",
+      "has": [
+        {
+          "type": "host",
+          "value": "mint.warmthly.org"
+        }
+      ],
+      "destination": "/mint/research.html"
     },
     {
       "source": "/:path*",
@@ -77,39 +117,6 @@
     }
   ],
   "redirects": [
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "admin.warmthly.org"
-        }
-      ],
-      "destination": "/admin-app/index.html",
-      "permanent": true
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "post.warmthly.org"
-        }
-      ],
-      "destination": "/post/index.html",
-      "permanent": true
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "mint.warmthly.org"
-        }
-      ],
-      "destination": "/mint/index.html",
-      "permanent": true
-    },
     {
       "source": "/post/:path*",
       "has": [
