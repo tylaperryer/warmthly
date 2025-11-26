@@ -1361,6 +1361,7 @@
                         donors: new Set()
                   };
                   this.isDragging = false; // Track if user is currently dragging a coin
+                  this.draggedBody = null; // Track the body currently being dragged
                   
                   // Error and loading state elements
                   this.errorContainer = null;
@@ -1375,6 +1376,7 @@
                   this.scroogeDuck = null; // Reference to Scrooge McDuck duck element
                   this.scroogePopup = null; // Reference to Scrooge popup
                   this.activeMobileTag = null; // Track which cent's tag is active on mobile
+                  this.physicsUpdateSkip = 0; // Counter for skipping physics updates when there are many coins
                   
                   this.init();
             }
@@ -1527,11 +1529,20 @@
                   this.world = this.engine.world;
                   this.world.gravity.y = 1; // Standard gravity
 
-                  // --- Physics Speed & Quality Adjustments ---
-                  this.engine.timing.timeScale = 1.2; // Run the simulation 20% faster than default
-                  this.engine.positionIterations = 10; // Increases simulation accuracy and stability
-                  this.engine.velocityIterations = 8;  // Same as above, for velocity
-                  // --- END Physics Adjustments ---
+                  // --- Performance Optimizations ---
+                  // Enable sleeping for better performance (coins at rest won't be simulated)
+                  this.engine.enableSleeping = true;
+                  
+                  // Note: Grid broadphase removed - using default broadphase for better compatibility
+                  // Grid broadphase can be re-enabled later if needed with proper configuration
+                  
+                  // Set higher iterations for smoother physics
+                  this.engine.positionIterations = 10; // Higher iterations = smoother, more accurate physics
+                  this.engine.velocityIterations = 8;
+                  
+                  // Physics speed adjustment - slightly faster for more responsive feel
+                  this.engine.timing.timeScale = 1.0; // Use normal speed for smoother animation
+                  // --- END Performance Optimizations ---
 
                   // 2. Add a mouse controller for dragging coins
                   const mouse = Mouse.create(this.pool);
@@ -1552,6 +1563,12 @@
                         // Track dragging state
                         this.isDragging = true; // A drag has started!
                         
+                        // Store and wake up the coin being dragged
+                        this.draggedBody = event.body;
+                        if (this.draggedBody && Matter.Sleeping) {
+                              Matter.Sleeping.set(this.draggedBody, false);
+                        }
+                        
                         // Mark all cents as not potential taps when dragging starts
                         this.cents.forEach(cent => {
                               if (cent._potentialTap) {
@@ -1563,6 +1580,41 @@
                   Events.on(mouseConstraint, 'enddrag', (event) => {
                         // Track dragging state
                         this.isDragging = false; // The drag has ended!
+                        this.draggedBody = null; // Clear the dragged body reference
+                  });
+                  
+                  // Listen for collisions to wake up coins that collide with the dragged coin
+                  // Use collisionStart only (not collisionActive) to avoid performance issues
+                  // Throttle the wake-up calls to prevent lag
+                  let lastWakeUpTime = 0;
+                  const WAKE_UP_THROTTLE = 50; // Only wake up coins every 50ms max
+                  
+                  Events.on(this.engine, 'collisionStart', (event) => {
+                        if (!this.isDragging || !this.draggedBody) return;
+                        
+                        const now = Date.now();
+                        if (now - lastWakeUpTime < WAKE_UP_THROTTLE) return;
+                        lastWakeUpTime = now;
+                        
+                        const pairs = event.pairs;
+                        for (let i = 0; i < pairs.length; i++) {
+                              const pair = pairs[i];
+                              const bodyA = pair.bodyA;
+                              const bodyB = pair.bodyB;
+                              
+                              // Check if either body is the dragged body
+                              if (bodyA === this.draggedBody) {
+                                    // Wake up the coin that collided with the dragged coin
+                                    if (Matter.Sleeping && Matter.Sleeping.get(bodyB)) {
+                                          Matter.Sleeping.set(bodyB, false);
+                                    }
+                              } else if (bodyB === this.draggedBody) {
+                                    // Wake up the coin that collided with the dragged coin
+                                    if (Matter.Sleeping && Matter.Sleeping.get(bodyA)) {
+                                          Matter.Sleeping.set(bodyA, false);
+                                    }
+                              }
+                        }
                   });
 
                   // Store mouse constraint for potential cleanup
@@ -1590,46 +1642,38 @@
                   // 4. Run the engine
                   this.runner = Runner.run(this.engine);
                   
-                  // 5. Setup batched animation loop to sync DOM elements with physics bodies
-                  // Batch DOM updates to prevent layout thrashing
-                  Matter.Events.on(this.engine, 'afterUpdate', () => {
-                        // Collect all updates
-                        this.pendingDOMUpdates = [];
+                  // 5. Setup animation loop to sync DOM elements with physics bodies
+                  // Use requestAnimationFrame directly for smoother 60fps updates
+                  const updateDOM = () => {
+                        // Update all coins
                         this.cents.forEach(cent => {
                               if (cent.body) {
-                                    this.pendingDOMUpdates.push({
-                                          element: cent,
-                                          x: cent.body.position.x,
-                                          y: cent.body.position.y,
-                                          angle: cent.body.angle
-                                    });
+                                    const x = cent.body.position.x;
+                                    const y = cent.body.position.y;
+                                    const angle = cent.body.angle;
+                                    
+                                    cent.style.left = x + 'px';
+                                    cent.style.top = y + 'px';
+                                    cent.style.transform = `translate(-50%, -50%) rotate(${angle}rad)`;
                               }
                         });
                         
                         // Also update Scrooge duck if it exists
                         if (this.scroogeDuck && this.scroogeDuck.body) {
-                              this.pendingDOMUpdates.push({
-                                    element: this.scroogeDuck,
-                                    x: this.scroogeDuck.body.position.x,
-                                    y: this.scroogeDuck.body.position.y,
-                                    angle: this.scroogeDuck.body.angle
-                              });
+                              const x = this.scroogeDuck.body.position.x;
+                              const y = this.scroogeDuck.body.position.y;
+                              const angle = this.scroogeDuck.body.angle;
+                              
+                              this.scroogeDuck.style.left = x + 'px';
+                              this.scroogeDuck.style.top = y + 'px';
+                              this.scroogeDuck.style.transform = `translate(-50%, -50%) rotate(${angle}rad)`;
                         }
                         
-                        // Apply all updates in a single RAF callback
-                        if (!this.rafScheduled) {
-                              this.rafScheduled = true;
-                              requestAnimationFrame(() => {
-                                    this.pendingDOMUpdates.forEach(update => {
-                                          update.element.style.left = update.x + 'px';
-                                          update.element.style.top = update.y + 'px';
-                                          update.element.style.transform = `translate(-50%, -50%) rotate(${update.angle}rad)`;
-                                    });
-                                    this.rafScheduled = false;
-                                    this.pendingDOMUpdates = [];
-                              });
-                        }
-                  });
+                        requestAnimationFrame(updateDOM);
+                  };
+                  
+                  // Start the animation loop
+                  requestAnimationFrame(updateDOM);
             }
 
             updateSearchFilter() {
@@ -2127,6 +2171,11 @@
                         }
                         if (cent.parentNode) {
                               cent.parentNode.removeChild(cent);
+                        }
+                        // Remove from main cents array
+                        const index = this.cents.indexOf(cent);
+                        if (index > -1) {
+                              this.cents.splice(index, 1);
                         }
                   });
                   this.focusedCents = [];
