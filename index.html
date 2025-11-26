@@ -24,13 +24,13 @@
       background-color: #fff6f1;
       min-height: 100%;
     }
-    /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
+    /* 2. Fade in body content once fonts are loaded to prevent FOUC/FOUT */
     body {
-      opacity: 0;
-      visibility: hidden;
+      opacity: 1;
+      visibility: visible;
       transition: opacity 0.3s ease-in-out;
     }
-    /* 3. Fade in smoothly once fonts are ready */
+    /* 3. Ensure fonts-loaded class works (for future use) */
     body.fonts-loaded {
       opacity: 1;
       visibility: visible;
@@ -276,22 +276,35 @@
 
   <script>
     // --- NATIVE FONT LOADING ---
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
+    // Immediately show content, then mark fonts as loaded when ready
+    (function() {
+      try {
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => {
+            document.body.classList.remove('fonts-loading');
+            document.body.classList.add('fonts-loaded');
+          }).catch(() => {
+            // If font loading fails, still show content
+            document.body.classList.remove('fonts-loading');
+            document.body.classList.add('fonts-loaded');
+          });
+          
+          // Fallback timeout - ensure content is always shown
+          setTimeout(() => {
+            document.body.classList.remove('fonts-loading');
+            document.body.classList.add('fonts-loaded');
+          }, 100);
+        } else {
+          // Fallback for older browsers
+          document.body.classList.remove('fonts-loading');
+          document.body.classList.add('fonts-loaded');
+        }
+      } catch(e) {
+        // If anything fails, ensure content is visible
         document.body.classList.remove('fonts-loading');
         document.body.classList.add('fonts-loaded');
-      });
-      
-      // Fallback timeout
-      setTimeout(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      }, 3000);
-    } else {
-      // Fallback for older browsers
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    }
+      }
+    })();
     // --- END FONT LOADING ---
     
     // Lazy load YouTube video on click
