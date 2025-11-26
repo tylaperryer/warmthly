@@ -7,7 +7,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-hashes' https://www.gstatic.com https://cdn.quilljs.com; style-src 'self' 'unsafe-inline' 'unsafe-hashes' https://cdn.quilljs.com; font-src 'self'; img-src 'self' data: https:; frame-src https://www.youtube-nocookie.com https://open.spotify.com; connect-src 'self' https://*.warmthly.org https://api.airtable.com https://*.firebaseio.com;"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-hashes' https://www.gstatic.com https://cdn.quilljs.com; style-src 'self' 'unsafe-inline' 'unsafe-hashes' https://cdn.quilljs.com; font-src 'self'; img-src 'self' data: https:; frame-src https://www.youtube-nocookie.com https://open.spotify.com; connect-src 'self' https://*.warmthly.org https://api.airtable.com https://*.firebaseio.com;"
         },
         {
           "key": "X-Content-Type-Options",
