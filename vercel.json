@@ -37,7 +37,7 @@
           "value": "admin.warmthly.org"
         }
       ],
-      "destination": "/admin-app"
+      "destination": "/admin-app/index.html"
     },
     {
       "source": "/:path*",
@@ -57,7 +57,7 @@
           "value": "post.warmthly.org"
         }
       ],
-      "destination": "/post"
+      "destination": "/post/index.html"
     },
     {
       "source": "/:path*",
@@ -77,7 +77,7 @@
           "value": "mint.warmthly.org"
         }
       ],
-      "destination": "/mint"
+      "destination": "/mint/index.html"
     },
     {
       "source": "/:path*",
@@ -104,10 +104,6 @@
     {
       "source": "/post",
       "destination": "/post.html"
-    },
-    {
-      "source": "/test-mint",
-      "destination": "/mint"
     }
   ],
   "redirects": [
