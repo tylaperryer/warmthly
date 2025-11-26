@@ -30,24 +30,14 @@
   ],
   "rewrites": [
     {
-      "source": "/:path*",
+      "source": "/mint/mint.html",
       "has": [
         {
           "type": "host",
-          "value": "admin.warmthly.org"
+          "value": "mint.warmthly.org"
         }
       ],
-      "destination": "/admin-app/:path*.html"
-    },
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "post.warmthly.org"
-        }
-      ],
-      "destination": "/post/:path*.html"
+      "destination": "/"
     },
     {
       "source": "/:path*",
@@ -58,6 +48,46 @@
         }
       ],
       "destination": "/mint/:path*.html"
+    },
+    {
+      "source": "/admin-app/admin.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.warmthly.org"
+        }
+      ],
+      "destination": "/"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.warmthly.org"
+        }
+      ],
+      "destination": "/admin-app/:path*.html"
+    },
+    {
+      "source": "/post/post.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "post.warmthly.org"
+        }
+      ],
+      "destination": "/"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "post.warmthly.org"
+        }
+      ],
+      "destination": "/post/:path*.html"
     },
     {
       "source": "/admin/emails",
@@ -81,6 +111,39 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "mint.warmthly.org"
+        }
+      ],
+      "destination": "/mint/mint.html",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.warmthly.org"
+        }
+      ],
+      "destination": "/admin-app/admin.html",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "post.warmthly.org"
+        }
+      ],
+      "destination": "/post/post.html",
+      "permanent": false
+    },
     {
       "source": "/post/:path*",
       "has": [
