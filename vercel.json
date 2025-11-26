@@ -108,31 +108,67 @@
   "redirects": [
     {
       "source": "/post/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "warmthly.org"
+        }
+      ],
       "destination": "/",
       "permanent": false
     },
     {
       "source": "/post",
+      "has": [
+        {
+          "type": "host",
+          "value": "warmthly.org"
+        }
+      ],
       "destination": "/",
       "permanent": false
     },
     {
       "source": "/mint/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "warmthly.org"
+        }
+      ],
       "destination": "/",
       "permanent": false
     },
     {
       "source": "/mint",
+      "has": [
+        {
+          "type": "host",
+          "value": "warmthly.org"
+        }
+      ],
       "destination": "/",
       "permanent": false
     },
     {
       "source": "/admin/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "warmthly.org"
+        }
+      ],
       "destination": "/",
       "permanent": false
     },
     {
       "source": "/admin",
+      "has": [
+        {
+          "type": "host",
+          "value": "warmthly.org"
+        }
+      ],
       "destination": "/",
       "permanent": false
     }
