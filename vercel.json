@@ -1,110 +1,140 @@
 {
-    "cleanUrls": true,
-    "headers": [
-      {
-        "source": "/(.*)",
-        "headers": [
-          {
-            "key": "Content-Security-Policy",
-            "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com https://cdn.quilljs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.quilljs.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.youtube-nocookie.com https://open.spotify.com; connect-src 'self' https://*.warmthly.org https://api.airtable.com https://*.firebaseio.com;"
-          },
-          {
-            "key": "X-Content-Type-Options",
-            "value": "nosniff"
-          },
-          {
-            "key": "X-Frame-Options",
-            "value": "DENY"
-          },
-          {
-            "key": "Referrer-Policy",
-            "value": "strict-origin-when-cross-origin"
-          },
-          {
-            "key": "Permissions-Policy",
-            "value": "geolocation=(), microphone=(), camera=()"
-          }
-        ]
-      }
-    ],
-    "rewrites": [
-      {
-        "source": "/:path*",
-        "has": [
-          {
-            "type": "host",
-            "value": "admin.warmthly.org"
-          }
-        ],
-        "destination": "/admin-app/:path*"
-      },
-      {
-        "source": "/:path*",
-        "has": [
-          {
-            "type": "host",
-            "value": "post.warmthly.org"
-          }
-        ],
-        "destination": "/post/:path*"
-      },
-      {
-        "source": "/:path*",
-        "has": [
-          {
-            "type": "host",
-            "value": "mint.warmthly.org"
-          }
-        ],
-        "destination": "/mint/:path*"
-      },
-      {
-        "source": "/admin/emails",
-        "destination": "/admin/emails.html"
-      },
-      {
-        "source": "/vote",
-        "destination": "/vote.html"
-      },
-      {
-        "source": "/research",
-        "destination": "/research.html"
-      },
-      {
-        "source": "/post",
-        "destination": "/post.html"
-      }
-    ],
-    "redirects": [
-      {
-        "source": "/post/:path*",
-        "destination": "/",
-        "permanent": false
-      },
-      {
-        "source": "/post",
-        "destination": "/",
-        "permanent": false
-      },
-      {
-        "source": "/mint/:path*",
-        "destination": "/",
-        "permanent": false
-      },
-      {
-        "source": "/mint",
-        "destination": "/",
-        "permanent": false
-      },
-      {
-        "source": "/admin/:path*",
-        "destination": "/",
-        "permanent": false
-      },
-      {
-        "source": "/admin",
-        "destination": "/",
-        "permanent": false
-      }
-    ]
-  }
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com https://cdn.quilljs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.quilljs.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.youtube-nocookie.com https://open.spotify.com; connect-src 'self' https://*.warmthly.org https://api.airtable.com https://*.firebaseio.com;"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(), microphone=(), camera=()"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.warmthly.org"
+        }
+      ],
+      "destination": "/admin-app/index.html"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.warmthly.org"
+        }
+      ],
+      "destination": "/admin-app/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "post.warmthly.org"
+        }
+      ],
+      "destination": "/post/index.html"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "post.warmthly.org"
+        }
+      ],
+      "destination": "/post/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "mint.warmthly.org"
+        }
+      ],
+      "destination": "/mint/index.html"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "mint.warmthly.org"
+        }
+      ],
+      "destination": "/mint/:path*"
+    },
+    {
+      "source": "/admin/emails",
+      "destination": "/admin/emails.html"
+    },
+    {
+      "source": "/vote",
+      "destination": "/vote.html"
+    },
+    {
+      "source": "/research",
+      "destination": "/research.html"
+    },
+    {
+      "source": "/post",
+      "destination": "/post.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/post/:path*",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/post",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/mint/:path*",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/mint",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/admin",
+      "destination": "/",
+      "permanent": false
+    }
+  ]
+}
