@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { withRateLimit, loginRateLimitOptions } from './rate-limit.js';
+import logger from './logger.js';
 
 // Constant-time comparison to prevent timing attacks
 function constantTimeCompare(a, b) {
@@ -17,14 +18,14 @@ function constantTimeCompare(a, b) {
 
 async function loginHandler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: { message: 'Method Not Allowed' } });
   }
 
   const { password } = req.body;
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!adminPassword) {
-    return res.status(500).json({ error: 'Admin password not configured.' });
+    return res.status(500).json({ error: { message: 'Admin password not configured.' } });
   }
 
   // Use constant-time comparison to prevent timing attacks
@@ -33,8 +34,8 @@ async function loginHandler(req, res) {
     const jwtSecret = process.env.JWT_SECRET;
     
     if (!jwtSecret) {
-      console.error('JWT_SECRET is not configured');
-      return res.status(500).json({ error: 'Authentication system not configured.' });
+      logger.error('[login] JWT_SECRET is not configured');
+      return res.status(500).json({ error: { message: 'Authentication system not configured.' } });
     }
 
     const token = jwt.sign(
@@ -43,9 +44,9 @@ async function loginHandler(req, res) {
       { expiresIn: '8h' } // Token expires in 8 hours
     );
 
-    res.status(200).json({ token });
+    return res.status(200).json({ token });
   } else {
-    res.status(401).json({ error: 'Incorrect password' });
+    return res.status(401).json({ error: { message: 'Incorrect password' } });
   }
 }
 
