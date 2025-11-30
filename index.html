@@ -817,14 +817,44 @@
       videoPlayButton.addEventListener('click', loadVideo);
     }
 
-    const stoplight = document.getElementById('stoplight');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    let isMenuOpen = false;
-    function toggleMenu() { isMenuOpen = !isMenuOpen; stoplight.classList.toggle('active', isMenuOpen); dropdownMenu.classList.toggle('active', isMenuOpen); }
-    stoplight.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
-    document.addEventListener('click', (e) => { if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) { toggleMenu(); } });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isMenuOpen) { toggleMenu(); } });
-    dropdownMenu.addEventListener('click', (e) => { e.stopPropagation(); });
+    // Stoplight menu functionality
+    (function() {
+      const stoplight = document.getElementById('stoplight');
+      const dropdownMenu = document.getElementById('dropdown-menu');
+      
+      if (!stoplight || !dropdownMenu) {
+        console.error('Stoplight elements not found');
+        return;
+      }
+      
+      let isMenuOpen = false;
+      function toggleMenu() { 
+        isMenuOpen = !isMenuOpen; 
+        stoplight.classList.toggle('active', isMenuOpen); 
+        dropdownMenu.classList.toggle('active', isMenuOpen); 
+      }
+      
+      stoplight.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+        toggleMenu(); 
+      });
+      
+      document.addEventListener('click', (e) => { 
+        if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) { 
+          toggleMenu(); 
+        } 
+      });
+      
+      document.addEventListener('keydown', (e) => { 
+        if (e.key === 'Escape' && isMenuOpen) { 
+          toggleMenu(); 
+        } 
+      });
+      
+      dropdownMenu.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+      });
+    })();
     
     // Cookie Popup - First-time visitor only
     const cookieButton = document.getElementById('cookieButton');
