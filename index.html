@@ -282,14 +282,33 @@
       <!-- Amount Selection Form -->
       <div id="donationForm">
         <h2>Support Warmthly</h2>
-        <p>Choose an amount or enter a custom donation:</p>
+        <p>Choose an amount or enter a custom donation. All amounts will be converted to South African Rand (ZAR) using current exchange rates:</p>
+        <div class="currency-selector-wrapper">
+          <label for="currencySelect" style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-color); opacity: 0.8; margin-right: 0.5rem;">Currency:</label>
+          <select id="currencySelect" style="padding: 0.5rem 1rem; border: 2px solid var(--warmthly-orange); border-radius: var(--radius-sm); font-family: 'Inter', sans-serif; font-size: 1rem; background: white; cursor: pointer; outline: none;">
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="CAD">CAD (C$)</option>
+            <option value="AUD">AUD (A$)</option>
+            <option value="JPY">JPY (¥)</option>
+            <option value="CHF">CHF (Fr)</option>
+            <option value="NZD">NZD (NZ$)</option>
+            <option value="SEK">SEK (kr)</option>
+            <option value="NOK">NOK (kr)</option>
+            <option value="DKK">DKK (kr)</option>
+            <option value="SGD">SGD (S$)</option>
+            <option value="HKD">HKD (HK$)</option>
+            <option value="ZAR">ZAR (R)</option>
+          </select>
+        </div>
         <div class="donation-amounts">
           <button class="amount-btn" data-amount="1000">$10</button>
           <button class="amount-btn" data-amount="2500">$25</button>
           <button class="amount-btn" data-amount="5000">$50</button>
           <button class="amount-btn" data-amount="10000">$100</button>
         </div>
-        <input type="number" id="customAmount" placeholder="Custom amount ($)" min="1" step="1">
+        <input type="number" id="customAmount" placeholder="Custom amount" min="1" step="1">
         <p id="conversionNotice" style="font-size: 0.85rem; color: var(--text-color); opacity: 0.7; margin-top: 0.5rem; text-align: center; font-family: 'Inter', sans-serif; display: none;">
           💱 Amounts will be converted to South African Rand (ZAR) at current exchange rates
         </p>
@@ -326,10 +345,8 @@
   <!-- Error Popup -->
   <div class="error-popup" id="errorPopup">
     <div class="error-popup-content">
-      <span class="error-icon">⚠️</span>
       <h2>Payment Not Completed</h2>
-      <p id="errorMessage">Your payment was not processed. This could be due to insufficient funds, a declined card, or the payment was cancelled.</p>
-      <p style="font-size: 0.95rem; opacity: 0.9; margin-top: 1rem;">Please try again or use a different payment method.</p>
+      <p id="errorMessage">Payment was not completed. If you encountered an error, please try again or use a different payment method.</p>
       <button class="error-popup-button" id="errorPopupButton">Try Again</button>
     </div>
   </div>
@@ -717,20 +734,71 @@
       const amountButtons = document.querySelectorAll('.amount-btn');
       const conversionNotice = document.getElementById('conversionNotice');
       const conversionText = document.getElementById('conversionText');
+      const currencySelect = document.getElementById('currencySelect');
       
-      let selectedAmount = null; // Amount in USD cents
+      let selectedAmount = null; // Amount in selected currency (cents, or whole units for JPY)
       let convertedAmount = null; // Amount in ZAR cents
+      let currentCurrency = 'USD'; // Default currency
+      
+      // Currency symbols and info
+      const currencyInfo = {
+        USD: { symbol: '$', name: 'USD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        EUR: { symbol: '€', name: 'EUR', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        GBP: { symbol: '£', name: 'GBP', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        CAD: { symbol: 'C$', name: 'CAD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        AUD: { symbol: 'A$', name: 'AUD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        JPY: { symbol: '¥', name: 'JPY', usesCents: false, defaultAmounts: [1000, 2500, 5000, 10000] },
+        CHF: { symbol: 'Fr', name: 'CHF', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        NZD: { symbol: 'NZ$', name: 'NZD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        SEK: { symbol: 'kr', name: 'SEK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        NOK: { symbol: 'kr', name: 'NOK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        DKK: { symbol: 'kr', name: 'DKK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        SGD: { symbol: 'S$', name: 'SGD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        HKD: { symbol: 'HK$', name: 'HKD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+        ZAR: { symbol: 'R', name: 'ZAR', usesCents: true, defaultAmounts: [10000, 25000, 50000, 100000] }
+      };
       
       // Track whether payment succeeded
       let paymentSucceeded = false;
       let paymentAttempted = false;
 
+      // Format amount for display
+      function formatAmount(amount, currency) {
+        const info = currencyInfo[currency];
+        if (!info) return amount.toString();
+        
+        const displayAmount = info.usesCents ? (amount / 100) : amount;
+        const formatted = displayAmount.toLocaleString('en-US', { 
+          minimumFractionDigits: info.usesCents ? 2 : 0,
+          maximumFractionDigits: info.usesCents ? 2 : 0
+        });
+        return `${info.symbol}${formatted}`;
+      }
+
+      // Update button labels based on currency
+      function updateButtonLabels() {
+        const info = currencyInfo[currentCurrency];
+        amountButtons.forEach((btn, index) => {
+          const amount = info.defaultAmounts[index] || info.defaultAmounts[0];
+          btn.dataset.amount = amount;
+          btn.textContent = formatAmount(amount, currentCurrency);
+        });
+        
+        // Update placeholder
+        customAmountInput.placeholder = `Custom amount (${info.symbol})`;
+      }
+
       // Show/hide conversion notice
       function updateConversionNotice() {
         if (selectedAmount && selectedAmount > 0 && convertedAmount) {
-          const usdAmount = (selectedAmount / 100).toFixed(2);
+          const info = currencyInfo[currentCurrency];
+          const originalAmount = info.usesCents ? (selectedAmount / 100) : selectedAmount;
           const zarAmount = (convertedAmount / 100).toFixed(2);
-          conversionText.textContent = `💱 $${usdAmount} USD will be converted to approximately R${zarAmount} ZAR at current exchange rates`;
+          const formattedOriginal = originalAmount.toLocaleString('en-US', {
+            minimumFractionDigits: info.usesCents ? 2 : 0,
+            maximumFractionDigits: info.usesCents ? 2 : 0
+          });
+          conversionText.textContent = `💱 ${info.symbol}${formattedOriginal} ${currentCurrency} will be converted to approximately R${zarAmount} ZAR at current exchange rates`;
           conversionNotice.style.display = 'block';
         } else if (selectedAmount && selectedAmount > 0) {
           conversionText.textContent = '💱 Amounts will be converted to South African Rand (ZAR) at current exchange rates';
@@ -740,10 +808,10 @@
         }
       }
 
-      // Convert USD to ZAR
-      async function convertToZAR(usdCents) {
+      // Convert selected currency to ZAR
+      async function convertToZAR(amountInCents, fromCurrency) {
         try {
-          const response = await fetch(`/api/convert-currency?amount=${usdCents}&from=USD&to=ZAR`);
+          const response = await fetch(`/api/convert-currency?amount=${amountInCents}&from=${fromCurrency}&to=ZAR`);
           if (!response.ok) {
             throw new Error('Failed to convert currency');
           }
@@ -751,21 +819,40 @@
           return {
             zarCents: data.convertedAmount,
             rate: data.rate,
-            formattedUSD: data.formattedOriginal,
+            formattedOriginal: data.formattedOriginal,
             formattedZAR: data.formattedConverted
           };
         } catch (error) {
           console.error('Currency conversion error:', error);
-          // Fallback: use approximate rate of 17 (1 USD ≈ 17 ZAR)
-          const fallbackRate = 17;
+          // Fallback: use approximate rates
+          const fallbackRates = {
+            USD: 17, EUR: 18, GBP: 21, CAD: 12, AUD: 11, JPY: 0.11,
+            CHF: 19, NZD: 10, SEK: 1.5, NOK: 1.5, DKK: 2.3, SGD: 12, HKD: 2.2, ZAR: 1
+          };
+          const fallbackRate = fallbackRates[fromCurrency] || 17;
           return {
-            zarCents: Math.round(usdCents * fallbackRate),
+            zarCents: Math.round(amountInCents * fallbackRate),
             rate: fallbackRate,
-            formattedUSD: (usdCents / 100).toFixed(2),
-            formattedZAR: ((usdCents * fallbackRate) / 100).toFixed(2)
+            formattedOriginal: (amountInCents / 100).toFixed(2),
+            formattedZAR: ((amountInCents * fallbackRate) / 100).toFixed(2)
           };
         }
       }
+
+      // Currency change handler
+      currencySelect.addEventListener('change', (e) => {
+        currentCurrency = e.target.value;
+        updateButtonLabels();
+        // Clear selection when currency changes
+        selectedAmount = null;
+        convertedAmount = null;
+        customAmountInput.value = '';
+        amountButtons.forEach(b => b.classList.remove('selected'));
+        updateConversionNotice();
+      });
+
+      // Initialize button labels
+      updateButtonLabels();
 
       // Amount button selection
       amountButtons.forEach(btn => {
@@ -776,7 +863,7 @@
           customAmountInput.value = '';
           updateConversionNotice();
           // Pre-convert to show in notice
-          convertToZAR(selectedAmount).then(result => {
+          convertToZAR(selectedAmount, currentCurrency).then(result => {
             convertedAmount = result.zarCents;
             updateConversionNotice();
           });
@@ -787,11 +874,13 @@
       customAmountInput.addEventListener('input', (e) => {
         const value = parseFloat(e.target.value);
         if (value && value > 0) {
-          selectedAmount = Math.round(value * 100); // Convert to cents
+          const info = currencyInfo[currentCurrency];
+          // Convert to cents (or keep as whole units for JPY)
+          selectedAmount = info.usesCents ? Math.round(value * 100) : Math.round(value);
           amountButtons.forEach(b => b.classList.remove('selected'));
           updateConversionNotice();
           // Pre-convert to show in notice
-          convertToZAR(selectedAmount).then(result => {
+          convertToZAR(selectedAmount, currentCurrency).then(result => {
             convertedAmount = result.zarCents;
             updateConversionNotice();
           });
@@ -834,6 +923,12 @@
             customAmountInput.value = '';
           }
           amountButtons.forEach(b => b.classList.remove('selected'));
+          // Reset currency to default
+          if (currencySelect) {
+            currencySelect.value = 'USD';
+            currentCurrency = 'USD';
+            updateButtonLabels();
+          }
           updateConversionNotice();
           
           // Reset form visibility
@@ -869,19 +964,21 @@
 
       // Proceed to payment - embed Yoco directly on page
       proceedButton.addEventListener('click', async () => {
-        const minAmount = 100; // Minimum $1 (100 cents)
+        const info = currencyInfo[currentCurrency];
+        const minAmount = info.usesCents ? 100 : 1; // Minimum 1 unit
         if (!selectedAmount || selectedAmount < minAmount) {
-          alert('Please select or enter an amount (minimum $1)');
+          const minDisplay = info.usesCents ? '1.00' : '1';
+          alert(`Please select or enter an amount (minimum ${info.symbol}${minDisplay})`);
           return;
         }
 
-        // Convert USD to ZAR
+        // Convert selected currency to ZAR
         proceedButton.disabled = true;
         proceedButton.textContent = 'Converting...';
         
         let conversionResult;
         try {
-          conversionResult = await convertToZAR(selectedAmount);
+          conversionResult = await convertToZAR(selectedAmount, currentCurrency);
           convertedAmount = conversionResult.zarCents;
         } catch (error) {
           console.error('Conversion failed:', error);
@@ -976,13 +1073,18 @@
           // Show Yoco popup with comprehensive error handling
           try {
             const zarAmount = (convertedAmount / 100).toFixed(2);
-            const usdAmount = (selectedAmount / 100).toFixed(2);
+            const info = currencyInfo[currentCurrency];
+            const originalAmount = info.usesCents ? (selectedAmount / 100) : selectedAmount;
+            const formattedOriginal = originalAmount.toLocaleString('en-US', {
+              minimumFractionDigits: info.usesCents ? 2 : 0,
+              maximumFractionDigits: info.usesCents ? 2 : 0
+            });
             
             yocoSDK.showPopup({
               amountInCents: Math.round(convertedAmount),
               currency: 'ZAR',
               name: 'Warmthly Donation',
-              description: `Pay R${zarAmount} (${usdAmount} USD converted at current rate) - Thank you for supporting our mission to rehumanize our world!`,
+              description: `Pay R${zarAmount} (${info.symbol}${formattedOriginal} ${currentCurrency} converted at current rate) - Thank you for supporting our mission to rehumanize our world!`,
               callbackUrl: callbackUrl,
               cancelUrl: cancelUrl,
               metadata: {
