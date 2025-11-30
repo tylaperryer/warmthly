@@ -476,14 +476,6 @@ body.yoco-active {
   box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.2);
 }
 
-.currency-selector-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-  gap: 0.5rem;
-}
-
 .donation-modal-actions {
   display: flex;
   gap: 1rem;
