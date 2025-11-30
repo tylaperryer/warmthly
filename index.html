@@ -258,15 +258,15 @@
       display: none;
       justify-content: center;
       align-items: center;
-      z-index: 100000;
+      z-index: 100000 !important;
       animation: fadeIn 0.3s ease-out;
       cursor: pointer;
     }
+    .success-popup.active {
+      display: flex !important;
+    }
     .success-popup-content {
       cursor: default;
-    }
-    .success-popup.active {
-      display: flex;
     }
     .success-popup-content {
       background: linear-gradient(135deg, #2ed573 0%, #27ae60 100%);
@@ -600,6 +600,27 @@
   </div>
 
   <script>
+    // Global function to force unlock scrolling (can be called from anywhere)
+    window.forceUnlockScroll = function() {
+      try {
+        const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+        document.body.classList.remove('yoco-active', 'modal-open');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.height = '';
+        setTimeout(() => {
+          window.scrollTo(0, scrollY);
+        }, 10);
+        console.log('Scroll force unlocked');
+      } catch (error) {
+        console.error('Error in forceUnlockScroll:', error);
+      }
+    };
+    
     // --- NATIVE FONT LOADING ---
     (function() {
       // Immediate fallback - show content right away if script runs
@@ -744,14 +765,32 @@
           document.body.style.top = '';
           document.body.style.width = '';
           document.body.style.overflow = '';
+          document.body.style.height = '';
           
           // Restore html overflow
           document.documentElement.style.overflow = '';
+          document.documentElement.style.height = '';
           
-          // Restore scroll position
-          if (scrollY !== undefined && scrollY !== null) {
+          // Force reflow/repaint
+          void document.body.offsetHeight;
+          
+          // Restore scroll position if provided
+          if (typeof scrollY === 'number' && !isNaN(scrollY)) {
             window.scrollTo(0, scrollY);
           }
+          
+          // Ensure scrolling is re-enabled
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          
+          // Double check after a short delay
+          setTimeout(() => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            if (typeof scrollY === 'number' && !isNaN(scrollY)) {
+              window.scrollTo(0, scrollY);
+            }
+          }, 50);
         } catch (error) {
           console.error('Error unlocking body scroll:', error);
           // Force unlock even on error
@@ -760,7 +799,9 @@
           document.body.style.top = '';
           document.body.style.width = '';
           document.body.style.overflow = '';
+          document.body.style.height = '';
           document.documentElement.style.overflow = '';
+          document.documentElement.style.height = '';
         }
       }
       
@@ -771,10 +812,22 @@
           const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
           
           // Remove yoco-active class
-          document.body.classList.remove('yoco-active');
+          document.body.classList.remove('yoco-active', 'modal-open');
           
-          // Unlock scrolling
-          unlockBodyScroll(scrollY);
+          // Force unlock scrolling immediately
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          
+          // Restore scroll position
+          setTimeout(() => {
+            window.scrollTo(0, scrollY);
+            // Double-check scrolling is enabled
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+          }, 50);
           
           const donateButton = document.getElementById('donateButton');
           const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
@@ -817,9 +870,22 @@
       // Close modal
       function closeModal() {
         try {
-          const scrollY = window.scrollY;
+          const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+          
+          // First remove the modal active state
           donationModal.classList.remove('active');
-          unlockBodyScroll(scrollY);
+          
+          // Then unlock scroll after a short delay to allow animations
+          setTimeout(() => {
+            unlockBodyScroll(scrollY);
+            
+            // Force scroll restoration after a delay
+            setTimeout(() => {
+              window.scrollTo(0, scrollY);
+              document.body.style.overflow = '';
+              document.documentElement.style.overflow = '';
+            }, 100);
+          }, 100);
           
           selectedAmount = null;
           if (customAmountInput) {
@@ -953,8 +1019,11 @@
                 try {
                   console.log('Yoco popup closed');
                   
-                  // Cleanup Yoco state (this will unlock scrolling)
-                  cleanupYocoState();
+                  // Get scroll position before cleanup
+                  const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+                  
+                  // Cleanup Yoco state
+                  document.body.classList.remove('yoco-active', 'modal-open');
                   
                   // Restore button
                   if (donateButton) {
@@ -972,15 +1041,40 @@
                   // Reset form
                   closeModal();
                   
-                  // Ensure scrolling is restored
+                  // Force unlock scroll using global function
+                  if (typeof window.forceUnlockScroll === 'function') {
+                    window.forceUnlockScroll();
+                  }
+                  
+                  // Also manually restore
+                  document.body.style.position = '';
+                  document.body.style.top = '';
+                  document.body.style.width = '';
+                  document.body.style.height = '';
+                  document.body.style.overflow = '';
+                  document.documentElement.style.overflow = '';
+                  document.documentElement.style.height = '';
+                  
                   setTimeout(() => {
-                    document.body.style.overflow = '';
-                    document.documentElement.style.overflow = '';
-                  }, 100);
+                    window.scrollTo(0, scrollY);
+                    if (typeof window.forceUnlockScroll === 'function') {
+                      window.forceUnlockScroll();
+                    }
+                    
+                    // Triple-check after a bit
+                    setTimeout(() => {
+                      if (typeof window.forceUnlockScroll === 'function') {
+                        window.forceUnlockScroll();
+                      }
+                    }, 300);
+                  }, 50);
                 } catch (error) {
                   console.error('Error in onClose handler:', error);
-                  cleanupYocoState();
                   // Force unlock
+                  document.body.classList.remove('yoco-active', 'modal-open');
+                  document.body.style.position = '';
+                  document.body.style.top = '';
+                  document.body.style.width = '';
                   document.body.style.overflow = '';
                   document.documentElement.style.overflow = '';
                 }
@@ -989,10 +1083,10 @@
                 try {
                   console.log('Payment successful:', data);
                   
-                  // Cleanup Yoco state first
-                  cleanupYocoState();
+                  // Get amount before cleanup
+                  const amount = (selectedAmount / 100).toFixed(2);
                   
-                  // Restore button
+                  // Restore button first
                   if (donateButton) {
                     donateButton.style.display = 'inline-block';
                   }
@@ -1003,57 +1097,131 @@
                   // Reset form
                   closeModal();
                   
-                  // Show green success popup
-                  const amount = (selectedAmount / 100).toFixed(2);
-                  const successPopup = document.getElementById('successPopup');
-                  const successAmount = document.getElementById('successAmount');
+                  // Cleanup Yoco state (but preserve scroll position for restoration)
+                  const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
                   
-                  if (successPopup && successAmount) {
-                    successAmount.textContent = 'R' + amount;
-                    successPopup.classList.add('active');
-                    
-                    // Auto-close after 5 seconds or on button click
-                    const closeSuccessPopup = () => {
-                      successPopup.classList.remove('active');
-                      window.history.replaceState({}, document.title, window.location.pathname);
-                      // Ensure scrolling is restored
-                      document.body.style.overflow = '';
-                      document.documentElement.style.overflow = '';
-                    };
-                    
-                    const successButton = document.getElementById('successPopupButton');
-                    if (successButton) {
-                      successButton.onclick = closeSuccessPopup;
-                    }
-                    
-                    // Close on click outside (but not on the content itself)
-                    const handleSuccessClickOutside = (e) => {
-                      if (e.target === successPopup) {
-                        closeSuccessPopup();
-                        successPopup.removeEventListener('click', handleSuccessClickOutside);
-                      }
-                    };
-                    successPopup.addEventListener('click', handleSuccessClickOutside);
-                    
-                    // Prevent clicks on content from closing
-                    const successContent = successPopup.querySelector('.success-popup-content');
-                    if (successContent) {
-                      successContent.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                      });
-                    }
-                    
-                    // Auto-close after 5 seconds
-                    setTimeout(closeSuccessPopup, 5000);
-                  } else {
-                    // Fallback to alert if popup elements not found
-                    alert('Thank you! Your donation of R' + amount + ' was successful!');
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                  // Remove yoco-active class and unlock scroll
+                  document.body.classList.remove('yoco-active', 'modal-open');
+                  document.body.style.position = '';
+                  document.body.style.top = '';
+                  document.body.style.width = '';
+                  document.body.style.overflow = '';
+                  document.documentElement.style.overflow = '';
+                  
+                  // Force unlock scroll immediately using global function
+                  if (typeof window.forceUnlockScroll === 'function') {
+                    window.forceUnlockScroll();
                   }
+                  
+                  // Also manually restore scroll multiple times
+                  const restoreScroll = () => {
+                    document.body.style.position = '';
+                    document.body.style.top = '';
+                    document.body.style.width = '';
+                    document.body.style.height = '';
+                    document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
+                    document.documentElement.style.height = '';
+                    window.scrollTo(0, scrollY);
+                  };
+                  
+                  // Restore immediately
+                  restoreScroll();
+                  
+                  // Restore again after short delays
+                  setTimeout(restoreScroll, 50);
+                  setTimeout(restoreScroll, 200);
+                  setTimeout(restoreScroll, 500);
+                  setTimeout(() => {
+                    if (typeof window.forceUnlockScroll === 'function') {
+                      window.forceUnlockScroll();
+                    }
+                  }, 1000);
+                  
+                  // Show green success popup after Yoco has fully closed
+                  setTimeout(() => {
+                    try {
+                      const successPopup = document.getElementById('successPopup');
+                      const successAmount = document.getElementById('successAmount');
+                      
+                      console.log('Attempting to show success popup...');
+                      console.log('Success popup element:', successPopup);
+                      console.log('Success amount element:', successAmount);
+                      
+                      if (successPopup && successAmount) {
+                        successAmount.textContent = 'R' + amount;
+                        successPopup.style.display = 'flex';
+                        successPopup.style.zIndex = '100000';
+                        successPopup.classList.add('active');
+                        console.log('Success popup shown with amount:', amount);
+                        
+                        // Force show if still not visible
+                        setTimeout(() => {
+                          if (!successPopup.classList.contains('active')) {
+                            successPopup.style.display = 'flex';
+                            successPopup.classList.add('active');
+                          }
+                        }, 100);
+                      
+                        // Auto-close after 5 seconds or on button click
+                        const closeSuccessPopup = () => {
+                          successPopup.classList.remove('active');
+                          successPopup.style.display = 'none';
+                          window.history.replaceState({}, document.title, window.location.pathname);
+                          // Ensure scrolling is restored using global function
+                          if (typeof window.forceUnlockScroll === 'function') {
+                            window.forceUnlockScroll();
+                          }
+                        };
+                        
+                        const successButton = document.getElementById('successPopupButton');
+                        if (successButton) {
+                          successButton.onclick = closeSuccessPopup;
+                        }
+                        
+                        // Close on click outside (but not on the content itself)
+                        const handleSuccessClickOutside = (e) => {
+                          if (e.target === successPopup) {
+                            closeSuccessPopup();
+                            successPopup.removeEventListener('click', handleSuccessClickOutside);
+                          }
+                        };
+                        successPopup.addEventListener('click', handleSuccessClickOutside);
+                        
+                        // Prevent clicks on content from closing
+                        const successContent = successPopup.querySelector('.success-popup-content');
+                        if (successContent) {
+                          successContent.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                          });
+                        }
+                        
+                        // Auto-close after 5 seconds
+                        setTimeout(closeSuccessPopup, 5000);
+                      } else {
+                        // Fallback to alert if popup elements not found
+                        console.error('Success popup elements not found!');
+                        alert('Thank you! Your donation of R' + amount + ' was successful!');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                      }
+                    } catch (innerError) {
+                      console.error('Error showing success popup:', innerError);
+                      alert('Thank you! Your donation of R' + amount + ' was successful!');
+                    }
+                  }, 300);
+                  
                 } catch (error) {
                   console.error('Error in onSuccess handler:', error);
                   alert('Payment was successful, but there was an error processing the confirmation. Thank you for your donation!');
-                  cleanupYocoState();
+                  
+                  // Force cleanup
+                  document.body.classList.remove('yoco-active', 'modal-open');
+                  document.body.style.position = '';
+                  document.body.style.top = '';
+                  document.body.style.width = '';
+                  document.body.style.overflow = '';
+                  document.documentElement.style.overflow = '';
+                  
                   closeModal();
                 }
               },
@@ -1180,84 +1348,91 @@
     // Check for payment success/cancel in URL parameters (fallback if iframe redirects parent)
     (function() {
       try {
+        // Always force unlock scroll on page load
+        setTimeout(() => {
+          if (typeof window.forceUnlockScroll === 'function') {
+            window.forceUnlockScroll();
+          }
+        }, 100);
+        
         const urlParams = new URLSearchParams(window.location.search);
         const paymentStatus = urlParams.get('payment');
         
         if (paymentStatus === 'success') {
           // Payment was successful - show green popup
-          const successPopup = document.getElementById('successPopup');
-          const successAmount = document.getElementById('successAmount');
-          
-          if (successPopup && successAmount) {
-            // Try to get amount from URL params or use default
-            const urlParams = new URLSearchParams(window.location.search);
-            const amount = urlParams.get('amount') || '0.00';
-            successAmount.textContent = 'R' + parseFloat(amount).toFixed(2);
-            successPopup.classList.add('active');
+          setTimeout(() => {
+            const successPopup = document.getElementById('successPopup');
+            const successAmount = document.getElementById('successAmount');
             
-            const closeSuccessPopup = () => {
-              successPopup.classList.remove('active');
-              window.history.replaceState({}, document.title, window.location.pathname);
-              // Ensure scrolling is restored
-              document.body.style.overflow = '';
-              document.documentElement.style.overflow = '';
-            };
-            
-            const successButton = document.getElementById('successPopupButton');
-            if (successButton) {
-              successButton.onclick = closeSuccessPopup;
-            }
-            
-            // Close on click outside (but not on the content itself)
-            const handleSuccessClickOutside = (e) => {
-              if (e.target === successPopup) {
-                closeSuccessPopup();
-                successPopup.removeEventListener('click', handleSuccessClickOutside);
+            if (successPopup && successAmount) {
+              // Try to get amount from URL params or use default
+              const amount = urlParams.get('amount') || '0.00';
+              successAmount.textContent = 'R' + parseFloat(amount).toFixed(2);
+              successPopup.style.display = 'flex';
+              successPopup.style.zIndex = '100000';
+              successPopup.classList.add('active');
+              
+              const closeSuccessPopup = () => {
+                successPopup.classList.remove('active');
+                successPopup.style.display = 'none';
+                window.history.replaceState({}, document.title, window.location.pathname);
+                // Ensure scrolling is restored
+                if (typeof window.forceUnlockScroll === 'function') {
+                  window.forceUnlockScroll();
+                }
+              };
+              
+              const successButton = document.getElementById('successPopupButton');
+              if (successButton) {
+                successButton.onclick = closeSuccessPopup;
               }
-            };
-            successPopup.addEventListener('click', handleSuccessClickOutside);
-            
-            // Prevent clicks on content from closing
-            const successContent = successPopup.querySelector('.success-popup-content');
-            if (successContent) {
-              successContent.addEventListener('click', (e) => {
-                e.stopPropagation();
-              });
+              
+              // Close on click outside (but not on the content itself)
+              const handleSuccessClickOutside = (e) => {
+                if (e.target === successPopup) {
+                  closeSuccessPopup();
+                  successPopup.removeEventListener('click', handleSuccessClickOutside);
+                }
+              };
+              successPopup.addEventListener('click', handleSuccessClickOutside);
+              
+              // Prevent clicks on content from closing
+              const successContent = successPopup.querySelector('.success-popup-content');
+              if (successContent) {
+                successContent.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                });
+              }
+              
+              setTimeout(closeSuccessPopup, 5000);
             }
-            
-            setTimeout(closeSuccessPopup, 5000);
-          }
+          }, 500);
           
-          // Clean up URL and ensure cleanup
+          // Clean up URL
           window.history.replaceState({}, document.title, window.location.pathname);
-          document.body.classList.remove('yoco-active', 'modal-open');
-          document.body.style.position = '';
-          document.body.style.top = '';
-          document.body.style.width = '';
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
         } else if (paymentStatus === 'cancelled') {
           // Payment was cancelled
           // Clean up URL
           window.history.replaceState({}, document.title, window.location.pathname);
-          
-          // Ensure cleanup
-          document.body.classList.remove('yoco-active', 'modal-open');
-          document.body.style.position = '';
-          document.body.style.top = '';
-          document.body.style.width = '';
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
         }
+        
+        // Always ensure scroll is unlocked
+        if (typeof window.forceUnlockScroll === 'function') {
+          window.forceUnlockScroll();
+        }
+        setTimeout(() => {
+          if (typeof window.forceUnlockScroll === 'function') {
+            window.forceUnlockScroll();
+          }
+        }, 500);
       } catch (error) {
         console.error('Error processing payment status from URL:', error);
         // Clean up URL and state anyway
         try {
           window.history.replaceState({}, document.title, window.location.pathname);
-          document.body.classList.remove('yoco-active', 'modal-open');
-          document.body.style.position = '';
-          document.body.style.top = '';
-          document.body.style.width = '';
+          if (typeof window.forceUnlockScroll === 'function') {
+            window.forceUnlockScroll();
+          }
         } catch (cleanupError) {
           console.error('Error during cleanup:', cleanupError);
         }
