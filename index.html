@@ -954,6 +954,11 @@
       // Open modal
       donateButton.addEventListener('click', () => {
         try {
+          // Reset button state
+          if (proceedButton) {
+            proceedButton.disabled = false;
+            proceedButton.textContent = 'Proceed to Payment';
+          }
           window.lockBodyScroll(); // Use our unified lock function
           donationModal.classList.add('active');
         } catch (error) {
@@ -983,6 +988,11 @@
             customAmountInput.value = '';
           }
           amountButtons.forEach(b => b.classList.remove('selected'));
+          // Reset button state
+          if (proceedButton) {
+            proceedButton.disabled = false;
+            proceedButton.textContent = 'Proceed to Payment';
+          }
           // Reset currency to default
           if (currencyDisplay) {
             currentCurrency = 'USD';
@@ -1622,5 +1632,10 @@
   
   <!-- Yoco SDK - Client-side payment integration -->
   <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
+  
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>CC BY-NC-SA Warmthly 2025</p>
+  </footer>
 </body>
 </html>
