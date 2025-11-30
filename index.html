@@ -16,6 +16,10 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
 
+  <!-- Preload critical fonts to prevent font flash -->
+  <link rel="preload" href="/fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/CormorantGaramond-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+
   <style>
     /* --- ANTI-FLASH AND PERFORMANCE FIXES --- */
     /* 1. Set base background color immediately to prevent white flash */
@@ -24,13 +28,13 @@
       background-color: #fff6f1;
       min-height: 100%;
     }
-    /* 2. Fade in body content once fonts are loaded to prevent FOUC/FOUT */
+    /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
     body {
-      opacity: 1;
-      visibility: visible;
+      opacity: 0;
+      visibility: hidden;
       transition: opacity 0.3s ease-in-out;
     }
-    /* 3. Ensure fonts-loaded class works (for future use) */
+    /* 3. Fade in smoothly once fonts are ready */
     body.fonts-loaded {
       opacity: 1;
       visibility: visible;
@@ -39,10 +43,10 @@
 
     /* Your Original CSS - Minified and Combined for Performance */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype'); }
-    @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf') format('truetype'); }
-    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); }
-    @font-face { font-family: 'Inter'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype'); }
+    @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300 700; font-display: optional; src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype'); }
+    @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 300 700; font-display: optional; src: url('/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf') format('truetype'); }
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: optional; src: url('/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); }
+    @font-face { font-family: 'Inter'; font-style: italic; font-weight: 100 900; font-display: optional; src: url('/fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype'); }
     html { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
     html::-webkit-scrollbar { display: none; }
     body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.7; color: #2c2c2c; background: #fff6f1; min-height: 100vh; position: relative; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
@@ -276,7 +280,6 @@
 
   <script>
     // --- NATIVE FONT LOADING ---
-    // Immediately show content, then mark fonts as loaded when ready
     (function() {
       try {
         if (document.fonts && document.fonts.ready) {
@@ -284,28 +287,82 @@
             document.body.classList.remove('fonts-loading');
             document.body.classList.add('fonts-loaded');
           }).catch(() => {
-            // If font loading fails, still show content
-            document.body.classList.remove('fonts-loading');
-            document.body.classList.add('fonts-loaded');
+            // If font loading fails, still show content after timeout
+            setTimeout(() => {
+              document.body.classList.remove('fonts-loading');
+              document.body.classList.add('fonts-loaded');
+            }, 100);
           });
           
-          // Fallback timeout - ensure content is always shown
+          // Fallback timeout - ensure content is always shown (increased for font preloading)
+          setTimeout(() => {
+            document.body.classList.remove('fonts-loading');
+            document.body.classList.add('fonts-loaded');
+          }, 3000);
+        } else {
+          // Fallback for older browsers
           setTimeout(() => {
             document.body.classList.remove('fonts-loading');
             document.body.classList.add('fonts-loaded');
           }, 100);
-        } else {
-          // Fallback for older browsers
-          document.body.classList.remove('fonts-loading');
-          document.body.classList.add('fonts-loaded');
         }
       } catch(e) {
         // If anything fails, ensure content is visible
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
+        setTimeout(() => {
+          document.body.classList.remove('fonts-loading');
+          document.body.classList.add('fonts-loaded');
+        }, 100);
       }
     })();
     // --- END FONT LOADING ---
+    
+    // --- PAGE PREFETCHING ---
+    // Prefetch likely next pages in the background to prevent black flashes
+    (function() {
+      // Wait for fonts to load before prefetching to avoid impacting initial load
+      function prefetchPages() {
+        const pagesToPrefetch = [
+          '/post/index.html',
+          '/mint/index.html',
+          '/post/vote.html',
+          '/mint/research.html'
+        ];
+        
+        pagesToPrefetch.forEach(page => {
+          const link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.href = page;
+          link.as = 'document';
+          document.head.appendChild(link);
+        });
+      }
+      
+      // Prefetch after fonts load or after a delay
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          // Small delay to ensure main page is fully loaded
+          setTimeout(prefetchPages, 1000);
+        });
+      } else {
+        setTimeout(prefetchPages, 2000);
+      }
+      
+      // Also prefetch on link hover for instant navigation
+      document.addEventListener('mouseover', function(e) {
+        const link = e.target.closest('a');
+        if (link && link.href && link.href.startsWith(window.location.origin)) {
+          const url = new URL(link.href);
+          if (url.pathname.endsWith('.html') || !url.pathname.includes('.')) {
+            const prefetchLink = document.createElement('link');
+            prefetchLink.rel = 'prefetch';
+            prefetchLink.href = link.href;
+            prefetchLink.as = 'document';
+            document.head.appendChild(prefetchLink);
+          }
+        }
+      }, { passive: true });
+    })();
+    // --- END PAGE PREFETCHING ---
     
     // Lazy load YouTube video on click
     const videoPlaceholder = document.getElementById('video-placeholder');
