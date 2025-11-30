@@ -1,0 +1,48 @@
+/* CSS Custom Properties - Design Tokens */
+:root {
+  /* Colors */
+  --warmthly-orange: #FF8C42;
+  --warmthly-orange-hover: #e07a35;
+  --warmthly-background: #fff6f1;
+  --warmthly-background-alt: #ffeee6;
+  --text-color: #2c2c2c;
+  --text-color-light: rgba(44, 44, 44, 0.8);
+  --error-color: #D8000C;
+  --success-color: #2ed573;
+  --success-color-dark: #27ae60;
+  --error-red: #ff6b6b;
+  --error-red-dark: #ee5a6f;
+  --red-dot: #ff4757;
+  --green-dot: #2ed573;
+  
+  /* Stoplight/Dropdown Variables */
+  --tint-color: rgba(255, 255, 255, 0.15);
+  --blur-radius: 12px;
+  --border-color: rgba(255, 255, 255, 0.25);
+  --highlight-color: rgba(255, 255, 255, 0.4);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --text-color-dark: #1c2526;
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 20px;
+  --radius-full: 50px;
+  
+  /* Z-index layers */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-header: 1001;
+  --z-stoplight: 1002;
+  --z-modal: 10000;
+  --z-popup: 100000;
+}
+
