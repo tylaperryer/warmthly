@@ -6,7 +6,7 @@ import logger from './logger.js';
 async function airtableHandler(req, res) {
   // Only allow GET requests
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: { message: 'Method Not Allowed' } });
   }
 
   try {
