@@ -247,6 +247,94 @@
       border-color: #999;
     }
     
+    /* Success Popup */
+    .success-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100000;
+      animation: fadeIn 0.3s ease-out;
+      cursor: pointer;
+    }
+    .success-popup-content {
+      cursor: default;
+    }
+    .success-popup.active {
+      display: flex;
+    }
+    .success-popup-content {
+      background: linear-gradient(135deg, #2ed573 0%, #27ae60 100%);
+      padding: 3rem 2.5rem;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 12px 40px rgba(46, 213, 115, 0.4);
+      position: relative;
+      animation: successPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-align: center;
+      color: white;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes successPopIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-50px);
+      }
+      50% {
+        transform: scale(1.05) translateY(0);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    .success-popup-content h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .success-popup-content p {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.2rem;
+      color: white;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .success-popup-content .success-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .success-popup-button {
+      background: white;
+      color: #27ae60;
+      padding: 1rem 2.5rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    .success-popup-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    
     /* Cookie Popup */
     .cookie-button {
       position: fixed;
@@ -483,6 +571,17 @@
     </div>
   </div>
   
+  <!-- Success Popup -->
+  <div class="success-popup" id="successPopup">
+    <div class="success-popup-content">
+      <span class="success-icon">✓</span>
+      <h2>Thank You!</h2>
+      <p>Your donation of <strong id="successAmount">R0.00</strong> was successful!</p>
+      <p style="font-size: 1rem; opacity: 0.9;">Your support helps us rehumanize our world, one space at a time.</p>
+      <button class="success-popup-button" id="successPopupButton">Continue</button>
+    </div>
+  </div>
+  
   <!-- Cookie Popup -->
   <button class="cookie-button" id="cookieButton" aria-label="View privacy and cookie information" style="display: none;">
     <span aria-hidden="true">🥠</span>
@@ -636,20 +735,46 @@
       
       // Helper function to restore body scroll
       function unlockBodyScroll(scrollY) {
-        document.body.classList.remove('modal-open');
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        if (scrollY !== undefined) {
-          window.scrollTo(0, scrollY);
+        try {
+          // Remove all lock classes
+          document.body.classList.remove('modal-open', 'yoco-active');
+          
+          // Restore body styles
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          
+          // Restore html overflow
+          document.documentElement.style.overflow = '';
+          
+          // Restore scroll position
+          if (scrollY !== undefined && scrollY !== null) {
+            window.scrollTo(0, scrollY);
+          }
+        } catch (error) {
+          console.error('Error unlocking body scroll:', error);
+          // Force unlock even on error
+          document.body.classList.remove('modal-open', 'yoco-active');
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
         }
       }
       
       // Helper function to cleanup Yoco state
       function cleanupYocoState() {
         try {
+          // Get scroll position before unlocking
+          const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+          
+          // Remove yoco-active class
           document.body.classList.remove('yoco-active');
-          unlockBodyScroll();
+          
+          // Unlock scrolling
+          unlockBodyScroll(scrollY);
           
           const donateButton = document.getElementById('donateButton');
           const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
@@ -669,6 +794,13 @@
           }
         } catch (error) {
           console.error('Error cleaning up Yoco state:', error);
+          // Force cleanup
+          document.body.classList.remove('yoco-active', 'modal-open');
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
         }
       }
 
@@ -820,6 +952,8 @@
               onClose: () => {
                 try {
                   console.log('Yoco popup closed');
+                  
+                  // Cleanup Yoco state (this will unlock scrolling)
                   cleanupYocoState();
                   
                   // Restore button
@@ -837,20 +971,25 @@
                   
                   // Reset form
                   closeModal();
+                  
+                  // Ensure scrolling is restored
+                  setTimeout(() => {
+                    document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
+                  }, 100);
                 } catch (error) {
                   console.error('Error in onClose handler:', error);
                   cleanupYocoState();
+                  // Force unlock
+                  document.body.style.overflow = '';
+                  document.documentElement.style.overflow = '';
                 }
               },
               onSuccess: (data) => {
                 try {
                   console.log('Payment successful:', data);
                   
-                  // Show confirmation popup
-                  const amount = (selectedAmount / 100).toFixed(2);
-                  const confirmed = confirm('Thank you! Your donation of R' + amount + ' was successful!\n\nClick OK to continue.');
-                  
-                  // Cleanup state
+                  // Cleanup Yoco state first
                   cleanupYocoState();
                   
                   // Restore button
@@ -864,9 +1003,51 @@
                   // Reset form
                   closeModal();
                   
-                  // Optionally redirect or show success message
-                  if (confirmed) {
-                    // Clean URL
+                  // Show green success popup
+                  const amount = (selectedAmount / 100).toFixed(2);
+                  const successPopup = document.getElementById('successPopup');
+                  const successAmount = document.getElementById('successAmount');
+                  
+                  if (successPopup && successAmount) {
+                    successAmount.textContent = 'R' + amount;
+                    successPopup.classList.add('active');
+                    
+                    // Auto-close after 5 seconds or on button click
+                    const closeSuccessPopup = () => {
+                      successPopup.classList.remove('active');
+                      window.history.replaceState({}, document.title, window.location.pathname);
+                      // Ensure scrolling is restored
+                      document.body.style.overflow = '';
+                      document.documentElement.style.overflow = '';
+                    };
+                    
+                    const successButton = document.getElementById('successPopupButton');
+                    if (successButton) {
+                      successButton.onclick = closeSuccessPopup;
+                    }
+                    
+                    // Close on click outside (but not on the content itself)
+                    const handleSuccessClickOutside = (e) => {
+                      if (e.target === successPopup) {
+                        closeSuccessPopup();
+                        successPopup.removeEventListener('click', handleSuccessClickOutside);
+                      }
+                    };
+                    successPopup.addEventListener('click', handleSuccessClickOutside);
+                    
+                    // Prevent clicks on content from closing
+                    const successContent = successPopup.querySelector('.success-popup-content');
+                    if (successContent) {
+                      successContent.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                      });
+                    }
+                    
+                    // Auto-close after 5 seconds
+                    setTimeout(closeSuccessPopup, 5000);
+                  } else {
+                    // Fallback to alert if popup elements not found
+                    alert('Thank you! Your donation of R' + amount + ' was successful!');
                     window.history.replaceState({}, document.title, window.location.pathname);
                   }
                 } catch (error) {
@@ -893,9 +1074,18 @@
                     proceedButton.disabled = false;
                     proceedButton.textContent = originalText;
                   }
+                  
+                  // Ensure scrolling is restored
+                  setTimeout(() => {
+                    document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
+                  }, 100);
                 } catch (handlerError) {
                   console.error('Error in onError handler:', handlerError);
                   cleanupYocoState();
+                  // Force unlock
+                  document.body.style.overflow = '';
+                  document.documentElement.style.overflow = '';
                 }
               }
             });
@@ -951,7 +1141,16 @@
           // Restore scroll if we locked it
           if (scrollY !== null) {
             unlockBodyScroll(scrollY);
+          } else {
+            // Force unlock even if scrollY is null
+            cleanupYocoState();
           }
+          
+          // Ensure scrolling is restored
+          setTimeout(() => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+          }, 100);
         }
       });
       
@@ -985,16 +1184,58 @@
         const paymentStatus = urlParams.get('payment');
         
         if (paymentStatus === 'success') {
-          // Payment was successful
-          const confirmed = confirm('Thank you! Your donation was successful!\n\nClick OK to continue.');
-          // Clean up URL
-          window.history.replaceState({}, document.title, window.location.pathname);
+          // Payment was successful - show green popup
+          const successPopup = document.getElementById('successPopup');
+          const successAmount = document.getElementById('successAmount');
           
-          // Ensure cleanup
+          if (successPopup && successAmount) {
+            // Try to get amount from URL params or use default
+            const urlParams = new URLSearchParams(window.location.search);
+            const amount = urlParams.get('amount') || '0.00';
+            successAmount.textContent = 'R' + parseFloat(amount).toFixed(2);
+            successPopup.classList.add('active');
+            
+            const closeSuccessPopup = () => {
+              successPopup.classList.remove('active');
+              window.history.replaceState({}, document.title, window.location.pathname);
+              // Ensure scrolling is restored
+              document.body.style.overflow = '';
+              document.documentElement.style.overflow = '';
+            };
+            
+            const successButton = document.getElementById('successPopupButton');
+            if (successButton) {
+              successButton.onclick = closeSuccessPopup;
+            }
+            
+            // Close on click outside (but not on the content itself)
+            const handleSuccessClickOutside = (e) => {
+              if (e.target === successPopup) {
+                closeSuccessPopup();
+                successPopup.removeEventListener('click', handleSuccessClickOutside);
+              }
+            };
+            successPopup.addEventListener('click', handleSuccessClickOutside);
+            
+            // Prevent clicks on content from closing
+            const successContent = successPopup.querySelector('.success-popup-content');
+            if (successContent) {
+              successContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+              });
+            }
+            
+            setTimeout(closeSuccessPopup, 5000);
+          }
+          
+          // Clean up URL and ensure cleanup
+          window.history.replaceState({}, document.title, window.location.pathname);
           document.body.classList.remove('yoco-active', 'modal-open');
           document.body.style.position = '';
           document.body.style.top = '';
           document.body.style.width = '';
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
         } else if (paymentStatus === 'cancelled') {
           // Payment was cancelled
           // Clean up URL
@@ -1005,6 +1246,8 @@
           document.body.style.position = '';
           document.body.style.top = '';
           document.body.style.width = '';
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
         }
       } catch (error) {
         console.error('Error processing payment status from URL:', error);
