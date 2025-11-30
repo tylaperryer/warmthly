@@ -284,23 +284,29 @@
         <h2>Support Warmthly</h2>
         <p>Choose an amount or enter a custom donation. All amounts will be converted to South African Rand (ZAR) using current exchange rates:</p>
         <div class="currency-selector-wrapper">
-          <label for="currencySelect" style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-color); opacity: 0.8; margin-right: 0.5rem;">Currency:</label>
-          <select id="currencySelect" style="padding: 0.5rem 1rem; border: 2px solid var(--warmthly-orange); border-radius: var(--radius-sm); font-family: 'Inter', sans-serif; font-size: 1rem; background: white; cursor: pointer; outline: none;">
-            <option value="USD">USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="CAD">CAD (C$)</option>
-            <option value="AUD">AUD (A$)</option>
-            <option value="JPY">JPY (¥)</option>
-            <option value="CHF">CHF (Fr)</option>
-            <option value="NZD">NZD (NZ$)</option>
-            <option value="SEK">SEK (kr)</option>
-            <option value="NOK">NOK (kr)</option>
-            <option value="DKK">DKK (kr)</option>
-            <option value="SGD">SGD (S$)</option>
-            <option value="HKD">HKD (HK$)</option>
-            <option value="ZAR">ZAR (R)</option>
-          </select>
+          <label style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-color); opacity: 0.8; margin-right: 0.5rem;">Currency:</label>
+          <div class="custom-currency-dropdown" id="currencyDropdown">
+            <div class="custom-currency-select" id="currencySelect">
+              <span class="currency-display">USD ($)</span>
+              <span class="currency-arrow">▼</span>
+            </div>
+            <div class="custom-currency-options" id="currencyOptions">
+              <div class="currency-option" data-value="USD">USD ($)</div>
+              <div class="currency-option" data-value="EUR">EUR (€)</div>
+              <div class="currency-option" data-value="GBP">GBP (£)</div>
+              <div class="currency-option" data-value="CAD">CAD (C$)</div>
+              <div class="currency-option" data-value="AUD">AUD (A$)</div>
+              <div class="currency-option" data-value="JPY">JPY (¥)</div>
+              <div class="currency-option" data-value="CHF">CHF (Fr)</div>
+              <div class="currency-option" data-value="NZD">NZD (NZ$)</div>
+              <div class="currency-option" data-value="SEK">SEK (kr)</div>
+              <div class="currency-option" data-value="NOK">NOK (kr)</div>
+              <div class="currency-option" data-value="DKK">DKK (kr)</div>
+              <div class="currency-option" data-value="SGD">SGD (S$)</div>
+              <div class="currency-option" data-value="HKD">HKD (HK$)</div>
+              <div class="currency-option" data-value="ZAR">ZAR (R)</div>
+            </div>
+          </div>
         </div>
         <div class="donation-amounts">
           <button class="amount-btn" data-amount="1000">$10</button>
@@ -734,11 +740,32 @@
       const amountButtons = document.querySelectorAll('.amount-btn');
       const conversionNotice = document.getElementById('conversionNotice');
       const conversionText = document.getElementById('conversionText');
+      const currencyDropdown = document.getElementById('currencyDropdown');
       const currencySelect = document.getElementById('currencySelect');
+      const currencyOptions = document.getElementById('currencyOptions');
+      const currencyDisplay = currencySelect.querySelector('.currency-display');
       
       let selectedAmount = null; // Amount in selected currency (cents, or whole units for JPY)
       let convertedAmount = null; // Amount in ZAR cents
       let currentCurrency = 'USD'; // Default currency
+      
+      // Currency display names
+      const currencyDisplayNames = {
+        USD: 'USD ($)',
+        EUR: 'EUR (€)',
+        GBP: 'GBP (£)',
+        CAD: 'CAD (C$)',
+        AUD: 'AUD (A$)',
+        JPY: 'JPY (¥)',
+        CHF: 'CHF (Fr)',
+        NZD: 'NZD (NZ$)',
+        SEK: 'SEK (kr)',
+        NOK: 'NOK (kr)',
+        DKK: 'DKK (kr)',
+        SGD: 'SGD (S$)',
+        HKD: 'HKD (HK$)',
+        ZAR: 'ZAR (R)'
+      };
       
       // Currency symbols and info
       const currencyInfo = {
@@ -839,17 +866,53 @@
         }
       }
 
-      // Currency change handler
-      currencySelect.addEventListener('change', (e) => {
-        currentCurrency = e.target.value;
-        updateButtonLabels();
-        // Clear selection when currency changes
-        selectedAmount = null;
-        convertedAmount = null;
-        customAmountInput.value = '';
-        amountButtons.forEach(b => b.classList.remove('selected'));
-        updateConversionNotice();
+      // Custom dropdown handlers
+      currencySelect.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currencySelect.classList.toggle('active');
+        currencyOptions.classList.toggle('show');
       });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!currencyDropdown.contains(e.target)) {
+          currencySelect.classList.remove('active');
+          currencyOptions.classList.remove('show');
+        }
+      });
+      
+      // Handle currency option selection
+      currencyOptions.querySelectorAll('.currency-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const value = option.dataset.value;
+          currentCurrency = value;
+          
+          // Update display
+          currencyDisplay.textContent = currencyDisplayNames[value];
+          
+          // Update selected state
+          currencyOptions.querySelectorAll('.currency-option').forEach(opt => {
+            opt.classList.remove('selected');
+          });
+          option.classList.add('selected');
+          
+          // Close dropdown
+          currencySelect.classList.remove('active');
+          currencyOptions.classList.remove('show');
+          
+          // Update buttons and clear selection
+          updateButtonLabels();
+          selectedAmount = null;
+          convertedAmount = null;
+          customAmountInput.value = '';
+          amountButtons.forEach(b => b.classList.remove('selected'));
+          updateConversionNotice();
+        });
+      });
+      
+      // Set initial selected state
+      currencyOptions.querySelector(`[data-value="${currentCurrency}"]`).classList.add('selected');
 
       // Initialize button labels
       updateButtonLabels();
@@ -924,9 +987,13 @@
           }
           amountButtons.forEach(b => b.classList.remove('selected'));
           // Reset currency to default
-          if (currencySelect) {
-            currencySelect.value = 'USD';
+          if (currencyDisplay) {
             currentCurrency = 'USD';
+            currencyDisplay.textContent = currencyDisplayNames['USD'];
+            currencyOptions.querySelectorAll('.currency-option').forEach(opt => {
+              opt.classList.remove('selected');
+            });
+            currencyOptions.querySelector('[data-value="USD"]').classList.add('selected');
             updateButtonLabels();
           }
           updateConversionNotice();
@@ -1068,7 +1135,7 @@
           
           // Reset flags for new payment attempt
           paymentSucceeded = false;
-          paymentAttempted = false;
+          paymentAttempted = true; // Mark that we're attempting payment (popup is opening)
           
           // Show Yoco popup with comprehensive error handling
           try {
@@ -1100,8 +1167,9 @@
                 // (onSuccess fires before onClose if payment succeeded)
                 setTimeout(() => {
                   try {
-                    // If payment didn't succeed, show error message
-                    if (!paymentSucceeded) {
+                    // Only show error if payment was actually attempted and didn't succeed
+                    // Don't show error if user just clicked outside without attempting payment
+                    if (paymentAttempted && !paymentSucceeded) {
                       console.log('⚠️ Payment not completed - showing message');
                       window.showPaymentErrorPopup(
                         'Payment was not completed. If you encountered an error, please try again or use a different payment method.'
@@ -1557,5 +1625,11 @@
   
   <!-- Yoco SDK - Client-side payment integration -->
   <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
+  
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>CC BY-NC-SA Warmthly 2025</p>
+    <p>Check our source code for our site on our <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+  </footer>
 </body>
 </html>
