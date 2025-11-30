@@ -1041,17 +1041,16 @@
           try {
             const keyResponse = await fetch('/api/get-yoco-public-key');
             if (!keyResponse.ok) {
-              throw new Error('Failed to fetch public key');
+              throw new Error('Failed to fetch public key from server');
             }
             const keyData = await keyResponse.json();
-            publicKey = keyData.publicKey || 'pk_live_0f16cae9qWBO9nd54734';
+            publicKey = keyData.publicKey;
+            if (!publicKey) {
+              throw new Error('Public key not returned from server');
+            }
           } catch (keyError) {
-            console.warn('Failed to fetch public key from API, using fallback:', keyError);
-            publicKey = 'pk_live_0f16cae9qWBO9nd54734';
-          }
-          
-          if (!publicKey) {
-            throw new Error('Yoco public key is missing. Please contact support.');
+            console.error('Failed to fetch public key:', keyError);
+            throw new Error('Yoco public key is not configured. Please contact support.');
           }
 
           try {
