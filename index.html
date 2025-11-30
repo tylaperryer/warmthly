@@ -43,10 +43,10 @@
 
     /* Your Original CSS - Minified and Combined for Performance */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300 700; font-display: optional; src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype'); }
-    @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 300 700; font-display: optional; src: url('/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf') format('truetype'); }
-    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: optional; src: url('/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); }
-    @font-face { font-family: 'Inter'; font-style: italic; font-weight: 100 900; font-display: optional; src: url('/fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype'); }
+    @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype'); }
+    @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf') format('truetype'); }
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); }
+    @font-face { font-family: 'Inter'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype'); }
     html { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
     html::-webkit-scrollbar { display: none; }
     body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.7; color: #2c2c2c; background: #fff6f1; min-height: 100vh; position: relative; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
@@ -101,7 +101,136 @@
     .method-step p { opacity: 0.8; line-height: 1.7; padding-left: 2.2rem; }
     .donate-button { background: #FF8C42; color: white; padding: 1rem 2.5rem; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3); margin-top: 1rem; font-family: 'Inter', sans-serif; }
     .donate-button:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 140, 66, 0.4); background: #e07a35; }
+    .donate-button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .footer { margin-top: 4rem; opacity: 0.7; font-size: 0.9rem; }
+    
+    /* Donation Modal Styles */
+    .donation-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    .donation-modal.active {
+      display: flex;
+    }
+    .donation-modal-content {
+      background: #fff6f1;
+      padding: 2.5rem;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      position: relative;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    
+    #yocoPaymentContainer {
+      width: 100%;
+    }
+    
+    #yocoIframeContainer iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 10px;
+    }
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    .donation-modal-content h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #FF8C42;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .donation-modal-content > p {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #2c2c2c;
+      opacity: 0.8;
+    }
+    .donation-amounts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .amount-btn {
+      padding: 1rem;
+      border: 2px solid #FF8C42;
+      background: white;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #FF8C42;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+    }
+    .amount-btn:hover {
+      background: rgba(255, 140, 66, 0.1);
+      transform: translateY(-2px);
+    }
+    .amount-btn.selected {
+      background: #FF8C42;
+      color: white;
+    }
+    #customAmount {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #FF8C42;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      margin: 1rem 0;
+      font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
+    }
+    #customAmount:focus {
+      outline: none;
+      border-color: #e07a35;
+      box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.2);
+    }
+    .donation-modal-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .cancel-button {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid #ccc;
+      background: white;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    .cancel-button:hover {
+      background: #f5f5f5;
+      border-color: #999;
+    }
     
     /* Cookie Popup */
     .cookie-button {
@@ -198,6 +327,36 @@
       .method-step p { padding-left: 0; }
       .cookie-button { bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 1.5rem; }
       .cookie-popup { bottom: 70px; right: 15px; max-width: calc(100vw - 30px); font-size: 0.85rem; padding: 0.9rem 1rem; }
+      .donation-modal-content { padding: 1.5rem; }
+      .donation-amounts { grid-template-columns: 1fr; }
+    }
+    
+    /* Ensure Yoco popup appears above everything */
+    .yoco-popup-container,
+    [class*="yoco"],
+    [id*="yoco"],
+    [class*="Yoco"],
+    [id*="Yoco"],
+    iframe[src*="yoco"],
+    div[style*="position: fixed"][style*="z-index"] {
+      z-index: 99999 !important;
+      position: fixed !important;
+    }
+    
+    /* Target common modal/overlay patterns that Yoco might use */
+    body > div[style*="position: fixed"]:last-child,
+    body > div[style*="z-index"]:last-child {
+      z-index: 99999 !important;
+    }
+    
+    /* Fix z-index stacking context when Yoco popup is active */
+    body.yoco-active .header,
+    body.yoco-active .container {
+      z-index: auto !important;
+    }
+    
+    body.yoco-active {
+      isolation: auto !important;
     }
   </style>
 </head>
@@ -255,10 +414,55 @@
             <p>We publish our findings and methodologies as open-source "playbooks." This allows anyone, anywhere, to replicate our success, adapt our methods, and contribute to a more human-centered world.</p>
         </div>
     </div>
-    <a href="https://gofund.me/fbf54e209" class="donate-button" target="_blank" rel="noopener noreferrer" aria-label="Donate to support Warmthly">🤍 Support the Mission</a>
+    <!-- Donation Section - Will be replaced with Yoco payment form -->
+    <div id="donationSection" style="margin: 2rem 0;">
+      <button class="donate-button" id="donateButton" aria-label="Donate to support Warmthly">🤍 Support the Mission</button>
+      <div id="yocoPaymentEmbed" style="display: none; margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          <h3 style="font-family: 'Inter', sans-serif; color: #FF8C42; margin-bottom: 1rem; text-align: center;">Complete Your Donation</h3>
+          <div id="yocoEmbedContainer" style="width: 100%; min-height: 500px;">
+            <!-- Yoco payment form will be embedded here -->
+          </div>
+          <button id="cancelPayment" class="cancel-button" style="margin-top: 1rem; width: 100%;">Cancel</button>
+        </div>
+      </div>
+    </div>
     <footer class="footer">
         <p>&copy; 2025 Warmthly. All rights reserved.</p>
     </footer>
+  </div>
+  
+  <!-- Donation Modal -->
+  <div class="donation-modal" id="donationModal">
+    <div class="donation-modal-content">
+      <!-- Amount Selection Form -->
+      <div id="donationForm">
+        <h2>Support Warmthly</h2>
+        <p>Choose an amount or enter a custom donation:</p>
+        <div class="donation-amounts">
+          <button class="amount-btn" data-amount="10000">R100</button>
+          <button class="amount-btn" data-amount="25000">R250</button>
+          <button class="amount-btn" data-amount="50000">R500</button>
+          <button class="amount-btn" data-amount="100000">R1,000</button>
+        </div>
+        <input type="number" id="customAmount" placeholder="Custom amount (R)" min="1" step="1">
+        <div class="donation-modal-actions">
+          <button id="proceedDonation" class="donate-button">Proceed to Payment</button>
+          <button id="cancelDonation" class="cancel-button">Cancel</button>
+        </div>
+      </div>
+      
+      <!-- Yoco Payment Container (hidden initially) -->
+      <div id="yocoPaymentContainer" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="margin: 0;">Complete Your Donation</h2>
+          <button id="backToAmount" class="cancel-button" style="padding: 0.5rem 1rem; font-size: 0.9rem;">← Back</button>
+        </div>
+        <div id="yocoIframeContainer" style="width: 100%; height: 600px; border: none; border-radius: 10px; overflow: hidden;">
+          <!-- Yoco checkout will be loaded here -->
+        </div>
+      </div>
+    </div>
   </div>
   
   <!-- Cookie Popup -->
@@ -364,6 +568,217 @@
     })();
     // --- END PAGE PREFETCHING ---
     
+    // --- DONATION FUNCTIONALITY ---
+    (function() {
+      const donateButton = document.getElementById('donateButton');
+      const donationModal = document.getElementById('donationModal');
+      const proceedButton = document.getElementById('proceedDonation');
+      const cancelButton = document.getElementById('cancelDonation');
+      const customAmountInput = document.getElementById('customAmount');
+      const amountButtons = document.querySelectorAll('.amount-btn');
+      
+      let selectedAmount = null;
+
+      // Amount button selection
+      amountButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          amountButtons.forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedAmount = parseInt(btn.dataset.amount);
+          customAmountInput.value = '';
+        });
+      });
+
+      // Custom amount input
+      customAmountInput.addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        if (value && value > 0) {
+          selectedAmount = Math.round(value * 100); // Convert to cents
+          amountButtons.forEach(b => b.classList.remove('selected'));
+        } else {
+          selectedAmount = null;
+        }
+      });
+
+      // Open modal
+      donateButton.addEventListener('click', () => {
+        donationModal.classList.add('active');
+      });
+
+      // Close modal
+      function closeModal() {
+        donationModal.classList.remove('active');
+        selectedAmount = null;
+        customAmountInput.value = '';
+        amountButtons.forEach(b => b.classList.remove('selected'));
+        
+        // Reset form visibility
+        const donationForm = document.getElementById('donationForm');
+        const yocoPaymentContainer = document.getElementById('yocoPaymentContainer');
+        const yocoIframeContainer = document.getElementById('yocoIframeContainer');
+        if (donationForm) donationForm.style.display = 'block';
+        if (yocoPaymentContainer) yocoPaymentContainer.style.display = 'none';
+        if (yocoIframeContainer) yocoIframeContainer.innerHTML = '';
+      }
+
+      cancelButton.addEventListener('click', closeModal);
+
+      // Close modal when clicking outside
+      donationModal.addEventListener('click', (e) => {
+        if (e.target === donationModal) {
+          closeModal();
+        }
+      });
+
+      // Close modal on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && donationModal.classList.contains('active')) {
+          closeModal();
+        }
+      });
+
+      // Main donation button - opens modal for amount selection
+      donateButton.addEventListener('click', () => {
+        donationModal.classList.add('active');
+      });
+      
+      // Proceed to payment - embed Yoco directly on page
+      proceedButton.addEventListener('click', async () => {
+        if (!selectedAmount || selectedAmount < 100) {
+          alert('Please select or enter an amount (minimum R1)');
+          return;
+        }
+
+        proceedButton.disabled = true;
+        const originalText = proceedButton.textContent;
+        proceedButton.textContent = 'Processing...';
+
+        try {
+          // Initialize Yoco SDK
+          if (typeof window.YocoSDK === 'undefined') {
+            throw new Error('Yoco SDK not loaded. Please refresh the page.');
+          }
+
+          const publicKey = 'pk_test_6da95a49qWBO9nd4b474';
+          const yocoSDK = new window.YocoSDK({
+            publicKey: publicKey
+          });
+
+          // Close modal and show Yoco payment embedded on page
+          donationModal.classList.remove('active');
+          
+          // Hide donate button, show embedded payment
+          const donationSection = document.getElementById('donationSection');
+          const donateButton = document.getElementById('donateButton');
+          const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
+          const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
+          
+          donateButton.style.display = 'none';
+          yocoPaymentEmbed.style.display = 'block';
+          yocoEmbedContainer.innerHTML = '';
+          
+          // Scroll to payment form
+          yocoPaymentEmbed.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Use Yoco SDK popup - it will appear as an overlay
+          // The popup is designed to overlay the page, so we'll let it do that
+          const callbackUrl = window.location.origin + window.location.pathname + '?payment=success';
+          const cancelUrl = window.location.origin + window.location.pathname + '?payment=cancelled';
+          
+          yocoSDK.showPopup({
+            amountInCents: Math.round(selectedAmount),
+            currency: 'ZAR',
+            name: 'Warmthly Donation',
+            description: 'Thank you for supporting our mission to rehumanize our world!',
+            callbackUrl: callbackUrl,
+            cancelUrl: cancelUrl,
+            metadata: {
+              source: 'website_donation'
+            },
+            onClose: () => {
+              document.body.classList.remove('yoco-active');
+              // User cancelled - restore button
+              donateButton.style.display = 'inline-block';
+              yocoPaymentEmbed.style.display = 'none';
+              proceedButton.disabled = false;
+              proceedButton.textContent = originalText;
+            },
+            onSuccess: (data) => {
+              document.body.classList.remove('yoco-active');
+              // Payment successful
+              alert('Thank you! Your donation of R' + (selectedAmount / 100).toFixed(2) + ' was successful!');
+              
+              // Restore button
+              donateButton.style.display = 'inline-block';
+              yocoPaymentEmbed.style.display = 'none';
+              
+              // Reset form
+              closeModal();
+            }
+          });
+          
+          // Add yoco-active class to body to fix z-index stacking
+          document.body.classList.add('yoco-active');
+          
+          // Ensure Yoco popup has high z-index
+          setTimeout(() => {
+            const yocoElements = document.querySelectorAll('[class*="yoco" i], [id*="yoco" i], iframe[src*="yoco" i]');
+            yocoElements.forEach(el => {
+              const style = window.getComputedStyle(el);
+              if (style.position === 'fixed') {
+                el.style.zIndex = '999999';
+              }
+            });
+          }, 100);
+          
+          proceedButton.disabled = false;
+          proceedButton.textContent = originalText;
+
+        } catch (error) {
+          console.error('Donation error:', error);
+          alert('Sorry, there was an error processing your donation: ' + error.message);
+          
+          // Restore button
+          const donateButton = document.getElementById('donateButton');
+          const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
+          if (donateButton) donateButton.style.display = 'inline-block';
+          if (yocoPaymentEmbed) yocoPaymentEmbed.style.display = 'none';
+          
+          proceedButton.disabled = false;
+          proceedButton.textContent = originalText;
+        }
+      });
+      
+      // Cancel payment button
+      const cancelPaymentBtn = document.getElementById('cancelPayment');
+      if (cancelPaymentBtn) {
+        cancelPaymentBtn.addEventListener('click', () => {
+          const donateButton = document.getElementById('donateButton');
+          const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
+          if (donateButton) donateButton.style.display = 'inline-block';
+          if (yocoPaymentEmbed) yocoPaymentEmbed.style.display = 'none';
+        });
+      }
+    })();
+    // --- END DONATION FUNCTIONALITY ---
+    
+    // Check for payment success/cancel in URL parameters (fallback if iframe redirects parent)
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentStatus = urlParams.get('payment');
+      
+      if (paymentStatus === 'success') {
+        // Payment was successful
+        alert('Thank you! Your donation was successful!');
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (paymentStatus === 'cancelled') {
+        // Payment was cancelled
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    })();
+    
     // Lazy load YouTube video on click
     const videoPlaceholder = document.getElementById('video-placeholder');
     const videoContainer = document.getElementById('video-container');
@@ -457,5 +872,8 @@
       });
     }
   </script>
+  
+  <!-- Yoco SDK - Client-side payment integration -->
+  <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
 </body>
 </html>
