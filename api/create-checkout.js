@@ -14,9 +14,12 @@ async function createCheckoutHandler(req, res) {
       return res.status(400).json({ error: 'Invalid amount. Minimum donation is R1 (100 cents).' });
     }
 
-    // Using test key for CodeSandbox testing
-    // TODO: Move to environment variable for production
-    const secretKey = 'sk_test_9f74e0b3AW5EBNv1bfb48c8860dd';
+    // Get secret key from environment variable
+    const secretKey = process.env.YOCO_SECRET_KEY;
+    if (!secretKey) {
+      logger.error('[create-checkout] Yoco secret key not configured');
+      return res.status(500).json({ error: 'Yoco secret key not configured' });
+    }
 
     // Create checkout with Yoco API
     // According to Yoco docs, Checkout API only requires amount and currency
