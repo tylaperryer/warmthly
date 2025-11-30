@@ -91,25 +91,21 @@
 }
 
 .stoplight {
-  --tint-color: var(--tint-color);
-  --blur-radius: var(--blur-radius);
-  --border-color: var(--border-color);
-  --highlight-color: var(--highlight-color);
-  --shadow-color: var(--shadow-color);
   display: flex;
   flex-direction: column;
   gap: 3px;
   cursor: pointer;
   padding: 8px;
   position: relative;
-  background: var(--tint-color);
-  backdrop-filter: blur(var(--blur-radius)) saturate(1.2);
-  -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2);
-  border: 1px solid var(--border-color);
+  /* Default: No background, border, or glass effect - just dots */
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border-radius: var(--radius-md);
-  box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05);
+  box-shadow: none;
   transition: all 0.4s cubic-bezier(0.25,0.8,0.25,1);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .stoplight::before {
@@ -123,19 +119,24 @@
   background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
   pointer-events: none;
   z-index: 1;
-  opacity: 0.7;
+  opacity: 0;
   transition: opacity 0.4s cubic-bezier(0.25,0.8,0.25,1);
 }
 
+/* On hover/active: Show glass effect container */
 .stoplight:hover,
 .stoplight.active {
-  background: rgba(255,255,255,0.25);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -1px 1px rgba(0,0,0,0.1);
+  background: var(--tint-color);
+  backdrop-filter: blur(var(--blur-radius)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05);
+  overflow: hidden;
 }
 
 .stoplight:hover::before,
 .stoplight.active::before {
-  opacity: 1;
+  opacity: 0.7;
 }
 
 .stoplight-dot {
@@ -193,12 +194,6 @@
 
 /* ===== DROPDOWN MENU ===== */
 .dropdown-menu {
-  --tint-color: var(--tint-color);
-  --blur-radius: var(--blur-radius);
-  --border-color: var(--border-color);
-  --highlight-color: var(--highlight-color);
-  --shadow-color: var(--shadow-color);
-  --text-color: var(--text-color-dark);
   position: absolute;
   top: 100%;
   right: 0;
