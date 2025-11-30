@@ -254,16 +254,19 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
       justify-content: center;
       align-items: center;
       z-index: 100000 !important;
-      animation: fadeIn 0.3s ease-out;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
       cursor: pointer;
     }
     .success-popup.active {
-      display: flex !important;
+      opacity: 1;
+      visibility: visible;
     }
     .success-popup-content {
       cursor: default;
@@ -754,43 +757,65 @@
         return scrollY;
       }
       
-      // Helper function to restore body scroll
-      function unlockBodyScroll(scrollY) {
+      // Global function to force unlock scroll
+      window.forceUnlockScroll = function() {
         try {
           // Remove all lock classes
           document.body.classList.remove('modal-open', 'yoco-active');
           
-          // Restore body styles
+          // Reset body styles
           document.body.style.position = '';
           document.body.style.top = '';
           document.body.style.width = '';
           document.body.style.overflow = '';
           document.body.style.height = '';
           
-          // Restore html overflow
+          // Reset html styles
           document.documentElement.style.overflow = '';
           document.documentElement.style.height = '';
           
           // Force reflow/repaint
           void document.body.offsetHeight;
           
-          // Restore scroll position if provided
-          if (typeof scrollY === 'number' && !isNaN(scrollY)) {
-            window.scrollTo(0, scrollY);
+          // Restore scroll position from data attribute if it exists
+          const savedScrollY = document.body.getAttribute('data-saved-scroll');
+          if (savedScrollY) {
+            window.scrollTo(0, parseInt(savedScrollY, 10));
+            document.body.removeAttribute('data-saved-scroll');
           }
-          
-          // Ensure scrolling is re-enabled
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
           
           // Double check after a short delay
           setTimeout(() => {
             document.body.style.overflow = '';
             document.documentElement.style.overflow = '';
+            if (savedScrollY) {
+              window.scrollTo(0, parseInt(savedScrollY, 10));
+            }
+          }, 100);
+        } catch (error) {
+          console.error('Error in forceUnlockScroll:', error);
+        }
+      };
+      
+      // Helper function to restore body scroll
+      function unlockBodyScroll(scrollY) {
+        try {
+          // Save scroll position to data attribute as fallback
+          if (typeof scrollY === 'number' && !isNaN(scrollY)) {
+            document.body.setAttribute('data-saved-scroll', scrollY);
+          }
+          
+          // Use the global function to ensure consistent behavior
+          window.forceUnlockScroll();
+          
+          // Additional check after a delay
+          setTimeout(() => {
             if (typeof scrollY === 'number' && !isNaN(scrollY)) {
               window.scrollTo(0, scrollY);
             }
-          }, 50);
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+          }, 150);
         } catch (error) {
           console.error('Error unlocking body scroll:', error);
           // Force unlock even on error
@@ -1149,19 +1174,30 @@
                       console.log('Success amount element:', successAmount);
                       
                       if (successPopup && successAmount) {
-                        successAmount.textContent = 'R' + amount;
+                        // Ensure popup is visible and on top
                         successPopup.style.display = 'flex';
+                        successPopup.style.visibility = 'visible';
+                        successPopup.style.opacity = '1';
                         successPopup.style.zIndex = '100000';
-                        successPopup.classList.add('active');
-                        console.log('Success popup shown with amount:', amount);
                         
-                        // Force show if still not visible
+                        // Set the amount
+                        successAmount.textContent = 'R' + amount;
+                        
+                        // Add active class with a small delay to ensure display is updated first
+                        setTimeout(() => {
+                          successPopup.classList.add('active');
+                          console.log('Success popup shown with amount:', amount);
+                        }, 50);
+                        
+                        // Force show if still not visible after a short delay
                         setTimeout(() => {
                           if (!successPopup.classList.contains('active')) {
                             successPopup.style.display = 'flex';
+                            successPopup.style.visibility = 'visible';
+                            successPopup.style.opacity = '1';
                             successPopup.classList.add('active');
                           }
-                        }, 100);
+                        }, 150);
                       
                         // Auto-close after 5 seconds or on button click
                         const closeSuccessPopup = () => {
@@ -1368,9 +1404,17 @@
               // Try to get amount from URL params or use default
               const amount = urlParams.get('amount') || '0.00';
               successAmount.textContent = 'R' + parseFloat(amount).toFixed(2);
+              
+              // Ensure popup is visible and on top
               successPopup.style.display = 'flex';
+              successPopup.style.visibility = 'visible';
+              successPopup.style.opacity = '1';
               successPopup.style.zIndex = '100000';
-              successPopup.classList.add('active');
+              
+              // Add active class with a small delay
+              setTimeout(() => {
+                successPopup.classList.add('active');
+              }, 50);
               
               const closeSuccessPopup = () => {
                 successPopup.classList.remove('active');
