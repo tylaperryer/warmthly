@@ -563,7 +563,7 @@
       </div>
     </div>
     <footer class="footer">
-        <p>&copy; 2025 Warmthly. All rights reserved.</p>
+        <p>CC BY-NC-SA Warmthly 2025</p>
     </footer>
   </div>
   
@@ -1036,7 +1036,20 @@
             throw new Error('Yoco SDK not loaded. Please refresh the page and try again.');
           }
 
-          const publicKey = 'pk_test_6da95a49qWBO9nd4b474';
+          // Fetch public key from API (uses environment variable)
+          let publicKey;
+          try {
+            const keyResponse = await fetch('/api/get-yoco-public-key');
+            if (!keyResponse.ok) {
+              throw new Error('Failed to fetch public key');
+            }
+            const keyData = await keyResponse.json();
+            publicKey = keyData.publicKey || 'pk_live_0f16cae9qWBO9nd54734';
+          } catch (keyError) {
+            console.warn('Failed to fetch public key from API, using fallback:', keyError);
+            publicKey = 'pk_live_0f16cae9qWBO9nd54734';
+          }
+          
           if (!publicKey) {
             throw new Error('Yoco public key is missing. Please contact support.');
           }
@@ -1149,6 +1162,43 @@
                     successPopup.style.display = 'flex';
                     successPopup.style.zIndex = '100000';
                     successPopup.classList.add('active');
+                    
+                    // Add close handler that restores donate button
+                    const closeSuccessPopup = () => {
+                      successPopup.classList.remove('active');
+                      successPopup.style.display = 'none';
+                      // Restore donate button
+                      const donateButton = document.getElementById('donateButton');
+                      if (donateButton) {
+                        donateButton.style.display = 'inline-block';
+                      }
+                      window.forceUnlockScroll();
+                    };
+                    
+                    const successButton = document.getElementById('successPopupButton');
+                    if (successButton) {
+                      successButton.onclick = closeSuccessPopup;
+                    }
+                    
+                    // Close on click outside
+                    const handleSuccessClickOutside = (e) => {
+                      if (e.target === successPopup) {
+                        closeSuccessPopup();
+                        successPopup.removeEventListener('click', handleSuccessClickOutside);
+                      }
+                    };
+                    successPopup.addEventListener('click', handleSuccessClickOutside);
+                    
+                    // Prevent clicks on content from closing
+                    const successContent = successPopup.querySelector('.success-popup-content');
+                    if (successContent) {
+                      successContent.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                      });
+                    }
+                    
+                    // Auto-close after 5 seconds
+                    setTimeout(closeSuccessPopup, 5000);
                   }
                   
                   // Reset proceed button
@@ -1292,6 +1342,11 @@
                 successPopup.classList.remove('active');
                 successPopup.style.display = 'none';
                 window.history.replaceState({}, document.title, window.location.pathname);
+                // Restore donate button
+                const donateButton = document.getElementById('donateButton');
+                if (donateButton) {
+                  donateButton.style.display = 'inline-block';
+                }
                 // Ensure scrolling is restored
                 if (typeof window.forceUnlockScroll === 'function') {
                   window.forceUnlockScroll();
