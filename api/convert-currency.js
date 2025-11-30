@@ -44,18 +44,35 @@ export default async function handler(req, res) {
       throw new Error(`Conversion rate not found for ${to}`);
     }
 
-    // Convert amount (amount is in cents, so we convert and round)
+    // Convert amount
+    // Note: For JPY, amount is in whole units (not cents). For ZAR, we need cents.
+    // So if from=JPY, we multiply by 100 to convert to cents, then apply rate
+    // For other currencies, amount is already in cents
     const originalAmount = parseFloat(amount);
-    const convertedAmount = Math.round(originalAmount * rate);
+    let amountInZARCents;
+    
+    if (from === 'JPY') {
+      // JPY amount is in whole units, convert to ZAR cents
+      // First convert JPY to ZAR (whole units), then multiply by 100 for cents
+      amountInZARCents = Math.round(originalAmount * rate * 100);
+    } else {
+      // Other currencies: amount is in cents, convert directly
+      amountInZARCents = Math.round(originalAmount * rate);
+    }
 
+    // Format original amount (handle JPY differently)
+    const formattedOriginal = from === 'JPY' 
+      ? originalAmount.toFixed(0)
+      : (originalAmount / 100).toFixed(2);
+    
     return res.status(200).json({
       originalAmount,
-      convertedAmount,
+      convertedAmount: amountInZARCents,
       from,
       to,
       rate,
-      formattedOriginal: (originalAmount / 100).toFixed(2),
-      formattedConverted: (convertedAmount / 100).toFixed(2)
+      formattedOriginal,
+      formattedConverted: (amountInZARCents / 100).toFixed(2)
     });
   } catch (error) {
     console.error('Error converting currency:', error);
