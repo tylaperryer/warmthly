@@ -132,6 +132,11 @@
   border: 1px solid var(--border-color);
   box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05);
   overflow: hidden;
+  outline: none;
+}
+
+.stoplight:focus {
+  outline: none;
 }
 
 .stoplight:hover::before,
@@ -250,7 +255,6 @@
 
 .dropdown-item:hover {
   color: var(--warmthly-orange);
-  background: rgba(255, 140, 66, 0.15);
 }
 
 .dropdown-item.dropdown-item-red {
