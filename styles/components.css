@@ -614,20 +614,13 @@ body.yoco-active {
 
 /* Hide scrollbar for currency options */
 .custom-currency-options::-webkit-scrollbar {
-  width: 6px;
+  width: 0;
+  height: 0;
 }
 
-.custom-currency-options::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-currency-options::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.custom-currency-options::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+.custom-currency-options {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 .donation-modal-actions {
@@ -993,6 +986,18 @@ html.scroll-unlocked {
   .dropdown-menu {
     min-width: 180px;
   }
+}
+
+/* ===== FOOTER ===== */
+.site-footer {
+  margin-top: 4rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  border-top: 1px solid rgba(44, 44, 44, 0.1);
 }
 
 
