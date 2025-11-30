@@ -30,8 +30,8 @@
     }
     /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
     body {
-      opacity: 0;
-      visibility: hidden;
+      opacity: 1;
+      visibility: visible;
       transition: opacity 0.3s ease-in-out;
     }
     /* 3. Fade in smoothly once fonts are ready */
@@ -485,6 +485,12 @@
   <script>
     // --- NATIVE FONT LOADING ---
     (function() {
+      // Immediate fallback - show content right away if script runs
+      setTimeout(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      }, 0);
+      
       try {
         if (document.fonts && document.fonts.ready) {
           document.fonts.ready.then(() => {
