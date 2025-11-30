@@ -122,6 +122,21 @@
     .donation-modal.active {
       display: flex;
     }
+    
+    /* Prevent body scroll and background shift when modal is open */
+    body.modal-open {
+      overflow: hidden !important;
+      position: fixed;
+      width: 100%;
+      padding-right: 0;
+    }
+    
+    /* Prevent background shift when Yoco popup is active */
+    body.yoco-active {
+      overflow: hidden !important;
+      position: fixed;
+      width: 100%;
+    }
     .donation-modal-content {
       background: #fff6f1;
       padding: 2.5rem;
@@ -357,6 +372,9 @@
     
     body.yoco-active {
       isolation: auto !important;
+      overflow: hidden !important;
+      position: fixed;
+      width: 100%;
     }
   </style>
 </head>
@@ -606,25 +624,89 @@
         }
       });
 
+      // Helper function to prevent body scroll
+      function lockBodyScroll() {
+        const scrollY = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = '100%';
+        document.body.classList.add('modal-open');
+        return scrollY;
+      }
+      
+      // Helper function to restore body scroll
+      function unlockBodyScroll(scrollY) {
+        document.body.classList.remove('modal-open');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        if (scrollY !== undefined) {
+          window.scrollTo(0, scrollY);
+        }
+      }
+      
+      // Helper function to cleanup Yoco state
+      function cleanupYocoState() {
+        try {
+          document.body.classList.remove('yoco-active');
+          unlockBodyScroll();
+          
+          const donateButton = document.getElementById('donateButton');
+          const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
+          const donationSection = document.getElementById('donationSection');
+          
+          if (donateButton) {
+            donateButton.style.display = 'inline-block';
+          }
+          if (yocoPaymentEmbed) {
+            yocoPaymentEmbed.style.display = 'none';
+          }
+          if (donationSection) {
+            const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
+            if (yocoEmbedContainer) {
+              yocoEmbedContainer.innerHTML = '';
+            }
+          }
+        } catch (error) {
+          console.error('Error cleaning up Yoco state:', error);
+        }
+      }
+
       // Open modal
       donateButton.addEventListener('click', () => {
-        donationModal.classList.add('active');
+        try {
+          lockBodyScroll();
+          donationModal.classList.add('active');
+        } catch (error) {
+          console.error('Error opening modal:', error);
+        }
       });
 
       // Close modal
       function closeModal() {
-        donationModal.classList.remove('active');
-        selectedAmount = null;
-        customAmountInput.value = '';
-        amountButtons.forEach(b => b.classList.remove('selected'));
-        
-        // Reset form visibility
-        const donationForm = document.getElementById('donationForm');
-        const yocoPaymentContainer = document.getElementById('yocoPaymentContainer');
-        const yocoIframeContainer = document.getElementById('yocoIframeContainer');
-        if (donationForm) donationForm.style.display = 'block';
-        if (yocoPaymentContainer) yocoPaymentContainer.style.display = 'none';
-        if (yocoIframeContainer) yocoIframeContainer.innerHTML = '';
+        try {
+          const scrollY = window.scrollY;
+          donationModal.classList.remove('active');
+          unlockBodyScroll(scrollY);
+          
+          selectedAmount = null;
+          if (customAmountInput) {
+            customAmountInput.value = '';
+          }
+          amountButtons.forEach(b => b.classList.remove('selected'));
+          
+          // Reset form visibility
+          const donationForm = document.getElementById('donationForm');
+          const yocoPaymentContainer = document.getElementById('yocoPaymentContainer');
+          const yocoIframeContainer = document.getElementById('yocoIframeContainer');
+          if (donationForm) donationForm.style.display = 'block';
+          if (yocoPaymentContainer) yocoPaymentContainer.style.display = 'none';
+          if (yocoIframeContainer) yocoIframeContainer.innerHTML = '';
+        } catch (error) {
+          console.error('Error closing modal:', error);
+          // Force unlock even if there's an error
+          unlockBodyScroll();
+        }
       }
 
       cancelButton.addEventListener('click', closeModal);
@@ -655,22 +737,41 @@
           return;
         }
 
+        if (!proceedButton) {
+          console.error('Proceed button not found');
+          return;
+        }
+
         proceedButton.disabled = true;
         const originalText = proceedButton.textContent;
         proceedButton.textContent = 'Processing...';
 
+        let scrollY = null;
+        let yocoSDK = null;
+
         try {
           // Initialize Yoco SDK
           if (typeof window.YocoSDK === 'undefined') {
-            throw new Error('Yoco SDK not loaded. Please refresh the page.');
+            throw new Error('Yoco SDK not loaded. Please refresh the page and try again.');
           }
 
           const publicKey = 'pk_test_6da95a49qWBO9nd4b474';
-          const yocoSDK = new window.YocoSDK({
-            publicKey: publicKey
-          });
+          if (!publicKey) {
+            throw new Error('Yoco public key is missing. Please contact support.');
+          }
 
-          // Close modal and show Yoco payment embedded on page
+          try {
+            yocoSDK = new window.YocoSDK({
+              publicKey: publicKey
+            });
+          } catch (sdkError) {
+            throw new Error('Failed to initialize Yoco SDK: ' + (sdkError.message || 'Unknown error'));
+          }
+
+          // Lock body scroll before closing modal
+          scrollY = lockBodyScroll();
+          
+          // Close modal
           donationModal.classList.remove('active');
           
           // Hide donate button, show embedded payment
@@ -679,79 +780,178 @@
           const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
           const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
           
+          if (!donationSection || !donateButton || !yocoPaymentEmbed || !yocoEmbedContainer) {
+            throw new Error('Required payment elements not found on page.');
+          }
+          
           donateButton.style.display = 'none';
           yocoPaymentEmbed.style.display = 'block';
           yocoEmbedContainer.innerHTML = '';
           
           // Scroll to payment form
-          yocoPaymentEmbed.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            try {
+              yocoPaymentEmbed.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (scrollError) {
+              console.warn('Could not scroll to payment form:', scrollError);
+            }
+          }, 100);
           
-          // Use Yoco SDK popup - it will appear as an overlay
-          // The popup is designed to overlay the page, so we'll let it do that
+          // Prepare callback URLs
           const callbackUrl = window.location.origin + window.location.pathname + '?payment=success';
           const cancelUrl = window.location.origin + window.location.pathname + '?payment=cancelled';
-          
-          yocoSDK.showPopup({
-            amountInCents: Math.round(selectedAmount),
-            currency: 'ZAR',
-            name: 'Warmthly Donation',
-            description: 'Thank you for supporting our mission to rehumanize our world!',
-            callbackUrl: callbackUrl,
-            cancelUrl: cancelUrl,
-            metadata: {
-              source: 'website_donation'
-            },
-            onClose: () => {
-              document.body.classList.remove('yoco-active');
-              // User cancelled - restore button
-              donateButton.style.display = 'inline-block';
-              yocoPaymentEmbed.style.display = 'none';
-              proceedButton.disabled = false;
-              proceedButton.textContent = originalText;
-            },
-            onSuccess: (data) => {
-              document.body.classList.remove('yoco-active');
-              // Payment successful
-              alert('Thank you! Your donation of R' + (selectedAmount / 100).toFixed(2) + ' was successful!');
-              
-              // Restore button
-              donateButton.style.display = 'inline-block';
-              yocoPaymentEmbed.style.display = 'none';
-              
-              // Reset form
-              closeModal();
-            }
-          });
           
           // Add yoco-active class to body to fix z-index stacking
           document.body.classList.add('yoco-active');
           
-          // Ensure Yoco popup has high z-index
-          setTimeout(() => {
-            const yocoElements = document.querySelectorAll('[class*="yoco" i], [id*="yoco" i], iframe[src*="yoco" i]');
-            yocoElements.forEach(el => {
-              const style = window.getComputedStyle(el);
-              if (style.position === 'fixed') {
-                el.style.zIndex = '999999';
+          // Show Yoco popup with comprehensive error handling
+          try {
+            yocoSDK.showPopup({
+              amountInCents: Math.round(selectedAmount),
+              currency: 'ZAR',
+              name: 'Warmthly Donation',
+              description: 'Thank you for supporting our mission to rehumanize our world!',
+              callbackUrl: callbackUrl,
+              cancelUrl: cancelUrl,
+              metadata: {
+                source: 'website_donation',
+                amount: selectedAmount
+              },
+              onClose: () => {
+                try {
+                  console.log('Yoco popup closed');
+                  cleanupYocoState();
+                  
+                  // Restore button
+                  if (donateButton) {
+                    donateButton.style.display = 'inline-block';
+                  }
+                  if (yocoPaymentEmbed) {
+                    yocoPaymentEmbed.style.display = 'none';
+                  }
+                  
+                  if (proceedButton) {
+                    proceedButton.disabled = false;
+                    proceedButton.textContent = originalText;
+                  }
+                  
+                  // Reset form
+                  closeModal();
+                } catch (error) {
+                  console.error('Error in onClose handler:', error);
+                  cleanupYocoState();
+                }
+              },
+              onSuccess: (data) => {
+                try {
+                  console.log('Payment successful:', data);
+                  
+                  // Show confirmation popup
+                  const amount = (selectedAmount / 100).toFixed(2);
+                  const confirmed = confirm('Thank you! Your donation of R' + amount + ' was successful!\n\nClick OK to continue.');
+                  
+                  // Cleanup state
+                  cleanupYocoState();
+                  
+                  // Restore button
+                  if (donateButton) {
+                    donateButton.style.display = 'inline-block';
+                  }
+                  if (yocoPaymentEmbed) {
+                    yocoPaymentEmbed.style.display = 'none';
+                  }
+                  
+                  // Reset form
+                  closeModal();
+                  
+                  // Optionally redirect or show success message
+                  if (confirmed) {
+                    // Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                  }
+                } catch (error) {
+                  console.error('Error in onSuccess handler:', error);
+                  alert('Payment was successful, but there was an error processing the confirmation. Thank you for your donation!');
+                  cleanupYocoState();
+                  closeModal();
+                }
+              },
+              onError: (error) => {
+                try {
+                  console.error('Yoco payment error:', error);
+                  alert('Payment error: ' + (error.message || 'An unknown error occurred. Please try again.'));
+                  cleanupYocoState();
+                  
+                  if (donateButton) {
+                    donateButton.style.display = 'inline-block';
+                  }
+                  if (yocoPaymentEmbed) {
+                    yocoPaymentEmbed.style.display = 'none';
+                  }
+                  
+                  if (proceedButton) {
+                    proceedButton.disabled = false;
+                    proceedButton.textContent = originalText;
+                  }
+                } catch (handlerError) {
+                  console.error('Error in onError handler:', handlerError);
+                  cleanupYocoState();
+                }
               }
             });
-          }, 100);
+          } catch (popupError) {
+            throw new Error('Failed to show Yoco payment popup: ' + (popupError.message || 'Unknown error'));
+          }
           
-          proceedButton.disabled = false;
-          proceedButton.textContent = originalText;
+          // Ensure Yoco popup has high z-index
+          setTimeout(() => {
+            try {
+              const yocoElements = document.querySelectorAll('[class*="yoco" i], [id*="yoco" i], iframe[src*="yoco" i]');
+              yocoElements.forEach(el => {
+                try {
+                  const style = window.getComputedStyle(el);
+                  if (style.position === 'fixed') {
+                    el.style.zIndex = '999999';
+                  }
+                } catch (elError) {
+                  console.warn('Error setting z-index on Yoco element:', elError);
+                }
+              });
+            } catch (zIndexError) {
+              console.warn('Error setting Yoco z-index:', zIndexError);
+            }
+          }, 100);
 
         } catch (error) {
           console.error('Donation error:', error);
-          alert('Sorry, there was an error processing your donation: ' + error.message);
+          
+          // Cleanup on error
+          cleanupYocoState();
+          
+          // Show user-friendly error message
+          const errorMessage = error.message || 'An unexpected error occurred. Please try again or contact support if the problem persists.';
+          alert('Sorry, there was an error processing your donation:\n\n' + errorMessage);
           
           // Restore button
           const donateButton = document.getElementById('donateButton');
           const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-          if (donateButton) donateButton.style.display = 'inline-block';
-          if (yocoPaymentEmbed) yocoPaymentEmbed.style.display = 'none';
+          if (donateButton) {
+            donateButton.style.display = 'inline-block';
+          }
+          if (yocoPaymentEmbed) {
+            yocoPaymentEmbed.style.display = 'none';
+          }
           
-          proceedButton.disabled = false;
-          proceedButton.textContent = originalText;
+          // Restore proceed button
+          if (proceedButton) {
+            proceedButton.disabled = false;
+            proceedButton.textContent = originalText;
+          }
+          
+          // Restore scroll if we locked it
+          if (scrollY !== null) {
+            unlockBodyScroll(scrollY);
+          }
         }
       });
       
@@ -759,10 +959,20 @@
       const cancelPaymentBtn = document.getElementById('cancelPayment');
       if (cancelPaymentBtn) {
         cancelPaymentBtn.addEventListener('click', () => {
-          const donateButton = document.getElementById('donateButton');
-          const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-          if (donateButton) donateButton.style.display = 'inline-block';
-          if (yocoPaymentEmbed) yocoPaymentEmbed.style.display = 'none';
+          try {
+            cleanupYocoState();
+            const donateButton = document.getElementById('donateButton');
+            const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
+            if (donateButton) {
+              donateButton.style.display = 'inline-block';
+            }
+            if (yocoPaymentEmbed) {
+              yocoPaymentEmbed.style.display = 'none';
+            }
+          } catch (error) {
+            console.error('Error canceling payment:', error);
+            cleanupYocoState();
+          }
         });
       }
     })();
@@ -770,18 +980,44 @@
     
     // Check for payment success/cancel in URL parameters (fallback if iframe redirects parent)
     (function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const paymentStatus = urlParams.get('payment');
-      
-      if (paymentStatus === 'success') {
-        // Payment was successful
-        alert('Thank you! Your donation was successful!');
-        // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-      } else if (paymentStatus === 'cancelled') {
-        // Payment was cancelled
-        // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentStatus = urlParams.get('payment');
+        
+        if (paymentStatus === 'success') {
+          // Payment was successful
+          const confirmed = confirm('Thank you! Your donation was successful!\n\nClick OK to continue.');
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          // Ensure cleanup
+          document.body.classList.remove('yoco-active', 'modal-open');
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+        } else if (paymentStatus === 'cancelled') {
+          // Payment was cancelled
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          // Ensure cleanup
+          document.body.classList.remove('yoco-active', 'modal-open');
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+        }
+      } catch (error) {
+        console.error('Error processing payment status from URL:', error);
+        // Clean up URL and state anyway
+        try {
+          window.history.replaceState({}, document.title, window.location.pathname);
+          document.body.classList.remove('yoco-active', 'modal-open');
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+        } catch (cleanupError) {
+          console.error('Error during cleanup:', cleanupError);
+        }
       }
     })();
     
