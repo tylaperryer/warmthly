@@ -20,564 +20,187 @@
   <link rel="preload" href="/fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="/fonts/CormorantGaramond-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
 
+  <!-- Shared CSS -->
+  <link rel="stylesheet" href="/styles/common.css">
+
   <style>
+    /* Critical CSS - Must be inline for performance */
     /* --- ANTI-FLASH AND PERFORMANCE FIXES --- */
-    /* 1. Set base background color immediately to prevent white flash */
     :root { color-scheme: light; }
     html {
       background-color: #fff6f1;
       min-height: 100%;
     }
-    /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
     body {
       opacity: 1;
       visibility: visible;
       transition: opacity 0.3s ease-in-out;
     }
-    /* 3. Fade in smoothly once fonts are ready */
     body.fonts-loaded {
       opacity: 1;
       visibility: visible;
     }
     /* --- END ANTI-FLASH FIXES --- */
 
-    /* Your Original CSS - Minified and Combined for Performance */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype'); }
-    @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 300 700; font-display: swap; src: url('/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf') format('truetype'); }
-    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); }
-    @font-face { font-family: 'Inter'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype'); }
-    html { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
-    html::-webkit-scrollbar { display: none; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.7; color: #2c2c2c; background: #fff6f1; min-height: 100vh; position: relative; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
-    body::-webkit-scrollbar { display: none; }
-    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: radial-gradient(circle at 20% 30%, rgba(255, 140, 66, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 182, 193, 0.12) 0%, transparent 50%), radial-gradient(circle at 40% 70%, rgba(173, 216, 230, 0.1) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(144, 238, 144, 0.08) 0%, transparent 50%), linear-gradient(135deg, #fff6f1 0%, #ffeee6 100%); z-index: -1; pointer-events: none; }
-    ::selection { background: #FF8C42; color: #FFFFFF; }
-    .header { position: fixed; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1001; pointer-events: none; }
-    .header-left { pointer-events: auto; }
-    .header-right { display: flex; align-items: center; gap: 20px; pointer-events: auto; }
-    .brand-logo { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 2rem; color: #FF8C42; user-select: none; text-decoration: none; }
-    .nav-link { font-family: 'Inter', sans-serif; font-weight: 600; color: #FF8C42; text-decoration: none; font-size: 1rem; user-select: none; transition: color 0.3s ease; }
-    .nav-link:hover { color: #e07a35; }
-    .stoplight-container { position: relative; }
-    .stoplight { --tint-color: rgba(255,255,255,0.15); --blur-radius: 12px; --border-color: rgba(255,255,255,0.25); --highlight-color: rgba(255,255,255,0.4); --shadow-color: rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 3px; cursor: pointer; padding: 8px; position: relative; background: var(--tint-color); backdrop-filter: blur(var(--blur-radius)) saturate(1.2); -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05); transition: all 0.4s cubic-bezier(0.25,0.8,0.25,1); overflow: hidden; }
-    .stoplight::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%); pointer-events: none; z-index: 1; opacity: 0.7; }
-    .stoplight:hover, .stoplight.active { background: rgba(255,255,255,0.25); box-shadow: 0 8px 16px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -1px 1px rgba(0,0,0,0.1); }
-    .stoplight:hover::before, .stoplight.active::before { opacity: 1; }
-    .stoplight-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; transition: opacity 0.4s cubic-bezier(0.25,0.8,0.25,1); z-index: 2; opacity: 0.3; }
-    .stoplight-dot.red { background: #ff4757; }
-    .stoplight-dot.yellow { background: #FF8C42; }
-    .stoplight-dot.green { background: #2ed573; }
-    .stoplight-container:hover .stoplight-dot.red, .stoplight.active .stoplight-dot.red { animation: stoplight-cycle-red 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
-    .stoplight-container:hover .stoplight-dot.green, .stoplight.active .stoplight-dot.green { animation: stoplight-cycle-green 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
-    .stoplight-container:hover .stoplight-dot.yellow, .stoplight.active .stoplight-dot.yellow { animation: stoplight-cycle-yellow 10s cubic-bezier(0.25,0.8,0.25,1) infinite; }
-    @keyframes stoplight-cycle-red { 0%, 33.33% { opacity: 1; } 33.34%, 100% { opacity: 0.3; } }
-    @keyframes stoplight-cycle-green { 0%, 33.33% { opacity: 0.3; } 33.34%, 66.66% { opacity: 1; } 66.67%, 100% { opacity: 0.3; } }
-    @keyframes stoplight-cycle-yellow { 0%, 66.66% { opacity: 0.3; } 66.67%, 100% { opacity: 1; } }
-    .dropdown-menu { --tint-color: rgba(255,255,255,0.15); --blur-radius: 12px; --border-color: rgba(255,255,255,0.25); --highlight-color: rgba(255,255,255,0.4); --shadow-color: rgba(0,0,0,0.08); --text-color: #1c2526; position: absolute; top: 100%; right: 0; background: var(--tint-color); backdrop-filter: blur(var(--blur-radius)) saturate(1.2); -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2); border-radius: 18px; padding: 8px; margin-top: 12px; min-width: 200px; box-shadow: 0 8px 32px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); opacity: 0; visibility: hidden; transform: translateY(-12px) scale(0.94); transition: all 0.4s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
-    .dropdown-menu::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%); pointer-events: none; z-index: 1; opacity: 0.7; }
-    .dropdown-menu.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-    .dropdown-item { display: block; padding: 12px 16px; margin: 2px 0; color: var(--text-color); text-decoration: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 500; font-size: 0.95rem; transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1); border-radius: 10px; position: relative; z-index: 2; }
-    .dropdown-item:hover { color: #FF8C42; }
-    .container { max-width: 800px; margin: 0 auto; padding: 100px 20px 40px; text-align: center; color: #2c2c2c; position: relative; z-index: 1; }
-    .logo { font-family: 'Inter', sans-serif; font-size: 3.5rem; font-weight: 600; margin-bottom: 1rem; color: #FF8C42; }
-    .subtitle { font-size: 1.2rem; color: #2c2c2c; opacity: 0.8; font-weight: 400; margin-bottom: 3rem; font-family: 'Inter', sans-serif; }
-    .video-section { margin: 3rem 0; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); }
-    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; background: #000; border-radius: 20px; }
-    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 20px; }
-    .video-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; border-radius: 20px; cursor: pointer; transition: opacity 0.3s ease; }
-    .video-placeholder.loaded { opacity: 0; pointer-events: none; }
-    .video-play-button { background: transparent; border: none; cursor: pointer; padding: 0; margin-bottom: 1rem; transition: transform 0.2s ease; }
-    .video-play-button:hover { transform: scale(1.1); }
-    .video-placeholder-text { color: white; font-family: 'Inter', sans-serif; font-size: 1rem; margin: 0; }
-    .method-section { text-align: left; margin: 4rem auto; padding: 3rem; background: rgba(255, 255, 255, 0.2); border-radius: 20px; border: 1px solid rgba(255, 140, 66, 0.15); max-width: 700px; }
-    .method-section .section-title { font-family: 'Inter', sans-serif; font-size: 1.8rem; font-weight: 600; color: #FF8C42; margin-bottom: 1rem; text-align: center; }
-    .method-section .intro-paragraph { text-align: center; font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; }
-    .method-section .intro-paragraph strong { color: #2c2c2c; font-weight: 600; }
-    .method-step { margin-bottom: 2rem; }
-    .method-step:last-child { margin-bottom: 0; }
-    .method-step h3 { font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 600; color: #2c2c2c; margin-bottom: 0.5rem; }
-    .method-step h3 span { color: #FF8C42; margin-right: 0.5rem; }
-    .method-step p { opacity: 0.8; line-height: 1.7; padding-left: 2.2rem; }
-    .donate-button { background: #FF8C42; color: white; padding: 1rem 2.5rem; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3); margin-top: 1rem; font-family: 'Inter', sans-serif; }
-    .donate-button:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 140, 66, 0.4); background: #e07a35; }
-    .donate-button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    .footer { margin-top: 4rem; opacity: 0.7; font-size: 0.9rem; }
-    
-    /* Donation Modal Styles */
-    .donation-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: transparent;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-    }
-    .donation-modal.active {
-      display: flex;
-    }
-    
-    /* Prevent body scroll and background shift when modal is open */
-    body.modal-open {
-      overflow: hidden !important;
-      position: fixed;
-      width: 100%;
-      padding-right: 0;
-    }
-    
-    /* Prevent background shift when Yoco popup is active */
-    body.yoco-active {
-      overflow: hidden !important;
-      position: fixed;
-      width: 100%;
-    }
-    .donation-modal-content {
-      background: #fff6f1;
-      padding: 2.5rem;
-      border-radius: 20px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    /* Page-specific styles */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 100px 20px 40px;
+      text-align: center;
+      color: #2c2c2c;
       position: relative;
-      animation: modalFadeIn 0.3s ease-out;
+      z-index: 1;
     }
-    
-    #yocoPaymentContainer {
-      width: 100%;
-    }
-    
-    #yocoIframeContainer iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 10px;
-    }
-    @keyframes modalFadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-    .donation-modal-content h2 {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 2rem;
-      font-weight: 700;
+    .logo {
+      font-family: 'Inter', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
       color: #FF8C42;
-      margin-bottom: 0.5rem;
-      text-align: center;
     }
-    .donation-modal-content > p {
-      text-align: center;
-      margin-bottom: 1.5rem;
+    .subtitle {
+      font-size: 1.2rem;
       color: #2c2c2c;
       opacity: 0.8;
-    }
-    .donation-amounts {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin: 1.5rem 0;
-    }
-    .amount-btn {
-      padding: 1rem;
-      border: 2px solid #FF8C42;
-      background: white;
-      border-radius: 10px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #FF8C42;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      font-weight: 400;
+      margin-bottom: 3rem;
       font-family: 'Inter', sans-serif;
     }
-    .amount-btn:hover {
-      background: rgba(255, 140, 66, 0.1);
-      transform: translateY(-2px);
+    .video-section {
+      margin: 3rem 0;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
     }
-    .amount-btn.selected {
-      background: #FF8C42;
-      color: white;
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      background: #000;
+      border-radius: 20px;
     }
-    #customAmount {
-      width: 100%;
-      padding: 1rem;
-      border: 2px solid #FF8C42;
-      border-radius: 10px;
-      font-size: 1.1rem;
-      margin: 1rem 0;
-      font-family: 'Inter', sans-serif;
-      box-sizing: border-box;
-    }
-    #customAmount:focus {
-      outline: none;
-      border-color: #e07a35;
-      box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.2);
-    }
-    .donation-modal-actions {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-    .cancel-button {
-      flex: 1;
-      padding: 1rem;
-      border: 2px solid #ccc;
-      background: white;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-    .cancel-button:hover {
-      background: #f5f5f5;
-      border-color: #999;
-    }
-    
-    /* Success Popup */
-    .success-popup {
-      position: fixed;
+    .video-container iframe {
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 100000 !important;
-      animation: fadeIn 0.3s ease-out;
-      cursor: pointer;
-    }
-    .success-popup.active {
-      display: flex !important;
-    }
-    .success-popup-content {
-      cursor: default;
-    }
-    .success-popup-content {
-      background: linear-gradient(135deg, #2ed573 0%, #27ae60 100%);
-      padding: 3rem 2.5rem;
-      border-radius: 20px;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 12px 40px rgba(46, 213, 115, 0.4);
-      position: relative;
-      animation: successPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      text-align: center;
-      color: white;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes successPopIn {
-      0% {
-        opacity: 0;
-        transform: scale(0.5) translateY(-50px);
-      }
-      50% {
-        transform: scale(1.05) translateY(0);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-    .success-popup-content h2 {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    .success-popup-content p {
-      font-family: 'Inter', sans-serif;
-      font-size: 1.2rem;
-      color: white;
-      margin-bottom: 2rem;
-      line-height: 1.6;
-    }
-    .success-popup-content .success-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      display: block;
-    }
-    .success-popup-button {
-      background: white;
-      color: #27ae60;
-      padding: 1rem 2.5rem;
       border: none;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: 'Inter', sans-serif;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
     }
-    .success-popup-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    }
-    
-    /* Error Popup */
-    .error-popup {
-      position: fixed;
+    .video-placeholder {
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 100000 !important;
-      animation: fadeIn 0.3s ease-out;
-      cursor: pointer;
-    }
-    .error-popup.active {
-      display: flex !important;
-    }
-    .error-popup-content {
-      cursor: default;
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-      padding: 3rem 2.5rem;
-      border-radius: 20px;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      animation: popupSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      position: relative;
-    }
-    .error-popup-content h2 {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    .error-popup-content p {
-      font-family: 'Inter', sans-serif;
-      font-size: 1.1rem;
-      color: white;
-      margin-bottom: 1.5rem;
-      line-height: 1.6;
-      text-align: center;
-    }
-    .error-popup-content .error-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      display: block;
-      text-align: center;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-    }
-    .error-popup-button {
-      background: white;
-      color: #ee5a6f;
-      padding: 1rem 2.5rem;
-      border: none;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: 'Inter', sans-serif;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      display: block;
-      margin: 0 auto;
-    }
-    .error-popup-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-      background: #f8f9fa;
-    }
-    @keyframes popupSlideIn {
-      0% {
-        opacity: 0;
-        transform: scale(0.5) translateY(-50px);
-      }
-      50% {
-        transform: scale(1.05) translateY(0);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-    
-    /* Cookie Popup */
-    .cookie-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.25);
-      font-size: 1.8rem;
-      cursor: pointer;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      background: #000;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+    .video-placeholder.loaded {
       opacity: 0;
-      visibility: hidden;
-      transform: scale(0.8);
+      pointer-events: none;
     }
-    
-    .cookie-button.visible {
-      opacity: 1;
-      visibility: visible;
-      transform: scale(1);
+    .video-play-button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 1rem;
+      transition: transform 0.2s ease;
     }
-    
-    .cookie-button:hover {
-      background: rgba(255,255,255,0.25);
+    .video-play-button:hover {
       transform: scale(1.1);
     }
-    
-    .cookie-button:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.4);
-    }
-    
-    /* Screen reader only text */
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border-width: 0;
-    }
-    
-    .cookie-popup {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      z-index: 1001;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
+    .video-placeholder-text {
+      color: white;
       font-family: 'Inter', sans-serif;
-      font-size: 0.9rem;
-      line-height: 1.6;
+      font-size: 1rem;
+      margin: 0;
+    }
+    .method-section {
+      text-align: left;
+      margin: 4rem auto;
+      padding: 3rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 140, 66, 0.15);
+      max-width: 700px;
+    }
+    .method-section .section-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #FF8C42;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .method-section .intro-paragraph {
+      text-align: center;
+      font-size: 1.1rem;
+      opacity: 0.8;
+      margin-bottom: 2.5rem;
+    }
+    .method-section .intro-paragraph strong {
       color: #2c2c2c;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
-      max-width: 280px;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(10px) scale(0.9);
-      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      font-weight: 600;
+    }
+    .method-step {
+      margin-bottom: 2rem;
+    }
+    .method-step:last-child {
+      margin-bottom: 0;
+    }
+    .method-step h3 {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c2c2c;
+      margin-bottom: 0.5rem;
+    }
+    .method-step h3 span {
+      color: #FF8C42;
+      margin-right: 0.5rem;
+    }
+    .method-step p {
+      opacity: 0.8;
+      line-height: 1.7;
+      padding-left: 2.2rem;
+    }
+    .footer {
+      margin-top: 4rem;
+      opacity: 0.7;
+      font-size: 0.9rem;
     }
     
-    .cookie-popup.visible {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0) scale(1);
-    }
-    
-    @media (max-width: 768px) { 
-      .container { padding-top: 80px; } 
-      .header { flex-direction: row; align-items: center; } 
-      .brand-logo { position: static; } 
-      .header-right { position: static; } 
-      .logo { font-size: 2.5rem; margin-top: 60px; } 
-      .subtitle { font-size: 1rem; } 
-      .method-section { padding: 1.5rem; } 
-      .section-title { font-size: 1.5rem; } 
-      .method-step p { padding-left: 0; }
-      .cookie-button { bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 1.5rem; }
-      .cookie-popup { bottom: 70px; right: 15px; max-width: calc(100vw - 30px); font-size: 0.85rem; padding: 0.9rem 1rem; }
-      .donation-modal-content { padding: 1.5rem; }
-      .donation-amounts { grid-template-columns: 1fr; }
-    }
-    
-    /* Ensure Yoco popup appears above everything */
-    .yoco-popup-container,
-    [class*="yoco"],
-    [id*="yoco"],
-    [class*="Yoco"],
-    [id*="Yoco"],
-    iframe[src*="yoco"],
-    div[style*="position: fixed"][style*="z-index"] {
-      z-index: 99999 !important;
-      position: fixed !important;
-    }
-    
-    /* Target common modal/overlay patterns that Yoco might use */
-    body > div[style*="position: fixed"]:last-child,
-    body > div[style*="z-index"]:last-child {
-      z-index: 99999 !important;
-    }
-    
-    /* Fix z-index stacking context when Yoco popup is active */
-    body.yoco-active .header,
-    body.yoco-active .container {
-      z-index: auto !important;
-    }
-    
-    body.yoco-active {
-      isolation: auto !important;
-      overflow: hidden !important;
-      position: fixed;
-      width: 100%;
-    }
-    
-    /* NUCLEAR OPTION: Force unlock scroll even if Yoco styles persist */
-    /* This must be at the END of the stylesheet for maximum specificity */
-    body.force-scroll-unlock,
-    html.force-scroll-unlock {
-      overflow: visible !important;
-      overflow-y: auto !important;
-      position: static !important;
-      height: auto !important;
-      width: auto !important;
-      top: auto !important;
-      left: auto !important;
-    }
-    
-    /* Override any Yoco-injected styles */
-    body:not(.modal-open):not(.yoco-active),
-    html:not(.modal-open):not(.yoco-active) {
-      overflow-y: auto !important;
-      position: static !important;
-    }
-    
-    /* Ensure scroll is never locked unless explicitly modal-open or yoco-active */
-    body.scroll-unlocked,
-    html.scroll-unlocked {
-      overflow: visible !important;
-      overflow-y: auto !important;
-      position: static !important;
-      height: auto !important;
+    @media (max-width: 768px) {
+      .container {
+        padding-top: 80px;
+      }
+      .logo {
+        font-size: 2.5rem;
+        margin-top: 60px;
+      }
+      .subtitle {
+        font-size: 1rem;
+      }
+      .method-section {
+        padding: 1.5rem;
+      }
+      .method-section .section-title {
+        font-size: 1.5rem;
+      }
+      .method-step p {
+        padding-left: 0;
+      }
     }
   </style>
 </head>
