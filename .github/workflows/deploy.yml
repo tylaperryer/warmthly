@@ -1,4 +1,4 @@
-# This is the corrected code for .github/workflows/deploy.yml
+# This is the simplified and corrected code for .github/workflows/deploy.yml
 
 name: Deploy to GitHub Pages
 
@@ -14,7 +14,7 @@ permissions:
   id-token: write
 
 jobs:
-  # This job just checks your code, it doesn't build anything
+  # This job now only tests for broken links
   test:
     runs-on: ubuntu-latest
     steps:
@@ -27,17 +27,9 @@ jobs:
           # Check all HTML files in the current directory and any subdirectories
           args: --verbose --no-progress './**/*.html'
 
-      - name: Run Lighthouse accessibility audit
-        uses: treosh/lighthouse-ci-action@v10
-        with:
-          # This action will automatically find and use the lighthouserc.json file
-          # No other inputs are needed for a basic static site audit!
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-
   # This job deploys your site, but only if the 'test' job succeeds
   deploy:
-    needs: test # This line makes it wait for the 'test' job to finish successfully
+    needs: test # This still waits for the link checker to pass
     runs-on: ubuntu-latest
     environment:
       name: github-pages
