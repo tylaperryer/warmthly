@@ -990,13 +990,11 @@ html.scroll-unlocked {
 
 /* ===== FOOTER (HOMEPAGE INLINE LINE) ===== */
 .site-footer-inline {
-  margin-top: 2rem;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
   text-align: center;
   font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
   color: var(--text-color-light);
-  border-top: 1px solid rgba(44, 44, 44, 0.12);
 }
 
 .site-footer-inline a {
