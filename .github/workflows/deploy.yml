@@ -1,52 +1,58 @@
-# This is the code for .github/workflows/deploy.yml
+# This is the corrected code for .github/workflows/deploy.yml
 
 name: Deploy to GitHub Pages
 
 on:
-  # Run this workflow automatically every time you push to the 'main' branch
   push:
     branches:
       - main
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Allow this job to clone the repo and create a page deployment
 permissions:
   contents: read
   pages: write
   id-token: write
 
 jobs:
-  build:
+  # This job just checks your code, it doesn't build anything
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout your repository
         uses: actions/checkout@v4
-      
-      # This step is where you would build your site if needed.
-      # If you have a build command (like 'npm run build' or 'bun run build'),
-      # you would add it here. For a simple static site, you might not need it.
-      # Example:
-      # - name: Install dependencies
-      #   run: bun install
-      # - name: Build static site
-      #   run: bun run build # (if you have a build script)
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Test for broken links
+        uses: lycheeverse/lychee-action@v1
         with:
-          # This should be the folder containing your final website files.
-          # If your index.html is at the root, this is correct.
-          # If your files are in a 'dist' or 'build' folder, change this path.
-          path: '.'
+          # Check all HTML files in the current directory and any subdirectories
+          args: --verbose --no-progress './**/*.html'
 
+      - name: Run Lighthouse accessibility audit
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          # Instead of a URL, we point it to the local folder containing your site
+          # This will start a temporary server and test your new code before deployment
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          staticDistDir: '.' # The '.' means your site files are in the root directory
+
+  # This job deploys your site, but only if the 'test' job succeeds
   deploy:
-    needs: build
+    needs: test # This line makes it wait for the 'test' job to finish successfully
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Checkout your repository
+        uses: actions/checkout@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # The path '.' means your entire root directory will be deployed
+          path: '.'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
