@@ -30,11 +30,10 @@ jobs:
       - name: Run Lighthouse accessibility audit
         uses: treosh/lighthouse-ci-action@v10
         with:
-          # Instead of a URL, we point it to the local folder containing your site
-          # This will start a temporary server and test your new code before deployment
+          # This action will automatically find and use the lighthouserc.json file
+          # No other inputs are needed for a basic static site audit!
           uploadArtifacts: true
           temporaryPublicStorage: true
-          staticDistDir: '.' # The '.' means your site files are in the root directory
 
   # This job deploys your site, but only if the 'test' job succeeds
   deploy:
