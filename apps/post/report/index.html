@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="theme-color" content="#fff6f1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Report - Warmthly</title>
+  <link rel="preconnect" href="https://www.warmthly.org">
+  <link rel="preconnect" href="https://post.warmthly.org">
+  
+  <!-- Favicon Set for All Devices -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
+  <link rel="stylesheet" href="/styles/post.css">
+  
+</head>
+<body class="fonts-loading">
+  <a href="#main-content" class="skip-link purple">Skip to main content</a>
+  <div class="top-left-heading">
+    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
+    <a href="https://post.warmthly.org" class="post-text">Post</a>
+  </div>
+  
+  <div class="stoplight-container">
+    <div class="stoplight" id="stoplight">
+      <div class="stoplight-dot red"></div>
+      <div class="stoplight-dot yellow"></div>
+      <div class="stoplight-dot green"></div>
+    </div>
+    <div class="dropdown-menu" id="dropdown-menu">
+      <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
+      <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
+      <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
+    </div>
+  </div>
+
+  <div class="container container-narrow" id="main-content" role="main">
+    <h1 class="page-title purple">Report an Issue</h1>
+    <p class="main-text">
+      If you have concerns, questions, or need to report something related to Warmthly, please use the form below. We take all reports seriously and will review them promptly.
+    </p>
+
+    <div class="section">
+        <h2 class="section-title purple">Your Voice Matters</h2>
+        <p>
+            Transparency and accountability are core to our mission. If you've witnessed something that doesn't align with our values—Transparency, Honesty, Humility, and Empathy—we want to know. Your report will be reviewed by our team and addressed appropriately.
+        </p>
+        
+        <div class="info-box purple">
+          <p><strong>Note:</strong> All reports are reviewed confidentially. We take every concern seriously and will investigate all valid reports thoroughly.</p>
+        </div>
+        
+        <form class="report-form" id="reportForm">
+          <div class="form-group">
+            <label for="reportName" class="form-label">Your Name</label>
+            <input type="text" id="reportName" class="form-input" placeholder="Enter your name" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="reportEmail" class="form-label">Your Email</label>
+            <input type="email" id="reportEmail" class="form-input" placeholder="your.email@example.com" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="reportType" class="form-label">Report Type</label>
+            <select id="reportType" class="form-input" required>
+              <option value="">Select a type...</option>
+              <option value="media">Media Inquiry</option>
+              <option value="concern">Concern or Complaint</option>
+              <option value="admin">Administrative Issue</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="reportMessage" class="form-label">Message</label>
+            <textarea id="reportMessage" class="form-textarea" placeholder="Please describe your issue or inquiry in detail..." required></textarea>
+          </div>
+          
+          <div class="success-message" id="successMessage" role="alert" aria-live="polite">Thank you for your report. We've received your message and will review it promptly.</div>
+          <div class="error-message" id="errorMessage" role="alert" aria-live="polite"></div>
+          
+          <button type="submit" class="submit-button" id="submitButton">Submit Report</button>
+        </form>
+    </div>
+  </div>
+  
+  <script>
+    // --- NATIVE FONT LOADING ---
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      });
+      
+      // Fallback timeout
+      setTimeout(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      }, 3000);
+    } else {
+      // Fallback for older browsers
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    }
+    // --- END FONT LOADING ---
+
+    // Form submission handler
+    const reportForm = document.getElementById('reportForm');
+    const submitButton = document.getElementById('submitButton');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+    }
+    
+    function showSuccess() {
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+    }
+    
+    function hideMessages() {
+      successMessage.style.display = 'none';
+      errorMessage.style.display = 'none';
+    }
+    
+    reportForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessages();
+      
+      const formData = {
+        name: document.getElementById('reportName').value.trim(),
+        email: document.getElementById('reportEmail').value.trim(),
+        type: document.getElementById('reportType').value,
+        message: document.getElementById('reportMessage').value.trim()
+      };
+      
+      // Validate form
+      if (!formData.name || !formData.email || !formData.type || !formData.message) {
+        showError('Please fill in all required fields.');
+        return;
+      }
+      
+      if (!formData.email.includes('@')) {
+        showError('Please enter a valid email address.');
+        return;
+      }
+      
+      // Disable submit button
+      submitButton.disabled = true;
+      submitButton.textContent = 'Submitting...';
+      
+      try {
+        const response = await fetch('/api/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error?.message || 'Failed to submit report');
+        }
+        
+        showSuccess();
+        reportForm.reset();
+        
+        // Reset button after 3 seconds
+        setTimeout(() => {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Submit Report';
+          hideMessages();
+        }, 3000);
+        
+      } catch (error) {
+        console.error('Error submitting report:', error);
+        showError('Failed to submit report. Please try again or contact us directly.');
+        submitButton.disabled = false;
+        submitButton.textContent = 'Submit Report';
+      }
+    });
+
+    // Stoplight menu functionality
+    const stoplight = document.getElementById('stoplight');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    let isMenuOpen = false;
+    
+    function toggleMenu() {
+      isMenuOpen = !isMenuOpen;
+      stoplight.classList.toggle('active', isMenuOpen);
+      dropdownMenu.classList.toggle('active', isMenuOpen);
+      stoplight.setAttribute('aria-expanded', isMenuOpen ? 'true' : 'false');
+    }
+    
+    // Add keyboard support for stoplight
+    stoplight.setAttribute('role', 'button');
+    stoplight.setAttribute('tabindex', '0');
+    stoplight.setAttribute('aria-label', 'Open navigation menu');
+    stoplight.setAttribute('aria-expanded', 'false');
+    stoplight.setAttribute('aria-haspopup', 'true');
+    
+    stoplight.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+    
+    stoplight.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        toggleMenu();
+      }
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
+        toggleMenu();
+      }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isMenuOpen) {
+        toggleMenu();
+      }
+    });
+    
+    dropdownMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  </script>
+</body>
+</html>
+
