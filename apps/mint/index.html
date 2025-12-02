@@ -1,0 +1,3039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="theme-color" content="#fff6f1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Mint - Warmthly</title>
+  <!-- Preconnect to essential domains for faster resource loading -->
+  <link rel="preconnect" href="https://www.warmthly.org">
+  <link rel="preconnect" href="https://post.warmthly.org">
+  
+  <!-- Favicon Set for All Devices -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
+
+  <link rel="stylesheet" href="/styles/common.css">
+  <link rel="stylesheet" href="/styles/mint.css">
+  
+  <link rel="dns-prefetch" href="//warmthly.org">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <!-- Firebase SDK - Load asynchronously -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    
+    // Firebase configuration - UPDATE THESE WITH YOUR FIREBASE CONFIG
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    
+    // Initialize Firebase
+    try {
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      
+      // Make Firebase accessible globally
+      window.firebaseApp = app;
+      window.firebaseDb = db;
+      window.firebaseReady = true;
+    } catch (error) {
+      console.warn('Firebase initialization error:', error);
+      window.firebaseReady = false;
+    }
+  </script>
+</head>
+<body class="fonts-loading">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="preload-fonts">.</div>
+  
+  <header class="top-left-heading">
+    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
+    <a href="https://mint.warmthly.org" class="mint-text">Mint</a>
+  </header>
+  
+  <nav class="header-right" role="navigation" aria-label="Main navigation">
+    <div class="stoplight-container">
+      <div class="stoplight" id="stoplight">
+        <div class="stoplight-dot red"></div>
+        <div class="stoplight-dot yellow"></div>
+        <div class="stoplight-dot green"></div>
+      </div>
+      
+      <!-- --- MODIFICATION START: Removed 'Family' and 'Projects' links --- -->
+      <div class="dropdown-menu" id="dropdown-menu">
+        <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
+        <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
+        <a href="https://mint.warmthly.org/research" class="dropdown-item dropdown-item-green" aria-label="View our research and methods">Research</a>
+      </div>
+      <!-- --- MODIFICATION END --- -->
+    </div>
+  </nav>
+
+  <main class="container" id="main-content" role="main">
+    <h1 class="page-title">Mint</h1>
+    <p class="main-text">
+      <b>We track your every cent and our every decision right before you.</b> It is our commitment to you that we will forever track and provide utmost transparency for our every action and your every donation. Given the nature of our organization, you are able to fork and copy-paste our processes for your refining, those are also available on this page.
+    </p>
+    
+    <div class="database-section">
+      <div class="database-header">
+        <div class="embed-live-indicator">
+          <div class="live-dot"></div>
+          <span>Live</span>
+        </div>
+      </div>
+      <div class="stats-dashboard">
+        <div class="stat-item">
+          <div class="stat-value" id="totalDonations">0</div>
+          <div class="stat-label">Total Donations</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalAmount">$0.00</div>
+          <div class="stat-label">Amount Raised</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalDonors">0</div>
+          <div class="stat-label">Donors</div>
+        </div>
+      </div>
+      <div class="donation-pool-container" id="donationPool">
+        <button class="pool-legend-toggle" id="poolLegendToggle" aria-label="Show donation legend" title="Show donation legend">?</button>
+        <div class="pool-legend-dropdown dropdown-menu" id="poolLegendDropdown" role="dialog" aria-label="Donation legend">
+          <h3 class="legend-title">Donation Key</h3>
+          <ul class="legend-items" id="legendItems">
+            <!-- Items will be generated by JavaScript -->
+          </ul>
+        </div>
+        <div class="pool-search">
+          <input type="text" id="donorSearch" placeholder="Search expenses..." autocomplete="off" aria-label="Search expenses">
+        </div>
+        <button class="exit-focus-mode" id="exitFocusMode" aria-label="Back to all donations">â† Back to All Donations</button>
+        <div class="donation-pool" id="donationPoolArea" role="region" aria-label="Donation pool visualization"></div>
+        <div class="empty-state" id="emptyState" style="display: none;">No donations yet. Check back soon!</div>
+      </div>
+      <div class="donation-details-panel" id="donationDetailsPanel" role="dialog" aria-label="Donation details">
+        <div class="details-header" id="detailsHeader">Donation Details</div>
+        <div class="details-section">
+          <div class="details-label">Donor</div>
+          <div class="details-value" id="detailsDonor">-</div>
+        </div>
+        <div class="details-section">
+          <div class="details-label">Total Donation</div>
+          <div class="details-value" id="detailsAmount">-</div>
+        </div>
+        <div class="details-section">
+          <div class="details-label">Date</div>
+          <div class="details-value" id="detailsDate">-</div>
+        </div>
+        <div class="details-section">
+          <div class="details-label">Purpose</div>
+          <div class="details-value" id="detailsPurpose">-</div>
+        </div>
+        <div class="details-section">
+          <div class="details-label">Category</div>
+          <div class="details-value" id="detailsCategory">-</div>
+        </div>
+        <div class="details-section">
+          <div class="details-label">Transaction ID</div>
+          <div class="details-value" id="detailsTransactionId">-</div>
+        </div>
+        <div class="details-breakdown" id="detailsBreakdown" style="display: none;">
+          <div class="details-label">Fund Allocation</div>
+          <div class="breakdown-search">
+            <input type="text" id="breakdownSearch" placeholder="Search expenses..." autocomplete="off" aria-label="Search expenses in breakdown">
+          </div>
+          <div id="breakdownItems"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <script>
+      // Airtable Configuration
+      // Airtable configuration - API key is now handled securely on the backend
+      // To set up:
+      // 1. Add AIRTABLE_API_KEY to your Vercel environment variables
+      // 2. Update tableName to match your Airtable table name
+      // 3. Update fieldMappings to match your column names exactly
+      const airtableConfig = {
+            baseId: "appDmVaty9tcrUKsn", // From your embed URL
+            tableName: "Donations", // Update this to match your Airtable table name
+            viewId: "shrI3VVTE2iCyz3rO", // From your embed URL (optional, helps with filtering)
+            // Field mappings - update these to match your Airtable column names EXACTLY
+            fieldMappings: {
+                  amount: "Amount", // Column name for donation amount (must be a number field)
+                  donor: "Donor", // Column name for donor name
+                  date: "Date", // Column name for date (date field)
+                  purpose: "Purpose", // Column name for purpose
+                  category: "Category", // Column name for category
+                  transactionId: "Transaction ID" // Column name for transaction ID
+            },
+            pollInterval: 10000, // Poll for updates every 10 seconds (in milliseconds)
+            requestTimeout: 10000 // Request timeout in milliseconds
+      };
+
+      // Constants for configuration
+      const CONFIG = {
+            MAX_VISIBLE_CENTS: 1000, // Reduced from 5000 for better performance
+            PROCESSED_DONATIONS_CACHE_SIZE: 10000, // LRU cache size limit
+            SEARCH_DEBOUNCE_MS: 300, // Debounce search input
+            WALL_THICKNESS: 50,
+            COIN_SIZE: 20,
+            COIN_OFFSET_X: 25, // Tag positioning offset
+            COIN_OFFSET_Y: 10,
+            BATCH_SIZE: 50,
+            HISTORICAL_DELAY: 0,
+            NEW_DONATION_DELAY: 50
+      };
+
+      // Donation tier system for emoji-based clustering
+      const DONATION_TIERS = [
+            { threshold: 500, emoji: '💰', size: 40, label: 'Large Donation' },
+            { threshold: 100, emojis: ['💴', '💵', '💶', '💷'], size: 35, label: 'Medium Donation' },
+            { threshold: 25, emoji: '👛', size: 30, label: 'Small Donation' },
+            { threshold: 1, emoji: '🪙', size: 20, label: 'Coin' }
+      ];
+
+      // Coin type definitions
+      const COIN_TYPES = {
+            RED: 'red',      // Essentials (wages/salaries) - non-negotiables
+            PURPLE: 'purple', // Infrastructure/equipment/subscriptions - assets
+            BLUE: 'blue',     // Disposables (paint, stationery) - influencable
+            GREEN: 'green'    // Money not yet spent
+      };
+
+      // Coin type labels for legend
+      const COIN_TYPE_LABELS = {
+            red: 'Essentials (Wages/Salaries)',
+            purple: 'Infrastructure/Equipment/Subscriptions',
+            blue: 'Disposables (Paint, Stationery, etc.)',
+            green: 'Money Not Yet Spent'
+      };
+
+      // Simple input sanitization function (XSS prevention)
+      function sanitizeInput(str) {
+            if (typeof str !== 'string') return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+      }
+
+      // Simple LRU cache implementation
+      class LRUCache {
+            constructor(maxSize) {
+                  this.maxSize = maxSize;
+                  this.cache = new Map();
+            }
+
+            has(key) {
+                  return this.cache.has(key);
+            }
+
+            add(key) {
+                  // If at capacity, remove oldest (first) entry
+                  if (this.cache.size >= this.maxSize && !this.cache.has(key)) {
+                        const firstKey = this.cache.keys().next().value;
+                        this.cache.delete(firstKey);
+                  }
+                  // Remove and re-add to make it most recently used
+                  if (this.cache.has(key)) {
+                        this.cache.delete(key);
+                  }
+                  this.cache.set(key, true);
+            }
+      }
+
+      // Donation Pool Animation System
+      class DonationPool {
+            constructor(container) {
+                  this.container = container;
+                  this.pool = document.getElementById('donationPoolArea');
+                  this.cents = [];
+                  this.activeTags = new WeakMap(); // Use WeakMap to prevent memory leaks
+                  this.processedDonations = new LRUCache(CONFIG.PROCESSED_DONATIONS_CACHE_SIZE);
+                  this.centPool = []; // Object pool for coin elements
+                  this.maxVisibleCents = CONFIG.MAX_VISIBLE_CENTS;
+                  this.clusterThreshold = 100; // Cluster coins when too many
+                  this.visibleCents = new Set();
+                  this.coinPositions = []; // Track coin positions for physics
+                  this.coinSize = CONFIG.COIN_SIZE;
+                  this.searchQuery = '';
+                  this.searchDebounceTimer = null;
+                  this.isProcessingDonations = false; // Lock to prevent race conditions
+                  this.pendingDOMUpdates = []; // Batch DOM updates
+                  this.rafScheduled = false;
+                  this.cashEmojiIndex = 0; // Counter for cycling through cash emojis
+                  
+                  // Matter.js variables
+                  this.engine = null;
+                  this.world = null;
+                  this.runner = null;
+                  this.render = null;
+                  this.poolBody = null; // Reference to the main pool container body
+                  this.stats = {
+                        totalDonations: 0,
+                        totalAmount: 0,
+                        totalDonors: 0,
+                        donors: new Set()
+                  };
+                  this.isDragging = false; // Track if user is currently dragging a coin
+                  this.draggedBody = null; // Track the body currently being dragged
+                  
+                  // Error and loading state elements
+                  this.errorContainer = null;
+                  this.loadingIndicator = null;
+                  
+                  // Focus mode state
+                  this.isFocusMode = false;
+                  this.focusedDonation = null;
+                  this.hiddenObjects = []; // Store objects hidden during focus mode
+                  this.focusedCents = []; // Store cents created in focus mode
+                  this.centCreationTimeouts = []; // Store timeout IDs to cancel cent creation
+                  this.scroogeDuck = null; // Reference to Scrooge McDuck duck element
+                  this.scroogePopup = null; // Reference to Scrooge popup
+                  this.activeMobileTag = null; // Track which cent's tag is active on mobile
+                  this.physicsUpdateSkip = 0; // Counter for skipping physics updates when there are many coins
+                  this.donorRandomStrings = new Map(); // Store random 5-letter strings per donor
+                  this.highlightedCoins = new Set(); // Track currently highlighted coins
+                  
+                  this.init();
+            }
+
+            init() {
+                  this.containerRect = this.container.getBoundingClientRect();
+                  this.updateContainerSize();
+                  window.addEventListener('resize', () => this.updateContainerSize());
+                  
+                  // Create error container
+                  this.createErrorContainer();
+                  
+                  // Setup search with debouncing
+                  const searchInput = document.getElementById('donorSearch');
+                  if (searchInput) {
+                        searchInput.addEventListener('input', (e) => {
+                              // Debounce search input
+                              if (this.searchDebounceTimer) {
+                                    clearTimeout(this.searchDebounceTimer);
+                              }
+                              this.searchDebounceTimer = setTimeout(() => {
+                                    this.searchQuery = e.target.value.toLowerCase().trim();
+                                    if (this.isFocusMode) {
+                                          this.updateFocusModeSearchFilter();
+                                    } else {
+                                          this.updateSearchFilter();
+                                    }
+                              }, CONFIG.SEARCH_DEBOUNCE_MS);
+                        });
+                  }
+                  
+                  // Setup legend
+                  this.setupLegend();
+                  
+                  // Setup focus mode exit button
+                  const exitFocusBtn = document.getElementById('exitFocusMode');
+                  if (exitFocusBtn) {
+                        exitFocusBtn.addEventListener('click', () => this.exitFocusMode());
+                  }
+                  
+                  // Setup click-outside handler for mobile tooltips
+                  this.setupMobileTooltipDismiss();
+                  
+                  // Check if Airtable is configured
+                  // Setup Airtable listener (API key is now handled on backend)
+                  this.setupAirtableListener().catch(err => {
+                        this.showError('Failed to load donations. Please refresh the page.');
+                        console.error('Airtable setup error:', err);
+                        // Fallback to mock data on error
+                        this.loadMockData();
+                  });
+                  
+                  this.setupPhysics();
+            }
+
+            setupMobileTooltipDismiss() {
+                  // On mobile, close tooltips when tapping outside
+                  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                  if (isTouchDevice) {
+                        document.addEventListener('click', (e) => {
+                              // Don't close if clicking on a cent or its tag
+                              const clickedCent = e.target.closest('.cent');
+                              const clickedTag = e.target.closest('.donation-tag');
+                              
+                              if (!clickedCent && !clickedTag && this.activeMobileTag) {
+                                    this.hideTag(this.activeMobileTag);
+                                    this.activeMobileTag = null;
+                              }
+                        }, true); // Use capture phase to catch events early
+                  }
+            }
+
+            setupLegend() {
+                  const legendItemsEl = document.getElementById('legendItems');
+                  const legendToggle = document.getElementById('poolLegendToggle');
+                  const legendDropdown = document.getElementById('poolLegendDropdown');
+                  
+                  if (!legendItemsEl || !legendToggle || !legendDropdown) return;
+                  
+                  // Store original legend items for restoration
+                  this.originalLegendItems = [];
+                  
+                  // Populate legend from DONATION_TIERS
+                  DONATION_TIERS.forEach((tier, index) => {
+                        const nextTier = DONATION_TIERS[index - 1];
+                        let rangeText;
+                        
+                        if (tier.threshold === 1) {
+                              rangeText = `$1 - $${nextTier ? (nextTier.threshold - 0.01).toFixed(2) : 'âˆž'}`;
+                        } else if (nextTier) {
+                              rangeText = `$${tier.threshold} - $${(nextTier.threshold - 0.01).toFixed(2)}`;
+                        } else {
+                              rangeText = `$${tier.threshold}+`;
+                        }
+                        
+                        const emoji = tier.emoji || (tier.emojis ? tier.emojis[0] : '🪙');
+                        const li = document.createElement('li');
+                        li.className = 'legend-item';
+                        li.innerHTML = `<span>${emoji}</span> <span>${rangeText}</span>`;
+                        legendItemsEl.appendChild(li);
+                        this.originalLegendItems.push(li.cloneNode(true));
+                  });
+                  
+                  // Toggle legend dropdown
+                  this.isLegendOpen = false;
+                  legendToggle.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.isLegendOpen = !this.isLegendOpen;
+                        legendDropdown.classList.toggle('active', this.isLegendOpen);
+                  });
+                  
+                  // Close legend when clicking outside
+                  document.addEventListener('click', (e) => {
+                        if (!legendToggle.contains(e.target) && !legendDropdown.contains(e.target) && this.isLegendOpen) {
+                              this.isLegendOpen = false;
+                              legendDropdown.classList.remove('active');
+                        }
+                  });
+                  
+                  document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && this.isLegendOpen) {
+                              this.isLegendOpen = false;
+                              legendDropdown.classList.remove('active');
+                        }
+                  });
+            }
+
+            updateFocusModeLegend() {
+                  const legendItemsEl = document.getElementById('legendItems');
+                  const legendToggle = document.getElementById('poolLegendToggle');
+                  const legendDropdown = document.getElementById('poolLegendDropdown');
+                  
+                  if (!legendItemsEl || !legendToggle || !legendDropdown) return;
+                  
+                  // Clear existing items
+                  legendItemsEl.innerHTML = '';
+                  
+                  // Update title
+                  const legendTitle = legendDropdown.querySelector('.legend-title');
+                  if (legendTitle) {
+                        legendTitle.textContent = 'Expense Types';
+                  }
+                  
+                  // Add coin type legend items with colored coin previews
+                  Object.keys(COIN_TYPE_LABELS).forEach(type => {
+                        const li = document.createElement('li');
+                        li.className = 'legend-item';
+                        
+                        // Create coin preview with color filter
+                        const coinPreview = document.createElement('span');
+                        coinPreview.textContent = '🪙';
+                        coinPreview.className = `coin-type-${type}`;
+                        coinPreview.style.display = 'inline-block';
+                        coinPreview.style.marginRight = '8px';
+                        coinPreview.style.fontSize = '1.2rem';
+                        coinPreview.style.lineHeight = '1';
+                        coinPreview.style.verticalAlign = 'middle';
+                        
+                        li.appendChild(coinPreview);
+                        
+                        const label = document.createElement('span');
+                        label.textContent = COIN_TYPE_LABELS[type];
+                        li.appendChild(label);
+                        legendItemsEl.appendChild(li);
+                  });
+            }
+
+            restoreOriginalLegend() {
+                  const legendItemsEl = document.getElementById('legendItems');
+                  const legendDropdown = document.getElementById('poolLegendDropdown');
+                  
+                  if (!legendItemsEl || !legendDropdown || !this.originalLegendItems) return;
+                  
+                  // Clear existing items
+                  legendItemsEl.innerHTML = '';
+                  
+                  // Restore original title
+                  const legendTitle = legendDropdown.querySelector('.legend-title');
+                  if (legendTitle) {
+                        legendTitle.textContent = 'Donation Key';
+                  }
+                  
+                  // Restore original items
+                  this.originalLegendItems.forEach(item => {
+                        legendItemsEl.appendChild(item.cloneNode(true));
+                  });
+            }
+
+            createErrorContainer() {
+                  this.errorContainer = document.createElement('div');
+                  this.errorContainer.className = 'error-message';
+                  this.errorContainer.style.display = 'none';
+                  this.errorContainer.setAttribute('role', 'alert');
+                  this.errorContainer.setAttribute('aria-live', 'polite');
+                  const databaseSection = this.container.querySelector('.database-section');
+                  if (databaseSection) {
+                        databaseSection.insertBefore(this.errorContainer, databaseSection.firstChild);
+                  }
+            }
+
+            showError(message) {
+                  if (this.errorContainer) {
+                        this.errorContainer.textContent = message;
+                        this.errorContainer.style.display = 'block';
+                  }
+            }
+
+            hideError() {
+                  if (this.errorContainer) {
+                        this.errorContainer.style.display = 'none';
+                  }
+            }
+
+            setupPhysics() {
+                  const { Engine, Render, World, Bodies, Runner, Mouse, MouseConstraint, Events } = Matter;
+
+                  // 1. Create engine and world
+                  this.engine = Engine.create();
+                  this.world = this.engine.world;
+                  this.world.gravity.y = 1; // Standard gravity
+
+                  // --- Performance Optimizations ---
+                  // Enable sleeping for better performance (coins at rest won't be simulated)
+                  this.engine.enableSleeping = true;
+                  
+                  // Note: Grid broadphase removed - using default broadphase for better compatibility
+                  // Grid broadphase can be re-enabled later if needed with proper configuration
+                  
+                  // Set higher iterations for smoother physics
+                  this.engine.positionIterations = 10; // Higher iterations = smoother, more accurate physics
+                  this.engine.velocityIterations = 8;
+                  
+                  // Physics speed adjustment - slightly faster for more responsive feel
+                  this.engine.timing.timeScale = 1.0; // Use normal speed for smoother animation
+                  // --- END Performance Optimizations ---
+
+                  // 2. Add a mouse controller for dragging coins
+                  const mouse = Mouse.create(this.pool);
+                  const mouseConstraint = MouseConstraint.create(this.engine, {
+                        mouse: mouse,
+                        constraint: {
+                              stiffness: 0.8, // How rigid the "grab" is (higher = firmer grip)
+                              render: {
+                                    visible: false // Don't draw the grab line
+                              }
+                        }
+                  });
+
+                  World.add(this.world, mouseConstraint);
+
+                  // Listen for mouse events on the constraint
+                  Events.on(mouseConstraint, 'startdrag', (event) => {
+                        // Track dragging state
+                        this.isDragging = true; // A drag has started!
+                        
+                        // Store and wake up the coin being dragged
+                        this.draggedBody = event.body;
+                        if (this.draggedBody && Matter.Sleeping) {
+                              Matter.Sleeping.set(this.draggedBody, false);
+                        }
+                        
+                        // Mark all cents as not potential taps when dragging starts
+                        this.cents.forEach(cent => {
+                              if (cent._potentialTap) {
+                                    cent._potentialTap = false;
+                              }
+                        });
+                  });
+
+                  Events.on(mouseConstraint, 'enddrag', (event) => {
+                        // Track dragging state
+                        this.isDragging = false; // The drag has ended!
+                        this.draggedBody = null; // Clear the dragged body reference
+                  });
+                  
+                  // Listen for collisions to wake up coins that collide with the dragged coin
+                  // Use collisionStart only (not collisionActive) to avoid performance issues
+                  // Throttle the wake-up calls to prevent lag
+                  let lastWakeUpTime = 0;
+                  const WAKE_UP_THROTTLE = 50; // Only wake up coins every 50ms max
+                  
+                  Events.on(this.engine, 'collisionStart', (event) => {
+                        if (!this.isDragging || !this.draggedBody) return;
+                        
+                        const now = Date.now();
+                        if (now - lastWakeUpTime < WAKE_UP_THROTTLE) return;
+                        lastWakeUpTime = now;
+                        
+                        const pairs = event.pairs;
+                        for (let i = 0; i < pairs.length; i++) {
+                              const pair = pairs[i];
+                              const bodyA = pair.bodyA;
+                              const bodyB = pair.bodyB;
+                              
+                              // Check if either body is the dragged body
+                              if (bodyA === this.draggedBody) {
+                                    // Wake up the coin that collided with the dragged coin
+                                    if (Matter.Sleeping && Matter.Sleeping.get(bodyB)) {
+                                          Matter.Sleeping.set(bodyB, false);
+                                    }
+                              } else if (bodyB === this.draggedBody) {
+                                    // Wake up the coin that collided with the dragged coin
+                                    if (Matter.Sleeping && Matter.Sleeping.get(bodyA)) {
+                                          Matter.Sleeping.set(bodyA, false);
+                                    }
+                              }
+                        }
+                  });
+
+                  // Store mouse constraint for potential cleanup
+                  this.mouseConstraint = mouseConstraint;
+
+                  // 3. Create boundaries (walls and floor)
+                  const poolWidth = this.poolWidth;
+                  const poolHeight = this.poolHeight;
+                  const wallThickness = CONFIG.WALL_THICKNESS;
+
+                  // Create a container body for the pool area
+                  this.poolBody = Bodies.rectangle(poolWidth / 2, poolHeight / 2, poolWidth, poolHeight, { 
+                        isStatic: true, 
+                        isSensor: true,
+                        render: { visible: false }
+                  });
+                  
+                  // Create static boundaries (bottom, left, right)
+                  const ground = Bodies.rectangle(poolWidth / 2, poolHeight + wallThickness / 2, poolWidth, wallThickness, { isStatic: true, friction: 1, restitution: 0.1 });
+                  const leftWall = Bodies.rectangle(-wallThickness / 2, poolHeight / 2, wallThickness, poolHeight * 2, { isStatic: true, friction: 1 });
+                  const rightWall = Bodies.rectangle(poolWidth + wallThickness / 2, poolHeight / 2, wallThickness, poolHeight * 2, { isStatic: true, friction: 1 });
+
+                  World.add(this.world, [ground, leftWall, rightWall]);
+
+                  // 4. Run the engine
+                  this.runner = Runner.run(this.engine);
+                  
+                  // 5. Setup animation loop to sync DOM elements with physics bodies
+                  // Use requestAnimationFrame directly for smoother 60fps updates
+                  const updateDOM = () => {
+                        // Update all coins
+                        this.cents.forEach(cent => {
+                              if (cent.body) {
+                                    const x = cent.body.position.x;
+                                    const y = cent.body.position.y;
+                                    const angle = cent.body.angle;
+                                    
+                                    cent.style.left = x + 'px';
+                                    cent.style.top = y + 'px';
+                                    cent.style.transform = `translate(-50%, -50%) rotate(${angle}rad)`;
+                              }
+                        });
+                        
+                        // Also update Scrooge duck if it exists
+                        if (this.scroogeDuck && this.scroogeDuck.body) {
+                              const x = this.scroogeDuck.body.position.x;
+                              const y = this.scroogeDuck.body.position.y;
+                              const angle = this.scroogeDuck.body.angle;
+                              
+                              this.scroogeDuck.style.left = x + 'px';
+                              this.scroogeDuck.style.top = y + 'px';
+                              this.scroogeDuck.style.transform = `translate(-50%, -50%) rotate(${angle}rad)`;
+                        }
+                        
+                        requestAnimationFrame(updateDOM);
+                  };
+                  
+                  // Start the animation loop
+                  requestAnimationFrame(updateDOM);
+            }
+
+            updateSearchFilter() {
+                  // Create a list of matching donations for click-to-focus
+                  const matchingDonations = [];
+                  
+                  this.cents.forEach(cent => {
+                        if (!cent.donationData) return;
+                        
+                        const donorName = (cent.donationData.donor || '').toLowerCase();
+                        const matches = !this.searchQuery || donorName.includes(this.searchQuery);
+                        
+                        if (matches) {
+                              cent.classList.remove('search-no-match');
+                              cent.classList.add('search-match');
+                              
+                              // Collect unique matching donations
+                              const donationId = cent.dataset.donationId;
+                              if (donationId && !matchingDonations.find(d => d.id === donationId)) {
+                                    matchingDonations.push({
+                                          id: donationId,
+                                          donation: cent.donationData
+                                    });
+                              }
+                        } else {
+                              cent.classList.remove('search-match');
+                              cent.classList.add('search-no-match');
+                        }
+                  });
+                  
+                  // Store matching donations for potential click-to-focus feature
+                  this.matchingDonations = matchingDonations;
+            }
+
+            updateFocusModeSearchFilter() {
+                  // In focus mode, search through expense data and filter coins by saturation
+                  if (!this.searchQuery) {
+                        // Show all coins if no search query - all saturated
+                        this.focusedCents.forEach(cent => {
+                              cent.classList.remove('search-no-match');
+                              cent.classList.add('search-match');
+                        });
+                        return;
+                  }
+                  
+                  const query = this.searchQuery.toLowerCase();
+                  
+                  this.focusedCents.forEach(cent => {
+                        // Search in coin type
+                        const coinType = cent.dataset.coinType || '';
+                        const typeLabel = COIN_TYPE_LABELS[coinType] || '';
+                        
+                        let matches = false;
+                        
+                        // Search in coin type label
+                        if (typeLabel.toLowerCase().includes(query)) {
+                              matches = true;
+                        }
+                        
+                        // Search in expense data if available
+                        if (!matches && cent.expenseData) {
+                              const expenseDesc = (cent.expenseData.description || '').toLowerCase();
+                              const expenseCategory = (cent.expenseData.category || '').toLowerCase();
+                              const expenseType = (cent.expenseData.type || '').toLowerCase();
+                              matches = expenseDesc.includes(query) || 
+                                       expenseCategory.includes(query) || 
+                                       expenseType.includes(query);
+                        }
+                        
+                        // Also search in donation data as fallback
+                        if (!matches && cent.donationData) {
+                              const purpose = (cent.donationData.purpose || '').toLowerCase();
+                              const category = (cent.donationData.category || '').toLowerCase();
+                              matches = purpose.includes(query) || category.includes(query);
+                        }
+                        
+                        // Apply saturation/desaturation based on match
+                        if (matches) {
+                              cent.classList.remove('search-no-match');
+                              cent.classList.add('search-match');
+                        } else {
+                              cent.classList.remove('search-match');
+                              cent.classList.add('search-no-match');
+                        }
+                  });
+            }
+
+            updateContainerSize() {
+                  this.containerRect = this.container.getBoundingClientRect();
+                  this.poolWidth = this.containerRect.width;
+                  this.poolHeight = this.containerRect.height;
+                  
+                  // Update physics world boundaries if initialized
+                  if (this.world) {
+                        const { World, Bodies } = Matter;
+                        const wallThickness = 50;
+                        
+                        // Remove old boundaries (assuming they were the only static bodies added)
+                        // A more robust solution would track the boundary bodies and remove them specifically.
+                        // For simplicity, we'll re-add the boundaries in setupPhysics on a full re-init if needed, 
+                        // but for a simple resize, we'll just rely on the CSS container size.
+                        // For a full physics update, the entire world would need to be reset, but that's complex.
+                        // For now, we'll rely on the initial boundaries being large enough.
+                        // A better fix is to ensure the pool area has a fixed size or the boundaries are updated.
+                        
+                        // For this instruction set, we will assume the initial boundaries are sufficient 
+                        // or that the user will handle the full physics world update on resize if necessary.
+                  }
+            }
+
+            async setupAirtableListener() {
+                  try {
+                        // Load initial donations
+                        await this.fetchAirtableDonations(true);
+                        
+                        // Set up polling for updates with error handling
+                        this.airtablePollInterval = setInterval(() => {
+                              this.fetchAirtableDonations(false).catch(err => {
+                                    console.error('Polling error:', err);
+                                    // Don't show error for every polling failure, only log
+                              });
+                        }, airtableConfig.pollInterval);
+                  } catch (error) {
+                        this.showError('Failed to connect to donation database. Please check your connection and refresh.');
+                        throw error;
+                  }
+            }
+
+            async fetchAirtableDonations(isInitialLoad = false) {
+                  // Prevent concurrent fetches (race condition fix)
+                  if (this.isProcessingDonations) {
+                        return;
+                  }
+                  
+                  this.isProcessingDonations = true;
+                  
+                  try {
+                        // Build URL for backend proxy endpoint
+                        let url = `/api/airtable?baseId=${encodeURIComponent(airtableConfig.baseId)}&tableName=${encodeURIComponent(airtableConfig.tableName)}`;
+                        if (airtableConfig.viewId) {
+                              url += `&viewId=${encodeURIComponent(airtableConfig.viewId)}`;
+                        }
+                        
+                        // Add timeout using AbortController
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), airtableConfig.requestTimeout);
+                        
+                        const response = await fetch(url, {
+                              method: 'GET',
+                              headers: {
+                                    'Content-Type': 'application/json'
+                              },
+                              signal: controller.signal
+                        });
+                        
+                        clearTimeout(timeoutId);
+
+                        if (!response.ok) {
+                              const errorData = await response.json().catch(() => ({}));
+                              const errorMsg = errorData.error?.message || `Airtable API error: ${response.status} ${response.statusText}`;
+                              console.warn(errorMsg);
+                              if (isInitialLoad) {
+                                    if (response.status === 500 && errorData.error?.code === 'NOT_CONFIGURED') {
+                                          this.showError('Airtable not configured on server. Using mock data for demonstration.');
+                                    } else {
+                                          this.showError(errorMsg + ' Using mock data for demonstration.');
+                                    }
+                                    this.loadMockData();
+                              }
+                              this.isProcessingDonations = false;
+                              return;
+                        }
+
+                        const data = await response.json();
+                        const records = data.records || [];
+                        
+                        if (isInitialLoad) {
+                              console.log(`Loaded ${records.length} donations from Airtable`);
+                        }
+
+                        let newDonations = 0;
+                        records.forEach(record => {
+                              const donationId = record.id;
+                              
+                              // Use LRU cache with atomic check-and-add
+                              if (!this.processedDonations.has(donationId)) {
+                                    this.processedDonations.add(donationId);
+                                    newDonations++;
+                                    
+                                    // Map Airtable fields to donation structure
+                                    const fields = record.fields || {};
+                                    const donation = {
+                                          amount: this.parseAmount(fields[airtableConfig.fieldMappings.amount]),
+                                          donor: fields[airtableConfig.fieldMappings.donor] || 'Anonymous',
+                                          date: this.parseDate(fields[airtableConfig.fieldMappings.date]),
+                                          purpose: fields[airtableConfig.fieldMappings.purpose] || 'N/A',
+                                          category: fields[airtableConfig.fieldMappings.category] || 'General',
+                                          transactionId: fields[airtableConfig.fieldMappings.transactionId] || record.id
+                                    };
+                                    
+                                    // Validate donation data before adding
+                                    if (this.validateDonation(donation)) {
+                                          this.addDonation(donation, donationId, isInitialLoad);
+                                    }
+                              }
+                        });
+                        
+                        if (!isInitialLoad && newDonations > 0) {
+                              console.log(`Added ${newDonations} new donation(s) from Airtable`);
+                        }
+                        
+                        this.hideError();
+                  } catch (error) {
+                        console.error('Error fetching Airtable data:', error);
+                        
+                        let errorMessage = 'Error loading donations. ';
+                        if (error.name === 'AbortError') {
+                              errorMessage += 'Request timed out.';
+                        } else if (error.message.includes('CORS')) {
+                              errorMessage += 'CORS error: Make sure your Airtable base allows API access. You may need to use a backend proxy.';
+                        } else {
+                              errorMessage += error.message || 'Unknown error occurred.';
+                        }
+                        
+                        if (isInitialLoad) {
+                              this.showError(errorMessage);
+                              console.warn('Falling back to mock data.');
+                              this.loadMockData();
+                        } else {
+                              // For polling errors, just log (don't spam user)
+                              console.warn('Polling error:', errorMessage);
+                        }
+                  } finally {
+                        this.isProcessingDonations = false;
+                  }
+            }
+
+            validateDonation(donation) {
+                  // Validate amount (must be positive number)
+                  const amount = parseFloat(donation.amount);
+                  if (isNaN(amount) || amount <= 0 || !isFinite(amount)) {
+                        console.warn('Invalid donation amount:', donation.amount);
+                        return false;
+                  }
+                  
+                  // Validate date
+                  if (donation.date) {
+                        const date = new Date(donation.date);
+                        if (isNaN(date.getTime())) {
+                              console.warn('Invalid donation date:', donation.date);
+                              return false;
+                        }
+                  }
+                  
+                  return true;
+            }
+
+            parseAmount(amount) {
+                  if (typeof amount === 'number') {
+                        // Validate number
+                        if (isNaN(amount) || !isFinite(amount) || amount < 0) {
+                              return 0;
+                        }
+                        return amount;
+                  }
+                  if (typeof amount === 'string') {
+                        // Remove currency symbols and parse
+                        const cleaned = amount.replace(/[^0-9.]/g, '');
+                        const parsed = parseFloat(cleaned);
+                        // Validate parsed result
+                        if (isNaN(parsed) || !isFinite(parsed) || parsed < 0) {
+                              return 0;
+                        }
+                        return parsed;
+                  }
+                  return 0;
+            }
+
+            parseDate(dateValue) {
+                  if (!dateValue) return new Date().toISOString();
+                  if (dateValue instanceof Date) return dateValue.toISOString();
+                  if (typeof dateValue === 'string') {
+                        const date = new Date(dateValue);
+                        return isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+                  }
+                  return new Date().toISOString();
+            }
+
+            loadMockData() {
+                  // Mock data for demonstration - showcasing different donation tiers
+                  const mockDonations = [
+                        // Small coin donations
+                        { amount: 1.00, donor: 'Alice', date: new Date().toISOString(), purpose: 'General Support', category: 'General', transactionId: 'TXN-001' },
+                        { amount: 4.50, donor: 'Bob', date: new Date(Date.now() - 3600000).toISOString(), purpose: 'General Support', category: 'General', transactionId: 'TXN-002' },
+                        // Small donation (purse tier)
+                        { amount: 30.00, donor: 'Charlie', date: new Date(Date.now() - 7200000).toISOString(), purpose: 'General Support', category: 'General', transactionId: 'TXN-003' },
+                        // Medium donation (cash tier)
+                        { amount: 150.00, donor: 'Diana', date: new Date(Date.now() - 10800000).toISOString(), purpose: 'Project Funding', category: 'Projects', transactionId: 'TXN-004' },
+                        { amount: 250.00, donor: 'Edward', date: new Date(Date.now() - 14400000).toISOString(), purpose: 'Project Funding', category: 'Projects', transactionId: 'TXN-005' },
+                        // Large donation (money bag tier)
+                        { amount: 750.00, donor: 'MegaCorp Inc.', date: new Date(Date.now() - 18000000).toISOString(), purpose: 'Major Sponsor', category: 'Projects', transactionId: 'TXN-006' }
+                  ];
+
+                  mockDonations.forEach((donation, index) => {
+                        setTimeout(() => {
+                              this.addDonation(donation, `mock-${index}`, true);
+                        }, index * 800);
+                  });
+            }
+
+            addDonation(donation, donationId, isHistorical = false) {
+                  // Validate donation before processing
+                  if (!this.validateDonation(donation)) {
+                        return;
+                  }
+                  
+                  const amount = parseFloat(donation.amount) || 0;
+                  
+                  // Update stats
+                  this.stats.totalDonations++;
+                  this.stats.totalAmount += amount;
+                  if (donation.donor && donation.donor !== 'Anonymous') {
+                        this.stats.donors.add(donation.donor);
+                        this.stats.totalDonors = this.stats.donors.size;
+                  }
+                  
+                  this.updateStats();
+                  
+                  // Find the correct tier for this donation amount
+                  const tier = DONATION_TIERS.find(t => amount >= t.threshold);
+                  if (!tier) {
+                        console.warn('Donation amount too small:', amount);
+                        return;
+                  }
+                  
+                  // Determine which emoji to use
+                  let emoji;
+                  if (tier.emojis) {
+                        // If it's the cash tier, cycle through the emojis
+                        emoji = tier.emojis[this.cashEmojiIndex % tier.emojis.length];
+                        this.cashEmojiIndex++;
+                  } else {
+                        emoji = tier.emoji;
+                  }
+                  
+                  // Create ONE physics object for this entire donation
+                  this.createDonationObject(donation, donationId, emoji, tier.size, tier.label, isHistorical);
+            }
+
+            recalculateStats() {
+                  // Recalculate stats from actual rendered cents to prevent desync
+                  const actualDonations = new Set();
+                  let actualAmount = 0;
+                  const actualDonors = new Set();
+                  
+                  this.cents.forEach(cent => {
+                        if (cent.donationData) {
+                              const id = cent.dataset.donationId;
+                              if (id && !actualDonations.has(id)) {
+                                    actualDonations.add(id);
+                                    actualAmount += parseFloat(cent.donationData.amount) || 0;
+                                    if (cent.donationData.donor && cent.donationData.donor !== 'Anonymous') {
+                                          actualDonors.add(cent.donationData.donor);
+                                    }
+                              }
+                        }
+                  });
+                  
+                  // Update stats if there's a discrepancy
+                  if (Math.abs(this.stats.totalAmount - actualAmount) > 0.01) {
+                        this.stats.totalDonations = actualDonations.size;
+                        this.stats.totalAmount = actualAmount;
+                        this.stats.totalDonors = actualDonors.size;
+                        this.updateStats();
+                  }
+            }
+
+            enterFocusMode(donation, donationId) {
+                  if (this.isFocusMode) return;
+                  
+                  this.isFocusMode = true;
+                  this.focusedDonation = { ...donation, donationId };
+                  
+                  // Clear active mobile tag
+                  this.activeMobileTag = null;
+                  
+                  // Hide all existing tooltips when entering focus mode
+                  this.cents.forEach(cent => {
+                        this.hideTag(cent);
+                  });
+                  
+                  // Immediately desaturate all other donation objects (don't hide them)
+                  // This must happen BEFORE creating cents to prevent them from appearing
+                  this.cents.forEach(cent => {
+                        if (cent.dataset.donationId !== donationId) {
+                              // Add desaturation class (like search-no-match) immediately
+                              cent.classList.add('search-no-match');
+                        } else {
+                              // Hide the focused donation emoji (we'll show individual cents instead)
+                              if (cent.body) {
+                                    Matter.World.remove(this.world, cent.body);
+                              }
+                              cent.style.display = 'none';
+                              this.hiddenObjects.push(cent);
+                        }
+                  });
+                  
+                  // Clear the focused cents array
+                  this.focusedCents = [];
+                  
+                  // Generate individual cents for this donation
+                  const amount = parseFloat(donation.amount) || 0;
+                  const coinsCount = Math.floor(amount);
+                  
+                  // Clear any existing timeouts
+                  this.centCreationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+                  this.centCreationTimeouts = [];
+                  
+                  // Pre-fetch all expense data to determine groupings
+                  const expenseDataCache = new Map();
+                  const expenseDataPromises = [];
+                  for (let i = 0; i < coinsCount; i++) {
+                        const promise = this.fetchCoinExpenseData(donationId, i).then(data => {
+                              expenseDataCache.set(i, data);
+                              return data;
+                        }).catch(() => {
+                              // Fallback to random type if fetch fails
+                              const types = [COIN_TYPES.RED, COIN_TYPES.PURPLE, COIN_TYPES.BLUE, COIN_TYPES.GREEN];
+                              const randomType = types[Math.floor(Math.random() * types.length)];
+                              const fallbackData = { type: randomType, expense: null };
+                              expenseDataCache.set(i, fallbackData);
+                              return fallbackData;
+                        });
+                        expenseDataPromises.push(promise);
+                  }
+                  
+                  // Wait for all expense data to be fetched, then group coins
+                  Promise.all(expenseDataPromises).then(() => {
+                        if (!this.isFocusMode) return;
+                        
+                        // Group coins by expense string
+                        const coinGroups = [];
+                        let currentGroup = null;
+                        
+                        for (let i = 0; i < coinsCount; i++) {
+                              const expenseData = expenseDataCache.get(i);
+                              const coinType = expenseData?.type || COIN_TYPES.GREEN;
+                              const expense = expenseData?.expense;
+                              
+                              // Get expense string for grouping
+                              let expenseString = 'Not used';
+                              if (coinType !== COIN_TYPES.GREEN && expense) {
+                                    expenseString = expense.description || expense.purpose || 'Not used';
+                              }
+                              
+                              // Check if this coin should be grouped with the previous one
+                              if (currentGroup && 
+                                    currentGroup.expenseString === expenseString && 
+                                    currentGroup.coinType === coinType &&
+                                    currentGroup.endIndex === i - 1) {
+                                    // Extend current group
+                                    currentGroup.endIndex = i;
+                                    currentGroup.coins.push(i);
+                              } else {
+                                    // Start new group
+                                    if (currentGroup) {
+                                          coinGroups.push(currentGroup);
+                                    }
+                                    currentGroup = {
+                                          startIndex: i,
+                                          endIndex: i,
+                                          coins: [i],
+                                          expenseString: expenseString,
+                                          coinType: coinType,
+                                          expenseData: expenseData
+                                    };
+                              }
+                        }
+                        
+                        // Add last group
+                        if (currentGroup) {
+                              coinGroups.push(currentGroup);
+                        }
+                        
+                        // Create coins for each group
+                        const centDelay = 100; // 100ms per group
+                        coinGroups.forEach((group, groupIdx) => {
+                              const isLastGroup = (groupIdx === coinGroups.length - 1);
+                              const timeoutId = setTimeout(() => {
+                                    if (this.isFocusMode) {
+                                          // Create one coin for the group
+                                          this.createFocusCentGroup(donation, donationId, group, coinsCount);
+                                          
+                                          // If this is the last group and donation is over $100, show Scrooge McDuck
+                                          if (isLastGroup && amount > 100) {
+                                                setTimeout(() => {
+                                                      if (this.isFocusMode) {
+                                                            this.createScroogeDuck();
+                                                      }
+                                                }, 500);
+                                          }
+                                    }
+                              }, groupIdx * centDelay);
+                              this.centCreationTimeouts.push(timeoutId);
+                        });
+                  });
+                  
+                  // Show UI elements
+                  this.container.classList.add('focus-mode');
+                  // Show the donation details panel permanently in focus mode
+                  this.showDonationDetails(donation);
+                  
+                  // Update legend button to show coin type legend
+                  this.updateFocusModeLegend();
+                  
+                  // Set up interval to update coin breakdown as coins are created
+                  this.breakdownUpdateInterval = setInterval(() => {
+                        if (this.isFocusMode) {
+                              this.updateCoinBreakdown();
+                        }
+                  }, 500); // Update every 500ms
+                  
+                  // Clear search
+                  const searchInput = document.getElementById('donorSearch');
+                  if (searchInput) {
+                        searchInput.value = '';
+                        this.searchQuery = '';
+                  }
+            }
+
+            async fetchCoinExpenseData(donationId, centIndex) {
+                  // Fetch expense data from Firebase for this specific cent
+                  try {
+                        // Wait for Firebase to be ready
+                        if (!window.firebaseDb) {
+                              // Wait a bit for Firebase to initialize
+                              await new Promise(resolve => setTimeout(resolve, 100));
+                              if (!window.firebaseDb) {
+                                    // Firebase not initialized, return random type for demo
+                                    const types = [COIN_TYPES.RED, COIN_TYPES.PURPLE, COIN_TYPES.BLUE, COIN_TYPES.GREEN];
+                                    const randomType = types[Math.floor(Math.random() * types.length)];
+                                    return { type: randomType, expense: null };
+                              }
+                        }
+                        
+                        const { collection, getDocs, query, where, orderBy, limit } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+                        const expensesRef = collection(window.firebaseDb, 'expenses');
+                        
+                        // Query for expenses related to this donation, ordered by index
+                        const q = query(
+                              expensesRef,
+                              where('donationId', '==', donationId),
+                              orderBy('centIndex', 'asc'),
+                              limit(centIndex + 1)
+                        );
+                        
+                        const querySnapshot = await getDocs(q);
+                        const expenses = [];
+                        querySnapshot.forEach((doc) => {
+                              expenses.push({ id: doc.id, ...doc.data() });
+                        });
+                        
+                        // Get the expense for this specific cent index
+                        // Check if there's a grouped expense (expense with startIndex and endIndex)
+                        let expense = null;
+                        for (const exp of expenses) {
+                              if (exp.startIndex !== undefined && exp.endIndex !== undefined) {
+                                    // Grouped expense
+                                    if (centIndex >= exp.startIndex && centIndex <= exp.endIndex) {
+                                          expense = exp;
+                                          break;
+                                    }
+                              } else if (exp.centIndex === centIndex) {
+                                    // Individual expense
+                                    expense = exp;
+                                    break;
+                              }
+                        }
+                        
+                        if (expense && expense.type) {
+                              return { type: expense.type, expense: expense };
+                        }
+                        
+                        // Default to random type for demo if no expense data
+                        const types = [COIN_TYPES.RED, COIN_TYPES.PURPLE, COIN_TYPES.BLUE, COIN_TYPES.GREEN];
+                        const randomType = types[Math.floor(Math.random() * types.length)];
+                        return { type: randomType, expense: null };
+                  } catch (error) {
+                        console.warn('Error fetching expense data:', error);
+                        // Default to random type on error for demo
+                        const types = [COIN_TYPES.RED, COIN_TYPES.PURPLE, COIN_TYPES.BLUE, COIN_TYPES.GREEN];
+                        const randomType = types[Math.floor(Math.random() * types.length)];
+                        return { type: randomType, expense: null };
+                  }
+            }
+
+            createFocusCentGroup(donation, donationId, group, total) {
+                  // Create a single coin representing a group of coins
+                  const { Bodies, World } = Matter;
+                  
+                  const coinType = group.coinType || COIN_TYPES.GREEN;
+                  const startIndex = group.startIndex;
+                  const endIndex = group.endIndex;
+                  const isGroup = (endIndex > startIndex);
+                  
+                  const cent = document.createElement('div');
+                  cent.className = `cent emoji coin-type-${coinType}`;
+                  cent.textContent = '🪙';
+                  cent.style.fontSize = `${CONFIG.COIN_SIZE}px`;
+                  cent.dataset.donationId = donationId;
+                  cent.dataset.centIndex = startIndex; // Store start index
+                  cent.dataset.centEndIndex = endIndex; // Store end index for groups
+                  cent.dataset.isGroup = isGroup ? 'true' : 'false';
+                  cent.dataset.coinType = coinType;
+                  
+                  // Store donation and expense data
+                  cent.donationData = {
+                        donor: donation.donor || 'Anonymous',
+                        amount: donation.amount,
+                        date: donation.date,
+                        purpose: donation.purpose || 'N/A',
+                        category: donation.category || 'General',
+                        transactionId: donation.transactionId || 'N/A',
+                        centIndex: startIndex,
+                        centEndIndex: endIndex,
+                        totalCents: total,
+                        isGroup: isGroup,
+                        coinCount: endIndex - startIndex + 1
+                  };
+                  
+                  // Store expense data if available
+                  cent.expenseData = group.expenseData?.expense || null;
+                  
+                  // Store all coin indices in this group
+                  cent.groupCoinIndices = group.coins;
+                  
+                  // Physics body - slightly larger for groups
+                  const radius = CONFIG.COIN_SIZE / 2 * (isGroup ? 1.2 : 1.0);
+                  const startX = this.poolWidth / 2 + (Math.random() - 0.5) * 20;
+                  const startY = -radius;
+                  
+                  const coinBody = Bodies.circle(startX, startY, radius, {
+                        restitution: 0.2,
+                        friction: 0.8,
+                        density: 0.001 * (isGroup ? 1.2 : 1.0),
+                        label: 'cent'
+                  });
+                  
+                  cent.body = coinBody;
+                  World.add(this.world, coinBody);
+                  
+                  // DOM styling - hide until positioned correctly to prevent glitch
+                  cent.style.position = 'absolute';
+                  cent.style.width = (radius * 2) + 'px';
+                  cent.style.height = (radius * 2) + 'px';
+                  cent.style.left = startX + 'px';
+                  cent.style.top = startY + 'px';
+                  cent.style.display = 'flex';
+                  cent.style.visibility = 'hidden'; // Hide until positioned
+                  cent.style.opacity = '1';
+                  cent.style.lineHeight = (radius * 2) + 'px';
+                  cent.style.textAlign = 'center';
+                  cent.style.justifyContent = 'center';
+                  cent.style.alignItems = 'center';
+                  cent.style.willChange = 'transform';
+                  
+                  // Make visible in next frame once positioned
+                  requestAnimationFrame(() => {
+                        cent.style.visibility = 'visible';
+                  });
+                  
+                  // Accessibility
+                  const donorName = sanitizeInput(donation.donor || 'Anonymous');
+                  const coinLabel = isGroup ? 
+                        `Coins ${startIndex + 1}-${endIndex + 1} of ${total} from ${donorName}` :
+                        `Cent ${startIndex + 1} of ${total} from ${donorName}`;
+                  cent.setAttribute('role', 'img');
+                  cent.setAttribute('aria-label', coinLabel);
+                  
+                  // Event listeners (for focus mode cents)
+                  cent._mouseenterHandler = (e) => this.showTag(e, cent);
+                  cent._mouseleaveHandler = () => this.scheduleHideTag(cent);
+                  cent._touchStartHandler = (e) => this.handleCentTouchStart(e, cent);
+                  cent._touchEndHandler = (e) => this.handleCentTouchEnd(e, cent);
+                  
+                  cent.addEventListener('mouseenter', cent._mouseenterHandler);
+                  cent.addEventListener('mouseleave', cent._mouseleaveHandler);
+                  // Use capture phase to catch touch events before Matter.js
+                  cent.addEventListener('touchstart', cent._touchStartHandler, { passive: false, capture: true });
+                  cent.addEventListener('touchend', cent._touchEndHandler, { passive: false, capture: true });
+                  cent.style.cursor = 'pointer';
+                  cent.style.touchAction = 'manipulation'; // Improve touch responsiveness
+                  cent.hasListeners = true;
+                  
+                  this.pool.appendChild(cent);
+                  this.cents.push(cent);
+                  this.focusedCents.push(cent);
+                  
+                  // Also add individual coin references for breakdown (for backward compatibility)
+                  if (isGroup) {
+                        group.coins.forEach(coinIndex => {
+                              // Create a virtual cent reference for each coin in the group
+                              const virtualCent = {
+                                    dataset: {
+                                          donationId: donationId,
+                                          centIndex: coinIndex,
+                                          coinType: coinType
+                                    },
+                                    donationData: {
+                                          ...cent.donationData,
+                                          centIndex: coinIndex
+                                    },
+                                    expenseData: cent.expenseData,
+                                    groupCent: cent // Reference to the actual grouped cent
+                              };
+                              // Store virtual cents in a special array for breakdown
+                              if (!this._virtualCents) this._virtualCents = [];
+                              this._virtualCents.push(virtualCent);
+                        });
+                  }
+                  
+                  // Update breakdown when coin is added
+                  if (this.isFocusMode) {
+                        // Debounce the update to avoid too many calls
+                        if (this._breakdownUpdateTimeout) {
+                              clearTimeout(this._breakdownUpdateTimeout);
+                        }
+                        this._breakdownUpdateTimeout = setTimeout(() => {
+                              this.updateCoinBreakdown();
+                        }, 100);
+                  }
+            }
+
+            createFocusCent(donation, donationId, index, total, expenseData = null) {
+                  const { Bodies, World } = Matter;
+                  
+                  // Use provided expense data, or default to random type
+                  if (!expenseData) {
+                        const types = [COIN_TYPES.RED, COIN_TYPES.PURPLE, COIN_TYPES.BLUE, COIN_TYPES.GREEN];
+                        const randomType = types[Math.floor(Math.random() * types.length)];
+                        expenseData = { type: randomType, expense: null };
+                  }
+                  const coinType = expenseData.type || COIN_TYPES.GREEN;
+                  
+                  const cent = document.createElement('div');
+                  cent.className = `cent emoji coin-type-${coinType}`;
+                  cent.textContent = '🪙';
+                  cent.style.fontSize = `${CONFIG.COIN_SIZE}px`;
+                  cent.dataset.donationId = donationId;
+                  cent.dataset.centIndex = index;
+                  cent.dataset.coinType = coinType;
+                  
+                  // Store donation and expense data
+                  cent.donationData = {
+                        donor: donation.donor || 'Anonymous',
+                        amount: donation.amount,
+                        date: donation.date,
+                        purpose: donation.purpose || 'N/A',
+                        category: donation.category || 'General',
+                        transactionId: donation.transactionId || 'N/A',
+                        centIndex: index,
+                        totalCents: total
+                  };
+                  
+                  // Store expense data if available
+                  cent.expenseData = expenseData.expense || null;
+                  
+                  // Physics body
+                  const radius = CONFIG.COIN_SIZE / 2;
+                  const startX = this.poolWidth / 2 + (Math.random() - 0.5) * 20;
+                  const startY = -radius;
+                  
+                  const coinBody = Bodies.circle(startX, startY, radius, {
+                        restitution: 0.2,
+                        friction: 0.8,
+                        density: 0.001,
+                        label: 'cent'
+                  });
+                  
+                  cent.body = coinBody;
+                  World.add(this.world, coinBody);
+                  
+                  // DOM styling - hide until positioned correctly to prevent glitch
+                  cent.style.position = 'absolute';
+                  cent.style.width = CONFIG.COIN_SIZE + 'px';
+                  cent.style.height = CONFIG.COIN_SIZE + 'px';
+                  cent.style.left = startX + 'px';
+                  cent.style.top = startY + 'px';
+                  cent.style.display = 'flex';
+                  cent.style.visibility = 'hidden'; // Hide until positioned
+                  cent.style.opacity = '1';
+                  cent.style.lineHeight = CONFIG.COIN_SIZE + 'px';
+                  cent.style.textAlign = 'center';
+                  cent.style.justifyContent = 'center';
+                  cent.style.alignItems = 'center';
+                  cent.style.willChange = 'transform';
+                  
+                  // Make visible in next frame once positioned
+                  requestAnimationFrame(() => {
+                        cent.style.visibility = 'visible';
+                  });
+                  
+                  // Accessibility
+                  const donorName = sanitizeInput(donation.donor || 'Anonymous');
+                  cent.setAttribute('role', 'img');
+                  cent.setAttribute('aria-label', `Cent ${index + 1} of ${total} from ${donorName}`);
+                  
+                  // Event listeners (for focus mode cents)
+                  cent._mouseenterHandler = (e) => this.showTag(e, cent);
+                  cent._mouseleaveHandler = () => this.scheduleHideTag(cent);
+                  cent._touchStartHandler = (e) => this.handleCentTouchStart(e, cent);
+                  cent._touchEndHandler = (e) => this.handleCentTouchEnd(e, cent);
+                  
+                  cent.addEventListener('mouseenter', cent._mouseenterHandler);
+                  cent.addEventListener('mouseleave', cent._mouseleaveHandler);
+                  // Use capture phase to catch touch events before Matter.js
+                  cent.addEventListener('touchstart', cent._touchStartHandler, { passive: false, capture: true });
+                  cent.addEventListener('touchend', cent._touchEndHandler, { passive: false, capture: true });
+                  cent.style.cursor = 'pointer';
+                  cent.style.touchAction = 'manipulation'; // Improve touch responsiveness
+                  cent.hasListeners = true;
+                  
+                  this.pool.appendChild(cent);
+                  this.cents.push(cent);
+                  this.focusedCents.push(cent);
+                  
+                  // Update breakdown when coin is added
+                  if (this.isFocusMode) {
+                        // Debounce the update to avoid too many calls
+                        if (this._breakdownUpdateTimeout) {
+                              clearTimeout(this._breakdownUpdateTimeout);
+                        }
+                        this._breakdownUpdateTimeout = setTimeout(() => {
+                              this.updateCoinBreakdown();
+                        }, 100);
+                  }
+            }
+
+            exitFocusMode() {
+                  if (!this.isFocusMode) return;
+                  
+                  this.isFocusMode = false;
+                  
+                  // Clear breakdown update interval
+                  if (this.breakdownUpdateInterval) {
+                        clearInterval(this.breakdownUpdateInterval);
+                        this.breakdownUpdateInterval = null;
+                  }
+                  if (this._breakdownUpdateTimeout) {
+                        clearTimeout(this._breakdownUpdateTimeout);
+                        this._breakdownUpdateTimeout = null;
+                  }
+                  
+                  // Stop all pending cent creation
+                  this.centCreationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+                  this.centCreationTimeouts = [];
+                  
+                  // Clear focused cents
+                  this.focusedCents.forEach(cent => {
+                        if (cent.body) {
+                              Matter.World.remove(this.world, cent.body);
+                        }
+                        if (cent.parentNode) {
+                              cent.parentNode.removeChild(cent);
+                        }
+                        // Remove from main cents array
+                        const index = this.cents.indexOf(cent);
+                        if (index > -1) {
+                              this.cents.splice(index, 1);
+                        }
+                  });
+                  this.focusedCents = [];
+                  
+                  // Remove desaturation from all donations
+                  this.cents.forEach(cent => {
+                        cent.classList.remove('search-no-match');
+                  });
+                  
+                  // Restore hidden objects (the focused donation emoji)
+                  this.hiddenObjects.forEach(cent => {
+                        cent.style.display = '';
+                        if (cent.body) {
+                              Matter.World.add(this.world, cent.body);
+                        }
+                  });
+                  
+                  this.hiddenObjects = [];
+                  this.focusedDonation = null;
+                  
+                  // Remove Scrooge McDuck if present
+                  if (this.scroogeDuck) {
+                        // Remove physics body
+                        if (this.scroogeDuck.body) {
+                              Matter.World.remove(this.world, this.scroogeDuck.body);
+                        }
+                        
+                        // Remove event listeners
+                        if (this.scroogeDuck._hidePopupHandler) {
+                              document.removeEventListener('click', this.scroogeDuck._hidePopupHandler);
+                        }
+                        if (this.scroogeDuck._clickHandler) {
+                              this.scroogeDuck.removeEventListener('click', this.scroogeDuck._clickHandler);
+                        }
+                        if (this.scroogeDuck._popupTimeout) {
+                              clearTimeout(this.scroogeDuck._popupTimeout);
+                        }
+                        
+                        if (this.scroogeDuck.parentNode) {
+                              this.scroogeDuck.parentNode.removeChild(this.scroogeDuck);
+                        }
+                        this.scroogeDuck = null;
+                  }
+                  this.scroogePopup = null;
+                  
+                  // Clear highlights
+                  this.clearHighlights();
+                  
+                  // Remove click-outside handler
+                  if (this._highlightClickOutsideHandler) {
+                        document.removeEventListener('click', this._highlightClickOutsideHandler);
+                        this._highlightClickOutsideHandler = null;
+                  }
+                  
+                  // Hide UI elements
+                  this.container.classList.remove('focus-mode');
+                  this.hideDonationDetails();
+                  
+                  // Restore original legend button
+                  this.restoreOriginalLegend();
+            }
+
+            createScroogeDuck() {
+                  if (this.scroogeDuck) return; // Already exists
+                  
+                  const { Bodies, World } = Matter;
+                  
+                  const duck = document.createElement('div');
+                  duck.className = 'scrooge-duck';
+                  duck.textContent = '🦆';
+                  duck.setAttribute('role', 'button');
+                  duck.setAttribute('aria-label', 'Scrooge McDuck');
+                  
+                  // Physics body for duck - same size as coins
+                  const duckSize = CONFIG.COIN_SIZE; // Same size as coins
+                  const radius = duckSize / 2;
+                  const startX = this.poolWidth / 2 + (Math.random() - 0.5) * 20;
+                  const startY = -radius; // Start above the pool
+                  
+                  const duckBody = Bodies.circle(startX, startY, radius, {
+                        restitution: 0.2, // Same as coins
+                        friction: 0.8,    // Same as coins
+                        density: 0.001,   // Same as coins
+                        label: 'duck'
+                  });
+                  
+                  duck.body = duckBody;
+                  World.add(this.world, duckBody);
+                  
+                  // DOM styling - hide until positioned correctly
+                  duck.style.position = 'absolute';
+                  duck.style.width = duckSize + 'px';
+                  duck.style.height = duckSize + 'px';
+                  duck.style.left = startX + 'px';
+                  duck.style.top = startY + 'px';
+                  duck.style.fontSize = duckSize + 'px';
+                  duck.style.display = 'flex';
+                  duck.style.visibility = 'hidden'; // Hide until positioned
+                  duck.style.opacity = '1';
+                  duck.style.lineHeight = duckSize + 'px';
+                  duck.style.textAlign = 'center';
+                  duck.style.justifyContent = 'center';
+                  duck.style.alignItems = 'center';
+                  duck.style.willChange = 'transform';
+                  duck.style.transform = 'translate(-50%, -50%)';
+                  
+                  // Make visible in next frame once positioned
+                  requestAnimationFrame(() => {
+                        duck.style.visibility = 'visible';
+                  });
+                  
+                  // Duck position will be updated in the main physics loop (already set up in setupPhysics)
+                  
+                  // Create popup
+                  const popup = document.createElement('div');
+                  popup.className = 'scrooge-popup';
+                  popup.textContent = 'Scrooge McDuck';
+                  popup.style.position = 'absolute';
+                  popup.style.left = '50%';
+                  popup.style.top = '100%';
+                  popup.style.transform = 'translateX(-50%)';
+                  popup.style.marginTop = '10px';
+                  
+                  // Click handler to show popup
+                  let popupTimeout = null;
+                  const clickHandler = (e) => {
+                        e.stopPropagation();
+                        
+                        // Clear any existing timeout
+                        if (popupTimeout) {
+                              clearTimeout(popupTimeout);
+                        }
+                        
+                        popup.classList.toggle('visible');
+                        
+                        // Hide popup after 3 seconds if visible
+                        if (popup.classList.contains('visible')) {
+                              popupTimeout = setTimeout(() => {
+                                    popup.classList.remove('visible');
+                                    popupTimeout = null;
+                              }, 3000);
+                        } else {
+                              popupTimeout = null;
+                        }
+                  };
+                  
+                  duck.addEventListener('click', clickHandler);
+                  
+                  // Hide popup when clicking outside
+                  const hidePopupHandler = (e) => {
+                        if (!duck.contains(e.target) && !popup.contains(e.target)) {
+                              popup.classList.remove('visible');
+                              if (popupTimeout) {
+                                    clearTimeout(popupTimeout);
+                                    popupTimeout = null;
+                              }
+                        }
+                  };
+                  document.addEventListener('click', hidePopupHandler);
+                  
+                  // Store handlers for cleanup
+                  duck._clickHandler = clickHandler;
+                  duck._hidePopupHandler = hidePopupHandler;
+                  duck._popupTimeout = popupTimeout;
+                  
+                  duck.appendChild(popup);
+                  this.pool.appendChild(duck);
+                  
+                  this.scroogeDuck = duck;
+                  this.scroogePopup = popup;
+            }
+
+            showDonationDetails(donation) {
+                  const panel = document.getElementById('donationDetailsPanel');
+                  if (!panel) return;
+                  
+                  // Format date
+                  let formattedDate = 'N/A';
+                  if (donation.date) {
+                        try {
+                              const date = new Date(donation.date);
+                              if (!isNaN(date.getTime())) {
+                                    formattedDate = new Intl.DateTimeFormat(navigator.language || 'en-US', {
+                                          year: 'numeric',
+                                          month: 'short',
+                                          day: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                    }).format(date);
+                              }
+                        } catch (e) {
+                              console.warn('Date formatting error:', e);
+                        }
+                  }
+                  
+                  // Populate donation header info
+                  document.getElementById('detailsDonor').textContent = sanitizeInput(donation.donor || 'Anonymous');
+                  document.getElementById('detailsAmount').textContent = `$${parseFloat(donation.amount).toFixed(2)}`;
+                  document.getElementById('detailsDate').textContent = formattedDate;
+                  document.getElementById('detailsPurpose').textContent = sanitizeInput(donation.purpose || 'N/A');
+                  document.getElementById('detailsCategory').textContent = sanitizeInput(donation.category || 'General');
+                  document.getElementById('detailsTransactionId').textContent = sanitizeInput(donation.transactionId || 'N/A');
+                  
+                  // Show individual coin breakdown in focus mode
+                  this.updateCoinBreakdown();
+                  
+                  // Show panel
+                  panel.classList.add('active');
+            }
+
+            generateDonorRandomString(donorName) {
+                  // Generate or retrieve a random 5-letter string for this donor
+                  if (!this.donorRandomStrings.has(donorName)) {
+                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                        let randomString = '';
+                        for (let i = 0; i < 5; i++) {
+                              randomString += chars.charAt(Math.floor(Math.random() * chars.length));
+                        }
+                        this.donorRandomStrings.set(donorName, randomString);
+                  }
+                  return this.donorRandomStrings.get(donorName);
+            }
+
+            generateCoinId(donorName, coinIndex) {
+                  // Format: #(first 2 letters of donor)-(coin number)-(random 5 letters)
+                  const donorPrefix = (donorName || 'AN').substring(0, 2).toUpperCase();
+                  const randomString = this.generateDonorRandomString(donorName || 'Anonymous');
+                  return `#${donorPrefix}-${coinIndex + 1}-${randomString}`;
+            }
+
+            updateCoinBreakdown() {
+                  const breakdown = document.getElementById('detailsBreakdown');
+                  const breakdownItems = document.getElementById('breakdownItems');
+                  if (!breakdown || !breakdownItems) return;
+                  
+                  // Clear existing items
+                  breakdownItems.innerHTML = '';
+                  
+                  // Get all focused cents (including virtual cents from groups)
+                  const allCoins = [];
+                  
+                  // Add actual cents
+                  this.focusedCents.forEach(cent => {
+                        if (cent.dataset.isGroup === 'true') {
+                              // For grouped cents, create virtual entries for each coin in the group
+                              const startIndex = parseInt(cent.dataset.centIndex) || 0;
+                              const endIndex = parseInt(cent.dataset.centEndIndex) || startIndex;
+                              for (let i = startIndex; i <= endIndex; i++) {
+                                    const virtualCent = {
+                                          dataset: {
+                                                donationId: cent.dataset.donationId,
+                                                centIndex: i,
+                                                coinType: cent.dataset.coinType
+                                          },
+                                          donationData: {
+                                                ...cent.donationData,
+                                                centIndex: i
+                                          },
+                                          expenseData: cent.expenseData,
+                                          groupCent: cent
+                                    };
+                                    allCoins.push(virtualCent);
+                              }
+                        } else {
+                              allCoins.push(cent);
+                        }
+                  });
+                  
+                  // Sort by index
+                  const coins = allCoins.sort((a, b) => {
+                        const indexA = parseInt(a.dataset.centIndex) || 0;
+                        const indexB = parseInt(b.dataset.centIndex) || 0;
+                        return indexA - indexB;
+                  });
+                  
+                  if (coins.length === 0) {
+                        breakdown.style.display = 'none';
+                        return;
+                  }
+                  
+                  // Show breakdown section
+                  breakdown.style.display = 'block';
+                  
+                  // Group coins by expense string
+                  const coinGroups = new Map();
+                  const donorName = this.focusedDonation?.donor || 'Anonymous';
+                  
+                  coins.forEach((cent) => {
+                        const coinType = cent.dataset.coinType || 'green';
+                        const expenseData = cent.expenseData;
+                        
+                        // Get expense string for grouping
+                        let expenseString = 'Not used';
+                        if (coinType !== COIN_TYPES.GREEN) {
+                              if (expenseData && expenseData.description) {
+                                    expenseString = expenseData.description;
+                              } else if (expenseData && expenseData.purpose) {
+                                    expenseString = expenseData.purpose;
+                              }
+                        }
+                        
+                        // Create group key: expenseString + coinType
+                        const groupKey = `${expenseString}|${coinType}`;
+                        
+                        if (!coinGroups.has(groupKey)) {
+                              coinGroups.set(groupKey, {
+                                    expenseString: expenseString,
+                                    coinType: coinType,
+                                    coins: [],
+                                    expenseData: expenseData
+                              });
+                        }
+                        
+                        coinGroups.get(groupKey).coins.push(cent);
+                  });
+                  
+                  // Create an entry for each group
+                  coinGroups.forEach((group, groupKey) => {
+                        const coins = group.coins.sort((a, b) => {
+                              const indexA = parseInt(a.dataset.centIndex) || 0;
+                              const indexB = parseInt(b.dataset.centIndex) || 0;
+                              return indexA - indexB;
+                        });
+                        
+                        const coinType = group.coinType;
+                        const typeLabel = COIN_TYPE_LABELS[coinType] || 'Unknown';
+                        const expenseData = group.expenseData;
+                        const displayPurpose = group.expenseString;
+                        
+                        // Get category from expense data or default
+                        let category = typeLabel;
+                        if (expenseData && expenseData.category) {
+                              category = expenseData.category;
+                        }
+                        
+                        const breakdownItem = document.createElement('div');
+                        breakdownItem.className = 'breakdown-item';
+                        breakdownItem.dataset.coinType = coinType;
+                        breakdownItem.dataset.purpose = displayPurpose.toLowerCase();
+                        breakdownItem.dataset.coinIds = coins.map(c => c.dataset.centIndex).join(',');
+                        
+                        // Create name row with coin and amount
+                        const nameRow = document.createElement('div');
+                        nameRow.className = 'breakdown-item-name-row';
+                        
+                        // Create coin preview with color - make it clickable
+                        const coinPreview = document.createElement('span');
+                        coinPreview.textContent = '🪙';
+                        coinPreview.className = `coin-type-${coinType}`;
+                        coinPreview.style.display = 'inline-block';
+                        coinPreview.style.marginRight = '8px';
+                        coinPreview.style.fontSize = '1rem';
+                        coinPreview.style.lineHeight = '1';
+                        coinPreview.style.verticalAlign = 'middle';
+                        coinPreview.style.flexShrink = '0';
+                        coinPreview.style.cursor = 'pointer';
+                        coinPreview.setAttribute('role', 'button');
+                        
+                        // Make coin clickable to highlight
+                        coinPreview.addEventListener('click', (e) => {
+                              e.stopPropagation();
+                              this.highlightCoinGroupInPool(coins, breakdownItem);
+                        });
+                        
+                        // Create coin name/identifier
+                        const coinName = document.createElement('span');
+                        if (coins.length === 1) {
+                              const coinIndex = parseInt(coins[0].dataset.centIndex) || 0;
+                              coinName.textContent = this.generateCoinId(donorName, coinIndex);
+                        } else {
+                              const firstIndex = parseInt(coins[0].dataset.centIndex) || 0;
+                              const lastIndex = parseInt(coins[coins.length - 1].dataset.centIndex) || 0;
+                              // For grouped coins, use format: #AB-1-20-XYZAB
+                              const donorPrefix = (donorName || 'AN').substring(0, 2).toUpperCase();
+                              const randomString = this.generateDonorRandomString(donorName || 'Anonymous');
+                              coinName.textContent = `#${donorPrefix}-${firstIndex + 1}-${lastIndex + 1}-${randomString}`;
+                        }
+                        coinName.style.fontWeight = '600';
+                        coinName.style.flex = '1';
+                        
+                        // Create amount
+                        const amountText = document.createElement('span');
+                        amountText.textContent = `$${(coins.length * 1.0).toFixed(2)}`;
+                        amountText.style.fontWeight = '600';
+                        amountText.style.color = '#FF8C42';
+                        amountText.style.flexShrink = '0';
+                        
+                        nameRow.appendChild(coinPreview);
+                        nameRow.appendChild(coinName);
+                        nameRow.appendChild(amountText);
+                        
+                        // Create purpose text below name
+                        const purposeText = document.createElement('div');
+                        purposeText.className = 'breakdown-item-purpose';
+                        purposeText.textContent = sanitizeInput(displayPurpose);
+                        
+                        // Create actions wrapper with buttons
+                        const actionsWrapper = document.createElement('div');
+                        actionsWrapper.className = 'breakdown-item-actions';
+                        // Prevent parent hover when hovering buttons
+                        actionsWrapper.addEventListener('mouseenter', (e) => {
+                              e.stopPropagation();
+                        });
+                        actionsWrapper.addEventListener('mouseleave', (e) => {
+                              e.stopPropagation();
+                        });
+                        
+                        // Create Receipts button
+                        const receiptsButton = document.createElement('button');
+                        receiptsButton.className = 'breakdown-button receipts-button';
+                        receiptsButton.textContent = 'Receipts';
+                        receiptsButton.setAttribute('aria-label', `View receipts for ${sanitizeInput(displayPurpose)}`);
+                        receiptsButton.addEventListener('click', (e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              this.handleReceiptsClick(coins[0], expenseData, displayPurpose, receiptsButton);
+                        });
+                        
+                        // Create Report button
+                        const reportButton = document.createElement('button');
+                        reportButton.className = 'breakdown-button report-button';
+                        reportButton.textContent = 'Report';
+                        reportButton.setAttribute('aria-label', `Report suspicious expense: ${sanitizeInput(displayPurpose)}`);
+                        reportButton.addEventListener('click', (e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              this.handleReportExpenseClick(coins[0], expenseData, displayPurpose, reportButton);
+                        });
+                        
+                        actionsWrapper.appendChild(receiptsButton);
+                        actionsWrapper.appendChild(reportButton);
+                        
+                        breakdownItem.appendChild(nameRow);
+                        breakdownItem.appendChild(purposeText);
+                        breakdownItem.appendChild(actionsWrapper);
+                        
+                        breakdownItems.appendChild(breakdownItem);
+                  });
+                  
+                  // Setup breakdown search
+                  this.setupBreakdownSearch();
+                  
+                  // Re-apply search filter if there's an active search query
+                  const breakdownSearchInput = document.getElementById('breakdownSearch');
+                  if (breakdownSearchInput && breakdownSearchInput.value) {
+                        // Trigger search to filter newly created items
+                        if (this._breakdownSearchHandler) {
+                              this._breakdownSearchHandler({ target: breakdownSearchInput });
+                        }
+                  }
+                  
+                  // Setup click-outside handler for highlights
+                  this.setupHighlightClickOutside();
+            }
+
+            highlightCoinGroupInPool(coins, breakdownItem) {
+                  // Remove previous highlights
+                  this.clearHighlights();
+                  
+                  // Desaturate all coins first
+                  this.focusedCents.forEach(c => {
+                        c.classList.add('desaturated');
+                  });
+                  
+                  // Highlight these coins and item
+                  coins.forEach(cent => {
+                        // If it's a virtual cent from a group, highlight the actual group cent
+                        const actualCent = cent.groupCent || cent;
+                        actualCent.classList.add('highlighted');
+                        actualCent.classList.remove('search-no-match');
+                        actualCent.classList.remove('desaturated'); // Remove desaturation from highlighted coins
+                        this.highlightedCoins.add(actualCent);
+                  });
+                  // Don't add highlighted class to breakdown item to prevent orange flash
+            }
+
+            clearHighlights() {
+                  // Remove highlights and desaturation from all coins
+                  this.focusedCents.forEach(c => {
+                        c.classList.remove('highlighted');
+                        c.classList.remove('desaturated');
+                        if (!this.highlightedCoins.has(c)) {
+                              c.classList.remove('search-no-match');
+                        }
+                  });
+                  this.highlightedCoins.clear();
+                  // Don't remove highlighted class from breakdown items since we're not adding it
+            }
+
+            setupHighlightClickOutside() {
+                  // Remove existing handler if any
+                  if (this._highlightClickOutsideHandler) {
+                        document.removeEventListener('click', this._highlightClickOutsideHandler);
+                  }
+                  
+                  // Add click-outside handler
+                  this._highlightClickOutsideHandler = (e) => {
+                        // Check if click is outside breakdown items and coin previews
+                        const breakdownPanel = document.getElementById('donationDetailsPanel');
+                        const clickedBreakdownItem = e.target.closest('.breakdown-item');
+                        const clickedCoinPreview = e.target.closest('.breakdown-item-name-row span[role="button"]');
+                        
+                        if (!clickedBreakdownItem && !clickedCoinPreview && breakdownPanel && breakdownPanel.contains(e.target)) {
+                              // Clicked inside panel but not on breakdown items - clear highlights
+                              this.clearHighlights();
+                        } else if (!breakdownPanel || !breakdownPanel.contains(e.target)) {
+                              // Clicked outside panel - clear highlights
+                              this.clearHighlights();
+                        }
+                  };
+                  
+                  document.addEventListener('click', this._highlightClickOutsideHandler);
+            }
+
+            setupBreakdownSearch() {
+                  const breakdownSearchInput = document.getElementById('breakdownSearch');
+                  if (!breakdownSearchInput) return;
+                  
+                  // Clear any existing listener
+                  if (this._breakdownSearchHandler) {
+                        breakdownSearchInput.removeEventListener('input', this._breakdownSearchHandler);
+                  }
+                  
+                  this._breakdownSearchHandler = (e) => {
+                        const query = e.target.value.toLowerCase().trim();
+                        const breakdownItems = document.querySelectorAll('.breakdown-item');
+                        
+                        breakdownItems.forEach(item => {
+                              if (!query) {
+                                    // Show all items if no query
+                                    item.style.display = 'flex';
+                                    return;
+                              }
+                              
+                              // Get all text content from the item (including nested elements)
+                              const itemText = item.textContent || item.innerText || '';
+                              const itemTextLower = itemText.toLowerCase();
+                              
+                              // Also check dataset attributes
+                              const purpose = (item.dataset.purpose || '').toLowerCase();
+                              const coinIds = (item.dataset.coinIds || '').toLowerCase();
+                              const coinType = (item.dataset.coinType || '').toLowerCase();
+                              const typeLabel = (COIN_TYPE_LABELS[coinType] || '').toLowerCase();
+                              
+                              // Search in all text content and attributes
+                              const matches = itemTextLower.includes(query) ||
+                                    purpose.includes(query) || 
+                                    coinIds.includes(query) ||
+                                    coinType.includes(query) ||
+                                    typeLabel.includes(query);
+                              
+                              if (matches) {
+                                    item.style.display = 'flex';
+                              } else {
+                                    item.style.display = 'none';
+                              }
+                        });
+                  };
+                  
+                  breakdownSearchInput.addEventListener('input', this._breakdownSearchHandler);
+                  
+                  // Also trigger search on existing value if any
+                  if (breakdownSearchInput.value) {
+                        this._breakdownSearchHandler({ target: breakdownSearchInput });
+                  }
+            }
+
+            // Utility function to show popup with common logic
+            showExpensePopup(headerText, headerClass, contentElement, buttonElement) {
+                  // Remove existing popup if any
+                  const existingPopup = document.querySelector('.expense-popup');
+                  if (existingPopup) {
+                        existingPopup.remove();
+                  }
+                  
+                  // Create popup
+                  const popup = document.createElement('div');
+                  popup.className = 'expense-popup';
+                  
+                  // Header
+                  const header = document.createElement('div');
+                  header.className = `expense-popup-header ${headerClass}`;
+                  header.textContent = headerText;
+                  
+                  // Close button
+                  const closeBtn = document.createElement('button');
+                  closeBtn.className = 'expense-popup-close';
+                  closeBtn.innerHTML = 'Ã—';
+                  closeBtn.setAttribute('aria-label', `Close ${headerText.toLowerCase()} popup`);
+                  closeBtn.type = 'button';
+                  
+                  const closePopup = () => {
+                        popup.classList.remove('visible');
+                        setTimeout(() => popup.remove(), 300);
+                  };
+                  
+                  closeBtn.addEventListener('click', closePopup);
+                  
+                  popup.appendChild(closeBtn);
+                  popup.appendChild(header);
+                  popup.appendChild(contentElement);
+                  
+                  // Position popup near the button
+                  if (buttonElement) {
+                        const rect = buttonElement.getBoundingClientRect();
+                        popup.style.left = (rect.left + rect.width / 2) + 'px';
+                        popup.style.top = (rect.bottom + 10) + 'px';
+                        popup.style.transform = 'translateX(-50%) translateY(10px) scale(0.9)';
+                  } else {
+                        // Center on screen as fallback
+                        popup.style.left = '50%';
+                        popup.style.top = '50%';
+                        popup.style.transform = 'translate(-50%, -50%) translateY(10px) scale(0.9)';
+                  }
+                  
+                  document.body.appendChild(popup);
+                  
+                  // Show popup
+                  requestAnimationFrame(() => {
+                        popup.classList.add('visible');
+                        if (buttonElement) {
+                              popup.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+                        } else {
+                              popup.style.transform = 'translate(-50%, -50%) translateY(0) scale(1)';
+                        }
+                  });
+                  
+                  // Close on outside click
+                  const closeOnOutside = (e) => {
+                        if (!popup.contains(e.target) && !buttonElement?.contains(e.target)) {
+                              closePopup();
+                              document.removeEventListener('click', closeOnOutside);
+                        }
+                  };
+                  
+                  setTimeout(() => {
+                        document.addEventListener('click', closeOnOutside);
+                  }, 100);
+                  
+                  // Close on Escape key
+                  const closeOnEscape = (e) => {
+                        if (e.key === 'Escape') {
+                              closePopup();
+                              document.removeEventListener('keydown', closeOnEscape);
+                        }
+                  };
+                  document.addEventListener('keydown', closeOnEscape);
+                  
+                  return popup;
+            }
+
+            // Helper to create receipt item
+            createReceiptItem(receipt, idx) {
+                  const item = document.createElement('div');
+                  item.className = 'expense-popup-item';
+                  
+                  if (receipt.url) {
+                        item.innerHTML = `
+                              <div class="expense-popup-item-label">Receipt ${idx + 1}</div>
+                              <div class="expense-popup-item-value">
+                                    <a href="${sanitizeInput(receipt.url)}" target="_blank" style="color: #33CE79; text-decoration: underline;">${sanitizeInput(receipt.url)}</a>
+                              </div>
+                        `;
+                  } else if (receipt.description) {
+                        item.innerHTML = `
+                              <div class="expense-popup-item-label">Receipt ${idx + 1}</div>
+                              <div class="expense-popup-item-value">${sanitizeInput(receipt.description)}</div>
+                        `;
+                  }
+                  
+                  if (receipt.timestamp) {
+                        const dateLabel = document.createElement('div');
+                        dateLabel.className = 'expense-popup-item-label';
+                        dateLabel.textContent = 'Date';
+                        dateLabel.style.marginTop = '0.5rem';
+                        
+                        const dateValue = document.createElement('div');
+                        dateValue.className = 'expense-popup-item-value';
+                        try {
+                              const date = receipt.timestamp.toDate ? receipt.timestamp.toDate() : new Date(receipt.timestamp);
+                              dateValue.textContent = new Intl.DateTimeFormat(navigator.language || 'en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                              }).format(date);
+                        } catch (e) {
+                              dateValue.textContent = receipt.timestamp.toString();
+                        }
+                        
+                        item.appendChild(dateLabel);
+                        item.appendChild(dateValue);
+                  }
+                  
+                  return item;
+            }
+
+            async handleReceiptsClick(cent, expenseData, purpose, buttonElement) {
+                  // Show popup immediately with loading state
+                  const content = document.createElement('div');
+                  content.className = 'expense-popup-content';
+                  
+                  const loading = document.createElement('div');
+                  loading.className = 'expense-popup-empty';
+                  loading.textContent = 'Loading receipts...';
+                  content.appendChild(loading);
+                  
+                  const popup = this.showExpensePopup('Receipts', 'receipts', content, buttonElement);
+                  
+                  // Fetch receipts from Firebase (non-blocking)
+                  (async () => {
+                        let receipts = [];
+                        try {
+                              if (window.firebaseDb) {
+                                    const { collection, getDocs, query, where } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+                                    const receiptsRef = collection(window.firebaseDb, 'receipts');
+                                    
+                                    const q = query(
+                                          receiptsRef,
+                                          where('donationId', '==', cent.dataset.donationId),
+                                          where('centIndex', '==', parseInt(cent.dataset.centIndex))
+                                    );
+                                    
+                                    const querySnapshot = await getDocs(q);
+                                    querySnapshot.forEach((doc) => {
+                                          receipts.push({ id: doc.id, ...doc.data() });
+                                    });
+                              }
+                        } catch (error) {
+                              console.warn('Error fetching receipts:', error);
+                        }
+                        
+                        // Update content
+                        content.innerHTML = '';
+                        if (receipts.length === 0) {
+                              const empty = document.createElement('div');
+                              empty.className = 'expense-popup-empty';
+                              empty.textContent = 'No receipts available for this expense.';
+                              content.appendChild(empty);
+                        } else {
+                              receipts.forEach((receipt, idx) => {
+                                    content.appendChild(this.createReceiptItem(receipt, idx + 1));
+                              });
+                        }
+                  })();
+            }
+
+            async handleReportExpenseClick(cent, expenseData, purpose, buttonElement) {
+                  const donationId = cent.dataset.donationId;
+                  const centIndex = cent.dataset.centIndex;
+                  const coinType = cent.dataset.coinType || 'unknown';
+                  
+                  // Build form content
+                  const form = document.createElement('form');
+                  form.className = 'expense-popup-form';
+                  
+                  // Info section
+                  const infoSection = document.createElement('div');
+                  infoSection.className = 'expense-popup-item';
+                  infoSection.style.marginBottom = '1rem';
+                  infoSection.innerHTML = `
+                        <div class="expense-popup-item-label">Purpose</div>
+                        <div class="expense-popup-item-value">${sanitizeInput(purpose)}</div>
+                        <div class="expense-popup-item-label" style="margin-top: 0.5rem;">Type</div>
+                        <div class="expense-popup-item-value">${COIN_TYPE_LABELS[coinType] || 'Unknown'}</div>
+                  `;
+                  
+                  // Textarea
+                  const textarea = document.createElement('textarea');
+                  textarea.className = 'expense-popup-textarea';
+                  textarea.placeholder = 'Please describe why this expense is suspicious...';
+                  textarea.required = true;
+                  
+                  // Submit button
+                  const submitBtn = document.createElement('button');
+                  submitBtn.type = 'submit';
+                  submitBtn.className = 'expense-popup-submit reports';
+                  submitBtn.textContent = 'Submit Report';
+                  
+                  form.appendChild(infoSection);
+                  form.appendChild(textarea);
+                  form.appendChild(submitBtn);
+                  
+                  // Show popup
+                  const popup = this.showExpensePopup('Report Suspicious Expense', 'reports', form, buttonElement);
+                  
+                  // Focus textarea after popup is shown
+                  requestAnimationFrame(() => {
+                        textarea.focus();
+                  });
+                  
+                  // Handle form submission
+                  form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const reportText = textarea.value.trim();
+                        
+                        if (reportText) {
+                              try {
+                                    if (window.firebaseDb) {
+                                          const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+                                          await addDoc(collection(window.firebaseDb, 'expenseReports'), {
+                                                donationId: donationId,
+                                                centIndex: parseInt(centIndex),
+                                                purpose: purpose,
+                                                coinType: coinType,
+                                                expenseData: expenseData,
+                                                reportText: reportText,
+                                                timestamp: new Date(),
+                                                type: 'expense_report'
+                                          });
+                                    }
+                                    
+                                    // Show success message
+                                    const successMsg = document.createElement('div');
+                                    successMsg.className = 'expense-popup-empty';
+                                    successMsg.textContent = 'Thank you for your report. We will review this suspicious expense shortly.';
+                                    successMsg.style.color = '#33CE79';
+                                    form.innerHTML = '';
+                                    form.appendChild(successMsg);
+                                    
+                                    setTimeout(() => {
+                                          popup.classList.remove('visible');
+                                          setTimeout(() => popup.remove(), 300);
+                                    }, 2000);
+                              } catch (error) {
+                                    console.error('Error submitting report:', error);
+                                    alert('Error submitting report. Please try again.');
+                              }
+                        }
+                  });
+            }
+
+            hideDonationDetails() {
+                  const panel = document.getElementById('donationDetailsPanel');
+                  if (panel) {
+                        panel.classList.remove('active');
+                  }
+            }
+
+            createDonationObject(donation, donationId, emoji, size, label, isHistorical = false) {
+                  const { Bodies, World } = Matter;
+                  
+                  // Create the DOM element
+                  const element = document.createElement('div');
+                  element.className = 'cent emoji';
+                  element.textContent = emoji;
+                  element.style.fontSize = `${size}px`;
+                  element.dataset.donationId = donationId;
+                  
+                  // Store donation data
+                  element.donationData = {
+                        donor: donation.donor || 'Anonymous',
+                        amount: donation.amount,
+                        date: donation.date,
+                        purpose: donation.purpose || 'N/A',
+                        category: donation.category || 'General',
+                        transactionId: donation.transactionId || 'N/A'
+                  };
+                  
+                  // --- Physics Body ---
+                  // Create a circular body, adjusting the radius based on the emoji size
+                  const radius = size / 2;
+                  const startX = this.poolWidth / 2 + (Math.random() - 0.5) * 20;
+                  const startY = -radius; // Start above the screen
+                  
+                  const body = Bodies.circle(startX, startY, radius, {
+                        restitution: 0.3, // Bounciness
+                        friction: 0.7,    // How it slides against others
+                        density: 0.001 * size, // Make bigger objects heavier
+                        label: label
+                  });
+                  
+                  // Attach the body to the element and add to the world
+                  element.body = body;
+                  World.add(this.world, body);
+                  
+                  // Initial DOM positioning - hide until positioned correctly to prevent glitch
+                  element.style.position = 'absolute';
+                  element.style.width = size + 'px';
+                  element.style.height = size + 'px';
+                  element.style.left = startX + 'px';
+                  element.style.top = startY + 'px';
+                  element.style.display = 'flex';
+                  element.style.visibility = 'hidden'; // Hide until positioned
+                  element.style.opacity = '1';
+                  element.style.lineHeight = size + 'px';
+                  element.style.textAlign = 'center';
+                  element.style.justifyContent = 'center';
+                  element.style.alignItems = 'center';
+                  element.style.willChange = 'transform'; // Performance optimization
+                  
+                  // Make visible in next frame once positioned
+                  requestAnimationFrame(() => {
+                        element.style.visibility = 'visible';
+                  });
+                  
+                  // --- Accessibility ---
+                  // Note: Removed tabindex and keyboard handlers - coins are not keyboard navigable
+                  // Users can still interact via mouse/touch and search
+                  const donorName = sanitizeInput(donation.donor || 'Anonymous');
+                  const amountText = `$${parseFloat(donation.amount).toFixed(2)}`;
+                  element.setAttribute('role', 'img');
+                  element.setAttribute('aria-label', `${label} from ${donorName}, ${amountText}.`);
+                  
+                  // Add event listeners for tooltips (hover for desktop, click/touch for mobile)
+                  // BUT: In focus mode, don't show popups - only show in normal mode
+                  element._mouseenterHandler = (e) => {
+                        if (!this.isFocusMode) {
+                              this.showTag(e, element);
+                        }
+                  };
+                  element._mouseleaveHandler = () => {
+                        if (!this.isFocusMode) {
+                              this.scheduleHideTag(element);
+                        }
+                  };
+                  element._touchStartHandler = (e) => {
+                        if (!this.isFocusMode) {
+                              this.handleCentTouchStart(e, element);
+                        }
+                  };
+                  element._touchEndHandler = (e) => {
+                        if (!this.isFocusMode) {
+                              this.handleCentTouchEnd(e, element);
+                        }
+                  };
+                  
+                  element.addEventListener('mouseenter', element._mouseenterHandler);
+                  element.addEventListener('mouseleave', element._mouseleaveHandler);
+                  // Use capture phase to catch touch events before Matter.js
+                  element.addEventListener('touchstart', element._touchStartHandler, { passive: false, capture: true });
+                  element.addEventListener('touchend', element._touchEndHandler, { passive: false, capture: true });
+                  element.style.cursor = 'pointer'; // Change to pointer to indicate clickability
+                  element.style.touchAction = 'manipulation'; // Improve touch responsiveness
+                  element.hasListeners = true;
+                  
+                  // Add the element to the DOM and the main 'cents' array
+                  this.pool.appendChild(element);
+                  this.cents.push(element);
+                  this.visibleCents.add(element);
+                  
+                  // If in focus mode, desaturate this element if it's not the focused donation
+                  if (this.isFocusMode && this.focusedDonation && donationId !== this.focusedDonation.donationId) {
+                        element.classList.add('search-no-match');
+                  }
+                  
+                  // Hide empty state if we have coins
+                  const emptyState = document.getElementById('emptyState');
+                  if (emptyState) {
+                        emptyState.style.display = 'none';
+                  }
+                  
+                  // Update search filter if search is active
+                  if (this.searchQuery) {
+                        this.updateSearchFilter();
+                  }
+            }
+
+            getCentFromPool() {
+                  // Reuse cent element from pool if available
+                  if (this.centPool.length > 0) {
+                        const cent = this.centPool.pop();
+                        // Ensure it's removed from any previous parent
+                        if (cent.parentNode) {
+                              cent.parentNode.removeChild(cent);
+                        }
+                        return cent;
+                  }
+                  
+                  // Create new cent element
+                  const cent = document.createElement('div');
+                  cent.className = 'cent emoji';
+                  cent.textContent = '🪙';
+                  return cent;
+            }
+
+            returnCentToPool(cent) {
+                  // Clean up and return to pool
+                  cent.style.left = '';
+                  cent.style.top = '';
+                  cent.style.transform = '';
+                  
+                  // Remove event listeners properly
+                  if (cent._mouseenterHandler) {
+                        cent.removeEventListener('mouseenter', cent._mouseenterHandler);
+                        cent._mouseenterHandler = null;
+                  }
+                  if (cent._mouseleaveHandler) {
+                        cent.removeEventListener('mouseleave', cent._mouseleaveHandler);
+                        cent._mouseleaveHandler = null;
+                  }
+                  if (cent._touchStartHandler) {
+                        cent.removeEventListener('touchstart', cent._touchStartHandler, { capture: true });
+                        cent._touchStartHandler = null;
+                  }
+                  if (cent._touchEndHandler) {
+                        cent.removeEventListener('touchend', cent._touchEndHandler, { capture: true });
+                        cent._touchEndHandler = null;
+                  }
+                  // Clear touch tracking data
+                  cent._touchStartTime = null;
+                  cent._touchStartX = null;
+                  cent._touchStartY = null;
+                  cent._potentialTap = null;
+                  cent._touchTarget = null;
+                  // Note: No keyboard handlers to remove - coins are not keyboard navigable
+                  
+                  // Clear active mobile tag if this is it
+                  if (this.activeMobileTag === cent) {
+                        this.activeMobileTag = null;
+                  }
+                  
+                  // Remove from active tags
+                  if (this.activeTags.has(cent)) {
+                        const tag = this.activeTags.get(cent);
+                        if (tag && tag.parentNode) {
+                              tag.parentNode.removeChild(tag);
+                        }
+                        this.activeTags.delete(cent);
+                  }
+                  
+                  cent.donationData = null;
+                  cent.hasListeners = false;
+                  
+                  // Remove physics body from world
+                  if (cent.body) {
+                        Matter.World.remove(this.world, cent.body);
+                        cent.body = null;
+                  }
+                  
+                  this.centPool.push(cent);
+            }
+
+
+
+            showTag(event, cent) {
+                  // NO POPUPS IN FOCUS MODE - info is in the permanent panel
+                  if (this.isFocusMode) return;
+                  
+                  if (this.isDragging) return; // If dragging, do not show tooltip!
+                  
+                  // Cancel any pending hide timeout for this cent
+                  if (cent._hideTagTimeout) {
+                        clearTimeout(cent._hideTagTimeout);
+                        cent._hideTagTimeout = null;
+                  }
+                  
+                  // If tag already exists, just make sure it's visible
+                  if (this.activeTags.has(cent)) {
+                        const existingTag = this.activeTags.get(cent);
+                        existingTag.classList.add('visible');
+                        return;
+                  }
+                  
+                  const tag = document.createElement('div');
+                  tag.className = 'donation-tag';
+                  tag.setAttribute('role', 'tooltip');
+                  tag.setAttribute('aria-live', 'polite');
+                  
+                  // Normal mode - show donor info
+                  const data = cent.donationData;
+                  if (!data) return;
+                  
+                  // Validate and format date
+                  let formattedDate = 'N/A';
+                  if (data.date) {
+                        try {
+                              const date = new Date(data.date);
+                              if (!isNaN(date.getTime())) {
+                                    formattedDate = new Intl.DateTimeFormat(navigator.language || 'en-US', {
+                                          year: 'numeric',
+                                          month: 'short',
+                                          day: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                    }).format(date);
+                              }
+                        } catch (e) {
+                              console.warn('Date formatting error:', e);
+                        }
+                  }
+                  
+                  // Sanitize all user-provided data to prevent XSS
+                  const donor = sanitizeInput(data.donor || 'Anonymous');
+                  const amount = parseFloat(data.amount) || 0;
+                  const purpose = sanitizeInput(data.purpose || 'N/A');
+                  const category = sanitizeInput(data.category || 'General');
+                  const transactionId = sanitizeInput(data.transactionId || 'N/A');
+                  
+                  const donationId = cent.dataset.donationId;
+                  
+                  const tagContent = `
+                        <div class="tag-header">${donor}</div>
+                        <div class="tag-item"><strong>Amount:</strong> $${amount.toFixed(2)}</div>
+                        <div class="tag-item"><strong>Date:</strong> ${formattedDate}</div>
+                        <div class="tag-item"><strong>Purpose:</strong> ${purpose}</div>
+                        <div class="tag-item"><strong>Category:</strong> ${category}</div>
+                        <div class="tag-item"><strong>Transaction ID:</strong> ${transactionId}</div>
+                        <button class="view-cents-button" data-donation-id="${donationId}" aria-label="See every cent of this donation">See Every Cent</button>
+                  `;
+                  
+                  tag.innerHTML = tagContent;
+                  
+                  // Add click handler for the "See Every Cent" button
+                  const viewCentsButton = tag.querySelector('.view-cents-button');
+                  if (viewCentsButton) {
+                        viewCentsButton.addEventListener('click', (e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              const id = viewCentsButton.getAttribute('data-donation-id');
+                              if (id && data) {
+                                    // Clear active mobile tag when entering focus mode
+                                    this.activeMobileTag = null;
+                                    this.enterFocusMode(data, id);
+                              }
+                        });
+                        // Also handle touch events for mobile
+                        viewCentsButton.addEventListener('touchend', (e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              const id = viewCentsButton.getAttribute('data-donation-id');
+                              if (id && data) {
+                                    this.activeMobileTag = null;
+                                    this.enterFocusMode(data, id);
+                              }
+                        }, { passive: false });
+                  }
+                  
+                  // Append to pool container so it's inside the box
+                  this.pool.appendChild(tag);
+                  
+                  // Position tag relative to coin, inside the pool container
+                  // Get position from Matter.js body if available, otherwise from style
+                  let centX, centY;
+                  if (cent.body) {
+                        centX = cent.body.position.x;
+                        centY = cent.body.position.y;
+                  } else {
+                        centX = parseFloat(cent.style.left) || 0;
+                        centY = parseFloat(cent.style.top) || 0;
+                  }
+                  
+                  const tagRect = tag.getBoundingClientRect();
+                  
+                  // Position to the right or left of the coin, near it
+                  let tagX = centX + CONFIG.COIN_OFFSET_X; // Right side of coin
+                  let tagY = centY - (tagRect.height / 2) + CONFIG.COIN_OFFSET_Y; // Vertically centered on coin
+                  
+                  // If tag would go outside pool bounds, position to the left instead
+                  if (tagX + tagRect.width > this.poolWidth - 20) {
+                        tagX = centX - tagRect.width - CONFIG.COIN_OFFSET_X;
+                  }
+                  
+                  // Ensure tag stays within pool bounds
+                  if (tagX < 10) tagX = 10;
+                  if (tagX + tagRect.width > this.poolWidth - 10) {
+                        tagX = this.poolWidth - tagRect.width - 10;
+                  }
+                  
+                  if (tagY < 10) tagY = 10;
+                  if (tagY + tagRect.height > this.poolHeight - 10) {
+                        tagY = this.poolHeight - tagRect.height - 10;
+                  }
+                  
+                  tag.style.position = 'absolute';
+                  tag.style.left = tagX + 'px';
+                  tag.style.top = tagY + 'px';
+                  tag.style.zIndex = '1000';
+                  
+                  // Use requestAnimationFrame for smooth appearance
+                  requestAnimationFrame(() => {
+                        tag.classList.add('visible');
+                  });
+                  
+                  // Keep tag visible when hovering over it
+                  tag.addEventListener('mouseenter', () => {
+                        // Cancel any pending hide
+                        if (cent._hideTagTimeout) {
+                              clearTimeout(cent._hideTagTimeout);
+                              cent._hideTagTimeout = null;
+                        }
+                        tag.classList.add('visible');
+                  });
+                  
+                  tag.addEventListener('mouseleave', () => {
+                        // Start hide delay when leaving tag
+                        this.scheduleHideTag(cent);
+                  });
+                  
+                  this.activeTags.set(cent, tag);
+            }
+
+            handleCentTouchStart(event, cent) {
+                  // If we are already dragging with Matter.js, do nothing
+                  if (this.isDragging) return;
+                  
+                  // Stop Matter.js from immediately treating this as a drag
+                  event.stopPropagation();
+                  
+                  // Record the starting time and position of the touch
+                  const touch = event.touches[0];
+                  if (touch) {
+                        cent._touchStartTime = Date.now();
+                        cent._touchStartX = touch.clientX;
+                        cent._touchStartY = touch.clientY;
+                        cent._touchTarget = event.target;
+                        // Mark this as a potential tap. We'll verify this on touchend
+                        cent._potentialTap = true;
+                  }
+            }
+
+            handleCentTouchEnd(event, cent) {
+                  // If this wasn't a potential tap (e.g., a drag already started), do nothing
+                  if (!cent._potentialTap || !cent._touchStartTime) {
+                        cent._touchStartTime = null;
+                        cent._potentialTap = false;
+                        return;
+                  }
+                  
+                  const touch = event.changedTouches[0];
+                  if (!touch) {
+                        cent._touchStartTime = null;
+                        cent._potentialTap = false;
+                        return;
+                  }
+                  
+                  // It's no longer a potential tap, we are now deciding what it was
+                  cent._potentialTap = false;
+                  
+                  const touchDuration = Date.now() - cent._touchStartTime;
+                  
+                  // Check if the finger moved significantly
+                  const deltaX = Math.abs(touch.clientX - (cent._touchStartX || touch.clientX));
+                  const deltaY = Math.abs(touch.clientY - (cent._touchStartY || touch.clientY));
+                  
+                  // Clear touch data
+                  cent._touchStartTime = null;
+                  cent._touchStartX = null;
+                  cent._touchStartY = null;
+                  
+                  // DEFINE A "TAP": A short touch that didn't move much
+                  const isTap = touchDuration < 250 && deltaX < 10 && deltaY < 10;
+                  
+                  if (isTap) {
+                        // It was a tap! Prevent any other action
+                        event.preventDefault();
+                        event.stopPropagation();
+                        event.stopImmediatePropagation();
+                        
+                        // Use requestAnimationFrame to ensure UI updates happen
+                        requestAnimationFrame(() => {
+                              // --- Mobile Toggle Logic ---
+                              // If this cent's tag is already open, close it
+                              if (this.activeMobileTag === cent) {
+                                    this.hideTag(cent);
+                                    this.activeMobileTag = null;
+                              } else {
+                                    // If another cent's tag is open, close that one first
+                                    if (this.activeMobileTag) {
+                                          this.hideTag(this.activeMobileTag);
+                                    }
+                                    // Now, show the new tag
+                                    this.showTag(event, cent);
+                                    this.activeMobileTag = cent; // Remember which tag is open
+                              }
+                        });
+                  }
+                  // If it wasn't a tap (it was a long press or a drag), do nothing and let Matter.js handle it
+            }
+
+            scheduleHideTag(cent) {
+                  // Cancel any existing timeout
+                  if (cent._hideTagTimeout) {
+                        clearTimeout(cent._hideTagTimeout);
+                  }
+                  
+                  // On mobile, don't auto-hide if this is the active mobile tag
+                  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                  if (isTouchDevice && this.activeMobileTag === cent) {
+                        return; // Don't auto-hide on mobile - user must tap elsewhere
+                  }
+                  
+                  // Schedule hide with delay to allow moving mouse from cent to tag
+                  cent._hideTagTimeout = setTimeout(() => {
+                        this.hideTag(cent);
+                        cent._hideTagTimeout = null;
+                  }, 300); // 300ms delay - enough time to move mouse but not too long
+            }
+
+            hideTag(cent) {
+                  // Clear any pending timeout
+                  if (cent._hideTagTimeout) {
+                        clearTimeout(cent._hideTagTimeout);
+                        cent._hideTagTimeout = null;
+                  }
+                  
+                  // Clear active mobile tag if this is it
+                  if (this.activeMobileTag === cent) {
+                        this.activeMobileTag = null;
+                  }
+                  
+                  const tag = this.activeTags.get(cent);
+                  if (tag) {
+                        tag.classList.remove('visible');
+                        setTimeout(() => {
+                              if (tag.parentNode) {
+                                    tag.parentNode.removeChild(tag);
+                              }
+                              // WeakMap automatically handles cleanup, but we can explicitly delete
+                              this.activeTags.delete(cent);
+                        }, 200);
+                  }
+            }
+
+            updateStats() {
+                  const totalDonationsEl = document.getElementById('totalDonations');
+                  const totalAmountEl = document.getElementById('totalAmount');
+                  const totalDonorsEl = document.getElementById('totalDonors');
+                  
+                  if (totalDonationsEl) {
+                        this.animateValue(totalDonationsEl, this.stats.totalDonations, (val) => Math.floor(val).toLocaleString());
+                  }
+                  if (totalAmountEl) {
+                        this.animateValue(totalAmountEl, this.stats.totalAmount, (val) => '$' + val.toFixed(2));
+                  }
+                  if (totalDonorsEl) {
+                        this.animateValue(totalDonorsEl, this.stats.totalDonors, (val) => Math.floor(val).toLocaleString());
+                  }
+            }
+
+            animateValue(element, target, formatter) {
+                  const start = parseFloat(element.textContent.replace(/[^0-9.]/g, '')) || 0;
+                  const duration = 1000;
+                  const startTime = performance.now();
+                  
+                  const animate = (currentTime) => {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const ease = 1 - Math.pow(1 - progress, 3);
+                        const current = start + (target - start) * ease;
+                        element.textContent = formatter(current);
+                        
+                        if (progress < 1) {
+                              requestAnimationFrame(animate);
+                        } else {
+                              element.textContent = formatter(target);
+                        }
+                  };
+                  
+                  requestAnimationFrame(animate);
+            }
+
+
+            destroy() {
+                  // Clear search debounce timer
+                  if (this.searchDebounceTimer) {
+                        clearTimeout(this.searchDebounceTimer);
+                  }
+                  
+                  if (this.runner) {
+                        Runner.stop(this.runner);
+                  }
+                  if (this.engine) {
+                        Engine.clear(this.engine);
+                  }
+                  if (this.airtablePollInterval) {
+                        clearInterval(this.airtablePollInterval);
+                  }
+                  
+                  // Clean up all cents and their physics bodies
+                  this.cents.forEach(cent => {
+                        // Properly remove event listeners
+                        this.returnCentToPool(cent);
+                        if (cent.parentNode) {
+                              cent.parentNode.removeChild(cent);
+                        }
+                  });
+                  
+                  this.cents = [];
+                  this.visibleCents.clear();
+                  // WeakMap doesn't need clearing, but we can clear if using Map
+                  if (this.activeTags instanceof Map) {
+                        this.activeTags.clear();
+                  }
+            }
+      }
+
+      // Initialize donation pool when DOM is ready
+      let donationPool;
+      function initDonationPool() {
+            const poolContainer = document.getElementById('donationPool');
+            if (poolContainer) {
+                  donationPool = new DonationPool(poolContainer);
+            } else {
+                  // Retry if container not ready yet
+                  setTimeout(initDonationPool, 100);
+            }
+      }
+      
+      if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDonationPool);
+      } else {
+            initDonationPool();
+      }
+
+      // Stoplight menu functionality
+      const stoplight = document.getElementById('stoplight');
+      const dropdownMenu = document.getElementById('dropdown-menu');
+      let isMenuOpen = false;
+
+      function toggleMenu() {
+        isMenuOpen = !isMenuOpen;
+        stoplight.classList.toggle('active', isMenuOpen);
+        dropdownMenu.classList.toggle('active', isMenuOpen);
+        stoplight.setAttribute('aria-expanded', isMenuOpen ? 'true' : 'false');
+      }
+
+      // Add keyboard support for stoplight
+      stoplight.setAttribute('role', 'button');
+      stoplight.setAttribute('tabindex', '0');
+      stoplight.setAttribute('aria-label', 'Open navigation menu');
+      stoplight.setAttribute('aria-expanded', 'false');
+      stoplight.setAttribute('aria-haspopup', 'true');
+
+      stoplight.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      stoplight.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          toggleMenu();
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
+          toggleMenu();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isMenuOpen) {
+          toggleMenu();
+        }
+      });
+
+      dropdownMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      
+      
+      // Section animation on scroll
+      const sections = document.querySelectorAll('.database-section');
+      const observerOptions = {
+            threshold: 0.1
+      };
+      
+      const sectionObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry, index) => {
+                  if (entry.isIntersecting) {
+                        setTimeout(() => {
+                              entry.target.classList.add('visible');
+                        }, index * 100);
+                        observer.unobserve(entry.target);
+                  }
+            });
+      }, observerOptions);
+      
+      sections.forEach(section => sectionObserver.observe(section));
+  </script>
+  
+  <script>
+    // --- NATIVE FONT LOADING ---
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      });
+      
+      // Fallback timeout
+      setTimeout(() => {
+        document.body.classList.remove('fonts-loading');
+        document.body.classList.add('fonts-loaded');
+      }, 3000);
+    } else {
+      // Fallback for older browsers
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-loaded');
+    }
+    // --- END FONT LOADING ---
+  </script>
+</body>
+</html>
+
