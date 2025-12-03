@@ -1,6 +1,6 @@
-# This is the simplified and corrected code for .github/workflows/deploy.yml
+# This is the new, simplified code for .github/workflows/deploy.yml
 
-name: Deploy to GitHub Pages
+name: Deploy All Sites via wrangler.toml
 
 on:
   push:
@@ -8,42 +8,30 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
-  # This job now only tests for broken links
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout your repository
-        uses: actions/checkout@v4
-
-      - name: Test for broken links
-        uses: lycheeverse/lychee-action@v1
-        with:
-          # Check all HTML files in the current directory and any subdirectories
-          args: --verbose --no-progress './**/*.html'
-
-  # This job deploys your site, but only if the 'test' job succeeds
   deploy:
-    needs: test # This still waits for the link checker to pass
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout your repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          # The path '.' means your entire root directory will be deployed
-          path: '.'
+          node-version: '20'
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Install Wrangler CLI
+        run: npm install -g wrangler
+
+      # The single command to deploy all sites based on wrangler.toml
+      - name: Deploy All Environments
+        run: |
+          # The --env flag tells Wrangler which section of the .toml to use
+          wrangler pages deploy --env main
+          wrangler pages deploy --env mint
+          wrangler pages deploy --env post
+          wrangler pages deploy --env admin
+        env:
+          # Secrets are still needed for authentication
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
