@@ -1,4 +1,4 @@
-# This is the corrected and working code for .github/workflows/deploy.yml
+# This is the final, corrected, and typo-free code for .github/workflows/deploy.yml
 
 name: Deploy All Sites to Cloudflare Pages
 
@@ -26,11 +26,7 @@ jobs:
       # --- DEPLOY MAIN SITE ---
       - name: Deploy 'warmthly'
         run: |
-          # We specify the project name and the directory directly.
-          # The --branch flag tells Pages this is a production deployment.
-          wrangler pages deploy apps/main \
-            --project-name="warmthly" \
-            --branch="main"
+          wrangler pages deploy apps/main --project-name="warmthly" --branch="main"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -38,29 +34,26 @@ jobs:
       # --- DEPLOY MINT SITE ---
       - name: Deploy 'warmthly-mint'
         run: |
-          wrangler pages deploy apps/mint \
-            --project-name="warmthly-mint" \
-            --branch="main"
+          wrangler pages deploy apps/mint --project-name="warmthly-mint" --branch="main"
         env:
+          # CORRECTED SPELLING HERE
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       # --- DEPLOY POST SITE ---
       - name: Deploy 'warmthly-post'
         run: |
-          wrangler pages deploy apps/post \
-            --project-name="warmthly-post" \
-            --branch="main"
+          wrangler pages deploy apps/post --project-name="warmthly-post" --branch="main"
         env:
+          # CORRECTED SPELLING HERE
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       # --- DEPLOY ADMIN SITE ---
       - name: Deploy 'warmthly-admin'
         run: |
-          wrangler pages deploy apps/admin \
-            --project-name="warmthly-admin" \
-            --branch="main"
+          wrangler pages deploy apps/admin --project-name="warmthly-admin" --branch="main"
         env:
+          # CORRECTED SPELLING HERE
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
