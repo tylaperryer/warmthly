@@ -41,19 +41,19 @@ export const WARMTHLY_CONFIG = {
   // Navigation menu items (used by stoplight component)
   navigation: {
     main: [
-      { label: 'Home', url: 'https://www.warmthly.org' },
-      { label: 'Transparency', url: 'https://transparency.warmthly.org' },
-      { label: 'Post', url: 'https://post.warmthly.org' }
+      { label: 'Post', url: 'https://post.warmthly.org' },
+      { label: 'Mint', url: 'https://mint.warmthly.org', ariaLabel: 'View our live transaction mint' }
     ],
     mint: [
       { label: 'Home', url: 'https://www.warmthly.org' },
-      { label: 'Mint', url: 'https://mint.warmthly.org' },
-      { label: 'Post', url: 'https://post.warmthly.org' }
+      { label: 'Post', url: 'https://post.warmthly.org' },
+      { label: 'Research', url: 'https://mint.warmthly.org/research', class: 'dropdown-item-green', ariaLabel: 'View our research and methods' }
     ],
     post: [
       { label: 'Home', url: 'https://www.warmthly.org' },
       { label: 'Mint', url: 'https://mint.warmthly.org' },
-      { label: 'Post', url: 'https://post.warmthly.org' }
+      { label: 'Dissolution', url: 'https://post.warmthly.org/vote' },
+      { label: 'Report', url: 'https://post.warmthly.org/report', class: 'dropdown-item-red' }
     ],
     admin: [
       { label: 'Home', url: 'https://www.warmthly.org' },
