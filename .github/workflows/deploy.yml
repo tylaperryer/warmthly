@@ -15,16 +15,12 @@ permissions:
   id-token: write
 
 jobs:
-  build-and-deploy:
+  build-and-deploy-main:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     concurrency:
-      group: "pages-${{ matrix.app }}"
+      group: "pages-main"
       cancel-in-progress: false
-    strategy:
-      matrix:
-        app: [main, mint, post, admin]
-      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,62 +39,63 @@ jobs:
         with:
           static_site_generator: none
 
-      - name: Prepare and minify ${{ matrix.app }} site
+      - name: Prepare and minify main site
         run: |
           set -e
+          APP_NAME="main"
           
           # Create build directory
-          mkdir -p build/${{ matrix.app }}
+          mkdir -p build/$APP_NAME
           
           # Verify source directory exists
-          if [ ! -d "apps/${{ matrix.app }}" ]; then
-            echo "Error: Source directory apps/${{ matrix.app }} does not exist"
+          if [ ! -d "apps/$APP_NAME" ]; then
+            echo "Error: Source directory apps/$APP_NAME does not exist"
             exit 1
           fi
           
-          # Copy app files (use set +e temporarily to allow warnings)
+          # Copy app files
           set +e
-          cp -r apps/${{ matrix.app }}/* build/${{ matrix.app }}/ 2>/dev/null || {
+          cp -r apps/$APP_NAME/* build/$APP_NAME/ 2>/dev/null || {
             echo "Warning: Failed to copy some app files, continuing..."
           }
           set -e
           
-          # Copy shared assets (allow warnings, don't fail)
+          # Copy shared assets
           set +e
-          cp -r fonts build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: fonts directory not found"
-          cp -r global build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: global directory not found"
+          cp -r fonts build/$APP_NAME/ 2>/dev/null || echo "Warning: fonts directory not found"
+          cp -r global build/$APP_NAME/ 2>/dev/null || echo "Warning: global directory not found"
           set -e
           
-          # Copy lego directory (will minify JS/CSS separately) - REQUIRED
+          # Copy lego directory - REQUIRED
           if [ ! -d "lego" ]; then
             echo "Error: lego directory is required but not found"
             exit 1
           fi
-          cp -r lego build/${{ matrix.app }}/ || {
+          cp -r lego build/$APP_NAME/ || {
             echo "Error: Failed to copy lego directory"
             exit 1
           }
           
-          # Copy robots.txt, manifest.json, and favicon.svg (optional)
+          # Copy robots.txt, manifest.json, and favicon.svg
           set +e
-          cp robots.txt build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: robots.txt not found"
-          cp manifest.json build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: manifest.json not found"
-          cp favicon.svg build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: favicon.svg not found"
+          cp robots.txt build/$APP_NAME/ 2>/dev/null || echo "Warning: robots.txt not found"
+          cp manifest.json build/$APP_NAME/ 2>/dev/null || echo "Warning: manifest.json not found"
+          cp favicon.svg build/$APP_NAME/ 2>/dev/null || echo "Warning: favicon.svg not found"
           set -e
           
-          # Minify CSS files first (before HTML minification)
-          if [ -d "build/${{ matrix.app }}/lego/styles" ]; then
+          # Minify CSS files
+          if [ -d "build/$APP_NAME/lego/styles" ]; then
             set +e
-            find build/${{ matrix.app }}/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
+            find build/$APP_NAME/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
               cleancss -O2 -o "$file" "$file" || echo "Warning: Failed to minify $file"
             done
             set -e
           fi
           
-          # Minify JavaScript files (preserve ES module syntax)
-          if [ -d "build/${{ matrix.app }}/lego" ]; then
+          # Minify JavaScript files
+          if [ -d "build/$APP_NAME/lego" ]; then
             set +e
-            find build/${{ matrix.app }}/lego -name "*.js" -type f ! -path "*/node_modules/*" 2>/dev/null | while read file; do
+            find build/$APP_NAME/lego -name "*.js" -type f ! -path "*/node_modules/*" 2>/dev/null | while read file; do
               terser "$file" \
                 -o "$file" \
                 --compress \
@@ -111,9 +108,9 @@ jobs:
             set -e
           fi
           
-          # Minify HTML files (preserve type="module" attributes)
+          # Minify HTML files
           set +e
-          find build/${{ matrix.app }} -name "*.html" -type f | while read file; do
+          find build/$APP_NAME -name "*.html" -type f | while read file; do
             html-minifier-terser \
               --collapse-whitespace \
               --remove-comments \
@@ -128,38 +125,309 @@ jobs:
           set -e
           
           # Create .nojekyll to prevent Jekyll processing
-          touch build/${{ matrix.app }}/.nojekyll
+          touch build/$APP_NAME/.nojekyll
           
           # Verify build output exists
-          if [ ! -f "build/${{ matrix.app }}/index.html" ] && [ ! -d "build/${{ matrix.app }}/index.html" ]; then
-            echo "Error: No index.html found in build output for ${{ matrix.app }}"
-            ls -la build/${{ matrix.app }}/
+          if [ ! -f "build/$APP_NAME/index.html" ] && [ ! -d "build/$APP_NAME/index.html" ]; then
+            echo "Error: No index.html found in build output for $APP_NAME"
+            ls -la build/$APP_NAME/
             exit 1
           fi
           
-          echo "Build completed successfully for ${{ matrix.app }}"
-
-      - name: Verify build output
-        run: |
-          if [ ! -d "build/${{ matrix.app }}" ]; then
-            echo "Error: Build directory does not exist"
-            exit 1
-          fi
-          echo "Build directory size:"
-          du -sh build/${{ matrix.app }}
-          echo "Build directory contents:"
-          ls -la build/${{ matrix.app }} | head -20
+          echo "Build completed successfully for $APP_NAME"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build/${{ matrix.app }}
-        continue-on-error: false
+          path: build/main
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: false
 
+  build-and-deploy-mint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: "pages-mint"
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install minification tools
+        run: |
+          npm install -g html-minifier-terser clean-css-cli terser
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        with:
+          static_site_generator: none
+
+      - name: Prepare and minify mint site
+        run: |
+          set -e
+          APP_NAME="mint"
+          
+          mkdir -p build/$APP_NAME
+          if [ ! -d "apps/$APP_NAME" ]; then
+            echo "Error: Source directory apps/$APP_NAME does not exist"
+            exit 1
+          fi
+          
+          set +e
+          cp -r apps/$APP_NAME/* build/$APP_NAME/ 2>/dev/null || echo "Warning: Failed to copy some app files"
+          cp -r fonts build/$APP_NAME/ 2>/dev/null || echo "Warning: fonts directory not found"
+          cp -r global build/$APP_NAME/ 2>/dev/null || echo "Warning: global directory not found"
+          set -e
+          
+          if [ ! -d "lego" ]; then
+            echo "Error: lego directory is required but not found"
+            exit 1
+          fi
+          cp -r lego build/$APP_NAME/ || exit 1
+          
+          set +e
+          cp robots.txt build/$APP_NAME/ 2>/dev/null || echo "Warning: robots.txt not found"
+          cp manifest.json build/$APP_NAME/ 2>/dev/null || echo "Warning: manifest.json not found"
+          cp favicon.svg build/$APP_NAME/ 2>/dev/null || echo "Warning: favicon.svg not found"
+          set -e
+          
+          if [ -d "build/$APP_NAME/lego/styles" ]; then
+            set +e
+            find build/$APP_NAME/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
+              cleancss -O2 -o "$file" "$file" || echo "Warning: Failed to minify $file"
+            done
+            set -e
+          fi
+          
+          if [ -d "build/$APP_NAME/lego" ]; then
+            set +e
+            find build/$APP_NAME/lego -name "*.js" -type f ! -path "*/node_modules/*" 2>/dev/null | while read file; do
+              terser "$file" -o "$file" --compress --mangle --module --keep-classnames --keep-fnames || echo "Warning: Failed to minify $file"
+            done
+            set -e
+          fi
+          
+          set +e
+          find build/$APP_NAME -name "*.html" -type f | while read file; do
+            html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-style-link-type-attributes --minify-css --output "$file" "$file" || echo "Warning: Failed to minify $file"
+          done
+          set -e
+          
+          touch build/$APP_NAME/.nojekyll
+          
+          if [ ! -f "build/$APP_NAME/index.html" ] && [ ! -d "build/$APP_NAME/index.html" ]; then
+            echo "Error: No index.html found in build output for $APP_NAME"
+            exit 1
+          fi
+          
+          echo "Build completed successfully for $APP_NAME"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/mint
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-deploy-post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: "pages-post"
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install minification tools
+        run: |
+          npm install -g html-minifier-terser clean-css-cli terser
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        with:
+          static_site_generator: none
+
+      - name: Prepare and minify post site
+        run: |
+          set -e
+          APP_NAME="post"
+          
+          mkdir -p build/$APP_NAME
+          if [ ! -d "apps/$APP_NAME" ]; then
+            echo "Error: Source directory apps/$APP_NAME does not exist"
+            exit 1
+          fi
+          
+          set +e
+          cp -r apps/$APP_NAME/* build/$APP_NAME/ 2>/dev/null || echo "Warning: Failed to copy some app files"
+          cp -r fonts build/$APP_NAME/ 2>/dev/null || echo "Warning: fonts directory not found"
+          cp -r global build/$APP_NAME/ 2>/dev/null || echo "Warning: global directory not found"
+          set -e
+          
+          if [ ! -d "lego" ]; then
+            echo "Error: lego directory is required but not found"
+            exit 1
+          fi
+          cp -r lego build/$APP_NAME/ || exit 1
+          
+          set +e
+          cp robots.txt build/$APP_NAME/ 2>/dev/null || echo "Warning: robots.txt not found"
+          cp manifest.json build/$APP_NAME/ 2>/dev/null || echo "Warning: manifest.json not found"
+          cp favicon.svg build/$APP_NAME/ 2>/dev/null || echo "Warning: favicon.svg not found"
+          set -e
+          
+          if [ -d "build/$APP_NAME/lego/styles" ]; then
+            set +e
+            find build/$APP_NAME/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
+              cleancss -O2 -o "$file" "$file" || echo "Warning: Failed to minify $file"
+            done
+            set -e
+          fi
+          
+          if [ -d "build/$APP_NAME/lego" ]; then
+            set +e
+            find build/$APP_NAME/lego -name "*.js" -type f ! -path "*/node_modules/*" 2>/dev/null | while read file; do
+              terser "$file" -o "$file" --compress --mangle --module --keep-classnames --keep-fnames || echo "Warning: Failed to minify $file"
+            done
+            set -e
+          fi
+          
+          set +e
+          find build/$APP_NAME -name "*.html" -type f | while read file; do
+            html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-style-link-type-attributes --minify-css --output "$file" "$file" || echo "Warning: Failed to minify $file"
+          done
+          set -e
+          
+          touch build/$APP_NAME/.nojekyll
+          
+          if [ ! -f "build/$APP_NAME/index.html" ] && [ ! -d "build/$APP_NAME/index.html" ]; then
+            echo "Error: No index.html found in build output for $APP_NAME"
+            exit 1
+          fi
+          
+          echo "Build completed successfully for $APP_NAME"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/post
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-deploy-admin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: "pages-admin"
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install minification tools
+        run: |
+          npm install -g html-minifier-terser clean-css-cli terser
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        with:
+          static_site_generator: none
+
+      - name: Prepare and minify admin site
+        run: |
+          set -e
+          APP_NAME="admin"
+          
+          mkdir -p build/$APP_NAME
+          if [ ! -d "apps/$APP_NAME" ]; then
+            echo "Error: Source directory apps/$APP_NAME does not exist"
+            exit 1
+          fi
+          
+          set +e
+          cp -r apps/$APP_NAME/* build/$APP_NAME/ 2>/dev/null || echo "Warning: Failed to copy some app files"
+          cp -r fonts build/$APP_NAME/ 2>/dev/null || echo "Warning: fonts directory not found"
+          cp -r global build/$APP_NAME/ 2>/dev/null || echo "Warning: global directory not found"
+          set -e
+          
+          if [ ! -d "lego" ]; then
+            echo "Error: lego directory is required but not found"
+            exit 1
+          fi
+          cp -r lego build/$APP_NAME/ || exit 1
+          
+          set +e
+          cp robots.txt build/$APP_NAME/ 2>/dev/null || echo "Warning: robots.txt not found"
+          cp manifest.json build/$APP_NAME/ 2>/dev/null || echo "Warning: manifest.json not found"
+          cp favicon.svg build/$APP_NAME/ 2>/dev/null || echo "Warning: favicon.svg not found"
+          set -e
+          
+          if [ -d "build/$APP_NAME/lego/styles" ]; then
+            set +e
+            find build/$APP_NAME/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
+              cleancss -O2 -o "$file" "$file" || echo "Warning: Failed to minify $file"
+            done
+            set -e
+          fi
+          
+          if [ -d "build/$APP_NAME/lego" ]; then
+            set +e
+            find build/$APP_NAME/lego -name "*.js" -type f ! -path "*/node_modules/*" 2>/dev/null | while read file; do
+              terser "$file" -o "$file" --compress --mangle --module --keep-classnames --keep-fnames || echo "Warning: Failed to minify $file"
+            done
+            set -e
+          fi
+          
+          set +e
+          find build/$APP_NAME -name "*.html" -type f | while read file; do
+            html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-style-link-type-attributes --minify-css --output "$file" "$file" || echo "Warning: Failed to minify $file"
+          done
+          set -e
+          
+          touch build/$APP_NAME/.nojekyll
+          
+          if [ ! -f "build/$APP_NAME/index.html" ] && [ ! -d "build/$APP_NAME/index.html" ]; then
+            echo "Error: No index.html found in build output for $APP_NAME"
+            exit 1
+          fi
+          
+          echo "Build completed successfully for $APP_NAME"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/admin
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
