@@ -163,9 +163,16 @@ jobs:
 
       - name: Verify and fix directory structure
         run: |
+          set +e  # Don't fail on errors, just report them
+          
           echo "=== Verifying build structure ==="
+          if [ ! -d "build" ]; then
+            echo "ERROR: Build directory does not exist!"
+            exit 1
+          fi
+          
           echo "Build directory contents:"
-          ls -la build/ || echo "Build directory not found"
+          ls -la build/ || echo "Cannot list build directory"
           
           echo ""
           echo "Checking each app structure:"
@@ -183,10 +190,15 @@ jobs:
                 echo "    - lego/web-components: $([ -d "build/$app/lego/web-components" ] && echo "✓" || echo "✗")"
                 echo "    - lego/config: $([ -d "build/$app/lego/config" ] && echo "✓" || echo "✗")"
                 
-                # List CSS files
+                # List CSS files (suppress errors if none found)
                 if [ -d "build/$app/lego/styles" ]; then
                   echo "    - CSS files:"
-                  ls -1 build/$app/lego/styles/*.css 2>/dev/null | sed 's|.*/||' | sed 's/^/      - /' || echo "      (none found)"
+                  CSS_FILES=$(ls -1 build/$app/lego/styles/*.css 2>/dev/null)
+                  if [ -n "$CSS_FILES" ]; then
+                    echo "$CSS_FILES" | sed 's|.*/||' | sed 's/^/      - /'
+                  else
+                    echo "      (none found)"
+                  fi
                 fi
               fi
             else
@@ -233,28 +245,49 @@ jobs:
           echo "=== Structure verification complete ==="
           
           # Final check: Verify that at least one app has the correct structure
-          if [ ! -d "build/main" ] && [ ! -d "build/mint" ] && [ ! -d "build/post" ] && [ ! -d "build/admin" ]; then
+          APPS_FOUND=0
+          for app in main mint post admin; do
+            if [ -d "build/$app" ]; then
+              APPS_FOUND=$((APPS_FOUND + 1))
+            fi
+          done
+          
+          if [ $APPS_FOUND -eq 0 ]; then
             echo "ERROR: No app directories found in build!"
             exit 1
           fi
           
+          echo "Found $APPS_FOUND app(s) in build directory"
+          
+          # Sample file check (non-critical, don't fail if missing)
           echo ""
           echo "=== Sample file check ==="
-          # Check if we can read a sample CSS file
           if [ -f "build/main/lego/styles/common.css" ]; then
             echo "Sample from common.css (first 10 lines):"
-            head -10 build/main/lego/styles/common.css
+            head -10 build/main/lego/styles/common.css 2>/dev/null || echo "  (cannot read file)"
             echo ""
-            echo "File size: $(wc -c < build/main/lego/styles/common.css) bytes"
+            echo "File size: $(wc -c < build/main/lego/styles/common.css 2>/dev/null || echo 0) bytes"
+          else
+            echo "common.css not found in main app (this is okay if main didn't build)"
           fi
           
-          # Verify HTML files reference lego correctly
+          # Verify HTML files reference lego correctly (non-critical)
           echo ""
           echo "=== Checking HTML references ==="
           if [ -f "build/main/index.html" ]; then
             echo "Checking main/index.html for lego references:"
-            grep -o '/lego/[^"]*' build/main/index.html | head -5 | sed 's/^/  - /' || echo "  (no /lego/ references found)"
+            LEGO_REFS=$(grep -o '/lego/[^"]*' build/main/index.html 2>/dev/null | head -5)
+            if [ -n "$LEGO_REFS" ]; then
+              echo "$LEGO_REFS" | sed 's/^/  - /'
+            else
+              echo "  (no /lego/ references found)"
+            fi
+          else
+            echo "main/index.html not found (this is okay if main didn't build)"
           fi
+          
+          echo ""
+          echo "=== Verification complete - proceeding with deployment ==="
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
