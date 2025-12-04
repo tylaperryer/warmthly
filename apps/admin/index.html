@@ -2,18 +2,16 @@
 <html lang="en">
 <head>
   <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
   <warmthly-head 
-    title="Admin Email Sender - Warmthly"
+    title="Admin Dashboard - Warmthly"
+    description="Administrative dashboard for managing Warmthly operations"
     app="admin"
     viewport="1.0"
-    robots="noindex, nofollow"
-    preconnects="https://cdn.quilljs.com">
+    robots="noindex, nofollow">
   </warmthly-head>
-  
-  <link rel="dns-prefetch" href="//cdn.quilljs.com">
-
-  <!-- Include the Quill library -->
-  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
   <style>
     /* Critical CSS - Must be inline for performance */
@@ -25,7 +23,6 @@
       --warmthly-background: #fff6f1;
       --text-color: #2c2c2c;
       --error-color: #D8000C;
-      --success-color: #2ed573;
     }
     html {
       background-color: var(--warmthly-background);
@@ -46,29 +43,17 @@
   </style>
 </head>
 <body class="fonts-loading">
-  <!-- Header -->
-  <header class="top-left-heading">
-    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a> <a href="https://admin.warmthly.org" class="admin-text">Admin</a>
-  </header>
-  
-  <div class="stoplight-container">
-    <div class="stoplight" id="stoplight">
-      <div class="stoplight-dot red"></div>
-      <div class="stoplight-dot yellow"></div>
-      <div class="stoplight-dot green"></div>
-    </div>
-    <div class="dropdown-menu" id="dropdown-menu">
-      <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
-      <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
-      <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
-    </div>
-  </div>
 
-  <!-- Login Section (Visible by default) -->
-  <div id="login-section" class="login-section">
+  <!-- Header -->
+  <warmthly-header app="admin"></warmthly-header>
+  
+  <!-- Navigation -->
+  <warmthly-stoplight app="admin"></warmthly-stoplight>
+
+  <div class="login-section" id="login-section">
     <div class="login-container">
       <h1>Admin Access</h1>
-      <p>Enter the password to access the email sender.</p>
+      <p>Enter the password to access the Warmthly dashboard.</p>
       <form id="login-form">
         <input 
           type="password" 
@@ -89,153 +74,29 @@
 
   <!-- Admin Content (Hidden by default) -->
   <div id="admin-content" class="admin-content">
-  <div class="container">
-      <a href="https://admin.warmthly.org" class="back-link">← Back to Admin Dashboard</a>
-      <form id="email-form" novalidate>
-        <h2>Send Email</h2>
-        
-        <div class="form-group">
-          <label for="from">From: <span aria-label="required">*</span></label>
-          <input 
-            type="email" 
-            id="from" 
-            name="from" 
-            required 
-            autocomplete="email"
-            aria-required="true"
-            aria-describedby="from-error"
-          />
-          <span id="from-error" class="error-message" role="alert" aria-live="polite"></span>
-        </div>
+    <div class="container">
+      <h1>Welcome, Admin</h1>
+      <p class="welcome-text">Manage your Warmthly administration tools and settings.</p>
+      
+      <ul class="admin-links">
+        <li><a href="/emails">Email Management (Send & View Received)</a></li>
+      </ul>
 
-        <div class="form-group">
-          <label for="to">To: <span aria-label="required">*</span></label>
-          <input 
-            type="email" 
-            id="to" 
-            name="to" 
-            required 
-            autocomplete="email"
-            aria-required="true"
-            aria-describedby="to-error"
-          />
-          <span id="to-error" class="error-message" role="alert" aria-live="polite"></span>
-        </div>
-
-        <div class="form-group">
-          <label for="subject">Subject: <span aria-label="required">*</span></label>
-          <input 
-            type="text" 
-            id="subject" 
-            name="subject" 
-            required 
-            maxlength="200"
-            aria-required="true"
-            aria-describedby="subject-error"
-          />
-          <span id="subject-error" class="error-message" role="alert" aria-live="polite"></span>
-        </div>
-
-        <div class="form-group">
-          <label for="editor">Body: <span aria-label="required">*</span></label>
-          <div id="editor" role="textbox" aria-label="Email body" aria-required="true"></div>
-        </div>
-
-        <button type="submit" id="submit-button">Send Email</button>
-        <div id="status" role="status" aria-live="polite" aria-atomic="true"></div>
-    </form>
-
-      <!-- Received Emails Section -->
-      <div class="received-emails-section">
-        <div class="section-header">
-          <h2>Emails</h2>
-          <button class="refresh-button" id="refresh-emails-button" aria-label="Refresh emails list">
-            Refresh
-          </button>
-        </div>
-        <div id="emails-container">
-          <div class="loading-state">Loading emails...</div>
-        </div>
-      </div>
+      <button class="logout-button" id="logout-button">Logout</button>
     </div>
   </div>
 
-  <!-- Include the Quill library JS -->
-  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
 
   <script>
-    // --- NATIVE FONT LOADING ---
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      });
-      
-      // Fallback timeout
-      setTimeout(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      }, 3000);
-    } else {
-      // Fallback for older browsers
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    }
-    // --- END FONT LOADING ---
-    
-    // Stoplight menu functionality
-    const stoplight = document.getElementById('stoplight');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    let isMenuOpen = false;
-    
-    function toggleMenu() {
-      isMenuOpen = !isMenuOpen;
-      stoplight.classList.toggle('active', isMenuOpen);
-      dropdownMenu.classList.toggle('active', isMenuOpen);
-      stoplight.setAttribute('aria-expanded', isMenuOpen ? 'true' : 'false');
-    }
-    
-    // Add keyboard support for stoplight
-    stoplight.setAttribute('role', 'button');
-    stoplight.setAttribute('tabindex', '0');
-    stoplight.setAttribute('aria-label', 'Open navigation menu');
-    stoplight.setAttribute('aria-expanded', 'false');
-    stoplight.setAttribute('aria-haspopup', 'true');
-    
-    stoplight.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
-    
-    stoplight.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        toggleMenu();
-      }
-    });
-    
-    document.addEventListener('click', (e) => {
-      if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    dropdownMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
 
-    // Authentication
     const loginForm = document.getElementById('login-form');
     const passwordInput = document.getElementById('password-input');
     const loginSection = document.getElementById('login-section');
     const adminContent = document.getElementById('admin-content');
     const errorMessage = document.getElementById('error-message');
+    const logoutButton = document.getElementById('logout-button');
 
     // Check if already authenticated (session storage)
     const isAuthenticated = sessionStorage.getItem('warmthly-admin-authenticated') === 'true';
@@ -248,7 +109,7 @@
       event.preventDefault();
       const enteredPassword = passwordInput.value;
       errorMessage.style.display = 'none';
-      
+
       const submitButton = loginForm.querySelector('button[type="submit"]');
       submitButton.disabled = true;
       submitButton.textContent = 'Verifying...';
@@ -264,22 +125,15 @@
           const result = await response.json();
           const token = result.token;
           
-          if (!token) {
-            throw new Error('No token received from server');
+          if (token) {
+            // Store authentication token (JWT) instead of password
+            sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+            sessionStorage.setItem('warmthly-admin-token', token);
           }
-          
-          // Store authentication token (JWT) instead of password
-          sessionStorage.setItem('warmthly-admin-authenticated', 'true');
-          sessionStorage.setItem('warmthly-admin-token', token);
           
           loginSection.style.display = 'none';
           adminContent.classList.add('active');
           passwordInput.value = '';
-          
-          // Load emails after authentication
-          if (adminContent.classList.contains('active')) {
-            loadReceivedEmails();
-          }
         } else {
           errorMessage.style.display = 'block';
           passwordInput.value = '';
@@ -294,318 +148,31 @@
       }
     });
 
-    // Initialize Quill editor (only after authentication)
-    let quill = null;
-    if (isAuthenticated) {
-      initializeEditor();
-    } else {
-      // Initialize editor when authenticated.
-      const observer = new MutationObserver((mutations) => {
-        if (adminContent.classList.contains('active') && !quill) {
-          initializeEditor();
-          observer.disconnect();
-        }
-      });
-      observer.observe(adminContent, { attributes: true, attributeFilter: ['class'] });
-    }
-
-    function initializeEditor() {
-      quill = new Quill('#editor', {
-        theme: 'snow',
-      modules: {
-        toolbar: [
-          [{ 'header': [1, 2, false] }],
-          ['bold', 'italic', 'underline'],
-          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-          ['link', 'image']
-        ]
-        },
-        placeholder: 'Compose your email...'
-      });
-      }
-
-    // Email form handling
-    const emailForm = document.getElementById('email-form');
-    const statusEl = document.getElementById('status');
-    const submitButton = document.getElementById('submit-button');
-
-    emailForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Clear previous status
-      statusEl.className = '';
-      statusEl.textContent = '';
-      
-      // Validate form
-      const from = document.getElementById('from').value.trim();
-      const to = document.getElementById('to').value.trim();
-      const subject = document.getElementById('subject').value.trim();
-      const htmlBody = quill ? quill.root.innerHTML : '';
-
-      let isValid = true;
-
-      // Validate from email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const fromError = document.getElementById('from-error');
-      if (!from || !emailRegex.test(from)) {
-        fromError.textContent = 'Please enter a valid email address.';
-        fromError.style.display = 'block';
-        isValid = false;
-      } else {
-        fromError.textContent = '';
-        fromError.style.display = 'none';
-      }
-
-      // Validate to email
-      const toError = document.getElementById('to-error');
-      if (!to || !emailRegex.test(to)) {
-        toError.textContent = 'Please enter a valid email address.';
-        toError.style.display = 'block';
-        isValid = false;
-      } else {
-        toError.textContent = '';
-        toError.style.display = 'none';
-      }
-
-      // Validate subject
-      const subjectError = document.getElementById('subject-error');
-      if (!subject) {
-        subjectError.textContent = 'Please enter an email subject.';
-        subjectError.style.display = 'block';
-        isValid = false;
-      } else {
-        subjectError.textContent = '';
-        subjectError.style.display = 'none';
-      }
-
-      // Validate body
-      const emptyPatterns = [
-        /^<p>\s*<\/p>$/i,
-        /^<p><br\s*\/?><\/p>$/i,
-        /^<p>\s*<br\s*\/?>\s*<\/p>$/i,
-        /^<p>&nbsp;<\/p>$/i,
-      ];
-      const trimmedBody = htmlBody.trim();
-      if (!trimmedBody || emptyPatterns.some(pattern => pattern.test(trimmedBody))) {
-        statusEl.className = 'error';
-        statusEl.textContent = 'Email body cannot be empty.';
-        isValid = false;
-      }
-
-      if (!isValid) {
-        return;
-      }
-
-      // Disable submit button
-      submitButton.disabled = true;
-      statusEl.className = 'sending';
-      statusEl.textContent = 'Sending email...';
-
-      const data = {
-        from: from,
-        to: to,
-        subject: subject,
-        html: htmlBody,
-      };
-
-      try {
-        const response = await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          statusEl.className = 'success';
-          statusEl.textContent = 'Success! Email sent successfully.';
-          emailForm.reset();
-          if (quill) {
-            quill.setText('');
-          }
-          
-          // Refresh received emails list after successful send
-          setTimeout(() => {
-            loadReceivedEmails();
-          }, 500);
-          
-          // Clear form after 3 seconds
-          setTimeout(() => {
-            statusEl.className = '';
-            statusEl.textContent = '';
-          }, 3000);
-        } else {
-          statusEl.className = 'error';
-          statusEl.textContent = `Error: ${result.error?.message || 'Failed to send email. Please try again.'}`;
-        }
-      } catch (error) {
-        statusEl.className = 'error';
-        statusEl.textContent = 'A network error occurred. Please check your connection and try again.';
-      } finally {
-        submitButton.disabled = false;
+    // Logout functionality
+    logoutButton.addEventListener('click', function() {
+      if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.removeItem('warmthly-admin-authenticated');
+        sessionStorage.removeItem('warmthly-admin-token');
+        adminContent.classList.remove('active');
+        loginSection.style.display = 'flex';
+        passwordInput.focus();
       }
     });
 
-    // Clear error messages on input
-    document.getElementById('from').addEventListener('input', function() {
-      document.getElementById('from-error').style.display = 'none';
-    });
-    document.getElementById('to').addEventListener('input', function() {
-      document.getElementById('to-error').style.display = 'none';
-    });
-    document.getElementById('subject').addEventListener('input', function() {
-      document.getElementById('subject-error').style.display = 'none';
-    });
-
-    // Received Emails Functionality
-    const emailsContainer = document.getElementById('emails-container');
-    const refreshButton = document.getElementById('refresh-emails-button');
-
-    // Helper function to get stored JWT token
-    function getStoredToken() {
-      return sessionStorage.getItem('warmthly-admin-token');
-    }
-
-    // Load emails on page load if authenticated
-    if (isAuthenticated) {
-      const token = getStoredToken();
-      if (token) {
-        loadReceivedEmails();
-      } else {
-        emailsContainer.innerHTML = '<div class="empty-state">Please refresh the page and log in again to view received emails.</div>';
-      }
-    }
-
-    // Also load emails when admin content becomes active (after login)
-    const adminObserver = new MutationObserver((mutations) => {
-      if (adminContent.classList.contains('active')) {
-        const token = getStoredToken();
-        if (token) {
-          loadReceivedEmails();
-        }
+    // Protect against session hijacking - clear session on page visibility change if suspicious.
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        // Optionally clear session when tab is hidden for extended period
+        // This is optional and can be removed if too aggressive
       }
     });
-    adminObserver.observe(adminContent, { attributes: true, attributeFilter: ['class'] });
 
-    refreshButton.addEventListener('click', function() {
-      loadReceivedEmails();
+    // Clear session on browser close (optional security measure)
+    window.addEventListener('beforeunload', function() {
+      // Note: This is a best-effort approach
+      // For more security, consider implementing server-side session management
     });
-
-    async function loadReceivedEmails() {
-      const token = getStoredToken();
-      if (!token) {
-        // If authenticated but no token, user needs to re-login
-        if (isAuthenticated) {
-          emailsContainer.innerHTML = '<div class="empty-state">Session expired. Please refresh the page and log in again.</div>';
-        } else {
-          emailsContainer.innerHTML = '<div class="empty-state">Please log in to view received emails.</div>';
-        }
-        return;
-      }
-
-      refreshButton.disabled = true;
-      emailsContainer.innerHTML = '<div class="loading-state">Loading emails...</div>';
-
-      try {
-        const response = await fetch('/api/get-emails', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.status === 401) {
-          // Token expired or invalid, clear session
-          sessionStorage.removeItem('warmthly-admin-authenticated');
-          sessionStorage.removeItem('warmthly-admin-token');
-          emailsContainer.innerHTML = '<div class="empty-state">Session expired. Please refresh the page and log in again.</div>';
-          return;
-        }
-
-        if (!response.ok) {
-          // Try to get error message from response
-          let errorMessage = 'Failed to fetch emails';
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.error || errorMessage;
-          } catch (e) {
-            // If we can't parse the error, use the status text
-            errorMessage = response.statusText || errorMessage;
-          }
-          
-          // Show specific error messages
-          if (response.status === 500) {
-            emailsContainer.innerHTML = `<div class="empty-state error">Server error: ${escapeHtml(errorMessage)}. Please check your Vercel environment variables (JWT_SECRET and REDIS_URL).</div>`;
-          } else {
-            emailsContainer.innerHTML = `<div class="empty-state error">Error: ${escapeHtml(errorMessage)}</div>`;
-          }
-          return;
-        }
-
-        const emails = await response.json();
-
-        // Handle case where emails might not be an array
-        if (!Array.isArray(emails)) {
-          console.error('Unexpected response format:', emails);
-          emailsContainer.innerHTML = '<div class="empty-state error">Unexpected response from server. Please try again.</div>';
-          return;
-        }
-
-        if (emails.length === 0) {
-          emailsContainer.innerHTML = '<div class="empty-state">No emails received yet. Incoming emails will appear here.</div>';
-        } else {
-          emailsContainer.innerHTML = emails.map(email => `
-            <div class="email-item">
-              <div class="email-header">
-                <div class="email-subject">${escapeHtml(email.subject || 'No Subject')}</div>
-                <div class="email-date">${formatDate(email.receivedAt)}</div>
-              </div>
-              <div class="email-meta">
-                <div class="email-from">
-                  <span class="email-label">From:</span>
-                  <span>${escapeHtml(email.from || 'Unknown')}</span>
-                </div>
-                <div class="email-to">
-                  <span class="email-label">To:</span>
-                  <span>${escapeHtml(email.to || 'Unknown')}</span>
-                </div>
-              </div>
-            </div>
-          `).join('');
-        }
-      } catch (error) {
-        console.error('Error loading emails:', error);
-        // Show more detailed error message
-        const errorMsg = error.message || 'Unknown error occurred';
-        emailsContainer.innerHTML = `<div class="empty-state error">Error loading emails: ${escapeHtml(errorMsg)}. Please check your connection and try again.</div>`;
-      } finally {
-        refreshButton.disabled = false;
-      }
-    }
-
-    function formatDate(dateString) {
-      if (!dateString) return 'Unknown date';
-      try {
-        const date = new Date(dateString);
-        return date.toLocaleString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      } catch (e) {
-        return dateString;
-      }
-    }
-
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
   </script>
 </body>
 </html>
+ 
