@@ -1,4 +1,5 @@
-# This is the final, corrected version of deploy.yml with the correct project names.
+# Deploy All Sites to Cloudflare Pages via GitHub Actions
+# Using GitHub Actions provides unlimited deployments (Cloudflare limits only apply to manual deployments)
 
 name: Deploy All Sites to Cloudflare Pages
 
@@ -26,6 +27,13 @@ jobs:
       # --- DEPLOY MAIN SITE ---
       - name: Deploy 'warmthly'
         run: |
+          # Copy shared assets to app directory
+          cp -r fonts apps/main/ 2>/dev/null || true
+          cp -r lego apps/main/ 2>/dev/null || true
+          cp -r global apps/main/ 2>/dev/null || true
+          # Copy favicons to root for easier access
+          cp global/favicon/*.png apps/main/ 2>/dev/null || true
+          # Deploy to Cloudflare Pages
           wrangler pages deploy apps/main --project-name="warmthly" --branch="main"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -34,7 +42,13 @@ jobs:
       # --- DEPLOY MINT SITE ---
       - name: Deploy 'mint'
         run: |
-          # CORRECTED PROJECT NAME HERE
+          # Copy shared assets to app directory
+          cp -r fonts apps/mint/ 2>/dev/null || true
+          cp -r lego apps/mint/ 2>/dev/null || true
+          cp -r global apps/mint/ 2>/dev/null || true
+          # Copy favicons to root for easier access
+          cp global/favicon/*.png apps/mint/ 2>/dev/null || true
+          # Deploy to Cloudflare Pages
           wrangler pages deploy apps/mint --project-name="mint" --branch="main"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -43,7 +57,13 @@ jobs:
       # --- DEPLOY POST SITE ---
       - name: Deploy 'post'
         run: |
-          # CORRECTED PROJECT NAME HERE
+          # Copy shared assets to app directory
+          cp -r fonts apps/post/ 2>/dev/null || true
+          cp -r lego apps/post/ 2>/dev/null || true
+          cp -r global apps/post/ 2>/dev/null || true
+          # Copy favicons to root for easier access
+          cp global/favicon/*.png apps/post/ 2>/dev/null || true
+          # Deploy to Cloudflare Pages
           wrangler pages deploy apps/post --project-name="post" --branch="main"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -52,7 +72,13 @@ jobs:
       # --- DEPLOY ADMIN SITE ---
       - name: Deploy 'admin'
         run: |
-          # CORRECTED PROJECT NAME HERE
+          # Copy shared assets to app directory
+          cp -r fonts apps/admin/ 2>/dev/null || true
+          cp -r lego apps/admin/ 2>/dev/null || true
+          cp -r global apps/admin/ 2>/dev/null || true
+          # Copy favicons to root for easier access
+          cp global/favicon/*.png apps/admin/ 2>/dev/null || true
+          # Deploy to Cloudflare Pages
           wrangler pages deploy apps/admin --project-name="admin" --branch="main"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
