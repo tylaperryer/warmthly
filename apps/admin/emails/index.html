@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="theme-color" content="#fff6f1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow">
-  <title>Admin Email Sender - Warmthly</title>
-
-  <!-- Preconnect to essential domains for faster resource loading -->
-  <link rel="preconnect" href="https://cdn.quilljs.com">
+  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <warmthly-head 
+    title="Admin Email Sender - Warmthly"
+    description="Administrative email management interface"
+    app="admin"
+    viewport="1.0"
+    robots="noindex, nofollow"
+    preconnects="https://cdn.quilljs.com">
+  </warmthly-head>
+  
   <link rel="dns-prefetch" href="//cdn.quilljs.com">
 
   <!-- Include the Quill library -->
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-
-  <!-- Admin CSS -->
-  <link rel="stylesheet" href="/lego/styles/admin.css">
 
   <style>
     /* Critical CSS - Must be inline for performance */
@@ -50,22 +51,10 @@
 </head>
 <body class="fonts-loading">
   <!-- Header -->
-  <header class="top-left-heading">
-    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a> <a href="https://admin.warmthly.org" class="admin-text">Admin</a>
-  </header>
+  <warmthly-header app="admin"></warmthly-header>
   
-  <div class="stoplight-container">
-    <div class="stoplight" id="stoplight">
-      <div class="stoplight-dot red"></div>
-      <div class="stoplight-dot yellow"></div>
-      <div class="stoplight-dot green"></div>
-    </div>
-    <div class="dropdown-menu" id="dropdown-menu">
-      <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
-      <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
-      <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
-    </div>
-  </div>
+  <!-- Navigation -->
+  <warmthly-stoplight app="admin"></warmthly-stoplight>
 
   <!-- Login Section (Visible by default) -->
   <div id="login-section" class="login-section">
@@ -93,7 +82,7 @@
   <!-- Admin Content (Hidden by default) -->
   <div id="admin-content" class="admin-content">
   <div class="container">
-      <a href="https://admin.warmthly.org" class="back-link">← Back to Admin Dashboard</a>
+      <a href="/" class="back-link" id="back-link">← Back to Admin Dashboard</a>
       <form id="email-form" novalidate>
         <h2>Send Email</h2>
         
@@ -166,72 +155,16 @@
   <!-- Include the Quill library JS -->
   <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
-  <script>
-    // --- NATIVE FONT LOADING ---
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      });
-      
-      // Fallback timeout
-      setTimeout(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      }, 3000);
-    } else {
-      // Fallback for older browsers
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
+
+  <script type="module">
+    // Update back link URL from config
+    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    const backLink = document.getElementById('back-link');
+    if (backLink) {
+      backLink.href = WARMTHLY_CONFIG.urls.admin;
     }
-    // --- END FONT LOADING ---
-    
-    // Stoplight menu functionality
-    const stoplight = document.getElementById('stoplight');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    let isMenuOpen = false;
-    
-    function toggleMenu() {
-      isMenuOpen = !isMenuOpen;
-      stoplight.classList.toggle('active', isMenuOpen);
-      dropdownMenu.classList.toggle('active', isMenuOpen);
-      stoplight.setAttribute('aria-expanded', isMenuOpen ? 'true' : 'false');
-    }
-    
-    // Add keyboard support for stoplight
-    stoplight.setAttribute('role', 'button');
-    stoplight.setAttribute('tabindex', '0');
-    stoplight.setAttribute('aria-label', 'Open navigation menu');
-    stoplight.setAttribute('aria-expanded', 'false');
-    stoplight.setAttribute('aria-haspopup', 'true');
-    
-    stoplight.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
-    
-    stoplight.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        toggleMenu();
-      }
-    });
-    
-    document.addEventListener('click', (e) => {
-      if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    dropdownMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
 
     // Authentication
     const loginForm = document.getElementById('login-form');

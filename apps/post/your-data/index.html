@@ -1,41 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="theme-color" content="#fff6f1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Your Data - Warmthly</title>
-  <link rel="preconnect" href="https://www.warmthly.org">
-  <link rel="preconnect" href="https://post.warmthly.org">
-  
-  <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
-  <link rel="stylesheet" href="/styles/post.css">
+  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <warmthly-head 
+    title="Your Data - Warmthly"
+    description="View and manage all data we store about you. Complete transparency on what we know."
+    app="post"
+    viewport="1.0"
+    preconnects="https://www.warmthly.org, https://post.warmthly.org">
+  </warmthly-head>
 </head>
 <body class="fonts-loading">
-  <div class="top-left-heading">
-    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
-  </div>
+  <warmthly-header app="post"></warmthly-header>
   
-  <div class="stoplight-container">
-    <div class="stoplight" id="stoplight">
-      <div class="stoplight-dot red"></div>
-      <div class="stoplight-dot yellow"></div>
-      <div class="stoplight-dot green"></div>
-    </div>
-    <div class="dropdown-menu" id="dropdown-menu">
-      <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
-      <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
-      <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
-    </div>
-  </div>
+  <warmthly-stoplight app="post"></warmthly-stoplight>
 
   <div class="container container-narrow" id="main-content" role="main">
     <h1 class="page-title">Your Data</h1>
     <p class="main-text">
-      <b>Radical Transparency:</b> This is everything we store about you. If you see something we didn't mention, <a href="/post/report.html">report it</a>.
+      <b>Radical Transparency:</b> This is everything we store about you. If you see something we didn't mention, <a href="/report/">report it</a>.
     </p>
 
     <div class="section">
@@ -66,56 +52,10 @@
     </div>
   </div>
 
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
+
   <script>
-    // --- NATIVE FONT LOADING ---
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      });
-      
-      // Fallback timeout
-      setTimeout(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      }, 3000);
-    } else {
-      // Fallback for older browsers
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    }
-    // --- END FONT LOADING ---
-
-    const stoplight = document.getElementById('stoplight');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    let isMenuOpen = false;
-
-    function toggleMenu() {
-      isMenuOpen = !isMenuOpen;
-      stoplight.classList.toggle('active', isMenuOpen);
-      dropdownMenu.classList.toggle('active', isMenuOpen);
-    }
-
-    stoplight.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-
-    dropdownMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
 
     // Placeholder functions
     function deleteCookieData() { alert('Functionality coming soon'); }

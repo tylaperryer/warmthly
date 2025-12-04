@@ -1,41 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="theme-color" content="#fff6f1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Post - Warmthly</title>
-  <link rel="preconnect" href="https://www.warmthly.org">
-  <link rel="preconnect" href="https://post.warmthly.org">
-  
-  <!-- Favicon Set for All Devices -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
-  <link rel="stylesheet" href="/styles/post.css">
+  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <warmthly-head 
+    title="Post - Warmthly"
+    description="Post-transaction transparency and reporting. View detailed breakdowns of how donations are used and report any concerns."
+    app="post"
+    viewport="1.0"
+    preconnects="https://www.warmthly.org, https://post.warmthly.org">
+  </warmthly-head>
   
 </head>
 <body class="fonts-loading">
-    <div class="top-left-heading">
-      <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
-      <a href="https://post.warmthly.org" class="post-text">Post</a>
-    </div>
+    <warmthly-header app="post"></warmthly-header>
     
     <nav class="header-right" role="navigation" aria-label="Main navigation">
-      <div class="stoplight-container">
-        <div class="stoplight" id="stoplight">
-          <div class="stoplight-dot red"></div>
-          <div class="stoplight-dot yellow"></div>
-          <div class="stoplight-dot green"></div>
-        </div>
-        <div class="dropdown-menu" id="dropdown-menu">
-          <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
-          <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
-          <a href="https://post.warmthly.org/vote" class="dropdown-item">Dissolution</a>
-          <a href="https://post.warmthly.org/report" class="dropdown-item dropdown-item-red">Report</a>
-        </div>
-      </div>
+      <warmthly-stoplight app="post"></warmthly-stoplight>
     </nav>
 
     <div class="container">
@@ -70,74 +53,13 @@
       <div class="chronicle-popup-content" id="popup-content"></div>
     </div>
 
-  <script>
-    // --- NATIVE FONT LOADING ---
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      });
-      
-      // Fallback timeout
-      setTimeout(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      }, 3000);
-    } else {
-      // Fallback for older browsers
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    }
-    // --- END FONT LOADING ---
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
 
-    // Stoplight menu functionality
-    const stoplight = document.getElementById('stoplight');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    let isMenuOpen = false;
-    
-    function toggleMenu() {
-      isMenuOpen = !isMenuOpen;
-      stoplight.classList.toggle('active', isMenuOpen);
-      dropdownMenu.classList.toggle('active', isMenuOpen);
-      stoplight.setAttribute('aria-expanded', isMenuOpen ? 'true' : 'false');
-    }
-    
-    // Add keyboard support for stoplight
-    stoplight.setAttribute('role', 'button');
-    stoplight.setAttribute('tabindex', '0');
-    stoplight.setAttribute('aria-label', 'Open navigation menu');
-    stoplight.setAttribute('aria-expanded', 'false');
-    stoplight.setAttribute('aria-haspopup', 'true');
-    
-    stoplight.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
-    
-    stoplight.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        toggleMenu();
-      }
-    });
-    
-    document.addEventListener('click', (e) => {
-      if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    dropdownMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-    
+  <script type="module">
     // --- TIMELINE FUNCTIONALITY ---
+    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    
     const bookEmojis = ['📕', '📗', '📘', '📙'];
     
     function getRandomBookEmoji() {
@@ -170,7 +92,7 @@
         content: `
           <p>The Mint page represents a fundamental shift in how organizations handle financial transparency. Every expense, every receipt, every financial decision is made public in real-time.</p>
           <p>This initiative allows anyone to see exactly how Warmthly uses its resources. We believe that financial transparency is not just about accountability—it's about building trust and demonstrating that we take our responsibility to donors and the community seriously.</p>
-          <p><a href="https://mint.warmthly.org" target="_blank">Visit the Mint page →</a></p>
+          <p><a href="${WARMTHLY_CONFIG.urls.mint}" target="_blank">Visit the Mint page →</a></p>
         `,
         comments: [
           { heading: '10% improved cost efficiency', description: 'Streamlined expense tracking reduced administrative overhead significantly.' },
@@ -187,7 +109,7 @@
           <p>The dissolution vote is Warmthly's ultimate promise to the community: if we ever lose our way, if we stop serving our mission, or if the community determines we're no longer needed, we will dissolve.</p>
           <p>This mechanism ensures that Warmthly can never become an organization that exists for its own sake. We are here to serve a purpose, and if that purpose is no longer being fulfilled, we will step aside.</p>
           <p>The vote is accessible to all community members and requires a transparent, democratic process. This is not just a safety mechanism—it's a commitment to staying true to our values, no matter what.</p>
-          <p><a href="https://post.warmthly.org/vote" target="_blank">Learn more about the dissolution vote →</a></p>
+          <p><a href="${WARMTHLY_CONFIG.urls.post}${WARMTHLY_CONFIG.routes.post.vote}" target="_blank">Learn more about the dissolution vote →</a></p>
         `,
         comments: [
           { heading: 'Dissolution mechanism designed', description: 'Community voting system created to ensure organizational accountability.' },
@@ -204,7 +126,7 @@
           <p>The Clipboard Liaison project addresses a critical gap in community communication. Many important local announcements, resources, and opportunities are shared on physical bulletin boards, community centers, and local gathering places—but these don't always reach everyone who needs them.</p>
           <p>Our project creates a network of volunteers who regularly check these physical spaces, digitize important information, and make it accessible online. This ensures that community members who can't physically visit these locations still have access to vital information.</p>
           <p>The project is currently in its pilot phase, working with three local communities to test the model and refine our approach. Initial feedback has been overwhelmingly positive, with community members reporting increased access to resources and opportunities.</p>
-          <p><a href="https://mint.warmthly.org" target="_blank">View project expenses on Mint →</a></p>
+          <p><a href="${WARMTHLY_CONFIG.urls.mint}" target="_blank">View project expenses on Mint →</a></p>
         `,
         comments: [
           { heading: 'We made the clipboard liaison today', description: 'Launched pilot program in three local communities to digitize physical bulletin boards.' },
@@ -289,7 +211,7 @@
       // Add signature only to the founding card
       if (entry.signature) {
         const sig = document.createElement('img');
-        sig.src = '/signature.png';
+        sig.src = '/global/images/signature.png';
         sig.alt = "Founder's handwritten signature";
         sig.style.cssText = `
           max-height: 60px;
@@ -440,7 +362,7 @@
       // Load SVG
       async loadSVG() {
         try {
-          const paths = ['./worlddots.svg', 'worlddots.svg', '/worlddots.svg'];
+          const paths = ['/global/images/worlddots.svg'];
           let svgText = null;
           
           for (const path of paths) {

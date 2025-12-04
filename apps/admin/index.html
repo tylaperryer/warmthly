@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="theme-color" content="#fff6f1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow">
-  <title>Admin Dashboard - Warmthly</title>
-
-  <!-- Admin CSS -->
-  <link rel="stylesheet" href="/styles/admin.css">
+  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <warmthly-head 
+    title="Admin Dashboard - Warmthly"
+    description="Administrative dashboard for managing Warmthly operations"
+    app="admin"
+    viewport="1.0"
+    robots="noindex, nofollow">
+  </warmthly-head>
 
   <style>
     /* Critical CSS - Must be inline for performance */
@@ -43,22 +45,10 @@
 <body class="fonts-loading">
 
   <!-- Header -->
-  <header class="top-left-heading">
-    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a> <a href="https://admin.warmthly.org" class="admin-text">Admin</a>
-  </header>
+  <warmthly-header app="admin"></warmthly-header>
   
-  <div class="stoplight-container">
-    <div class="stoplight" id="stoplight">
-      <div class="stoplight-dot red"></div>
-      <div class="stoplight-dot yellow"></div>
-      <div class="stoplight-dot green"></div>
-    </div>
-    <div class="dropdown-menu" id="dropdown-menu">
-      <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
-      <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
-      <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
-    </div>
-  </div>
+  <!-- Navigation -->
+  <warmthly-stoplight app="admin"></warmthly-stoplight>
 
   <div class="login-section" id="login-section">
     <div class="login-container">
@@ -96,72 +86,10 @@
     </div>
   </div>
 
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
+
   <script>
-    // --- NATIVE FONT LOADING ---
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      });
-      
-      // Fallback timeout
-      setTimeout(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      }, 3000);
-    } else {
-      // Fallback for older browsers
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    }
-    // --- END FONT LOADING ---
-    
-    // Stoplight menu functionality
-    const stoplight = document.getElementById('stoplight');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    let isMenuOpen = false;
-    
-    function toggleMenu() {
-      isMenuOpen = !isMenuOpen;
-      stoplight.classList.toggle('active', isMenuOpen);
-      dropdownMenu.classList.toggle('active', isMenuOpen);
-      stoplight.setAttribute('aria-expanded', isMenuOpen ? 'true' : 'false');
-    }
-    
-    // Add keyboard support for stoplight
-    stoplight.setAttribute('role', 'button');
-    stoplight.setAttribute('tabindex', '0');
-    stoplight.setAttribute('aria-label', 'Open navigation menu');
-    stoplight.setAttribute('aria-expanded', 'false');
-    stoplight.setAttribute('aria-haspopup', 'true');
-    
-    stoplight.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
-    
-    stoplight.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        toggleMenu();
-      }
-    });
-    
-    document.addEventListener('click', (e) => {
-      if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    dropdownMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
 
     const loginForm = document.getElementById('login-form');
     const passwordInput = document.getElementById('password-input');

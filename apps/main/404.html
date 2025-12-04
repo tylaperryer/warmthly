@@ -1,19 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="theme-color" content="#fff6f1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="viewport" content="width=device-width, initial-scale=0.75, user-scalable=yes" />
-  <title>404 - Warmthly</title>
-  
-  <!-- Favicon Set for All Devices -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
-  
-  <!-- Shared CSS -->
-  <link rel="stylesheet" href="/styles/common.css">
+  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <warmthly-head 
+    title="404 - Page Not Found - Warmthly"
+    description="The page you're looking for doesn't exist"
+    app="main"
+    viewport="0.75"
+    robots="noindex, nofollow">
+  </warmthly-head>
   
   <style>
     /* Critical CSS - Must be inline for performance */
@@ -170,27 +165,17 @@
   
   <!-- DNS prefetch for external domains -->
   <link rel="dns-prefetch" href="//warmthly.org">
+  
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
 </head>
 <body class="fonts-loading">
   <div class="preload-fonts"></div>
   
-  <div class="top-left-heading">
-    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
-  </div>
+  <warmthly-header app="main"></warmthly-header>
   
-  <div class="stoplight-container">
-    <div class="stoplight" id="stoplight">
-      <div class="stoplight-dot red"></div>
-      <div class="stoplight-dot yellow"></div>
-      <div class="stoplight-dot green"></div>
-    </div>
-    
-    <div class="dropdown-menu" id="dropdown-menu">
-      <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
-      <a href="https://transparency.warmthly.org" class="dropdown-item">Transparency</a>
-      <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
-    </div>
-  </div>
+  <warmthly-stoplight app="main"></warmthly-stoplight>
 
   <div class="container">
     <div class="big-404">404</div>
@@ -212,66 +197,23 @@
     <div class="navigation-help">
       <h3 class="nav-title">Let's find your way.</h3>
       <div class="nav-buttons">
-        <a href="https://www.warmthly.org" class="nav-button">Return Home</a>
+        <a href="/" class="nav-button" id="home-link">Return Home</a>
         <button class="nav-button" onclick="window.history.back( )">Go Back</button>
       </div>
     </div>
     
   </div>
   
-  <script>
-    // Stoplight menu functionality
-    const stoplight = document.getElementById('stoplight');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    let isMenuOpen = false;
-    
-    function toggleMenu() {
-      isMenuOpen = !isMenuOpen;
-      stoplight.classList.toggle('active', isMenuOpen);
-      dropdownMenu.classList.toggle('active', isMenuOpen);
-    }
-    
-    stoplight.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
-    
-    document.addEventListener('click', (e) => {
-      if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isMenuOpen) {
-        toggleMenu();
-      }
-    });
-    
-    dropdownMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-  </script>
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
   
-  <script>
-    // --- NATIVE FONT LOADING ---
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      });
-      
-      // Fallback timeout
-      setTimeout(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      }, 3000);
-    } else {
-      // Fallback for older browsers
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
+  <script type="module">
+    // Update home link URL from config
+    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    const homeLink = document.getElementById('home-link');
+    if (homeLink) {
+      homeLink.href = WARMTHLY_CONFIG.urls.main;
     }
-    // --- END FONT LOADING ---
   </script>
 </body>
 </html>
