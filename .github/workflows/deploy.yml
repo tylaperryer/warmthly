@@ -15,15 +15,17 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "pages-${{ matrix.app }}"
   cancel-in-progress: false
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       matrix:
         app: [main, mint, post, admin]
+      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,42 +46,74 @@ jobs:
 
       - name: Prepare and minify ${{ matrix.app }} site
         run: |
+          set -e
+          
           # Create build directory
           mkdir -p build/${{ matrix.app }}
           
-          # Copy app files
-          cp -r warmthly/apps/${{ matrix.app }}/* build/${{ matrix.app }}/ 2>/dev/null || true
+          # Verify source directory exists
+          if [ ! -d "warmthly/apps/${{ matrix.app }}" ]; then
+            echo "Error: Source directory warmthly/apps/${{ matrix.app }} does not exist"
+            exit 1
+          fi
           
-          # Copy shared assets
-          cp -r warmthly/fonts build/${{ matrix.app }}/ 2>/dev/null || true
-          cp -r warmthly/global build/${{ matrix.app }}/ 2>/dev/null || true
+          # Copy app files (use set +e temporarily to allow warnings)
+          set +e
+          cp -r warmthly/apps/${{ matrix.app }}/* build/${{ matrix.app }}/ 2>/dev/null || {
+            echo "Warning: Failed to copy some app files, continuing..."
+          }
+          set -e
           
-          # Copy lego directory (will minify JS/CSS separately)
-          cp -r warmthly/lego build/${{ matrix.app }}/ 2>/dev/null || true
+          # Copy shared assets (allow warnings, don't fail)
+          set +e
+          cp -r warmthly/fonts build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: fonts directory not found"
+          cp -r warmthly/global build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: global directory not found"
+          set -e
           
-          # Copy robots.txt, manifest.json, and favicon.svg
-          cp warmthly/robots.txt build/${{ matrix.app }}/ 2>/dev/null || true
-          cp warmthly/manifest.json build/${{ matrix.app }}/ 2>/dev/null || true
-          cp warmthly/favicon.svg build/${{ matrix.app }}/ 2>/dev/null || true
+          # Copy lego directory (will minify JS/CSS separately) - REQUIRED
+          if [ ! -d "warmthly/lego" ]; then
+            echo "Error: lego directory is required but not found"
+            exit 1
+          fi
+          cp -r warmthly/lego build/${{ matrix.app }}/ || {
+            echo "Error: Failed to copy lego directory"
+            exit 1
+          }
+          
+          # Copy robots.txt, manifest.json, and favicon.svg (optional)
+          set +e
+          cp warmthly/robots.txt build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: robots.txt not found"
+          cp warmthly/manifest.json build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: manifest.json not found"
+          cp warmthly/favicon.svg build/${{ matrix.app }}/ 2>/dev/null || echo "Warning: favicon.svg not found"
+          set -e
           
           # Minify CSS files first (before HTML minification)
-          find build/${{ matrix.app }}/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
-            cleancss --level 2 -o "$file" "$file" || true
-          done
+          if [ -d "build/${{ matrix.app }}/lego/styles" ]; then
+            set +e
+            find build/${{ matrix.app }}/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
+              cleancss --level 2 -o "$file" "$file" || echo "Warning: Failed to minify $file"
+            done
+            set -e
+          fi
           
           # Minify JavaScript files (preserve ES module syntax)
-          find build/${{ matrix.app }}/lego -name "*.js" -type f ! -path "*/node_modules/*" | while read file; do
-            terser "$file" \
-              -o "$file" \
-              --compress \
-              --mangle \
-              --module \
-              --keep-classnames \
-              --keep-fnames \
-              || true
-          done
+          if [ -d "build/${{ matrix.app }}/lego" ]; then
+            set +e
+            find build/${{ matrix.app }}/lego -name "*.js" -type f ! -path "*/node_modules/*" 2>/dev/null | while read file; do
+              terser "$file" \
+                -o "$file" \
+                --compress \
+                --mangle \
+                --module \
+                --keep-classnames \
+                --keep-fnames \
+                || echo "Warning: Failed to minify $file"
+            done
+            set -e
+          fi
           
           # Minify HTML files (preserve type="module" attributes)
+          set +e
           find build/${{ matrix.app }} -name "*.html" -type f | while read file; do
             html-minifier-terser \
               --collapse-whitespace \
@@ -92,11 +126,32 @@ jobs:
               --minify-js false \
               --file-ext html \
               --output "$file" \
-              "$file" || true
+              "$file" || echo "Warning: Failed to minify $file"
           done
+          set -e
           
           # Create .nojekyll to prevent Jekyll processing
           touch build/${{ matrix.app }}/.nojekyll
+          
+          # Verify build output exists
+          if [ ! -f "build/${{ matrix.app }}/index.html" ] && [ ! -d "build/${{ matrix.app }}/index.html" ]; then
+            echo "Error: No index.html found in build output for ${{ matrix.app }}"
+            ls -la build/${{ matrix.app }}/
+            exit 1
+          fi
+          
+          echo "Build completed successfully for ${{ matrix.app }}"
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "build/${{ matrix.app }}" ]; then
+            echo "Error: Build directory does not exist"
+            exit 1
+          fi
+          echo "Build directory size:"
+          du -sh build/${{ matrix.app }}
+          echo "Build directory contents:"
+          ls -la build/${{ matrix.app }} | head -20
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -106,8 +161,9 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        environment:
+          name: github-pages
+          url: ${{ steps.deployment.outputs.page_url }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          # Note: Each app needs its own GitHub Pages deployment configured
-          # in repository settings for the respective branch/path
 
