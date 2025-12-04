@@ -57,9 +57,10 @@ jobs:
           # Copy lego directory (will minify JS/CSS separately)
           cp -r warmthly/lego build/${{ matrix.app }}/ 2>/dev/null || true
           
-          # Copy robots.txt and manifest.json
+          # Copy robots.txt, manifest.json, and favicon.svg
           cp warmthly/robots.txt build/${{ matrix.app }}/ 2>/dev/null || true
           cp warmthly/manifest.json build/${{ matrix.app }}/ 2>/dev/null || true
+          cp warmthly/favicon.svg build/${{ matrix.app }}/ 2>/dev/null || true
           
           # Minify CSS files first (before HTML minification)
           find build/${{ matrix.app }}/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
