@@ -62,7 +62,7 @@ class WarmthlyHead extends HTMLElement {
       "@type": "Organization",
       "name": "Warmthly",
       "url": WARMTHLY_CONFIG.urls.main,
-      "logo": `${WARMTHLY_CONFIG.urls.main}/favicon.svg`,
+      "logo": `${WARMTHLY_CONFIG.urls.main}${WARMTHLY_CONFIG.favicon}`,
       "description": description,
       "sameAs": []
     };
@@ -109,9 +109,10 @@ ${robotsMeta}
   <meta name="mobile-web-app-capable" content="yes" />
   
 ${preconnectLinks ? `  <!-- Preconnect to essential domains for faster resource loading -->\n${preconnectLinks}\n` : ''}
-  <!-- Emoji Favicon (SVG) - Candle 🕯️ -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕯️</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕯️</text></svg>">
+  <!-- Emoji Favicon (SVG) - Candle 🕯️ - Renders in platform-specific style -->
+  <link rel="icon" type="image/svg+xml" href="${WARMTHLY_CONFIG.favicon}">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="${WARMTHLY_CONFIG.favicon}">
+  <link rel="apple-touch-icon" href="${WARMTHLY_CONFIG.favicon}">
   <link rel="manifest" href="/manifest.json">
 
   <!-- Preload critical fonts to prevent font flash -->
