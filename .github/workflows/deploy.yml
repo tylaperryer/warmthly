@@ -90,7 +90,7 @@ jobs:
           if [ -d "build/${{ matrix.app }}/lego/styles" ]; then
             set +e
             find build/${{ matrix.app }}/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
-              cleancss --level 2 -o "$file" "$file" || echo "Warning: Failed to minify $file"
+              cleancss -O2 -o "$file" "$file" || echo "Warning: Failed to minify $file"
             done
             set -e
           fi
@@ -119,11 +119,9 @@ jobs:
               --remove-comments \
               --remove-optional-tags \
               --remove-redundant-attributes \
-              --remove-script-type-attributes false \
+              --remove-script-type-attributes \
               --remove-style-link-type-attributes \
-              --minify-css true \
-              --minify-js false \
-              --file-ext html \
+              --minify-css \
               --output "$file" \
               "$file" || echo "Warning: Failed to minify $file"
           done
@@ -156,10 +154,12 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/${{ matrix.app }}
+        continue-on-error: false
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: false
 
