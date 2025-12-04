@@ -80,11 +80,16 @@ jobs:
           cp favicon.svg build/$APP_NAME/ 2>/dev/null || echo "Warning: favicon.svg not found"
           set -e
           
-          # Minify CSS files
+          # Minify CSS files (preserve @import statements)
           if [ -d "build/$APP_NAME/lego/styles" ]; then
             set +e
             find build/$APP_NAME/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
-              cleancss -O2 -o "$file" "$file" || echo "Warning: Failed to minify $file"
+              # Use cleancss with level 2 optimization but preserve imports
+              # -O2 is level 2, --skip-import-from allows imports to be processed
+              cleancss -O2 --skip-import-from all -o "$file" "$file" 2>&1 || {
+                # If that fails, try without skip-import-from
+                cleancss -O2 -o "$file" "$file" 2>&1 || echo "Warning: Failed to minify $file"
+              }
             done
             set -e
           fi
@@ -155,6 +160,101 @@ jobs:
           pattern: pages-*
           path: build
           merge-multiple: true
+
+      - name: Verify and fix directory structure
+        run: |
+          echo "=== Verifying build structure ==="
+          echo "Build directory contents:"
+          ls -la build/ || echo "Build directory not found"
+          
+          echo ""
+          echo "Checking each app structure:"
+          for app in main mint post admin; do
+            if [ -d "build/$app" ]; then
+              echo "  $app:"
+              echo "    - index.html: $([ -f "build/$app/index.html" ] && echo "✓" || echo "✗")"
+              echo "    - lego: $([ -d "build/$app/lego" ] && echo "✓" || echo "✗")"
+              echo "    - fonts: $([ -d "build/$app/fonts" ] && echo "✓" || echo "✗")"
+              echo "    - global: $([ -d "build/$app/global" ] && echo "✓" || echo "✗")"
+              
+              # Verify lego structure
+              if [ -d "build/$app/lego" ]; then
+                echo "    - lego/styles: $([ -d "build/$app/lego/styles" ] && echo "✓" || echo "✗")"
+                echo "    - lego/web-components: $([ -d "build/$app/lego/web-components" ] && echo "✓" || echo "✗")"
+                echo "    - lego/config: $([ -d "build/$app/lego/config" ] && echo "✓" || echo "✗")"
+                
+                # List CSS files
+                if [ -d "build/$app/lego/styles" ]; then
+                  echo "    - CSS files:"
+                  ls -1 build/$app/lego/styles/*.css 2>/dev/null | sed 's|.*/||' | sed 's/^/      - /' || echo "      (none found)"
+                fi
+              fi
+            else
+              echo "  $app: ✗ directory not found"
+            fi
+            echo ""
+          done
+          
+          # Verify critical files exist
+          echo "=== Verifying critical files ==="
+          for app in main mint post admin; do
+            if [ -d "build/$app" ]; then
+              echo "Checking $app:"
+              
+              # Check if CSS files exist
+              if [ -f "build/$app/lego/styles/common.css" ]; then
+                echo "  ✓ common.css exists"
+                # Check if common.css can find its imports
+                if grep -q "@import" "build/$app/lego/styles/common.css" 2>/dev/null; then
+                  echo "  ✓ common.css has imports"
+                fi
+              else
+                echo "  ✗ common.css missing!"
+              fi
+              
+              # Check if web components exist
+              if [ -f "build/$app/lego/web-components/warmthly-head.js" ]; then
+                echo "  ✓ warmthly-head.js exists"
+              else
+                echo "  ✗ warmthly-head.js missing!"
+              fi
+              
+              # Check if config exists
+              if [ -f "build/$app/lego/config/warmthly-config.js" ]; then
+                echo "  ✓ warmthly-config.js exists"
+              else
+                echo "  ✗ warmthly-config.js missing!"
+              fi
+              
+              echo ""
+            fi
+          done
+          
+          echo "=== Structure verification complete ==="
+          
+          # Final check: Verify that at least one app has the correct structure
+          if [ ! -d "build/main" ] && [ ! -d "build/mint" ] && [ ! -d "build/post" ] && [ ! -d "build/admin" ]; then
+            echo "ERROR: No app directories found in build!"
+            exit 1
+          fi
+          
+          echo ""
+          echo "=== Sample file check ==="
+          # Check if we can read a sample CSS file
+          if [ -f "build/main/lego/styles/common.css" ]; then
+            echo "Sample from common.css (first 10 lines):"
+            head -10 build/main/lego/styles/common.css
+            echo ""
+            echo "File size: $(wc -c < build/main/lego/styles/common.css) bytes"
+          fi
+          
+          # Verify HTML files reference lego correctly
+          echo ""
+          echo "=== Checking HTML references ==="
+          if [ -f "build/main/index.html" ]; then
+            echo "Checking main/index.html for lego references:"
+            grep -o '/lego/[^"]*' build/main/index.html | head -5 | sed 's/^/  - /' || echo "  (no /lego/ references found)"
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
