@@ -1,97 +1,60 @@
 /**
- * Warmthly Global Configuration
- * Centralized configuration for all URLs, paths, and references
+ * Warmthly Stoplight Menu Web Component
+ * Reusable stoplight navigation menu
+ * Uses global config for navigation items
  * 
- * Edit this file to update URLs/paths across the entire site
+ * Usage (auto-generate from app):
+ * <warmthly-stoplight app="main"></warmthly-stoplight>
+ * 
+ * Usage (custom menu items):
+ * <warmthly-stoplight>
+ *   <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
+ *   <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
+ * </warmthly-stoplight>
  */
 
-export const WARMTHLY_CONFIG = {
-  // Domain URLs - Update these if domains change
-  urls: {
-    main: 'https://www.warmthly.org',
-    mint: 'https://mint.warmthly.org',
-    post: 'https://post.warmthly.org',
-    admin: 'https://admin.warmthly.org',
-    transparency: 'https://transparency.warmthly.org'
-  },
-  
-  // Asset paths - Update these if directory structure changes
-  paths: {
-    lego: '/lego',
-    styles: '/lego/styles',
-    webComponents: '/lego/web-components',
-    global: '/global',
-    favicon: '/global/favicon',
-    fonts: '/fonts'
-  },
-  
-  // Font files
-  fonts: {
-    inter: '/fonts/Inter-VariableFont_opsz,wght.ttf',
-    cormorant: '/fonts/CormorantGaramond-VariableFont_wght.ttf'
-  },
-  
-  // Favicon files
-  favicons: {
-    icon32: '/global/favicon/candle-32.png',
-    icon16: '/global/favicon/candle-16.png',
-    apple: '/global/favicon/candle-apple.png'
-  },
-  
-  // Navigation menu items (used by stoplight component)
-  navigation: {
-    main: [
-      { label: 'Post', url: 'https://post.warmthly.org' },
-      { label: 'Mint', url: 'https://mint.warmthly.org', ariaLabel: 'View our live transaction mint' }
-    ],
-    mint: [
-      { label: 'Home', url: 'https://www.warmthly.org' },
-      { label: 'Post', url: 'https://post.warmthly.org' },
-      { label: 'Research', url: 'https://mint.warmthly.org/research', class: 'dropdown-item-green', ariaLabel: 'View our research and methods' }
-    ],
-    post: [
-      { label: 'Home', url: 'https://www.warmthly.org' },
-      { label: 'Mint', url: 'https://mint.warmthly.org' },
-      { label: 'Dissolution', url: 'https://post.warmthly.org/vote' },
-      { label: 'Report', url: 'https://post.warmthly.org/report', class: 'dropdown-item-red' }
-    ],
-    admin: [
-      { label: 'Home', url: 'https://www.warmthly.org' },
-      { label: 'Mint', url: 'https://mint.warmthly.org' },
-      { label: 'Post', url: 'https://post.warmthly.org' }
-    ]
-  },
-  
-  // App-specific routes (relative paths within each app)
-  routes: {
-    post: {
-      report: '/report/',
-      yourData: '/your-data/',
-      vote: '/vote/'
-    },
-    admin: {
-      emails: '/emails/',
-      dashboard: '/'
-    },
-    main: {
-      home: '/',
-      notFound: '/404.html'
+import { WARMTHLY_CONFIG, getNavigation } from '../config/warmthly-config.js';
+
+class WarmthlyStoplight extends HTMLElement {
+  async connectedCallback() {
+    const app = this.getAttribute('app') || '';
+    const customItems = this.innerHTML.trim();
+    
+    let menuItems = customItems;
+    
+    // Auto-generate menu from config if app is provided and no custom items
+    if (app && !customItems) {
+      const navItems = getNavigation(app);
+      menuItems = navItems.map(item => {
+        const classes = item.class ? `dropdown-item ${item.class}` : 'dropdown-item';
+        const ariaLabel = item.ariaLabel ? ` aria-label="${item.ariaLabel}"` : '';
+        return `<a href="${item.url}" class="${classes}"${ariaLabel}>${item.label}</a>`;
+      }).join('\n');
     }
+    
+    // Generate unique IDs for this instance
+    const instanceId = `stoplight-${Math.random().toString(36).substr(2, 9)}`;
+    const stoplightId = `stoplight-${instanceId}`;
+    const menuId = `dropdown-menu-${instanceId}`;
+    
+    this.innerHTML = `
+      <div class="stoplight-container">
+        <div class="stoplight" id="${stoplightId}">
+          <div class="stoplight-dot red"></div>
+          <div class="stoplight-dot yellow"></div>
+          <div class="stoplight-dot green"></div>
+        </div>
+        <div class="dropdown-menu" id="${menuId}">
+          ${menuItems}
+        </div>
+      </div>
+    `;
+    
+    // Initialize stoplight functionality
+    const { initStoplight } = await import('../components/stoplight/stoplight.js');
+    initStoplight(stoplightId, menuId);
   }
-};
-
-// Helper function to get URL for a specific app
-export function getAppUrl(app) {
-  return WARMTHLY_CONFIG.urls[app] || WARMTHLY_CONFIG.urls.main;
 }
 
-// Helper function to get path
-export function getPath(key) {
-  return WARMTHLY_CONFIG.paths[key] || '';
-}
-
-// Helper function to get navigation items for an app
-export function getNavigation(app) {
-  return WARMTHLY_CONFIG.navigation[app] || WARMTHLY_CONFIG.navigation.main;
-}
+customElements.define('warmthly-stoplight', WarmthlyStoplight);
 
