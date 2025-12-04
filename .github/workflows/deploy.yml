@@ -1,7 +1,7 @@
-# Deploy All Sites to Cloudflare Pages via GitHub Actions
-# Using GitHub Actions provides unlimited deployments (Cloudflare limits only apply to manual deployments)
+# Deploy All Sites to GitHub Pages
+# GitHub Pages hosts static sites, Cloudflare handles API/server functions
 
-name: Deploy All Sites to Cloudflare Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -9,77 +9,60 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [main, mint, post, admin]
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
         with:
-          node-version: '20'
+          static_site_generator: none
 
-      - name: Install Wrangler CLI
-        run: npm install -g wrangler
-
-      # --- DEPLOY MAIN SITE ---
-      - name: Deploy 'warmthly'
+      - name: Prepare ${{ matrix.app }} site
         run: |
-          # Copy shared assets to app directory
-          cp -r fonts apps/main/ 2>/dev/null || true
-          cp -r lego apps/main/ 2>/dev/null || true
-          cp -r global apps/main/ 2>/dev/null || true
-          # Copy favicons to root for easier access
-          cp global/favicon/*.png apps/main/ 2>/dev/null || true
-          # Deploy to Cloudflare Pages
-          wrangler pages deploy apps/main --project-name="warmthly" --branch="main"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Create build directory
+          mkdir -p build/${{ matrix.app }}
+          
+          # Copy app files
+          cp -r warmthly/apps/${{ matrix.app }}/* build/${{ matrix.app }}/ 2>/dev/null || true
+          
+          # Copy shared assets
+          cp -r warmthly/fonts build/${{ matrix.app }}/ 2>/dev/null || true
+          cp -r warmthly/lego build/${{ matrix.app }}/ 2>/dev/null || true
+          cp -r warmthly/global build/${{ matrix.app }}/ 2>/dev/null || true
+          
+          # Copy robots.txt and manifest.json
+          cp warmthly/robots.txt build/${{ matrix.app }}/ 2>/dev/null || true
+          cp warmthly/manifest.json build/${{ matrix.app }}/ 2>/dev/null || true
+          
+          # Create .nojekyll to prevent Jekyll processing
+          touch build/${{ matrix.app }}/.nojekyll
 
-      # --- DEPLOY MINT SITE ---
-      - name: Deploy 'mint'
-        run: |
-          # Copy shared assets to app directory
-          cp -r fonts apps/mint/ 2>/dev/null || true
-          cp -r lego apps/mint/ 2>/dev/null || true
-          cp -r global apps/mint/ 2>/dev/null || true
-          # Copy favicons to root for easier access
-          cp global/favicon/*.png apps/mint/ 2>/dev/null || true
-          # Deploy to Cloudflare Pages
-          wrangler pages deploy apps/mint --project-name="mint" --branch="main"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/${{ matrix.app }}
 
-      # --- DEPLOY POST SITE ---
-      - name: Deploy 'post'
-        run: |
-          # Copy shared assets to app directory
-          cp -r fonts apps/post/ 2>/dev/null || true
-          cp -r lego apps/post/ 2>/dev/null || true
-          cp -r global apps/post/ 2>/dev/null || true
-          # Copy favicons to root for easier access
-          cp global/favicon/*.png apps/post/ 2>/dev/null || true
-          # Deploy to Cloudflare Pages
-          wrangler pages deploy apps/post --project-name="post" --branch="main"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Note: Each app needs its own GitHub Pages deployment configured
+          # in repository settings for the respective branch/path
 
-      # --- DEPLOY ADMIN SITE ---
-      - name: Deploy 'admin'
-        run: |
-          # Copy shared assets to app directory
-          cp -r fonts apps/admin/ 2>/dev/null || true
-          cp -r lego apps/admin/ 2>/dev/null || true
-          cp -r global apps/admin/ 2>/dev/null || true
-          # Copy favicons to root for easier access
-          cp global/favicon/*.png apps/admin/ 2>/dev/null || true
-          # Deploy to Cloudflare Pages
-          wrangler pages deploy apps/admin --project-name="admin" --branch="main"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
