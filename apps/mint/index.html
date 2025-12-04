@@ -1,22 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="theme-color" content="#fff6f1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Mint - Warmthly</title>
-  <!-- Preconnect to essential domains for faster resource loading -->
-  <link rel="preconnect" href="https://www.warmthly.org">
-  <link rel="preconnect" href="https://post.warmthly.org">
-  
-  <!-- Favicon Set for All Devices -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
-
-  <link rel="stylesheet" href="/lego/styles/common.css">
-  <link rel="stylesheet" href="/lego/styles/mint.css">
+  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <warmthly-head 
+    title="Mint - Warmthly"
+    app="mint"
+    viewport="1.0"
+    preconnects="https://www.warmthly.org, https://post.warmthly.org">
+  </warmthly-head>
   
   <link rel="dns-prefetch" href="//warmthly.org">
   
@@ -55,27 +49,10 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
   <div class="preload-fonts">.</div>
   
-  <header class="top-left-heading">
-    <a href="https://www.warmthly.org" class="warmthly-link">Warmthly</a>
-    <a href="https://mint.warmthly.org" class="mint-text">Mint</a>
-  </header>
+  <warmthly-header app="mint"></warmthly-header>
   
   <nav class="header-right" role="navigation" aria-label="Main navigation">
-    <div class="stoplight-container">
-      <div class="stoplight" id="stoplight">
-        <div class="stoplight-dot red"></div>
-        <div class="stoplight-dot yellow"></div>
-        <div class="stoplight-dot green"></div>
-      </div>
-      
-      <!-- --- MODIFICATION START: Removed 'Family' and 'Projects' links --- -->
-      <div class="dropdown-menu" id="dropdown-menu">
-        <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
-        <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
-        <a href="https://mint.warmthly.org/research" class="dropdown-item dropdown-item-green" aria-label="View our research and methods">Research</a>
-      </div>
-      <!-- --- MODIFICATION END --- -->
-    </div>
+    <warmthly-stoplight app="mint"></warmthly-stoplight>
   </nav>
 
   <main class="container" id="main-content" role="main">
@@ -2945,55 +2922,6 @@
             initDonationPool();
       }
 
-      // Stoplight menu functionality
-      const stoplight = document.getElementById('stoplight');
-      const dropdownMenu = document.getElementById('dropdown-menu');
-      let isMenuOpen = false;
-
-      function toggleMenu() {
-        isMenuOpen = !isMenuOpen;
-        stoplight.classList.toggle('active', isMenuOpen);
-        dropdownMenu.classList.toggle('active', isMenuOpen);
-        stoplight.setAttribute('aria-expanded', isMenuOpen ? 'true' : 'false');
-      }
-
-      // Add keyboard support for stoplight
-      stoplight.setAttribute('role', 'button');
-      stoplight.setAttribute('tabindex', '0');
-      stoplight.setAttribute('aria-label', 'Open navigation menu');
-      stoplight.setAttribute('aria-expanded', 'false');
-      stoplight.setAttribute('aria-haspopup', 'true');
-
-      stoplight.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleMenu();
-      });
-
-      stoplight.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-          e.preventDefault();
-          toggleMenu();
-        }
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
-          toggleMenu();
-        }
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isMenuOpen) {
-          toggleMenu();
-        }
-      });
-
-      dropdownMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
-
-      
-      
       // Section animation on scroll
       const sections = document.querySelectorAll('.database-section');
       const observerOptions = {
@@ -3014,26 +2942,8 @@
       sections.forEach(section => sectionObserver.observe(section));
   </script>
   
-  <script>
-    // --- NATIVE FONT LOADING ---
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      });
-      
-      // Fallback timeout
-      setTimeout(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      }, 3000);
-    } else {
-      // Fallback for older browsers
-      document.body.classList.remove('fonts-loading');
-      document.body.classList.add('fonts-loaded');
-    }
-    // --- END FONT LOADING ---
-  </script>
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
 </body>
 </html>
 
