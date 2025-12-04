@@ -84,12 +84,22 @@ jobs:
           if [ -d "build/$APP_NAME/lego/styles" ]; then
             set +e
             find build/$APP_NAME/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
-              # Use cleancss with level 2 optimization but preserve imports
-              # -O2 is level 2, --skip-import-from allows imports to be processed
-              cleancss -O2 --skip-import-from all -o "$file" "$file" 2>&1 || {
-                # If that fails, try without skip-import-from
+              # Check if file has @import statements
+              if grep -q "^@import" "$file" 2>/dev/null; then
+                # For files with @import, use lower optimization to preserve imports
+                # -O1 is safer for files with imports, or we can skip minification for import files
+                # Actually, let's just minify without inlining imports
+                cleancss -O1 --skip-import-from "all" -o "$file" "$file" 2>&1 || {
+                  # If that fails, try basic minification
+                  cleancss -O1 -o "$file" "$file" 2>&1 || {
+                    # Last resort: just compress whitespace
+                    sed -i 's/  */ /g; s/ *{/{/g; s/{ */{/g; s/ *}/}/g; s/ *: */:/g; s/ *; */;/g; s/ *\/\*[^*]*\*\///g' "$file" 2>/dev/null || echo "Warning: Failed to minify $file"
+                  }
+                }
+              else
+                # For files without imports, use full optimization
                 cleancss -O2 -o "$file" "$file" 2>&1 || echo "Warning: Failed to minify $file"
-              }
+              fi
             done
             set -e
           fi
@@ -154,12 +164,33 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - name: Download all artifacts
+      - name: Download artifact - main
         uses: actions/download-artifact@v4
         with:
-          pattern: pages-*
-          path: build
-          merge-multiple: true
+          name: pages-main
+          path: build/main
+          continue-on-error: true
+
+      - name: Download artifact - mint
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-mint
+          path: build/mint
+          continue-on-error: true
+
+      - name: Download artifact - post
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-post
+          path: build/post
+          continue-on-error: true
+
+      - name: Download artifact - admin
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-admin
+          path: build/admin
+          continue-on-error: true
 
       - name: Verify and fix directory structure
         run: |
@@ -176,8 +207,10 @@ jobs:
           
           echo ""
           echo "Checking each app structure:"
+          APPS_FOUND=0
           for app in main mint post admin; do
             if [ -d "build/$app" ]; then
+              APPS_FOUND=$((APPS_FOUND + 1))
               echo "  $app:"
               echo "    - index.html: $([ -f "build/$app/index.html" ] && echo "✓" || echo "✗")"
               echo "    - lego: $([ -d "build/$app/lego" ] && echo "✓" || echo "✗")"
@@ -207,7 +240,16 @@ jobs:
             echo ""
           done
           
+          if [ $APPS_FOUND -eq 0 ]; then
+            echo "ERROR: No app directories found in build!"
+            echo "This means artifacts were not downloaded correctly."
+            exit 1
+          fi
+          
+          echo "Found $APPS_FOUND app(s) in build directory"
+          
           # Verify critical files exist
+          echo ""
           echo "=== Verifying critical files ==="
           for app in main mint post admin; do
             if [ -d "build/$app" ]; then
@@ -244,49 +286,35 @@ jobs:
           
           echo "=== Structure verification complete ==="
           
-          # Final check: Verify that at least one app has the correct structure
-          APPS_FOUND=0
-          for app in main mint post admin; do
-            if [ -d "build/$app" ]; then
-              APPS_FOUND=$((APPS_FOUND + 1))
-            fi
-          done
-          
-          if [ $APPS_FOUND -eq 0 ]; then
-            echo "ERROR: No app directories found in build!"
-            exit 1
-          fi
-          
-          echo "Found $APPS_FOUND app(s) in build directory"
-          
           # Sample file check (non-critical, don't fail if missing)
           echo ""
           echo "=== Sample file check ==="
-          if [ -f "build/main/lego/styles/common.css" ]; then
-            echo "Sample from common.css (first 10 lines):"
-            head -10 build/main/lego/styles/common.css 2>/dev/null || echo "  (cannot read file)"
-            echo ""
-            echo "File size: $(wc -c < build/main/lego/styles/common.css 2>/dev/null || echo 0) bytes"
-          else
-            echo "common.css not found in main app (this is okay if main didn't build)"
-          fi
+          for app in main mint post admin; do
+            if [ -f "build/$app/lego/styles/common.css" ]; then
+              echo "Sample from $app/common.css (first 5 lines):"
+              head -5 build/$app/lego/styles/common.css 2>/dev/null || echo "  (cannot read file)"
+              echo ""
+              break
+            fi
+          done
           
           # Verify HTML files reference lego correctly (non-critical)
           echo ""
           echo "=== Checking HTML references ==="
-          if [ -f "build/main/index.html" ]; then
-            echo "Checking main/index.html for lego references:"
-            LEGO_REFS=$(grep -o '/lego/[^"]*' build/main/index.html 2>/dev/null | head -5)
-            if [ -n "$LEGO_REFS" ]; then
-              echo "$LEGO_REFS" | sed 's/^/  - /'
-            else
-              echo "  (no /lego/ references found)"
+          for app in main mint post admin; do
+            if [ -f "build/$app/index.html" ]; then
+              echo "Checking $app/index.html for lego references:"
+              LEGO_REFS=$(grep -o '/lego/[^"]*' build/$app/index.html 2>/dev/null | head -5)
+              if [ -n "$LEGO_REFS" ]; then
+                echo "$LEGO_REFS" | sed 's/^/  - /'
+              else
+                echo "  (no /lego/ references found)"
+              fi
+              echo ""
+              break
             fi
-          else
-            echo "main/index.html not found (this is okay if main didn't build)"
-          fi
+          done
           
-          echo ""
           echo "=== Verification complete - proceeding with deployment ==="
 
       - name: Setup Pages
