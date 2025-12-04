@@ -67,7 +67,9 @@ class WarmthlyHead extends HTMLElement {
       "sameAs": []
     };
     
-    this.innerHTML = `
+    // Create a temporary container to parse the HTML
+    const temp = document.createElement('div');
+    temp.innerHTML = `
   <meta charset="UTF-8" />
   <meta name="theme-color" content="#fff6f1" />
   <meta name="color-scheme" content="light" />
@@ -127,6 +129,26 @@ ${cssLinks}
 ${JSON.stringify(structuredData, null, 2)}
   </script>
 `;
+    
+    // Move all children from temp container into document.head
+    // This ensures stylesheet links are properly in the head, not nested in custom element
+    while (temp.firstChild) {
+      const child = temp.firstChild;
+      // Handle title specially - replace existing title if present
+      if (child.tagName === 'TITLE') {
+        const existingTitle = document.head.querySelector('title');
+        if (existingTitle) {
+          existingTitle.textContent = child.textContent;
+        } else {
+          document.head.appendChild(child);
+        }
+      } else {
+        document.head.appendChild(child);
+      }
+    }
+    
+    // Hide the custom element since its content is now in the head
+    this.style.display = 'none';
   }
   
   escapeHtml(text) {
