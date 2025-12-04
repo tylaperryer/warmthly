@@ -1,27 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="theme-color" content="#fff6f1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="viewport" content="width=device-width, initial-scale=0.75, user-scalable=yes" />
-  <title>Warmthly</title>
-
-  <!-- Preconnect to essential domains for faster resource loading -->
-  <link rel="preconnect" href="https://mint.warmthly.org">
-  <link rel="preconnect" href="https://post.warmthly.org">
-  
-  <!-- Favicon Set for All Devices -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/candle-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/candle-16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/candle-apple.png">
-
-  <!-- Preload critical fonts to prevent font flash -->
-  <link rel="preload" href="/fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" href="/fonts/CormorantGaramond-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
-
-  <!-- Shared CSS -->
-  <link rel="stylesheet" href="/lego/styles/common.css">
+  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <warmthly-head 
+    title="Warmthly - Transparent Charity Tracking"
+    description="Warmthly is a transparent charity platform that tracks every donation and decision. See exactly where your money goes with real-time transparency."
+    app="main"
+    viewport="0.75"
+    preconnects="https://mint.warmthly.org, https://post.warmthly.org">
+  </warmthly-head>
 
   <style>
     /* Critical CSS - Must be inline for performance */
@@ -205,25 +195,17 @@
   </style>
 </head>
 <body class="fonts-loading">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <header class="header">
     <div class="header-left">
-        <a href="https://www.warmthly.org" class="brand-logo">Warmthly</a>
+        <a href="/" class="brand-logo" id="main-brand-logo">Warmthly</a>
     </div>
     <div class="header-right">
-        <div class="stoplight-container">
-            <div class="stoplight" id="stoplight">
-                <div class="stoplight-dot red"></div>
-                <div class="stoplight-dot yellow"></div>
-                <div class="stoplight-dot green"></div>
-            </div>
-            <div class="dropdown-menu" id="dropdown-menu">
-                <a href="https://post.warmthly.org" class="dropdown-item">Post</a>
-                <a href="https://mint.warmthly.org" class="dropdown-item" aria-label="View our live transaction mint">Mint</a>
-            </div>
-        </div>
+        <warmthly-stoplight app="main"></warmthly-stoplight>
     </div>
   </header>
   
+  <main id="main-content" role="main" aria-label="Main content">
   <div class="container">
     <h1 class="logo">Rehumanize Our World.</h1>
     <p class="subtitle">Warmthly is a global movement to make empathy a measurable part of our systems.</p>
@@ -637,48 +619,6 @@
       console.log('✅ Yoco style monitoring stopped');
     }, 30000);
     
-    // --- NATIVE FONT LOADING ---
-    (function() {
-      // Immediate fallback - show content right away if script runs
-      setTimeout(() => {
-        document.body.classList.remove('fonts-loading');
-        document.body.classList.add('fonts-loaded');
-      }, 0);
-      
-      try {
-        if (document.fonts && document.fonts.ready) {
-          document.fonts.ready.then(() => {
-            document.body.classList.remove('fonts-loading');
-            document.body.classList.add('fonts-loaded');
-          }).catch(() => {
-            // If font loading fails, still show content after timeout
-            setTimeout(() => {
-              document.body.classList.remove('fonts-loading');
-              document.body.classList.add('fonts-loaded');
-            }, 100);
-          });
-          
-          // Fallback timeout - ensure content is always shown (increased for font preloading)
-          setTimeout(() => {
-            document.body.classList.remove('fonts-loading');
-            document.body.classList.add('fonts-loaded');
-          }, 3000);
-        } else {
-          // Fallback for older browsers
-          setTimeout(() => {
-            document.body.classList.remove('fonts-loading');
-            document.body.classList.add('fonts-loaded');
-          }, 100);
-        }
-      } catch(e) {
-        // If anything fails, ensure content is visible
-        setTimeout(() => {
-          document.body.classList.remove('fonts-loading');
-          document.body.classList.add('fonts-loaded');
-        }, 100);
-      }
-    })();
-    // --- END FONT LOADING ---
     
     // --- PAGE PREFETCHING ---
     // Prefetch likely next pages in the background to prevent black flashes
@@ -1539,44 +1479,13 @@
       videoPlayButton.addEventListener('click', loadVideo);
     }
 
-    // Stoplight menu functionality
-    (function() {
-      const stoplight = document.getElementById('stoplight');
-      const dropdownMenu = document.getElementById('dropdown-menu');
-      
-      if (!stoplight || !dropdownMenu) {
-        console.error('Stoplight elements not found');
-        return;
+    // Update brand logo URL from config
+    import('/lego/config/warmthly-config.js').then(module => {
+      const brandLogo = document.getElementById('main-brand-logo');
+      if (brandLogo) {
+        brandLogo.href = module.WARMTHLY_CONFIG.urls.main;
       }
-      
-      let isMenuOpen = false;
-      function toggleMenu() { 
-        isMenuOpen = !isMenuOpen; 
-        stoplight.classList.toggle('active', isMenuOpen); 
-        dropdownMenu.classList.toggle('active', isMenuOpen); 
-      }
-      
-      stoplight.addEventListener('click', (e) => { 
-        e.stopPropagation(); 
-        toggleMenu(); 
-      });
-      
-      document.addEventListener('click', (e) => { 
-        if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) { 
-          toggleMenu(); 
-        } 
-      });
-      
-      document.addEventListener('keydown', (e) => { 
-        if (e.key === 'Escape' && isMenuOpen) { 
-          toggleMenu(); 
-        } 
-      });
-      
-      dropdownMenu.addEventListener('click', (e) => { 
-        e.stopPropagation(); 
-      });
-    })();
+    });
     
     // Cookie Popup - First-time visitor only
     const cookieButton = document.getElementById('cookieButton');
@@ -1630,6 +1539,11 @@
       });
     }
   </script>
+  
+  </main>
+  
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
   
   <!-- Yoco SDK - Client-side payment integration -->
   <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
