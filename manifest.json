@@ -1,0 +1,28 @@
+{
+  "name": "Warmthly",
+  "short_name": "Warmthly",
+  "description": "A global movement to make empathy a measurable part of our systems.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff6f1",
+  "theme_color": "#FF8C42",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/global/favicon/candle-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/global/favicon/candle-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/global/favicon/candle-apple.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
+
