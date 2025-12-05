@@ -68,7 +68,8 @@ body {
 
 /* Smooth fade-in animation - only when CSS is loaded */
 body.css-loaded {
-  animation: fadeInFromBg 0.8s ease-out;
+  animation: fadeInFromBg 0.8s ease-out !important;
+  opacity: 1 !important; /* Override inline style during animation */
 }
 
 @keyframes fadeInFromBg {
