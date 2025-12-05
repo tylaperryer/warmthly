@@ -563,10 +563,399 @@
   }
 }
 
+/* Vote Page Styles */
+.vote-section {
+  margin: 3rem 0;
+}
+
+.vote-note {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.error-message {
+  display: none;
+  padding: 1rem;
+  background: rgba(216, 0, 12, 0.1);
+  border: 1px solid var(--error-color);
+  border-radius: 12px;
+  color: var(--error-color);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.error-message.visible {
+  display: block;
+}
+
+/* Parliamentary Layout */
+.parliamentary-chamber {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+  backdrop-filter: blur(10px);
+  border-radius: 28px;
+  border: 1px solid rgba(255,140,66,0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  min-height: 600px;
+}
+
+.chamber-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.chamber-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--warmthly-orange);
+  margin-bottom: 0.5rem;
+}
+
+.chamber-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.parliamentary-seats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.parliamentary-seats::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(255,140,66,0.3), transparent);
+  transform: translateX(-50%);
+}
+
+.seats-section {
+  position: relative;
+}
+
+.seats-section.yes-section {
+  text-align: right;
+}
+
+.seats-section.no-section {
+  text-align: left;
+}
+
+.section-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.yes-section .section-label {
+  justify-content: flex-end;
+  color: var(--red-dot);
+}
+
+.no-section .section-label {
+  justify-content: flex-start;
+  color: var(--green-dot);
+}
+
+.section-label-icon {
+  font-size: 1.5rem;
+}
+
+.seats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.2);
+  border-radius: 16px;
+  min-height: 300px;
+  align-items: start;
+}
+
+.yes-section .seats-grid {
+  justify-items: end;
+}
+
+.no-section .seats-grid {
+  justify-items: start;
+}
+
+.seat {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  cursor: default;
+  animation: seatAppear 0.5s ease-out backwards;
+}
+
+@keyframes seatAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.seat.yes-seat {
+  background: linear-gradient(135deg, rgba(216, 0, 12, 0.15), rgba(216, 0, 12, 0.08));
+  border: 2px solid rgba(216, 0, 12, 0.3);
+  color: var(--red-dot);
+}
+
+.seat.no-seat {
+  background: linear-gradient(135deg, rgba(46, 213, 115, 0.15), rgba(46, 213, 115, 0.08));
+  border: 2px solid rgba(46, 213, 115, 0.3);
+  color: var(--green-dot);
+}
+
+.seat:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.vote-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.2);
+  border-radius: 16px;
+  font-family: 'Inter', sans-serif;
+}
+
+.vote-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vote-count-label {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vote-count-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--warmthly-orange);
+}
+
+.vote-threshold {
+  font-size: 0.9rem;
+  opacity: 0.6;
+  text-align: center;
+}
+
+.vote-buttons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.vote-button {
+  padding: 1.25rem 2.5rem;
+  border: none;
+  border-radius: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-width: 200px;
+}
+
+.vote-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.vote-button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.vote-button#yesButton {
+  background: linear-gradient(135deg, var(--red-dot), #ee3542);
+  color: white;
+  box-shadow: 0 4px 16px rgba(216, 0, 12, 0.3);
+}
+
+.vote-button#yesButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(216, 0, 12, 0.4);
+}
+
+.vote-button#yesButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vote-button#noButton {
+  background: linear-gradient(135deg, var(--green-dot), #27ae60);
+  color: white;
+  box-shadow: 0 4px 16px rgba(46, 213, 115, 0.3);
+}
+
+.vote-button#noButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(46, 213, 115, 0.4);
+}
+
+.vote-button#noButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.progress-indicator {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.15);
+  border-radius: 16px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 12px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--red-dot), #ff6b6b);
+  border-radius: 6px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .parliamentary-chamber {
+    padding: 1.5rem;
+  }
+  
+  .parliamentary-seats {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .parliamentary-seats::before {
+    display: none;
+  }
+  
+  .seats-section.yes-section,
+  .seats-section.no-section {
+    text-align: center;
+  }
+  
+  .yes-section .section-label,
+  .no-section .section-label {
+    justify-content: center;
+  }
+  
+  .yes-section .seats-grid,
+  .no-section .seats-grid {
+    justify-items: center;
+  }
+  
+  .seats-grid {
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .seat {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  
+  .vote-buttons {
+    flex-direction: column;
+  }
+  
+  .vote-button {
+    width: 100%;
+  }
+  
+  .vote-stats {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
 /* Accessibility */
 .timeline-card:focus-visible,
 .book-card:focus-visible,
-.chronicle-popup-close:focus-visible {
+.chronicle-popup-close:focus-visible,
+.vote-button:focus-visible {
   outline: 2px solid var(--warmthly-orange);
   outline-offset: 3px;
   border-radius: 4px;
