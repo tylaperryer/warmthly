@@ -1,0 +1,2 @@
+# warmthly
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6d7a1e1207f64d0e827b237d115e3a53)](https://app.codacy.com/gh/tylaperryer/warmthly?utm_source=github.com&utm_medium=referral&utm_content=tylaperryer/warmthly&utm_campaign=Badge_Grade)
