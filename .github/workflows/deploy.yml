@@ -320,7 +320,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: warmthly
           directory: build/main
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: '3'
 
       # Deploy to Cloudflare Pages - Mint Site (mint.warmthly.org)
@@ -331,7 +330,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: warmthly-mint
           directory: build/mint
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: '3'
 
       # Deploy to Cloudflare Pages - Post Site (post.warmthly.org)
@@ -342,7 +340,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: warmthly-post
           directory: build/post
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: '3'
 
       # Deploy to Cloudflare Pages - Admin Site (admin.warmthly.org)
@@ -353,5 +350,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: warmthly-admin
           directory: build/admin
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: '3'
