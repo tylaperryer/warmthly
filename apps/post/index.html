@@ -34,18 +34,13 @@
         <world-map-svg></world-map-svg>
       </div>
       
-      <!-- Timeline Wrapper with Line -->
       <div class="timeline-wrapper">
         <div class="timeline-line" aria-hidden="true"></div>
-        
-        <!-- Timeline Container -->
         <div class="timeline-container" id="timeline-container">
-          <!-- Timeline entries will be added here -->
         </div>
       </div>
     </div>
     
-    <!-- Chronicle Popup -->
     <div class="chronicle-popup" id="chronicle-popup">
       <button class="chronicle-popup-close" id="popup-close" aria-label="Close popup">×</button>
       <div class="chronicle-popup-header" id="popup-date"></div>
@@ -53,11 +48,9 @@
       <div class="chronicle-popup-content" id="popup-content"></div>
     </div>
 
-  <!-- Font Loader Component -->
   <warmthly-font-loader></warmthly-font-loader>
 
   <script type="module">
-    // --- TIMELINE FUNCTIONALITY ---
     import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
     
     const bookEmojis = ['📕', '📗', '📘', '📙'];
@@ -87,7 +80,7 @@
       {
         date: 'November 27, 2025',
         title: 'The Mint Initiative is Launched',
-        description: 'We launch our transparent financial tracking system, making every expense visible to the public.',
+        description: 'We launch our financial tracking system, making every expense visible to the public.',
         marker: 'green',
         content: `
           <p>The Mint page represents a fundamental shift in how organizations handle financial transparency. Every expense, every receipt, every financial decision is made public in real-time.</p>
@@ -182,15 +175,7 @@
       // Create book cards HTML
       const booksHTML = entry.comments ? entry.comments.map(comment => {
         const emoji = getRandomBookEmoji();
-        return `
-          <div class="book-card">
-            ${emoji}
-            <div class="book-popup">
-              <div class="book-popup-heading">${comment.heading}</div>
-              <div class="book-popup-description">${comment.description}</div>
-            </div>
-          </div>
-        `;
+        return `<div class="book-card">${emoji}<div class="book-popup"><div class="book-popup-heading">${comment.heading}</div><div class="book-popup-description">${comment.description}</div></div></div>`;
       }).join('') : '';
       
       entryElement.innerHTML = `
@@ -208,7 +193,6 @@
       const card = entryElement.querySelector('.timeline-card');
       card.addEventListener('click', () => openPopup(entry));
       
-      // Add signature only to the founding card
       if (entry.signature) {
         const sig = document.createElement('img');
         sig.src = '/global/images/signature.png';
@@ -223,9 +207,8 @@
         entryElement.querySelector('.timeline-card').appendChild(sig);
       }
       
-      // Add hover delay functionality to book cards
       const bookCards = entryElement.querySelectorAll('.book-card');
-      const isEven = index % 2 === 1; // nth-child is 1-indexed, so even entries are odd indices
+      const isEven = index % 2 === 1;
       
       bookCards.forEach(bookCard => {
         const bookPopup = bookCard.querySelector('.book-popup');
@@ -253,7 +236,7 @@
               bookPopup.style.transform = 'translateX(-50%) translateY(10px) scale(0.9)';
             }
             bookPopup.style.pointerEvents = 'none';
-          }, 300); // 300ms delay before hiding
+          }, 300);
         };
         
         bookCard.addEventListener('mouseenter', showPopup);
@@ -265,7 +248,6 @@
       timelineContainer.appendChild(entryElement);
     });
     
-    // Popup functionality
     function openPopup(entry) {
       popupDate.textContent = entry.date;
       popupTitle.textContent = entry.title;
@@ -273,8 +255,6 @@
       
       popup.classList.add('active');
       document.body.classList.add('popup-open');
-      
-      // Focus management
       popupClose.focus();
     }
     
@@ -285,7 +265,6 @@
     
     popupClose.addEventListener('click', closePopup);
     
-    // Close popup when clicking outside
     document.addEventListener('click', (e) => {
       if (popup.classList.contains('active') && !popup.contains(e.target) && !e.target.closest('.timeline-card')) {
         closePopup();
@@ -298,13 +277,10 @@
       }
     });
     
-    // Prevent popup from closing when clicking inside it
     popup.addEventListener('click', (e) => {
       e.stopPropagation();
     });
-    // --- END TIMELINE FUNCTIONALITY ---
     
-    // --- World Map SVG Component ---
     class WorldMapSVG extends HTMLElement {
       constructor() {
         super();
@@ -315,7 +291,6 @@
         this.svg = null;
       }
 
-      // Web Component lifecycle
       connectedCallback() {
         this.init();
       }
@@ -329,7 +304,6 @@
         await this.loadSVG();
       }
 
-      // Create container element in shadow DOM
       createContainer() {
         const style = document.createElement('style');
         style.textContent = `
@@ -359,7 +333,6 @@
         this.svgContainer = container;
       }
 
-      // Load SVG
       async loadSVG() {
         try {
           const paths = ['/global/images/worlddots.svg'];
@@ -388,29 +361,24 @@
             throw new Error('SVG element not found in loaded content');
           }
           
-          // Ensure viewBox is set (assuming the original 3129x1736 viewBox)
           if (!this.svg.getAttribute('viewBox')) {
             this.svg.setAttribute('viewBox', '0 0 3129 1736');
           }
           
-          // Set uniform styling for all circles
           this.svg.querySelectorAll('circle').forEach(circle => {
             circle.setAttribute('fill', '#FFB88C');
             circle.setAttribute('opacity', '0.6');
           });
           
         } catch (error) {
-          console.error('Error loading SVG:', error);
           this.svgContainer.innerHTML = '<p style="color: red;">Error loading map.</p>';
         }
       }
 
       destroy() {
-        // Nothing to clean up
       }
     }
 
-    // Register the new component
     customElements.define('world-map-svg', WorldMapSVG);
   </script>
 </body>
