@@ -66,10 +66,17 @@ body {
   -ms-overflow-style: none;
 }
 
-/* Smooth fade-in animation - only when CSS is loaded */
+/* Hide body until CSS loads - prevent FOUC */
+body:not(.css-loaded) {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Smooth fade-in animation when CSS is loaded */
 body.css-loaded {
-  animation: fadeInFromBg 0.8s ease-out !important;
-  opacity: 1 !important; /* Override inline style during animation */
+  visibility: visible !important;
+  opacity: 0 !important;
+  animation: fadeInFromBg 0.8s ease-out forwards !important;
 }
 
 @keyframes fadeInFromBg {
