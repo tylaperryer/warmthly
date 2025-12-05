@@ -1,6 +1,3 @@
-// Simple logging utility that respects NODE_ENV
-// Only logs in development mode to reduce production overhead and information leakage
-
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 const logger = {
@@ -17,7 +14,6 @@ const logger = {
   },
   
   error: (...args) => {
-    // Always log errors, even in production
     console.error(...args);
   },
   
