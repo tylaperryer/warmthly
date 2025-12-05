@@ -66,6 +66,39 @@ body {
   -ms-overflow-style: none;
 }
 
+/* Smooth fade-in animation - only when CSS is loaded */
+body.css-loaded {
+  animation: fadeInFromBg 0.8s ease-out;
+}
+
+@keyframes fadeInFromBg {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth fade-in for main content */
+body.css-loaded main,
+body.css-loaded .container {
+  animation: fadeInContent 1s ease-out 0.3s both;
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 body::-webkit-scrollbar {
   display: none;
 }
