@@ -23,7 +23,14 @@ class WarmthlyHead extends HTMLElement {
       admin: ['common.css', 'admin.css']
     };
     
-    const cssLinks = cssFiles[app]?.map(css => 
+    const appCssFiles = cssFiles[app] || ['common.css'];
+    
+    // Preload CSS files for faster loading
+    const cssPreloadLinks = appCssFiles.map(css => 
+      `  <link rel="preload" href="${stylesPath}/${css}" as="style">`
+    ).join('\n');
+    
+    const cssLinks = appCssFiles.map(css => 
       `  <link rel="stylesheet" href="${stylesPath}/${css}">`
     ).join('\n') || '';
     
@@ -46,6 +53,10 @@ class WarmthlyHead extends HTMLElement {
     const temp = document.createElement('div');
     temp.innerHTML = `
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.yoco.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdn.quilljs.com; font-src 'self' data:; img-src 'self' data: https: blob:; connect-src 'self' https://api.airtable.com https://payments.yoco.com https://api.exchangerate-api.com https://www.googleapis.com https://*.firebaseio.com https://*.firestore.googleapis.com; frame-src 'self' https://js.yoco.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content;" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="Referrer-Policy" content="no-referrer" />
   <meta name="theme-color" content="#fff6f1" />
   <meta name="color-scheme" content="light" />
   <meta name="viewport" content="width=device-width, initial-scale=${viewport}, maximum-scale=5.0, user-scalable=yes" />
@@ -82,7 +93,9 @@ ${preconnectLinks ? `  ${preconnectLinks}\n` : ''}  <link rel="icon" type="image
   <link rel="manifest" href="/manifest.json">
   <link rel="preload" href="${WARMTHLY_CONFIG.fonts.inter}" as="font" type="font/ttf" crossorigin="anonymous">
   <link rel="preload" href="${WARMTHLY_CONFIG.fonts.cormorant}" as="font" type="font/ttf" crossorigin="anonymous">
+${cssPreloadLinks}
 ${cssLinks}
+  <script src="/lego/utils/tracker-blocker.js"></script>
   <script type="application/ld+json">
 ${JSON.stringify(structuredData, null, 2)}
   </script>
@@ -102,7 +115,82 @@ ${JSON.stringify(structuredData, null, 2)}
       }
     }
     
+    // Wait for CSS to load, then show the body
+    this.waitForCSSLoad(appCssFiles, stylesPath).then(() => {
+      document.body.classList.add('css-loaded');
+    });
+    
     this.style.display = 'none';
+  }
+  
+  async waitForCSSLoad(cssFiles, stylesPath) {
+    // Wait a tiny bit for link elements to be added to DOM
+    await new Promise(resolve => setTimeout(resolve, 10));
+    
+    // Find the CSS link elements we just added
+    const requiredFileNames = cssFiles.map(css => css.split('/').pop());
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .filter(link => {
+        const href = link.href || '';
+        return requiredFileNames.some(fileName => href.includes(fileName));
+      });
+    
+    if (links.length === 0) {
+      // Links not found, show anyway after short delay
+      return new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    // Check if all are already loaded
+    const allLoaded = links.every(link => link.sheet);
+    if (allLoaded) {
+      return;
+    }
+    
+    // Wait for all CSS files to load
+    return new Promise((resolve) => {
+      let loadedCount = 0;
+      const totalLinks = links.length;
+      const maxWait = 2000; // Max 2 seconds wait
+      const startTime = Date.now();
+      
+      const checkComplete = () => {
+        if (loadedCount >= totalLinks || (Date.now() - startTime) > maxWait) {
+          resolve();
+        }
+      };
+      
+      links.forEach(link => {
+        if (link.sheet) {
+          loadedCount++;
+          checkComplete();
+        } else {
+          // Use both onload and periodic checking for reliability
+          const handleLoad = () => {
+            loadedCount++;
+            checkComplete();
+          };
+          
+          link.addEventListener('load', handleLoad, { once: true });
+          link.addEventListener('error', handleLoad, { once: true });
+          
+          // Also check periodically in case events don't fire
+          const checkInterval = setInterval(() => {
+            if (link.sheet) {
+              clearInterval(checkInterval);
+              if (loadedCount < totalLinks) {
+                loadedCount++;
+                checkComplete();
+              }
+            } else if ((Date.now() - startTime) > maxWait) {
+              clearInterval(checkInterval);
+              checkComplete();
+            }
+          }, 20);
+        }
+      });
+      
+      checkComplete();
+    });
   }
   
   escapeHtml(text) {
