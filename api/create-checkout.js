@@ -1,6 +1,8 @@
 import { withRateLimit, apiRateLimitOptions } from './rate-limit.js';
 import logger from './logger.js';
 
+const API_TIMEOUT = 15000;
+
 async function createCheckoutHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -9,22 +11,18 @@ async function createCheckoutHandler(req, res) {
   try {
     const { amount, currency = 'ZAR', customerReference, customerDescription } = req.body;
 
-    // Validate amount
     if (!amount || amount < 100) {
       return res.status(400).json({ error: 'Invalid amount. Minimum donation is R1 (100 cents).' });
     }
 
-    // Get secret key from environment variable
     const secretKey = process.env.YOCO_SECRET_KEY;
     if (!secretKey) {
       logger.error('[create-checkout] Yoco secret key not configured');
       return res.status(500).json({ error: 'Yoco secret key not configured' });
     }
 
-    // Create checkout with Yoco API
-    // According to Yoco docs, Checkout API only requires amount and currency
     const requestBody = {
-      amount: Math.round(amount), // Yoco expects amount in cents (integer)
+      amount: Math.round(amount),
       currency: currency.toUpperCase(),
     };
     
@@ -33,14 +31,31 @@ async function createCheckoutHandler(req, res) {
       currency: requestBody.currency
     });
     
-    const response = await fetch('https://payments.yoco.com/api/checkouts', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${secretKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+
+    let response;
+    try {
+      response = await fetch('https://payments.yoco.com/api/checkouts', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${secretKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        logger.error('[create-checkout] Request timeout');
+        return res.status(504).json({ 
+          error: 'Request to payment service timed out. Please try again.'
+        });
+      }
+      throw fetchError;
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -67,7 +82,6 @@ async function createCheckoutHandler(req, res) {
     
     logger.log('[create-checkout] Checkout created successfully:', data.id);
     
-    // Return the redirect URL to the frontend
     return res.status(200).json({
       redirectUrl: data.redirectUrl,
       checkoutId: data.id,

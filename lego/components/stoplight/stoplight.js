@@ -1,56 +1,57 @@
-/**
- * Stoplight Menu Component
- * Reusable stoplight navigation menu functionality
- * Usage: Call initStoplight(containerId, menuId) after DOM is loaded
- */
-
 export function initStoplight(stoplightId = 'stoplight', menuId = 'dropdown-menu') {
   const stoplight = document.getElementById(stoplightId);
   const dropdownMenu = document.getElementById(menuId);
   
   if (!stoplight || !dropdownMenu) {
-    console.warn(`Stoplight component: Elements with IDs "${stoplightId}" or "${menuId}" not found`);
     return;
   }
   
   let isMenuOpen = false;
+  
+  let focusTrapCleanup = null;
   
   function toggleMenu() {
     isMenuOpen = !isMenuOpen;
     stoplight.classList.toggle('active', isMenuOpen);
     dropdownMenu.classList.toggle('active', isMenuOpen);
     stoplight.setAttribute('aria-expanded', isMenuOpen ? 'true' : 'false');
+    stoplight.setAttribute('aria-pressed', isMenuOpen ? 'true' : 'false');
     
-    // Update menu items tabindex
     const menuItems = dropdownMenu.querySelectorAll('a[role="menuitem"], button[role="menuitem"]');
     menuItems.forEach(item => {
       item.setAttribute('tabindex', isMenuOpen ? '0' : '-1');
     });
     
-    // Focus management for accessibility
     if (isMenuOpen) {
-      // Focus first menu item when opening
       const firstItem = dropdownMenu.querySelector('a[role="menuitem"], button[role="menuitem"]');
       if (firstItem) {
         setTimeout(() => firstItem.focus(), 100);
       }
+      
+      if (typeof window.trapFocus === 'function') {
+        focusTrapCleanup = window.trapFocus(dropdownMenu);
+      }
+    } else {
+      if (focusTrapCleanup) {
+        focusTrapCleanup();
+        focusTrapCleanup = null;
+      }
     }
   }
   
-  // Ensure stoplight is a button (for accessibility)
   if (stoplight.tagName !== 'BUTTON') {
     stoplight.setAttribute('role', 'button');
   }
   stoplight.setAttribute('tabindex', '0');
   stoplight.setAttribute('aria-label', 'Open navigation menu');
   stoplight.setAttribute('aria-expanded', 'false');
+  stoplight.setAttribute('aria-pressed', 'false');
   stoplight.setAttribute('aria-haspopup', 'true');
   stoplight.setAttribute('aria-controls', menuId);
+  stoplight.setAttribute('type', 'button');
   
-  // Update menu role
   dropdownMenu.setAttribute('role', 'menu');
   
-  // Update menu items
   const menuItems = dropdownMenu.querySelectorAll('a, button');
   menuItems.forEach((item) => {
     if (item.tagName === 'A' && !item.hasAttribute('role')) {
@@ -79,7 +80,6 @@ export function initStoplight(stoplightId = 'stoplight', menuId = 'dropdown-menu
     }
   });
   
-  // Keyboard navigation within menu
   dropdownMenu.addEventListener('keydown', (e) => {
     const menuItems = Array.from(dropdownMenu.querySelectorAll('a[role="menuitem"], button[role="menuitem"]'));
     const currentIndex = menuItems.indexOf(e.target);
@@ -115,14 +115,12 @@ export function initStoplight(stoplightId = 'stoplight', menuId = 'dropdown-menu
     }
   });
   
-  // Close on outside click
   document.addEventListener('click', (e) => {
     if (!stoplight.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
       toggleMenu();
     }
   });
   
-  // Close on Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isMenuOpen) {
       toggleMenu();
@@ -130,16 +128,13 @@ export function initStoplight(stoplightId = 'stoplight', menuId = 'dropdown-menu
     }
   });
   
-  // Prevent menu clicks from closing menu (let links handle navigation)
   dropdownMenu.addEventListener('click', (e) => {
-    // Only stop propagation for non-link clicks
     if (e.target.tagName !== 'A') {
       e.stopPropagation();
     }
   });
 }
 
-// Auto-initialize if stoplight element exists
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     const stoplight = document.getElementById('stoplight');

@@ -1,18 +1,3 @@
-/**
- * Warmthly Stoplight Menu Web Component
- * Reusable stoplight navigation menu
- * Uses global config for navigation items
- * 
- * Usage (auto-generate from app):
- * <warmthly-stoplight app="main"></warmthly-stoplight>
- * 
- * Usage (custom menu items):
- * <warmthly-stoplight>
- *   <a href="https://www.warmthly.org" class="dropdown-item">Home</a>
- *   <a href="https://mint.warmthly.org" class="dropdown-item">Mint</a>
- * </warmthly-stoplight>
- */
-
 import { WARMTHLY_CONFIG, getNavigation } from '../config/warmthly-config.js';
 
 class WarmthlyStoplight extends HTMLElement {
@@ -22,7 +7,6 @@ class WarmthlyStoplight extends HTMLElement {
     
     let menuItems = customItems;
     
-    // Auto-generate menu from config if app is provided and no custom items
     if (app && !customItems) {
       const navItems = getNavigation(app);
       menuItems = navItems.map((item, index) => {
@@ -33,7 +17,6 @@ class WarmthlyStoplight extends HTMLElement {
       }).join('\n');
     }
     
-    // Generate unique IDs for this instance
     const instanceId = `stoplight-${Math.random().toString(36).substr(2, 9)}`;
     const stoplightId = `stoplight-${instanceId}`;
     const menuId = `dropdown-menu-${instanceId}`;
@@ -59,13 +42,10 @@ class WarmthlyStoplight extends HTMLElement {
       </div>
     `;
     
-    // Initialize stoplight functionality
     try {
       const { initStoplight } = await import('../components/stoplight/stoplight.js');
       initStoplight(stoplightId, menuId);
     } catch (error) {
-      console.error('Failed to initialize stoplight:', error);
-      // Fallback: Make menu always visible if JS fails
       const menu = document.getElementById(menuId);
       if (menu) {
         menu.style.display = 'block';

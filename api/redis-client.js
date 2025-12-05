@@ -1,58 +1,82 @@
-// Shared Redis client utility for serverless functions
-// Reuses connections across invocations for better performance
-
 import { createClient } from 'redis';
 import logger from './logger.js';
 
-// Create a reusable Redis client (will be reused across invocations in serverless)
+const MAX_RECONNECT_RETRIES = 3;
+const MAX_RECONNECT_DELAY = 3000;
+const CONNECTION_TIMEOUT = 5000;
+
 let redisClient = null;
+let connectionPromise = null;
 
 export async function getRedisClient() {
-  // Check if we have an existing open connection
   if (redisClient && redisClient.isOpen) {
     return redisClient;
   }
 
-  // Validate REDIS_URL is configured
+  if (connectionPromise) {
+    return connectionPromise;
+  }
+
   if (!process.env.REDIS_URL) {
     logger.error('[redis-client] REDIS_URL is not configured');
     throw new Error('REDIS_URL is not configured');
   }
 
-  // Create new client
-  redisClient = createClient({
-    url: process.env.REDIS_URL,
-    socket: {
-      reconnectStrategy: (retries) => {
-        if (retries > 3) {
-          logger.error('[redis-client] Redis reconnection failed after 3 attempts');
-          return new Error('Redis reconnection failed');
-        }
-        return Math.min(retries * 100, 3000);
-      }
-    }
-  });
-
-  // Error handling
-  redisClient.on('error', (err) => {
-    logger.error('[redis-client] Redis Client Error:', err);
-  });
-
-  // Connect if not already connected
-  if (!redisClient.isOpen) {
+  connectionPromise = (async () => {
     try {
-      await redisClient.connect();
+      redisClient = createClient({
+        url: process.env.REDIS_URL,
+        socket: {
+          connectTimeout: CONNECTION_TIMEOUT,
+          reconnectStrategy: (retries) => {
+            if (retries > MAX_RECONNECT_RETRIES) {
+              logger.error('[redis-client] Redis reconnection failed after 3 attempts');
+              connectionPromise = null;
+              return new Error('Redis reconnection failed');
+            }
+            return Math.min(retries * 100, MAX_RECONNECT_DELAY);
+          }
+        }
+      });
+
+      redisClient.on('error', (err) => {
+        logger.error('[redis-client] Redis Client Error:', err);
+        if (!redisClient.isOpen) {
+          connectionPromise = null;
+        }
+      });
+
+      redisClient.on('connect', () => {
+        logger.log('[redis-client] Redis connected');
+      });
+
+      redisClient.on('ready', () => {
+        logger.log('[redis-client] Redis ready');
+      });
+
+      if (!redisClient.isOpen) {
+        await Promise.race([
+          redisClient.connect(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Connection timeout')), CONNECTION_TIMEOUT)
+          )
+        ]);
+      }
+
+      connectionPromise = null;
+      return redisClient;
     } catch (connectError) {
+      connectionPromise = null;
+      redisClient = null;
       logger.error('[redis-client] Redis connection failed:', {
         message: connectError.message,
         stack: connectError.stack,
         name: connectError.name
       });
-      redisClient = null;
       throw connectError;
     }
-  }
+  })();
 
-  return redisClient;
+  return connectionPromise;
 }
 

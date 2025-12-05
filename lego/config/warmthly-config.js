@@ -1,12 +1,4 @@
-/**
- * Warmthly Global Configuration
- * Centralized configuration for all URLs, paths, and references
- * 
- * Edit this file to update URLs/paths across the entire site
- */
-
 export const WARMTHLY_CONFIG = {
-  // Domain URLs - Update these if domains change
   urls: {
     main: 'https://www.warmthly.org',
     mint: 'https://mint.warmthly.org',
@@ -14,8 +6,6 @@ export const WARMTHLY_CONFIG = {
     admin: 'https://admin.warmthly.org',
     transparency: 'https://transparency.warmthly.org'
   },
-  
-  // Asset paths - Update these if directory structure changes
   paths: {
     lego: '/lego',
     styles: '/lego/styles',
@@ -23,17 +13,11 @@ export const WARMTHLY_CONFIG = {
     global: '/global',
     fonts: '/fonts'
   },
-  
-  // Font files
   fonts: {
     inter: '/fonts/Inter-VariableFont_opsz,wght.ttf',
     cormorant: '/fonts/CormorantGaramond-VariableFont_wght.ttf'
   },
-  
-  // Favicon (SVG emoji - renders in platform-specific style)
   favicon: '/favicon.svg',
-  
-  // Navigation menu items (used by stoplight component)
   navigation: {
     main: [
       { label: 'Post', url: 'https://post.warmthly.org' },
@@ -56,8 +40,6 @@ export const WARMTHLY_CONFIG = {
       { label: 'Post', url: 'https://post.warmthly.org' }
     ]
   },
-  
-  // App-specific routes (relative paths within each app)
   routes: {
     post: {
       report: '/report/',
@@ -75,17 +57,14 @@ export const WARMTHLY_CONFIG = {
   }
 };
 
-// Helper function to get URL for a specific app
 export function getAppUrl(app) {
   return WARMTHLY_CONFIG.urls[app] || WARMTHLY_CONFIG.urls.main;
 }
 
-// Helper function to get path
 export function getPath(key) {
   return WARMTHLY_CONFIG.paths[key] || '';
 }
 
-// Helper function to get navigation items for an app
 export function getNavigation(app) {
   return WARMTHLY_CONFIG.navigation[app] || WARMTHLY_CONFIG.navigation.main;
 }

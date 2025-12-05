@@ -4,7 +4,6 @@ import { getRedisClient } from './redis-client.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Helper function to get the raw request body from Vercel
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -20,13 +19,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get the raw body for signature verification
     let rawBody;
     try {
       rawBody = await getRawBody(req);
     } catch (bodyError) {
       logger.error('[inbound-email] Error getting raw body:', bodyError.message);
-      // Fallback: try to use req.body if it exists
       if (req.body) {
         rawBody = Buffer.from(JSON.stringify(req.body));
       } else {
@@ -34,15 +31,11 @@ export default async function handler(req, res) {
       }
     }
     
-    // Get the signature headers from the request
     const signature = req.headers['svix-signature'];
     const id = req.headers['svix-id'];
     const timestamp = req.headers['svix-timestamp'];
-
-    // Verify the webhook signature - required in production
     const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
     
-    // Require webhook secret in production
     if (!webhookSecret) {
       logger.error('[inbound-email] RESEND_WEBHOOK_SECRET is required in production');
       return res.status(500).json({ error: { message: 'Webhook verification not configured' } });
@@ -50,7 +43,6 @@ export default async function handler(req, res) {
 
     let event;
     try {
-      // Verify the webhook signature
       event = resend.webhooks.verify({
         body: rawBody,
         headers: {
@@ -71,16 +63,12 @@ export default async function handler(req, res) {
     if (event.type === 'email.received') {
       const emailData = event.data;
       
-      // Validate required fields
       if (!emailData) {
         logger.error('[inbound-email] Email data is missing');
         return res.status(400).json({ error: { message: 'Email data is missing' } });
       }
 
-      // Get Redis client
       const client = await getRedisClient();
-
-      // Create a simple object for the email
       const emailToStore = {
         id: emailData.email_id || `email-${Date.now()}`,
         from: emailData.from || 'Unknown',
@@ -89,8 +77,6 @@ export default async function handler(req, res) {
         receivedAt: emailData.created_at || new Date().toISOString(),
       };
 
-      // Save the email to a list in the database.
-      // We use 'lPush' to add it to the beginning of a list called 'emails'.
       try {
         const emailJson = JSON.stringify(emailToStore);
         await client.lPush('emails', emailJson);
