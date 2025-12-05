@@ -63,12 +63,9 @@ class WorldMapSVG extends HTMLElement {
   // Load SVG
   async loadSVG() {
     try {
-      // Try multiple paths for flexibility
+      // Use the correct path for worlddots.svg
       const paths = [
-        '/global/images/worlddots.svg',
-        '/worlddots.svg',
-        './worlddots.svg',
-        'worlddots.svg'
+        '/global/images/worlddots.svg'
       ];
       let svgText = null;
       
