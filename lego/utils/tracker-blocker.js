@@ -19,6 +19,7 @@
   // List of known tracking domains to block
   const blockedDomains = [
     'cloudflareinsights.com',
+    'static.cloudflareinsights.com',
     'd3na0td23j4fjn.cloudfront.net',
     'google-analytics.com',
     'googletagmanager.com',
@@ -219,6 +220,60 @@
       return originalSendBeacon.call(this, url, data);
     };
   }
+  
+  // Block Cloudflare Insights immediately on page load (runs before DOM is ready)
+  (function blockCloudflareInsightsEarly() {
+    // Remove any existing Cloudflare Insights scripts
+    if (document.querySelector) {
+      document.querySelectorAll('script[src*="cloudflareinsights"], script[src*="static.cloudflareinsights"]').forEach(script => {
+        script.remove();
+        console.warn('[Tracker Blocker] Removed Cloudflare Insights script');
+      });
+    }
+    
+    // Block any Cloudflare Insights scripts that try to load
+    if (document.addEventListener) {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('script[src*="cloudflareinsights"], script[src*="static.cloudflareinsights"]').forEach(script => {
+          script.remove();
+          console.warn('[Tracker Blocker] Removed Cloudflare Insights script on DOMContentLoaded');
+        });
+      });
+    }
+  })();
+  
+  // Enhanced observer to catch Cloudflare Insights specifically
+  const cloudflareObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      mutation.addedNodes.forEach(function(node) {
+        if (node.nodeType === 1) {
+          // Check for Cloudflare Insights in any form
+          if (node.tagName === 'SCRIPT') {
+            const src = node.src || node.getAttribute('src') || '';
+            const innerHTML = node.innerHTML || '';
+            if (src.includes('cloudflareinsights') || innerHTML.includes('cloudflareinsights') || 
+                src.includes('static.cloudflareinsights') || innerHTML.includes('static.cloudflareinsights')) {
+              console.warn('[Tracker Blocker] Blocked Cloudflare Insights:', src || 'inline script');
+              node.remove();
+            }
+          }
+          // Also check iframe
+          if (node.tagName === 'IFRAME') {
+            const src = node.src || node.getAttribute('src') || '';
+            if (src.includes('cloudflareinsights') || src.includes('static.cloudflareinsights')) {
+              console.warn('[Tracker Blocker] Blocked Cloudflare Insights iframe:', src);
+              node.remove();
+            }
+          }
+        }
+      });
+    });
+  });
+  
+  cloudflareObserver.observe(document.documentElement || document.body || document, {
+    childList: true,
+    subtree: true
+  });
   
   console.log('[Tracker Blocker] Active - All tracking blocked');
 })();
