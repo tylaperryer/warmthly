@@ -95,6 +95,10 @@ ${preconnectLinks ? `  ${preconnectLinks}\n` : ''}  <link rel="icon" type="image
   <link rel="preload" href="${WARMTHLY_CONFIG.fonts.cormorant}" as="font" type="font/ttf" crossorigin="anonymous">
 ${cssPreloadLinks}
 ${cssLinks}
+  <script>
+    // Inline early blocker to catch Cloudflare Insights before it loads
+    (function(){'use strict';const b=['cloudflareinsights.com','static.cloudflareinsights.com'];function s(u){if(!u)return false;return b.some(d=>u.includes(d));}const of=window.fetch;window.fetch=function(...a){const u=typeof a[0]==='string'?a[0]:a[0].url;if(s(u)){return Promise.reject(new Error('Tracker blocked'));}return of.apply(this,a);};const ox=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u,...r){if(s(u)){throw new Error('Tracker blocked');}return ox.apply(this,[m,u,...r]);};const oc=document.createElement;document.createElement=function(t,...r){const e=oc.call(this,t,...r);if(t.toLowerCase()==='script'){const sa=e.setAttribute;e.setAttribute=function(n,v){if(n==='src'&&s(v)){return;}return sa.call(this,n,v);};}return e;};const mo=new MutationObserver(function(m){m.forEach(function(mu){mu.addedNodes.forEach(function(n){if(n.nodeType===1&&n.tagName==='SCRIPT'){const src=n.src||n.getAttribute('src')||'';if(s(src)||(n.innerHTML||'').includes('cloudflareinsights')){n.remove();}}}});});mo.observe(document.documentElement||document.body||document,{childList:true,subtree:true});if(document.querySelector){document.querySelectorAll('script[src*="cloudflareinsights"]').forEach(s=>s.remove());}})();
+  </script>
   <script src="/lego/utils/tracker-blocker.js"></script>
   <script type="application/ld+json">
 ${JSON.stringify(structuredData, null, 2)}
