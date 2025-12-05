@@ -119,9 +119,32 @@ ${JSON.stringify(structuredData, null, 2)}
       }
     }
     
-    // Wait for CSS to load, then show the body
+    // Show body with fade-in animation
+    const showBody = () => {
+      if (document.body && !document.body.classList.contains('css-loaded')) {
+        document.body.classList.add('css-loaded');
+      }
+    };
+    
+    // Show body immediately - CSS is loading, animation will handle the fade-in
+    // Use requestAnimationFrame to ensure DOM is ready
+    if (document.body) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(showBody);
+      });
+    } else {
+      // If body not ready, wait a bit
+      setTimeout(showBody, 10);
+    }
+    
+    // Fallback: always show after 100ms max
+    setTimeout(showBody, 100);
+    
+    // Also wait for CSS to load for better experience (non-blocking)
     this.waitForCSSLoad(appCssFiles, stylesPath).then(() => {
-      document.body.classList.add('css-loaded');
+      showBody();
+    }).catch(() => {
+      // Already shown from fallback above
     });
     
     this.style.display = 'none';
