@@ -20,9 +20,6 @@
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
   <style>
-    /* Critical CSS - Must be inline for performance */
-    /* --- ANTI-FLASH AND PERFORMANCE FIXES --- */
-    /* 1. Set base background color immediately to prevent white flash */
     :root { 
       color-scheme: light;
       --warmthly-orange: #FF8C42;
@@ -35,28 +32,21 @@
       background-color: var(--warmthly-background);
       min-height: 100%;
     }
-    /* 2. Hide body content until fonts are loaded to prevent FOUC/FOUT */
     body {
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.3s ease-in-out;
     }
-    /* 3. Fade in smoothly once fonts are ready */
     body.fonts-loaded {
       opacity: 1;
       visibility: visible;
     }
-    /* --- END ANTI-FLASH FIXES --- */
   </style>
 </head>
 <body class="fonts-loading">
-  <!-- Header -->
   <warmthly-header app="admin"></warmthly-header>
-  
-  <!-- Navigation -->
   <warmthly-stoplight app="admin"></warmthly-stoplight>
 
-  <!-- Login Section (Visible by default) -->
   <div id="login-section" class="login-section">
     <div class="login-container">
       <h1>Admin Access</h1>
@@ -79,7 +69,6 @@
     </div>
   </div>
 
-  <!-- Admin Content (Hidden by default) -->
   <div id="admin-content" class="admin-content">
   <div class="container">
       <a href="/" class="back-link" id="back-link">← Back to Admin Dashboard</a>
@@ -137,7 +126,6 @@
         <div id="status" role="status" aria-live="polite" aria-atomic="true"></div>
     </form>
 
-      <!-- Received Emails Section -->
       <div class="received-emails-section">
         <div class="section-header">
           <h2>Emails</h2>
@@ -152,28 +140,22 @@
     </div>
   </div>
 
-  <!-- Include the Quill library JS -->
   <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-
-  <!-- Font Loader Component -->
   <warmthly-font-loader></warmthly-font-loader>
 
   <script type="module">
-    // Update back link URL from config
     import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
     const backLink = document.getElementById('back-link');
     if (backLink) {
       backLink.href = WARMTHLY_CONFIG.urls.admin;
     }
 
-    // Authentication
     const loginForm = document.getElementById('login-form');
     const passwordInput = document.getElementById('password-input');
     const loginSection = document.getElementById('login-section');
     const adminContent = document.getElementById('admin-content');
     const errorMessage = document.getElementById('error-message');
 
-    // Check if already authenticated (session storage)
     const isAuthenticated = sessionStorage.getItem('warmthly-admin-authenticated') === 'true';
     if (isAuthenticated) {
       loginSection.style.display = 'none';
@@ -204,15 +186,12 @@
             throw new Error('No token received from server');
           }
           
-          // Store authentication token (JWT) instead of password
           sessionStorage.setItem('warmthly-admin-authenticated', 'true');
           sessionStorage.setItem('warmthly-admin-token', token);
-          
           loginSection.style.display = 'none';
           adminContent.classList.add('active');
           passwordInput.value = '';
           
-          // Load emails after authentication
           if (adminContent.classList.contains('active')) {
             loadReceivedEmails();
           }
@@ -230,12 +209,10 @@
       }
     });
 
-    // Initialize Quill editor (only after authentication)
     let quill = null;
     if (isAuthenticated) {
       initializeEditor();
     } else {
-      // Initialize editor when authenticated.
       const observer = new MutationObserver((mutations) => {
         if (adminContent.classList.contains('active') && !quill) {
           initializeEditor();
@@ -260,7 +237,6 @@
       });
       }
 
-    // Email form handling
     const emailForm = document.getElementById('email-form');
     const statusEl = document.getElementById('status');
     const submitButton = document.getElementById('submit-button');
@@ -268,11 +244,9 @@
     emailForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      // Clear previous status
       statusEl.className = '';
       statusEl.textContent = '';
       
-      // Validate form
       const from = document.getElementById('from').value.trim();
       const to = document.getElementById('to').value.trim();
       const subject = document.getElementById('subject').value.trim();
@@ -280,7 +254,6 @@
 
       let isValid = true;
 
-      // Validate from email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       const fromError = document.getElementById('from-error');
       if (!from || !emailRegex.test(from)) {
@@ -292,7 +265,6 @@
         fromError.style.display = 'none';
       }
 
-      // Validate to email
       const toError = document.getElementById('to-error');
       if (!to || !emailRegex.test(to)) {
         toError.textContent = 'Please enter a valid email address.';
@@ -303,7 +275,6 @@
         toError.style.display = 'none';
       }
 
-      // Validate subject
       const subjectError = document.getElementById('subject-error');
       if (!subject) {
         subjectError.textContent = 'Please enter an email subject.';
@@ -314,7 +285,6 @@
         subjectError.style.display = 'none';
       }
 
-      // Validate body
       const emptyPatterns = [
         /^<p>\s*<\/p>$/i,
         /^<p><br\s*\/?><\/p>$/i,
@@ -332,7 +302,6 @@
         return;
       }
 
-      // Disable submit button
       submitButton.disabled = true;
       statusEl.className = 'sending';
       statusEl.textContent = 'Sending email...';
@@ -361,12 +330,10 @@
             quill.setText('');
           }
           
-          // Refresh received emails list after successful send
           setTimeout(() => {
             loadReceivedEmails();
           }, 500);
           
-          // Clear form after 3 seconds
           setTimeout(() => {
             statusEl.className = '';
             statusEl.textContent = '';
@@ -383,7 +350,6 @@
       }
     });
 
-    // Clear error messages on input
     document.getElementById('from').addEventListener('input', function() {
       document.getElementById('from-error').style.display = 'none';
     });
@@ -394,16 +360,13 @@
       document.getElementById('subject-error').style.display = 'none';
     });
 
-    // Received Emails Functionality
     const emailsContainer = document.getElementById('emails-container');
     const refreshButton = document.getElementById('refresh-emails-button');
 
-    // Helper function to get stored JWT token
     function getStoredToken() {
       return sessionStorage.getItem('warmthly-admin-token');
     }
 
-    // Load emails on page load if authenticated
     if (isAuthenticated) {
       const token = getStoredToken();
       if (token) {
@@ -413,7 +376,6 @@
       }
     }
 
-    // Also load emails when admin content becomes active (after login)
     const adminObserver = new MutationObserver((mutations) => {
       if (adminContent.classList.contains('active')) {
         const token = getStoredToken();
@@ -481,9 +443,7 @@
 
         const emails = await response.json();
 
-        // Handle case where emails might not be an array
         if (!Array.isArray(emails)) {
-          console.error('Unexpected response format:', emails);
           emailsContainer.innerHTML = '<div class="empty-state error">Unexpected response from server. Please try again.</div>';
           return;
         }
@@ -511,8 +471,6 @@
           `).join('');
         }
       } catch (error) {
-        console.error('Error loading emails:', error);
-        // Show more detailed error message
         const errorMsg = error.message || 'Unknown error occurred';
         emailsContainer.innerHTML = `<div class="empty-state error">Error loading emails: ${escapeHtml(errorMsg)}. Please check your connection and try again.</div>`;
       } finally {
