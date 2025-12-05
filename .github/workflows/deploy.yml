@@ -1,7 +1,8 @@
-# Deploy All Sites to GitHub Pages with Minification
-# GitHub Pages hosts static sites, Cloudflare handles API/server functions
+# Deploy All Sites to Cloudflare Pages with Minification
+# GitHub Actions builds and minifies, Cloudflare Pages hosts with server-side functions
+# This setup uses GitHub's unlimited build time/resources while Cloudflare only hosts
 
-name: Deploy to GitHub Pages
+name: Deploy to Cloudflare Pages
 
 on:
   push:
@@ -11,7 +12,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
   id-token: write
 
 jobs:
@@ -84,18 +84,12 @@ jobs:
           if [ -d "build/$APP_NAME/lego/styles" ]; then
             set +e
             find build/$APP_NAME/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
-              # Check if file has @import statements
+              # Skip minification for files with @import to preserve import statements
+              # Minifying @import can break relative paths and cause MIME type errors
               if grep -q "^@import" "$file" 2>/dev/null; then
-                # For files with @import, use lower optimization to preserve imports
-                # -O1 is safer for files with imports, or we can skip minification for import files
-                # Actually, let's just minify without inlining imports
-                cleancss -O1 --skip-import-from "all" -o "$file" "$file" 2>&1 || {
-                  # If that fails, try basic minification
-                  cleancss -O1 -o "$file" "$file" 2>&1 || {
-                    # Last resort: just compress whitespace
-                    sed -i 's/  */ /g; s/ *{/{/g; s/{ */{/g; s/ *}/}/g; s/ *: */:/g; s/ *; */;/g; s/ *\/\*[^*]*\*\///g' "$file" 2>/dev/null || echo "Warning: Failed to minify $file"
-                  }
-                }
+                echo "Skipping minification for $file (contains @import statements)"
+                # Just remove comments and compress whitespace manually for @import files
+                sed -i 's|/\*[^*]*\*\/||g; s/  */ /g; s/^ *//g; s/ *$//g; /^$/d' "$file" 2>/dev/null || echo "Warning: Failed to clean $file"
               else
                 # For files without imports, use full optimization
                 cleancss -O2 -o "$file" "$file" 2>&1 || echo "Warning: Failed to minify $file"
@@ -156,12 +150,13 @@ jobs:
           retention-days: 1
 
   # This job runs after all build jobs are complete
+  # Deploys pre-built static files to Cloudflare Pages (no build time used)
   deploy:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      pages: write
+      contents: read
       id-token: write
     steps:
       - name: Download artifact - main
@@ -317,18 +312,46 @@ jobs:
           
           echo "=== Verification complete - proceeding with deployment ==="
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      # Deploy to Cloudflare Pages - Main Site (www.warmthly.org)
+      - name: Deploy main to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          static_site_generator: none
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: warmthly
+          directory: build/main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '3'
 
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v3
+      # Deploy to Cloudflare Pages - Mint Site (mint.warmthly.org)
+      - name: Deploy mint to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          path: build
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: warmthly-mint
+          directory: build/mint
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '3'
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # Deploy to Cloudflare Pages - Post Site (post.warmthly.org)
+      - name: Deploy post to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: warmthly-post
+          directory: build/post
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '3'
+
+      # Deploy to Cloudflare Pages - Admin Site (admin.warmthly.org)
+      - name: Deploy admin to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: warmthly-admin
+          directory: build/admin
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '3'
