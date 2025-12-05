@@ -3,9 +3,9 @@
 /* ===== HEADER & NAVIGATION ===== */
 .header {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  right: 20px;
+  top: var(--spacing-6);
+  left: var(--spacing-6);
+  right: var(--spacing-6);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -20,17 +20,19 @@
 .header-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--spacing-5);
   pointer-events: auto;
 }
 
 .brand-logo {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-weight: 700;
-  font-size: 2rem;
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-tight);
   color: var(--warmthly-orange);
   user-select: none;
   text-decoration: none;
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .nav-link {
@@ -49,14 +51,16 @@
 
 .top-left-heading {
   position: fixed;
-  top: 20px;
-  left: 20px;
+  top: var(--spacing-6);
+  left: var(--spacing-6);
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-weight: 700;
-  font-size: 2rem;
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-tight);
   color: var(--warmthly-orange);
   user-select: none;
   z-index: var(--z-header);
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .top-left-heading .warmthly-link {
@@ -93,9 +97,9 @@
 .stoplight {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--spacing-1);
   cursor: pointer;
-  padding: 8px;
+  padding: var(--spacing-2);
   position: relative;
   /* Default: No background, border, or glass effect - just dots */
   background: transparent;
@@ -211,8 +215,8 @@
   backdrop-filter: blur(var(--blur-radius)) saturate(1.2);
   -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2);
   border-radius: var(--radius-lg);
-  padding: 8px;
-  margin-top: 12px;
+  padding: var(--spacing-2);
+  margin-top: var(--spacing-3);
   min-width: 200px;
   box-shadow: 0 8px 32px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05);
   border: 1px solid var(--border-color);
@@ -245,13 +249,14 @@
 
 .dropdown-item {
   display: block;
-  padding: 12px 16px;
-  margin: 2px 0;
+  padding: var(--spacing-3) var(--spacing-4);
+  margin: var(--spacing-1) 0;
   color: var(--text-color);
   text-decoration: none;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
   transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1);
   border-radius: var(--radius-sm);
   position: relative;
@@ -282,18 +287,20 @@
 .donate-button {
   background: var(--warmthly-orange);
   color: white;
-  padding: 1rem 2.5rem;
+  padding: var(--spacing-4) var(--spacing-10);
   border: none;
   border-radius: var(--radius-full);
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
+  line-height: var(--line-height-base);
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
   display: inline-block;
-  box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3);
-  margin-top: 1rem;
+  box-shadow: 0 var(--spacing-1) var(--spacing-4) rgba(255, 140, 66, 0.3);
+  margin-top: var(--spacing-4);
   font-family: 'Inter', sans-serif;
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .donate-button:hover {
@@ -311,18 +318,20 @@
 .cancel-button {
   background: white;
   color: var(--text-color);
-  padding: 1rem 2.5rem;
+  padding: var(--spacing-4) var(--spacing-10);
   border: 2px solid #ccc;
   border-radius: var(--radius-full);
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
+  line-height: var(--line-height-base);
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
   display: inline-block;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  margin-top: 1rem;
+  box-shadow: 0 var(--spacing-1) var(--spacing-4) rgba(0, 0, 0, 0.1);
+  margin-top: var(--spacing-4);
   font-family: 'Inter', sans-serif;
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .cancel-button:hover {
@@ -339,17 +348,20 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: transparent;
+  background: rgba(255, 246, 241, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: none;
   justify-content: center;
   align-items: center;
   z-index: var(--z-modal);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  opacity: 0;
+  transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
 }
 
 .donation-modal.active {
   display: flex;
+  opacity: 1;
 }
 
 body.modal-open {
@@ -367,13 +379,13 @@ body.yoco-active {
 
 .donation-modal-content {
   background: var(--warmthly-background);
-  padding: 2.5rem;
+  padding: var(--spacing-10);
   border-radius: var(--radius-xl);
   max-width: 600px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 var(--spacing-2) var(--spacing-8) rgba(0, 0, 0, 0.2);
   position: relative;
   animation: modalFadeIn 0.3s ease-out;
 }
@@ -403,7 +415,7 @@ body.yoco-active {
 @keyframes modalFadeIn {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(-20px);
+    transform: scale(0.96) translateY(-12px);
   }
   to {
     opacity: 1;
@@ -413,34 +425,37 @@ body.yoco-active {
 
 .donation-modal-content h2 {
   font-family: 'Inter', sans-serif;
-  font-size: 2rem;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
+  line-height: var(--line-height-tight);
   color: var(--warmthly-orange);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-2);
   text-align: center;
 }
 
 .donation-modal-content > p {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-6);
   color: var(--text-color);
   opacity: 0.8;
+  line-height: var(--line-height-base);
 }
 
 .donation-amounts {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin: 1.5rem 0;
+  gap: var(--spacing-4);
+  margin: var(--spacing-6) 0;
 }
 
 .amount-btn {
-  padding: 1rem;
+  padding: var(--spacing-4);
   border: 2px solid var(--warmthly-orange);
   background: white;
   border-radius: var(--radius-sm);
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
+  line-height: var(--line-height-base);
   color: var(--warmthly-orange);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -452,18 +467,20 @@ body.yoco-active {
   transform: translateY(-2px);
 }
 
-.amount-btn.selected {
+.amount-btn.selected,
+.amount-btn[aria-pressed="true"] {
   background: var(--warmthly-orange);
   color: white;
 }
 
 #customAmount {
   width: 100%;
-  padding: 1rem;
+  padding: var(--spacing-4);
   border: 2px solid var(--warmthly-orange);
   border-radius: var(--radius-sm);
-  font-size: 1.1rem;
-  margin: 1rem 0;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-base);
+  margin: var(--spacing-4) 0;
   font-family: 'Inter', sans-serif;
   box-sizing: border-box;
 }
@@ -491,8 +508,8 @@ body.yoco-active {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
-  gap: 0.5rem;
+  margin-bottom: var(--spacing-4);
+  gap: var(--spacing-2);
 }
 
 /* ===== CUSTOM CURRENCY DROPDOWN ===== */
@@ -505,13 +522,14 @@ body.yoco-active {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 1rem;
+  padding: var(--spacing-3) var(--spacing-4);
   background: white;
   border: 2px solid #ddd;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
   color: var(--text-color);
   min-width: 120px;
   transition: all 0.2s ease;
@@ -527,8 +545,8 @@ body.yoco-active {
 }
 
 .custom-currency-select .currency-arrow {
-  margin-left: 0.5rem;
-  font-size: 0.7rem;
+  margin-left: var(--spacing-2);
+  font-size: var(--font-size-xs);
   transition: transform 0.2s ease;
   color: var(--text-color);
   opacity: 0.6;
@@ -540,14 +558,14 @@ body.yoco-active {
 
 .custom-currency-options {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + var(--spacing-2));
   left: 0;
   right: 0;
   background: var(--tint-color);
   backdrop-filter: blur(var(--blur-radius)) saturate(1.2);
   -webkit-backdrop-filter: blur(var(--blur-radius)) saturate(1.2);
   border-radius: var(--radius-lg);
-  padding: 8px;
+  padding: var(--spacing-2);
   box-shadow: 0 8px 32px var(--shadow-color), inset 0 1px 1px var(--highlight-color), inset 0 -1px 1px rgba(0,0,0,0.05);
   border: 1px solid var(--border-color);
   opacity: 0;
@@ -582,12 +600,13 @@ body.yoco-active {
 
 .currency-option {
   display: block;
-  padding: 10px 14px;
-  margin: 2px 0;
+  padding: var(--spacing-3) var(--spacing-4);
+  margin: var(--spacing-1) 0;
   color: var(--text-color);
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: var(--radius-sm);
@@ -625,8 +644,8 @@ body.yoco-active {
 
 .donation-modal-actions {
   display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-6);
 }
 
 /* ===== POPUPS ===== */
@@ -661,7 +680,7 @@ body.yoco-active {
 .success-popup-content,
 .error-popup-content {
   cursor: default;
-  padding: 3rem 2.5rem;
+  padding: var(--spacing-12) var(--spacing-10);
   border-radius: var(--radius-xl);
   max-width: 500px;
   width: 90%;
@@ -670,7 +689,7 @@ body.yoco-active {
 }
 
 .error-popup-content {
-  padding: 2rem 2rem;
+  padding: var(--spacing-8) var(--spacing-8);
   max-width: 400px;
 }
 
@@ -733,50 +752,47 @@ body.yoco-active {
 
 .success-popup-content h2 {
   font-family: 'Inter', sans-serif;
-  font-size: 2.5rem;
+  font-size: var(--font-size-3xl);
   font-weight: 700;
+  line-height: var(--line-height-tight);
   color: white;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
   text-align: center;
 }
 
 .error-popup-content h2 {
   font-family: 'Inter', sans-serif;
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
+  line-height: var(--line-height-tight);
   color: white;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--spacing-3);
   text-align: center;
 }
 
 .success-popup-content p {
   font-family: 'Inter', sans-serif;
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   color: white;
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
+  margin-bottom: var(--spacing-6);
+  line-height: var(--line-height-base);
   text-align: center;
 }
 
 .error-popup-content p {
   font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
   color: white;
-  margin-bottom: 1.25rem;
-  line-height: 1.5;
+  margin-bottom: var(--spacing-5);
+  line-height: var(--line-height-base);
   text-align: center;
   opacity: 0.95;
 }
 
-.success-popup-content p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-}
-
 .success-popup-content .success-icon,
 .error-popup-content .error-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--spacing-4);
   display: block;
   text-align: center;
 }
@@ -788,17 +804,19 @@ body.yoco-active {
 .success-popup-button,
 .error-popup-button {
   background: white;
-  padding: 1rem 2.5rem;
+  padding: var(--spacing-4) var(--spacing-10);
   border: none;
   border-radius: var(--radius-full);
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
+  line-height: var(--line-height-base);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Inter', sans-serif;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 var(--spacing-1) var(--spacing-4) rgba(0, 0, 0, 0.2);
   display: block;
   margin: 0 auto;
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .success-popup-button {
@@ -819,23 +837,23 @@ body.yoco-active {
 /* ===== COOKIE POPUP ===== */
 .cookie-button {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: var(--spacing-6);
+  right: var(--spacing-6);
   z-index: var(--z-dropdown);
-  width: 50px;
-  height: 50px;
+  width: var(--spacing-12);
+  height: var(--spacing-12);
   border-radius: 50%;
   background: rgba(255,255,255,0.15);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.25);
-  font-size: 1.8rem;
+  font-size: var(--font-size-2xl);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 var(--spacing-1) var(--spacing-3) rgba(0,0,0,0.05);
   opacity: 0;
   visibility: hidden;
   transform: scale(0.8);
@@ -859,24 +877,24 @@ body.yoco-active {
 
 .cookie-popup {
   position: fixed;
-  bottom: 80px;
-  right: 20px;
+  bottom: calc(var(--spacing-20) + var(--spacing-2));
+  right: var(--spacing-6);
   z-index: var(--z-header);
   background: rgba(255,255,255,0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4) var(--spacing-5);
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
   color: var(--text-color);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  box-shadow: 0 var(--spacing-2) var(--spacing-8) rgba(0,0,0,0.15);
   border: 1px solid rgba(255,255,255,0.3);
   max-width: 280px;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px) scale(0.9);
+  transform: translateY(var(--spacing-3)) scale(0.9);
   transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -942,13 +960,17 @@ html.scroll-unlocked {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .container {
-    padding-top: 80px;
-  }
-  
   .header {
+    top: var(--spacing-4);
+    left: var(--spacing-4);
+    right: var(--spacing-4);
     flex-direction: row;
     align-items: center;
+  }
+  
+  .top-left-heading {
+    top: var(--spacing-4);
+    left: var(--spacing-4);
   }
   
   .brand-logo {
@@ -960,23 +982,23 @@ html.scroll-unlocked {
   }
   
   .cookie-button {
-    bottom: 15px;
-    right: 15px;
-    width: 45px;
-    height: 45px;
-    font-size: 1.5rem;
+    bottom: var(--spacing-4);
+    right: var(--spacing-4);
+    width: var(--spacing-10);
+    height: var(--spacing-10);
+    font-size: var(--font-size-xl);
   }
   
   .cookie-popup {
-    bottom: 70px;
-    right: 15px;
-    max-width: calc(100vw - 30px);
-    font-size: 0.85rem;
-    padding: 0.9rem 1rem;
+    bottom: calc(var(--spacing-16) + var(--spacing-2));
+    right: var(--spacing-4);
+    max-width: calc(100vw - var(--spacing-8));
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-3) var(--spacing-4);
   }
   
   .donation-modal-content {
-    padding: 1.5rem;
+    padding: var(--spacing-6);
   }
   
   .donation-amounts {
@@ -990,11 +1012,13 @@ html.scroll-unlocked {
 
 /* ===== FOOTER (HOMEPAGE INLINE LINE) ===== */
 .site-footer-inline {
-  padding: 0.5rem 0;
+  padding: var(--spacing-2) 0;
   text-align: center;
   font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-base);
   color: var(--text-color-light);
+  margin-top: var(--spacing-12);
 }
 
 .site-footer-inline a {
