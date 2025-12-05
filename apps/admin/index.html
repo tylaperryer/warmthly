@@ -14,6 +14,16 @@
   </warmthly-head>
 
   <style>
+    /* Hide body until CSS loads to prevent FOUC */
+    body:not(.css-loaded) {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body.css-loaded {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
     :root { 
       color-scheme: light;
       --warmthly-orange: #FF8C42;
@@ -24,11 +34,6 @@
     html {
       background-color: var(--warmthly-background);
       min-height: 100%;
-    }
-    body {
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease-in-out;
     }
     body.fonts-loaded {
       opacity: 1;

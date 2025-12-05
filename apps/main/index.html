@@ -14,15 +14,20 @@
   </warmthly-head>
 
   <style>
+    /* Hide body until CSS loads to prevent FOUC */
+    body:not(.css-loaded) {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body.css-loaded {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
     :root { color-scheme: light; }
     html {
       background-color: #fff6f1;
       min-height: 100%;
-    }
-    body {
-      opacity: 1;
-      visibility: visible;
-      transition: opacity 0.3s ease-in-out;
     }
     body.fonts-loaded {
       opacity: 1;
@@ -39,7 +44,7 @@
     }
     .logo {
       font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-3xl);
+      font-size: var(--font-size-2xl);
       font-weight: 600;
       line-height: var(--line-height-tight);
       margin-bottom: var(--spacing-4);
@@ -47,7 +52,7 @@
       letter-spacing: var(--letter-spacing-tight);
     }
     .subtitle {
-      font-size: var(--font-size-lg);
+      font-size: var(--font-size-base);
       color: var(--text-color);
       opacity: 0.8;
       font-weight: 400;
@@ -170,7 +175,7 @@
     }
     .method-section .section-title {
       font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-2xl);
+      font-size: var(--font-size-xl);
       font-weight: 600;
       line-height: var(--line-height-tight);
       color: var(--warmthly-orange);
@@ -229,6 +234,7 @@
       margin-right: var(--spacing-2);
     }
     .method-step p {
+      font-size: var(--font-size-lg);
       opacity: 0.8;
       line-height: var(--line-height-base);
       padding-left: var(--spacing-10);
@@ -255,7 +261,7 @@
         padding-right: var(--spacing-4);
       }
       .logo {
-        font-size: var(--font-size-2xl);
+        font-size: var(--font-size-xl);
         margin-top: var(--spacing-16);
       }
       .subtitle {
@@ -266,7 +272,7 @@
         margin: var(--spacing-12) var(--spacing-4);
       }
       .method-section .section-title {
-        font-size: var(--font-size-xl);
+        font-size: var(--font-size-lg);
       }
       .method-step p {
         padding-left: 0;

@@ -60,15 +60,15 @@
   --radius-xl: 20px;
   --radius-full: 50px;
   
-  /* Typography Scale - Golden Ratio (1.618) */
-  --font-size-xs: 0.75rem;      /* 12px */
-  --font-size-sm: 0.875rem;     /* 14px */
+  /* Typography Scale - More reasonable sizes */
+  --font-size-xs: 0.875rem;     /* 14px */
+  --font-size-sm: 0.9375rem;    /* 15px */
   --font-size-base: 1rem;       /* 16px */
-  --font-size-lg: 1.25rem;      /* 20px */
-  --font-size-xl: 1.618rem;     /* ~26px - golden ratio */
-  --font-size-2xl: 2.618rem;    /* ~42px */
-  --font-size-3xl: 4.236rem;    /* ~68px */
-  --font-size-4xl: 6.854rem;    /* ~110px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.5rem;       /* 24px */
+  --font-size-2xl: 1.875rem;    /* 30px */
+  --font-size-3xl: 2.5rem;      /* 40px */
+  --font-size-4xl: 3.5rem;      /* 56px */
   
   /* Letter Spacing */
   --letter-spacing-tight: -0.02em;
