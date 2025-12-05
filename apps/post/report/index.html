@@ -13,6 +13,19 @@
     preconnects="https://www.warmthly.org, https://post.warmthly.org">
   </warmthly-head>
   
+  <style>
+    /* Hide body until CSS loads to prevent FOUC */
+    body:not(.css-loaded) {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body.css-loaded {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
+  </style>
+  
 </head>
 <body class="fonts-loading">
   <a href="#main-content" class="skip-link purple">Skip to main content</a>
