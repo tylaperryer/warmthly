@@ -14,15 +14,10 @@
   </warmthly-head>
 
   <style>
-    /* Hide body until CSS loads to prevent FOUC */
+    /* Hide body until CSS loads - base.css handles the animation */
     body:not(.css-loaded) {
       visibility: hidden;
       opacity: 0;
-    }
-    body.css-loaded {
-      visibility: visible;
-      opacity: 1;
-      transition: opacity 0.2s ease-in-out;
     }
     :root { color-scheme: light; }
     html {
