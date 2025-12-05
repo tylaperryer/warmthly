@@ -66,17 +66,17 @@ body {
   -ms-overflow-style: none;
 }
 
-/* Hide body until CSS loads - prevent FOUC */
-body:not(.css-loaded) {
-  visibility: hidden !important;
-  opacity: 0 !important;
+/* Hide body until fonts load - prevent FOUC */
+body:not(.fonts-loaded) {
+  visibility: hidden;
+  opacity: 0;
 }
 
-/* Smooth fade-in animation when CSS is loaded */
-body.css-loaded {
-  visibility: visible !important;
-  opacity: 0 !important;
-  animation: fadeInFromBg 0.8s ease-out forwards !important;
+/* Smooth fade-in animation when fonts are loaded */
+body.fonts-loaded {
+  visibility: visible;
+  opacity: 0; /* Start transparent for the animation */
+  animation: fadeInFromBg 0.8s ease-out forwards;
 }
 
 @keyframes fadeInFromBg {
@@ -91,8 +91,8 @@ body.css-loaded {
 }
 
 /* Smooth fade-in for main content */
-body.css-loaded main,
-body.css-loaded .container {
+body.fonts-loaded main,
+body.fonts-loaded .container {
   animation: fadeInContent 1s ease-out 0.3s both;
 }
 
