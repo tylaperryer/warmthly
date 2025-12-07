@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    // API Configuration - Set before other scripts load
+    window.API_BASE_URL = 'https://backend.warmthly.org';
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
+  <warmthly-head 
+    title="Admin Dashboard - Warmthly"
+    description="Administrative dashboard for managing Warmthly operations"
+    app="admin"
+    viewport="1.0"
+    robots="noindex, nofollow">
+  </warmthly-head>
+
+  <style>
+    /* Hide body until CSS loads to prevent FOUC */
+    body:not(.css-loaded) {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body.css-loaded {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
+    :root { 
+      color-scheme: light;
+      --warmthly-orange: #FF8C42;
+      --warmthly-background: #fff6f1;
+      --text-color: #2c2c2c;
+      --error-color: #D8000C;
+    }
+    html {
+      background-color: var(--warmthly-background);
+      min-height: 100%;
+    }
+    body.fonts-loaded {
+      opacity: 1;
+      visibility: visible;
+    }
+  </style>
+</head>
+<body class="fonts-loading">
+
+  <warmthly-header app="admin"></warmthly-header>
+  <div style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1rem; align-items: center;">
+    <warmthly-language-switcher></warmthly-language-switcher>
+    <warmthly-reading-level></warmthly-reading-level>
+    <warmthly-stoplight app="admin"></warmthly-stoplight>
+  </div>
+
+  <div class="login-section" id="login-section">
+    <div class="login-container">
+      <h1 data-reading-level-content>Admin Access</h1>
+      <p data-reading-level-content>Enter the password to access the Warmthly dashboard.</p>
+      <form id="login-form">
+        <input 
+          type="password" 
+          id="password-input" 
+          class="password-input" 
+          placeholder="Password" 
+          required 
+          autocomplete="current-password"
+          aria-label="Admin password"
+        />
+        <button type="submit" class="submit-button">Unlock</button>
+      </form>
+      <div id="error-message" class="error-message" role="alert" aria-live="polite">
+        Incorrect password. Please try again.
+      </div>
+    </div>
+  </div>
+
+  <div id="admin-content" class="admin-content">
+    <div class="container">
+      <h1 data-reading-level-content>Welcome, Admin</h1>
+      <p class="welcome-text" data-reading-level-content>Manage your Warmthly administration tools and settings.</p>
+      
+      <ul class="admin-links">
+        <li><a href="/emails">Email Management (Send & View Received)</a></li>
+      </ul>
+
+      <button class="logout-button" id="logout-button">Logout</button>
+    </div>
+  </div>
+
+  <warmthly-font-loader></warmthly-font-loader>
+
+  <!-- Secure token storage (Web Crypto API + IndexedDB) -->
+  <script src="/apps/admin/secure-auth.js"></script>
+
+  <script type="module">
+    const loginForm = document.getElementById('login-form');
+    const passwordInput = document.getElementById('password-input');
+    const loginSection = document.getElementById('login-section');
+    const adminContent = document.getElementById('admin-content');
+    const errorMessage = document.getElementById('error-message');
+    const logoutButton = document.getElementById('logout-button');
+
+    // Check authentication using secure storage
+    async function checkAuthentication() {
+      try {
+        if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+          const token = await window.SecureAuth.getAccessToken();
+          return token !== null;
+        } else {
+          // Fallback to sessionStorage if secure storage unavailable
+          return sessionStorage.getItem('warmthly-admin-authenticated') === 'true';
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        return false;
+      }
+    }
+
+    // Initialize authentication state
+    checkAuthentication().then((authenticated) => {
+      if (authenticated) {
+        loginSection.style.display = 'none';
+        adminContent.classList.add('active');
+      }
+    });
+
+    loginForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const enteredPassword = passwordInput.value;
+      errorMessage.style.display = 'none';
+
+      const submitButton = loginForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Verifying...';
+
+      try {
+        const apiBase = window.API_BASE_URL || 'https://backend.warmthly.org';
+        const response = await fetch(`${apiBase}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: enteredPassword }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          const token = result.token;
+          
+          if (token) {
+            // Store token securely using Web Crypto API + IndexedDB
+            if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+              try {
+                await window.SecureAuth.storeAccessToken(token);
+                // Also set session flag for compatibility
+                sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+              } catch (storageError) {
+                console.error('Secure storage failed, using fallback:', storageError);
+                // Fallback to sessionStorage
+                sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+                sessionStorage.setItem('warmthly-admin-token', token);
+              }
+            } else {
+              // Fallback to sessionStorage if secure storage unavailable
+              sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+              sessionStorage.setItem('warmthly-admin-token', token);
+            }
+          }
+          
+          loginSection.style.display = 'none';
+          adminContent.classList.add('active');
+          passwordInput.value = '';
+        } else {
+          errorMessage.style.display = 'block';
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      } catch (error) {
+        errorMessage.textContent = 'An error occurred. Please try again.';
+        errorMessage.style.display = 'block';
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Unlock';
+      }
+    });
+
+    logoutButton.addEventListener('click', async function() {
+      if (confirm('Are you sure you want to logout?')) {
+        // Clear secure storage
+        if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+          try {
+            await window.SecureAuth.clearAccessToken();
+          } catch (error) {
+            console.error('Failed to clear secure storage:', error);
+          }
+        }
+        // Clear sessionStorage fallback
+        sessionStorage.removeItem('warmthly-admin-authenticated');
+        sessionStorage.removeItem('warmthly-admin-token');
+        adminContent.classList.remove('active');
+        loginSection.style.display = 'flex';
+        passwordInput.focus();
+      }
+    });
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+      }
+    });
+
+    window.addEventListener('beforeunload', function() {
+    });
+  </script>
+</body>
+</html>
+ 

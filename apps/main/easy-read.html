@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <warmthly-head 
+    title="Easy Read - Warmthly"
+    description="Easy to read version of Warmthly - simplified language for better understanding"
+    app="main"
+    viewport="0.75"
+    robots="index, follow">
+  </warmthly-head>
+  
+  <style>
+    :root { color-scheme: light; }
+    html {
+      background-color: #fff6f1;
+      min-height: 100%;
+    }
+    body.fonts-loaded {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--spacing-24) var(--spacing-6) var(--spacing-10);
+      color: var(--text-color);
+      line-height: var(--line-height-base);
+    }
+    
+    h1 {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--font-size-3xl);
+      font-weight: 600;
+      color: var(--warmthly-orange);
+      margin-bottom: var(--spacing-8);
+      letter-spacing: var(--letter-spacing-tight);
+    }
+    
+    h2 {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      color: var(--warmthly-orange);
+      margin-top: var(--spacing-12);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    p {
+      margin-bottom: var(--spacing-6);
+      color: var(--text-color);
+      font-size: var(--font-size-lg);
+      line-height: 1.8;
+    }
+    
+    ul {
+      margin-bottom: var(--spacing-6);
+      padding-left: var(--spacing-8);
+    }
+    
+    li {
+      margin-bottom: var(--spacing-4);
+      line-height: 1.8;
+      font-size: var(--font-size-lg);
+    }
+    
+    .easy-read-badge {
+      display: inline-block;
+      padding: var(--spacing-2) var(--spacing-4);
+      background: var(--warmthly-orange);
+      color: white;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-top: var(--spacing-12);
+      padding: var(--spacing-3) var(--spacing-6);
+      border: 2px solid var(--warmthly-orange);
+      border-radius: var(--radius-md);
+      color: var(--warmthly-orange);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      min-height: 24px;
+      min-width: 24px;
+    }
+    
+    .back-link:hover,
+    .back-link:focus {
+      background: var(--warmthly-orange);
+      color: white;
+      outline: none;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: var(--spacing-20) var(--spacing-4) var(--spacing-10);
+      }
+      
+      h1 {
+        font-size: var(--font-size-2xl);
+      }
+    }
+  </style>
+  
+  <link rel="dns-prefetch" href="//warmthly.org">
+  
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+</head>
+<body class="fonts-loading">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <warmthly-header app="main"></warmthly-header>
+  <warmthly-stoplight app="main"></warmthly-stoplight>
+
+  <main id="main-content" role="main" aria-label="Easy Read Version">
+    <div class="container">
+      <span class="easy-read-badge">Easy Read Version</span>
+      <h1>Warmthly - Easy to Read</h1>
+      
+      <h2>What is Warmthly?</h2>
+      <p>
+        Warmthly is a group of people working together. We want to make the world kinder. We want people to care about each other more.
+      </p>
+      <p>
+        We want to change how things work. We want to make sure people are treated well. We want to make sure people are not just numbers.
+      </p>
+      
+      <h2>What do we do?</h2>
+      <p>
+        We help people. We start with mental health. We also help with education.
+      </p>
+      <p>
+        We want to make places better. We want places to feel good. We want places to help people feel better.
+      </p>
+      
+      <h2>How can you help?</h2>
+      <p>
+        You can give money to help us. This money helps us do our work. It helps us help more people.
+      </p>
+      <p>
+        You can give any amount you want. Every bit helps. Thank you for helping.
+      </p>
+      
+      <h2>Where does your money go?</h2>
+      <p>
+        We show you where every cent goes. You can see what we do with your money. We are very open about this.
+      </p>
+      <p>
+        You can see our work on our website. We show everything we do. Nothing is hidden.
+      </p>
+      
+      <h2>Who are we?</h2>
+      <p>
+        Tyla Perryer started Warmthly. Tyla is 15 years old. Tyla is from South Africa.
+      </p>
+      <p>
+        Tyla's family helps too. They help with the work. They help make things happen.
+      </p>
+      <p>
+        <strong>Important:</strong> Tyla does not take any money. All money goes to help people. Tyla works for free.
+      </p>
+      
+      <h2>Where do we work?</h2>
+      <p>
+        We start in Tbilisi, Georgia. This is in Europe. This helps us work faster. This helps us help more people.
+      </p>
+      
+      <h2>What is our first project?</h2>
+      <p>
+        Our first project helps mental health places. We make them better. We make them nicer. We make them help people more.
+      </p>
+      <p>
+        We use light. We use color. We make each place special. This helps people feel better.
+      </p>
+      
+      <h2>How to donate</h2>
+      <p>
+        You can give money on our website. Click the "Donate" button. Choose how much you want to give. Then follow the steps.
+      </p>
+      <p>
+        You can use a credit card. You can use a debit card. It is safe. We keep your information safe.
+      </p>
+      
+      <h2>Need more help?</h2>
+      <p>
+        If you have questions, you can:
+      </p>
+      <ul>
+        <li>Read our help page</li>
+        <li>Email us at desk@warmthly.org</li>
+        <li>Visit our main website</li>
+      </ul>
+      
+      <p style="margin-top: var(--spacing-8); font-weight: 600; color: var(--warmthly-orange);">
+        Thank you for reading. Thank you for caring. Together we can make the world better.
+      </p>
+      
+      <a href="/" class="back-link">← Back to Main Page</a>
+    </div>
+  </main>
+  
+  <warmthly-font-loader></warmthly-font-loader>
+  
+  <script type="module">
+    // Update back link from config
+    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    const backLink = document.querySelector('.back-link');
+    if (backLink) {
+      backLink.href = WARMTHLY_CONFIG.urls.main;
+    }
+  </script>
+</body>
+</html>
+
