@@ -1,0 +1,299 @@
+/**
+ * Helper functions for generating SEO tags
+ * Consolidated to avoid redundancy
+ */
+
+import { WARMTHLY_CONFIG, type AppName } from '@config/warmthly-config.js';
+
+/**
+ * Top 200 languages for SEO tags (hreflang and og:locale:alternate)
+ * Deduplicated and prioritized by usage
+ * All 7,019 languages are supported via API with ?lang= parameter
+ */
+const TOP_LANGUAGES = [
+  // Major Languages (ISO 639-1)
+  { code: 'en', locale: 'en_US' },
+  { code: 'es', locale: 'es_ES' },
+  { code: 'fr', locale: 'fr_FR' },
+  { code: 'de', locale: 'de_DE' },
+  { code: 'it', locale: 'it_IT' },
+  { code: 'pt', locale: 'pt_PT' },
+  { code: 'ru', locale: 'ru_RU' },
+  { code: 'ja', locale: 'ja_JP' },
+  { code: 'zh', locale: 'zh_CN' },
+  { code: 'pl', locale: 'pl_PL' },
+  { code: 'nl', locale: 'nl_NL' },
+  { code: 'sv', locale: 'sv_SE' },
+  { code: 'da', locale: 'da_DK' },
+  { code: 'no', locale: 'no_NO' },
+  { code: 'fi', locale: 'fi_FI' },
+  { code: 'el', locale: 'el_GR' },
+  { code: 'cs', locale: 'cs_CZ' },
+  { code: 'hu', locale: 'hu_HU' },
+  { code: 'ro', locale: 'ro_RO' },
+  { code: 'sk', locale: 'sk_SK' },
+  { code: 'sl', locale: 'sl_SI' },
+  { code: 'bg', locale: 'bg_BG' },
+  { code: 'hr', locale: 'hr_HR' },
+  { code: 'et', locale: 'et_EE' },
+  { code: 'lv', locale: 'lv_LV' },
+  { code: 'lt', locale: 'lt_LT' },
+  { code: 'uk', locale: 'uk_UA' },
+  { code: 'tr', locale: 'tr_TR' },
+  { code: 'id', locale: 'id_ID' },
+  { code: 'ko', locale: 'ko_KR' },
+  // RTL Languages
+  { code: 'ar', locale: 'ar_SA' },
+  { code: 'he', locale: 'he_IL' },
+  { code: 'fa', locale: 'fa_IR' },
+  { code: 'ur', locale: 'ur_PK' },
+  { code: 'yi', locale: 'yi_IL' },
+  { code: 'sd', locale: 'sd_PK' },
+  { code: 'ug', locale: 'ug_CN' },
+  { code: 'ku', locale: 'ku_IQ' },
+  // South Asian Languages
+  { code: 'hi', locale: 'hi_IN' },
+  { code: 'bn', locale: 'bn_BD' },
+  { code: 'ta', locale: 'ta_IN' },
+  { code: 'te', locale: 'te_IN' },
+  { code: 'mr', locale: 'mr_IN' },
+  { code: 'gu', locale: 'gu_IN' },
+  { code: 'kn', locale: 'kn_IN' },
+  { code: 'ml', locale: 'ml_IN' },
+  { code: 'pa', locale: 'pa_IN' },
+  { code: 'or', locale: 'or_IN' },
+  { code: 'as', locale: 'as_IN' },
+  { code: 'ne', locale: 'ne_NP' },
+  { code: 'si', locale: 'si_LK' },
+  { code: 'my', locale: 'my_MM' },
+  { code: 'km', locale: 'km_KH' },
+  { code: 'lo', locale: 'lo_LA' },
+  // Southeast Asian Languages
+  { code: 'th', locale: 'th_TH' },
+  { code: 'vi', locale: 'vi_VN' },
+  { code: 'ms', locale: 'ms_MY' },
+  { code: 'tl', locale: 'tl_PH' },
+  { code: 'ceb', locale: 'ceb_PH' },
+  { code: 'jv', locale: 'jv_ID' },
+  { code: 'su', locale: 'su_ID' },
+  // African Languages
+  { code: 'sw', locale: 'sw_KE' },
+  { code: 'zu', locale: 'zu_ZA' },
+  { code: 'xh', locale: 'xh_ZA' },
+  { code: 'af', locale: 'af_ZA' },
+  { code: 'am', locale: 'am_ET' },
+  { code: 'ha', locale: 'ha_NG' },
+  { code: 'yo', locale: 'yo_NG' },
+  { code: 'ig', locale: 'ig_NG' },
+  { code: 'ff', locale: 'ff_SN' },
+  { code: 'wo', locale: 'wo_SN' },
+  { code: 'bm', locale: 'bm_ML' },
+  { code: 'so', locale: 'so_SO' },
+  { code: 'om', locale: 'om_ET' },
+  { code: 'ti', locale: 'ti_ET' },
+  // European Languages (Additional)
+  { code: 'ga', locale: 'ga_IE' },
+  { code: 'cy', locale: 'cy_GB' },
+  { code: 'gd', locale: 'gd_GB' },
+  { code: 'is', locale: 'is_IS' },
+  { code: 'mt', locale: 'mt_MT' },
+  { code: 'mk', locale: 'mk_MK' },
+  { code: 'sr', locale: 'sr_RS' },
+  { code: 'bs', locale: 'bs_BA' },
+  { code: 'sq', locale: 'sq_AL' },
+  { code: 'be', locale: 'be_BY' },
+  { code: 'ka', locale: 'ka_GE' },
+  { code: 'hy', locale: 'hy_AM' },
+  { code: 'az', locale: 'az_AZ' },
+  { code: 'kk', locale: 'kk_KZ' },
+  { code: 'ky', locale: 'ky_KG' },
+  { code: 'uz', locale: 'uz_UZ' },
+  { code: 'mn', locale: 'mn_MN' },
+  { code: 'ca', locale: 'ca_ES' },
+  { code: 'eu', locale: 'eu_ES' },
+  { code: 'gl', locale: 'gl_ES' },
+  { code: 'br', locale: 'br_FR' },
+  { code: 'co', locale: 'co_FR' },
+  { code: 'oc', locale: 'oc_FR' },
+  { code: 'sc', locale: 'sc_IT' },
+  { code: 'wa', locale: 'wa_BE' },
+  { code: 'lb', locale: 'lb_LU' },
+  { code: 'fy', locale: 'fy_NL' },
+  { code: 'li', locale: 'li_NL' },
+  { code: 'fo', locale: 'fo_FO' },
+  { code: 'nn', locale: 'nn_NO' },
+  { code: 'se', locale: 'se_NO' },
+  // Additional languages to reach ~200
+  { code: 'nds', locale: 'nds_DE' },
+  { code: 'pms', locale: 'pms_IT' },
+  { code: 'vec', locale: 'vec_IT' },
+  { code: 'lmo', locale: 'lmo_IT' },
+  { code: 'rm', locale: 'rm_CH' },
+  { code: 'gsw', locale: 'gsw_CH' },
+  { code: 'bar', locale: 'bar_AT' },
+  { code: 'hsb', locale: 'hsb_DE' },
+  { code: 'dsb', locale: 'dsb_DE' },
+  { code: 'sgs', locale: 'sgs_LT' },
+  { code: 'vep', locale: 'vep_RU' },
+  { code: 'kv', locale: 'kv_RU' },
+  { code: 'udm', locale: 'udm_RU' },
+  { code: 'mdf', locale: 'mdf_RU' },
+  { code: 'myv', locale: 'myv_RU' },
+  { code: 'mhr', locale: 'mhr_RU' },
+  { code: 'mrj', locale: 'mrj_RU' },
+  { code: 'cv', locale: 'cv_RU' },
+  { code: 'tt', locale: 'tt_RU' },
+  { code: 'ba', locale: 'ba_RU' },
+  { code: 'sah', locale: 'sah_RU' },
+  { code: 'tyv', locale: 'tyv_RU' },
+  { code: 'xal', locale: 'xal_RU' },
+  { code: 'bua', locale: 'bua_RU' },
+  { code: 'bxr', locale: 'bxr_RU' },
+  { code: 'krc', locale: 'krc_RU' },
+  { code: 'kbd', locale: 'kbd_RU' },
+  { code: 'ady', locale: 'ady_RU' },
+  { code: 'ce', locale: 'ce_RU' },
+  { code: 'inh', locale: 'inh_RU' },
+  { code: 'av', locale: 'av_RU' },
+  { code: 'lbe', locale: 'lbe_RU' },
+  { code: 'lez', locale: 'lez_RU' },
+  { code: 'os', locale: 'os_RU' },
+  { code: 'kab', locale: 'kab_DZ' },
+  { code: 'shi', locale: 'shi_MA' },
+  { code: 'tzm', locale: 'tzm_MA' },
+  { code: 'rif', locale: 'rif_MA' },
+  { code: 'ber', locale: 'ber_DZ' },
+  { code: 'zgh', locale: 'zgh_MA' },
+  { code: 'ary', locale: 'ary_MA' },
+  { code: 'aeb', locale: 'aeb_TN' },
+  { code: 'acm', locale: 'acm_IQ' },
+  { code: 'ajp', locale: 'ajp_PS' },
+  { code: 'apc', locale: 'apc_SY' },
+  { code: 'afb', locale: 'afb_KW' },
+  { code: 'acq', locale: 'acq_YE' },
+  { code: 'ayh', locale: 'ayh_YE' },
+  { code: 'ayn', locale: 'ayn_YE' },
+  { code: 'acw', locale: 'acw_SA' },
+  { code: 'aec', locale: 'aec_EG' },
+  { code: 'ars', locale: 'ars_SA' },
+  { code: 'pbu', locale: 'pbu_PK' },
+  { code: 'hnd', locale: 'hnd_PK' },
+  { code: 'hno', locale: 'hno_PK' },
+  { code: 'hns', locale: 'hns_PK' },
+  { code: 'hne', locale: 'hne_IN' },
+  { code: 'mwr', locale: 'mwr_IN' },
+  { code: 'dcc', locale: 'dcc_IN' },
+  { code: 'bh', locale: 'bh_IN' },
+  { code: 'mag', locale: 'mag_IN' },
+  { code: 'mai', locale: 'mai_IN' },
+  { code: 'bho', locale: 'bho_IN' },
+  { code: 'raj', locale: 'raj_IN' },
+  { code: 'gom', locale: 'gom_IN' },
+  { code: 'kok', locale: 'kok_IN' },
+  { code: 'sat', locale: 'sat_IN' },
+  { code: 'mni', locale: 'mni_IN' },
+  { code: 'lus', locale: 'lus_IN' },
+  { code: 'kha', locale: 'kha_IN' },
+  { code: 'grt', locale: 'grt_IN' },
+  { code: 'brx', locale: 'brx_IN' },
+  { code: 'doi', locale: 'doi_IN' },
+  { code: 'ks', locale: 'ks_IN' },
+  { code: 'ps', locale: 'ps_AF' },
+  { code: 'bal', locale: 'bal_PK' },
+  { code: 'brh', locale: 'brh_PK' },
+  { code: 'skr', locale: 'skr_PK' },
+  { code: 'lah', locale: 'lah_PK' },
+  { code: 'new', locale: 'new_NP' },
+  { code: 'dv', locale: 'dv_MV' },
+  { code: 'war', locale: 'war_PH' },
+  { code: 'ilo', locale: 'ilo_PH' },
+  { code: 'pam', locale: 'pam_PH' },
+  { code: 'bcl', locale: 'bcl_PH' },
+  { code: 'pag', locale: 'pag_PH' },
+  { code: 'bno', locale: 'bno_PH' },
+  { code: 'hil', locale: 'hil_PH' },
+  { code: 'cdo', locale: 'cdo_CN' },
+  { code: 'hak', locale: 'hak_CN' },
+  { code: 'nan', locale: 'nan_CN' },
+  { code: 'wuu', locale: 'wuu_CN' },
+  { code: 'yue', locale: 'yue_HK' },
+  { code: 'gan', locale: 'gan_CN' },
+  { code: 'hsn', locale: 'hsn_CN' },
+  { code: 'cjy', locale: 'cjy_CN' },
+  { code: 'bo', locale: 'bo_CN' },
+  { code: 'tk', locale: 'tk_TM' },
+  { code: 'ace', locale: 'ace_ID' },
+  { code: 'ban', locale: 'ban_ID' },
+  { code: 'bug', locale: 'bug_ID' },
+  { code: 'bjn', locale: 'bjn_ID' },
+  { code: 'mad', locale: 'mad_ID' },
+  { code: 'min', locale: 'min_ID' },
+  { code: 'nia', locale: 'nia_ID' },
+  { code: 'nij', locale: 'nij_ID' },
+  { code: 'sun', locale: 'sun_ID' },
+  { code: 'lg', locale: 'lg_UG' },
+  { code: 'rw', locale: 'rw_RW' },
+  { code: 'ny', locale: 'ny_MW' },
+  { code: 'sn', locale: 'sn_ZW' },
+  { code: 'st', locale: 'st_LS' },
+  { code: 'tn', locale: 'tn_BW' },
+  { code: 've', locale: 've_ZA' },
+  { code: 'ts', locale: 'ts_ZA' },
+  { code: 'ss', locale: 'ss_ZA' },
+  { code: 'nr', locale: 'nr_ZA' },
+  { code: 'nso', locale: 'nso_ZA' },
+  { code: 'ak', locale: 'ak_GH' },
+  { code: 'tw', locale: 'tw_GH' },
+  { code: 'ee', locale: 'ee_GH' },
+  { code: 'pfl', locale: 'pfl_DE' },
+  { code: 'ksh', locale: 'ksh_DE' },
+  { code: 'sma', locale: 'sma_NO' },
+  { code: 'smj', locale: 'smj_SE' },
+  { code: 'smn', locale: 'smn_FI' },
+  { code: 'eo', locale: 'eo_XX' },
+  { code: 'ia', locale: 'ia_XX' },
+  { code: 'ie', locale: 'ie_XX' },
+  { code: 'vo', locale: 'vo_XX' },
+  { code: 'io', locale: 'io_XX' },
+  { code: 'la', locale: 'la_XX' },
+];
+
+/**
+ * Generate hreflang tags for top 200 languages
+ * All 7,019 languages are supported via API with ?lang= parameter
+ */
+export function generateHreflangTags(canonical: string, app: AppName): string {
+  const baseUrl = WARMTHLY_CONFIG.urls[app];
+  
+  // Extract pathname from canonical URL
+  let urlPath: string;
+  try {
+    const url = new URL(canonical);
+    urlPath = url.pathname;
+  } catch {
+    urlPath = canonical.startsWith('/') ? canonical : `/${canonical}`;
+  }
+  
+  // Generate hreflang tags for top 200 languages
+  const hreflangTags = TOP_LANGUAGES
+    .map((lang) => {
+      const langUrl = `${baseUrl}${urlPath}${urlPath.includes('?') ? '&' : '?'}lang=${lang.code}`;
+      return `  <link rel="alternate" hreflang="${lang.code}" href="${langUrl}">`;
+    })
+    .join('\n');
+  
+  // Add x-default (points to English/default)
+  const defaultUrl = `${baseUrl}${urlPath}`;
+  return `${hreflangTags}\n  <link rel="alternate" hreflang="x-default" href="${defaultUrl}">`;
+}
+
+/**
+ * Generate og:locale:alternate tags for top 200 languages
+ * All 7,019 languages are supported via API
+ */
+export function generateOGLocaleAlternates(): string {
+  return TOP_LANGUAGES
+    .map((lang) => `  <meta property="og:locale:alternate" content="${lang.locale}">`)
+    .join('\n');
+}
+

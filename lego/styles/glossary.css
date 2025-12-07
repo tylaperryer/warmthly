@@ -1,0 +1,225 @@
+/**
+ * Glossary Styles
+ * Styles for glossary terms and tooltips
+ */
+
+/* Pronunciation styles */
+[data-pronunciation] {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--warmthly-orange);
+  cursor: help;
+  border-bottom: 1px wavy var(--warmthly-orange);
+}
+
+[data-pronunciation]:hover,
+[data-pronunciation]:focus {
+  background-color: rgba(255, 140, 66, 0.1);
+  outline: 2px solid var(--warmthly-orange);
+  outline-offset: 2px;
+}
+
+[data-pronunciation][role="button"] {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+}
+
+.pronunciation-tooltip {
+  background: white;
+  border: 2px solid var(--warmthly-orange);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: 0 var(--spacing-2) var(--spacing-8) rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  position: fixed;
+  z-index: 999999;
+}
+
+.pronunciation-tooltip h3 {
+  margin: 0 0 var(--spacing-2) 0;
+  color: var(--warmthly-orange);
+  font-size: var(--font-size-lg);
+}
+
+.pronunciation-tooltip .phonetic {
+  font-family: monospace;
+  font-size: var(--font-size-lg);
+  color: var(--text-color);
+  margin: var(--spacing-2) 0;
+}
+
+.pronunciation-context {
+  background-color: rgba(255, 140, 66, 0.05);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-sm);
+  margin-top: var(--spacing-2);
+}
+
+.pronunciation-tooltip-close {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  color: var(--text-color);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pronunciation-tooltip-close:hover,
+.pronunciation-tooltip-close:focus {
+  background-color: rgba(0, 0, 0, 0.05);
+  outline: 2px solid var(--warmthly-orange);
+  outline-offset: 2px;
+}
+
+.pronunciation-list {
+  display: grid;
+  gap: var(--spacing-6);
+  margin-top: var(--spacing-6);
+}
+
+.pronunciation-list dt {
+  font-weight: 600;
+  color: var(--warmthly-orange);
+  margin-bottom: var(--spacing-2);
+}
+
+.pronunciation-list dd {
+  margin-left: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.pronunciation-list .phonetic {
+  font-family: monospace;
+  font-size: var(--font-size-lg);
+}
+
+/* Glossary term markers */
+[data-glossary-term] {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--warmthly-orange);
+  cursor: help;
+  border-bottom: 1px dotted var(--warmthly-orange);
+}
+
+[data-glossary-term]:hover,
+[data-glossary-term]:focus {
+  background-color: rgba(255, 140, 66, 0.1);
+  outline: 2px solid var(--warmthly-orange);
+  outline-offset: 2px;
+}
+
+[data-glossary-term][role="button"] {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Glossary tooltip */
+.glossary-tooltip {
+  background: white;
+  border: 2px solid var(--warmthly-orange);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: 0 var(--spacing-2) var(--spacing-8) rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  position: fixed;
+  z-index: 999999;
+}
+
+.glossary-tooltip h3 {
+  margin: 0 0 var(--spacing-2) 0;
+  color: var(--warmthly-orange);
+  font-size: var(--font-size-lg);
+}
+
+.glossary-tooltip p {
+  margin: var(--spacing-2) 0;
+  color: var(--text-color);
+}
+
+.glossary-simplified {
+  background-color: rgba(255, 140, 66, 0.05);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-sm);
+  margin-top: var(--spacing-2);
+}
+
+.glossary-tooltip-close {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  color: var(--text-color);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glossary-tooltip-close:hover,
+.glossary-tooltip-close:focus {
+  background-color: rgba(0, 0, 0, 0.05);
+  outline: 2px solid var(--warmthly-orange);
+  outline-offset: 2px;
+}
+
+.glossary-link {
+  display: inline-block;
+  margin-top: var(--spacing-3);
+  color: var(--warmthly-orange);
+  text-decoration: underline;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem;
+}
+
+/* Glossary list styles */
+.glossary-list {
+  display: grid;
+  gap: var(--spacing-6);
+  margin-top: var(--spacing-6);
+}
+
+.glossary-list dt {
+  font-weight: 600;
+  color: var(--warmthly-orange);
+  margin-bottom: var(--spacing-2);
+}
+
+.glossary-list dt strong {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.glossary-list dt strong:hover,
+.glossary-list dt strong:focus {
+  background-color: rgba(255, 140, 66, 0.1);
+  outline: 2px solid var(--warmthly-orange);
+  outline-offset: 2px;
+}
+
+.glossary-list dd {
+  margin-left: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+

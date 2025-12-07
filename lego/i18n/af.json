@@ -1,0 +1,47 @@
+{
+  "common": {
+    "loading": "Laai...",
+    "error": "Fout",
+    "success": "Sukses",
+    "cancel": "Kanselleer",
+    "submit": "Dien in",
+    "close": "Sluit",
+    "back": "Terug",
+    "next": "Volgende",
+    "save": "Stoor",
+    "delete": "Skrap",
+    "edit": "Wysig",
+    "view": "Bekyk",
+    "search": "Soek",
+    "filter": "Filter",
+    "sort": "Sorteer",
+    "language": "Taal"
+  },
+  "main": {
+    "title": "Herhumaniseer Ons Wêreld.",
+    "subtitle": "Warmthly is 'n wêreldwye beweging om empatie 'n meetbare deel van ons stelsels te maak.",
+    "donate": "Ondersteun die Missie",
+    "donateButton": "🤍 Ondersteun die Missie"
+  },
+  "mint": {
+    "title": "Munt",
+    "description": "Ons volg elke sent en elke beslissing reg voor jou. Dit is ons verbintenis aan jou dat ons vir altyd elke aksie en elke skenking sal volg en uiterste deursigtigheid sal bied."
+  },
+  "post": {
+    "title": "Plaas",
+    "subtitle": " 'n Lewende tydlyn van ons organisasie se verhaal—van stigtingsomstandighede tot toekomstige planne. Elke beslissing, mylpaal en gemeenskapsinteraksie word hier aangeteken vir volledige deursigtigheid."
+  },
+  "vote": {
+    "title": "Die Ontbindingsstemming",
+    "description": "Ons verbintenis is aan ons missie en waardes: Deursigtigheid, Eerlikheid, Nederigheid en Empatie. As ons daarin faal, glo ons dat ons moet ophou bestaan. Hierdie bladsy is ons gemeenskap-gehoue doodskakelaar."
+  },
+  "report": {
+    "title": "Rapporteer 'n Probleem",
+    "description": "As u bekommernisse, vrae het of iets met betrekking tot Warmthly moet rapporteer, gebruik asseblief die onderstaande vorm. Ons neem alle verslae ernstig op en sal dit dadelik hersien."
+  },
+  "yourData": {
+    "title": "Jou Data",
+    "description": "Radikale Deursigtigheid: Dit is alles wat ons oor jou stoor. As jy iets sien wat ons nie genoem het nie, rapporteer dit."
+  }
+}
+
