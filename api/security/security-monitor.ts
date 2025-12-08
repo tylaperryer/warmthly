@@ -122,7 +122,7 @@ export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
     });
 
     // Set expiration (keep events for 24 hours)
-    await client.pexpire(key, 24 * 60 * 60 * 1000);
+    await client.pExpire(key, 24 * 60 * 60 * 1000);
 
     // Check if alert threshold is exceeded
     await checkAlertThresholds(event);
@@ -171,6 +171,7 @@ async function checkAlertThresholds(event: SecurityEvent): Promise<void> {
         count,
         windowMs: threshold.windowMs,
         threshold: threshold.count,
+        timestamp: Date.now(),
       });
     }
   } catch (error: unknown) {
@@ -219,7 +220,7 @@ async function triggerAlert(alert: Alert): Promise<void> {
       score: alert.timestamp,
       value: JSON.stringify(alert),
     });
-    await client.pexpire(alertKey, 7 * 24 * 60 * 60 * 1000); // Keep for 7 days
+    await client.pExpire(alertKey, 7 * 24 * 60 * 60 * 1000); // Keep for 7 days
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('[security-monitor] Error storing alert:', errorMessage);
