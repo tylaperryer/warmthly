@@ -4,7 +4,7 @@
  * Includes rate limiting and timeout protection
  */
 
-import { withRateLimit, apiRateLimitOptions } from '../middleware/rate-limit.js';
+import { withRateLimit, apiRateLimitOptions, type Request, type Response } from '../middleware/rate-limit.js';
 import { verifyRequest, extractSignature } from '../security/request-signing.js';
 import logger from '../utils/logger.js';
 
@@ -18,33 +18,6 @@ const API_TIMEOUT = 15000;
  */
 const MIN_AMOUNT = 100; // R1.00
 
-/**
- * Request object interface
- */
-interface Request {
-  readonly method: string;
-  readonly body: {
-    readonly amount?: number;
-    readonly currency?: string;
-    readonly customerReference?: string;
-    readonly customerDescription?: string;
-    [key: string]: unknown;
-  };
-  readonly headers?: {
-    readonly 'x-request-signature'?: string;
-    readonly [key: string]: string | undefined;
-  };
-  [key: string]: unknown;
-}
-
-/**
- * Response object interface
- */
-interface Response {
-  status: (code: number) => Response;
-  json: (data: unknown) => Response;
-  [key: string]: unknown;
-}
 
 /**
  * Yoco checkout request body
@@ -80,7 +53,7 @@ interface YocoErrorResponse {
  * @param res - Response object
  * @returns Response with checkout URL or error
  */
-async function createCheckoutHandler(req: Request, res: Response): Promise<Response> {
+async function createCheckoutHandler(req: Request, res: Response): Promise<unknown> {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -90,10 +63,11 @@ async function createCheckoutHandler(req: Request, res: Response): Promise<Respo
     // Verify request signature if enabled (optional, can be enabled via REQUEST_SIGNING_SECRET env var)
     const requestSigningSecret = process.env.REQUEST_SIGNING_SECRET;
     if (requestSigningSecret) {
-      const signature = extractSignature(req.headers || {});
+      const headers = req.headers || {};
+      const signature = extractSignature(headers as unknown as Record<string, string | undefined>);
       const payload = req.body;
 
-      if (!verifyRequest(payload, signature, requestSigningSecret)) {
+      if (!verifyRequest(payload as string | object, signature, requestSigningSecret)) {
         logger.error('[create-checkout] Invalid request signature');
         return res.status(403).json({
           error: 'Invalid request signature',
@@ -101,7 +75,8 @@ async function createCheckoutHandler(req: Request, res: Response): Promise<Respo
       }
     }
 
-    const { amount, currency = 'ZAR', customerReference, customerDescription } = req.body;
+    const body = (req.body || {}) as { amount?: number; currency?: string; [key: string]: unknown };
+    const { amount, currency = 'ZAR' } = body;
 
     // Validate amount
     if (!amount || typeof amount !== 'number' || amount < MIN_AMOUNT) {

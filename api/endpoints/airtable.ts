@@ -4,7 +4,7 @@
  * Provides rate limiting and timeout protection
  */
 
-import { withRateLimit, apiRateLimitOptions } from '../middleware/rate-limit.js';
+import { withRateLimit, apiRateLimitOptions, type Request, type Response } from '../middleware/rate-limit.js';
 import logger from '../utils/logger.js';
 import { getRedisClient } from '../utils/redis-client.js';
 
@@ -23,30 +23,6 @@ const MAX_RECORDS = 1000;
  */
 const API_TIMEOUT = 10000;
 
-/**
- * Request object interface
- */
-interface Request {
-  readonly method: string;
-  readonly query: {
-    readonly baseId?: string;
-    readonly tableName?: string;
-    readonly viewId?: string;
-    readonly page?: string;
-    [key: string]: string | undefined;
-  };
-  [key: string]: unknown;
-}
-
-/**
- * Response object interface
- */
-interface Response {
-  status: (code: number) => Response;
-  json: (data: unknown) => Response;
-  setHeader: (name: string, value: string) => void;
-  [key: string]: unknown;
-}
 
 /**
  * Airtable API error response
@@ -61,7 +37,7 @@ interface AirtableErrorResponse {
 /**
  * Airtable handler function
  */
-async function airtableHandler(req: Request, res: Response): Promise<Response> {
+async function airtableHandler(req: Request, res: Response): Promise<unknown> {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: { message: 'Method Not Allowed' } });
   }
@@ -80,7 +56,8 @@ async function airtableHandler(req: Request, res: Response): Promise<Response> {
     }
 
     // Get query parameters
-    const { baseId, tableName, viewId, page } = req.query;
+    const query = (req.query || {}) as { baseId?: string; tableName?: string; viewId?: string; page?: string; [key: string]: string | string[] | undefined };
+    const { baseId, tableName, viewId, page } = query;
 
     // Validate required parameters
     if (!baseId || !tableName) {
@@ -194,7 +171,7 @@ async function airtableHandler(req: Request, res: Response): Promise<Response> {
     // Cache the response
     try {
       const redis = await getRedisClient();
-      await redis.setex(cacheKey, Math.floor(CACHE_TTL / 1000), JSON.stringify(data));
+      await redis.setEx(cacheKey, Math.floor(CACHE_TTL / 1000), JSON.stringify(data));
     } catch (cacheError: unknown) {
       const errorMessage = cacheError instanceof Error ? cacheError.message : String(cacheError);
       logger.error('[airtable] Cache write error:', errorMessage);
