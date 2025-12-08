@@ -119,8 +119,11 @@ export function sanitizeErrorMessage(message: string): string {
   }
 
   // Remove stack traces and file paths
-  return message
-    .split('\n')[0] // Only first line
+  const firstLine = message.split('\n')[0];
+  if (!firstLine) {
+    return 'An error occurred.';
+  }
+  return firstLine
     .replace(/at\s+.*/g, '') // Remove stack trace lines
     .replace(/\/[^\s]+/g, '') // Remove file paths
     .replace(/:\d+:\d+/g, '') // Remove line numbers
