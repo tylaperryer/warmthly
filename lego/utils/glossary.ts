@@ -162,6 +162,7 @@ export function markGlossaryTerms(text: string): string {
 
   for (const term of terms) {
     const glossaryTerm = GLOSSARY_DICTIONARY[term];
+    if (!glossaryTerm) continue;
     // Match whole words only (case-insensitive)
     const regex = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
     result = result.replace(regex, match => {
