@@ -1,0 +1,421 @@
+/* Admin App Specific Styles */
+
+/* Admin-specific header text color */
+.top-left-heading .admin-text {
+  color: var(--warmthly-orange);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.top-left-heading .admin-text:hover {
+  color: var(--warmthly-orange-hover);
+}
+
+/* Login Section */
+.login-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.login-container {
+  background: linear-gradient(135deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 15%));
+  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 3rem;
+  max-width: 400px;
+  width: 100%;
+  border: 1px solid rgb(255 140 66 / 12%);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
+  text-align: center;
+}
+
+.login-container h1 {
+  font-family: Inter, sans-serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--warmthly-orange);
+  margin-bottom: 0.5rem;
+}
+
+.login-container > p {
+  font-family: Inter, sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  margin-bottom: 2rem;
+}
+
+#login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.password-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid rgb(255 140 66 / 20%);
+  border-radius: 12px;
+  font-family: Inter, sans-serif;
+  font-size: 1rem;
+  background: rgb(255 255 255 / 50%);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.password-input:focus {
+  outline: none;
+  border-color: var(--warmthly-orange);
+  box-shadow: 0 0 0 3px rgb(255 140 66 / 10%);
+}
+
+.submit-button {
+  padding: 1rem 2rem;
+  background: var(--warmthly-orange);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: Inter, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+  background: var(--warmthly-orange-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(255 140 66 / 30%);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-message {
+  display: none;
+  color: var(--error-color);
+  font-family: Inter, sans-serif;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgb(216 0 12 / 10%);
+  border-radius: 8px;
+  border: 1px solid rgb(216 0 12 / 20%);
+}
+
+/* Admin Content */
+.admin-content {
+  display: none;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-content.active {
+  display: block;
+}
+
+.admin-content .container {
+  background: linear-gradient(135deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 15%));
+  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 3rem;
+  border: 1px solid rgb(255 140 66 / 12%);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
+}
+
+.admin-content h1 {
+  font-family: Inter, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--warmthly-orange);
+  margin-bottom: 0.5rem;
+}
+
+.welcome-text {
+  font-family: Inter, sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  margin-bottom: 2rem;
+}
+
+.admin-links {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+}
+
+.admin-links li {
+  margin-bottom: 1rem;
+}
+
+.admin-links a {
+  display: block;
+  padding: 1rem 1.5rem;
+  background: rgb(255 255 255 / 30%);
+  border-radius: 12px;
+  color: var(--warmthly-orange);
+  text-decoration: none;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid rgb(255 140 66 / 20%);
+}
+
+.admin-links a:hover {
+  background: rgb(255 255 255 / 50%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(255 140 66 / 20%);
+}
+
+.logout-button {
+  padding: 0.75rem 1.5rem;
+  background: rgb(216 0 12 / 10%);
+  color: var(--error-color);
+  border: 1px solid rgb(216 0 12 / 20%);
+  border-radius: 12px;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 2rem;
+}
+
+.logout-button:hover {
+  background: rgb(216 0 12 / 20%);
+  transform: translateY(-2px);
+}
+
+/* Email Form Styles (for emails page) */
+#email-form {
+  background: linear-gradient(135deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 15%));
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgb(255 140 66 / 12%);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid rgb(255 140 66 / 20%);
+  border-radius: 12px;
+  font-family: Inter, sans-serif;
+  font-size: 0.95rem;
+  background: rgb(255 255 255 / 50%);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--warmthly-orange);
+  box-shadow: 0 0 0 3px rgb(255 140 66 / 10%);
+}
+
+#submit-button {
+  padding: 1rem 2rem;
+  background: var(--warmthly-orange);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#submit-button:hover {
+  background: var(--warmthly-orange-hover);
+  transform: translateY(-2px);
+}
+
+#status {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+}
+
+#status.success {
+  background: rgb(46 213 115 / 10%);
+  color: var(--success-color);
+  border: 1px solid rgb(46 213 115 / 20%);
+}
+
+#status.error {
+  background: rgb(216 0 12 / 10%);
+  color: var(--error-color);
+  border: 1px solid rgb(216 0 12 / 20%);
+}
+
+#status.sending {
+  background: rgb(255 140 66 / 10%);
+  color: var(--warmthly-orange);
+  border: 1px solid rgb(255 140 66 / 20%);
+}
+
+/* Received Emails Section */
+.received-emails-section {
+  background: linear-gradient(135deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 15%));
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid rgb(255 140 66 / 12%);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  font-family: Inter, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--warmthly-orange);
+}
+
+.refresh-button {
+  padding: 0.5rem 1rem;
+  background: rgb(255 255 255 / 30%);
+  border: 1px solid rgb(255 140 66 / 20%);
+  border-radius: 8px;
+  color: var(--warmthly-orange);
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.refresh-button:hover {
+  background: rgb(255 255 255 / 50%);
+}
+
+.email-item {
+  background: rgb(255 255 255 / 30%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgb(255 140 66 / 10%);
+  transition: all 0.3s ease;
+}
+
+.email-item:hover {
+  background: rgb(255 255 255 / 50%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
+}
+
+.email-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+.email-subject {
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 1.1rem;
+}
+
+.email-date {
+  font-family: Inter, sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+.email-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.email-from,
+.email-to {
+  font-family: Inter, sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.email-label {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-color);
+  opacity: 0.6;
+  font-family: Inter, sans-serif;
+}
+
+.empty-state.error {
+  color: var(--error-color);
+  background: rgb(216 0 12 / 10%);
+  border-radius: 12px;
+  border: 1px solid rgb(216 0 12 / 20%);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: var(--warmthly-orange);
+  text-decoration: none;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.back-link:hover {
+  color: var(--warmthly-orange-hover);
+}
+
+/* Responsive */
+@media (width <= 768px) {
+  .login-container {
+    padding: 2rem 1.5rem;
+  }
+
+  .admin-content .container {
+    padding: 2rem 1.5rem;
+  }
+
+  .admin-content h1 {
+    font-size: 2rem;
+  }
+}
