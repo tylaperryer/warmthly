@@ -71,8 +71,8 @@ function log(level: LogLevel, method: keyof Console, ...args: unknown[]): void {
     return;
   }
 
-  if (config.enableConsole && typeof console !== 'undefined' && console[method]) {
-    console[method](...args);
+  if (config.enableConsole && typeof console !== 'undefined' && console[method] && typeof console[method] === 'function') {
+    (console[method] as (...args: unknown[]) => void)(...args);
   }
 
   // Track errors
