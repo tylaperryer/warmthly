@@ -21,7 +21,7 @@ class WarmthlySelect extends BaseComponent {
   private labelElement: HTMLLabelElement | null = null;
   private errorElement: HTMLDivElement | null = null;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return [
       'name',
       'value',
@@ -36,11 +36,11 @@ class WarmthlySelect extends BaseComponent {
     ];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.createSelect();
   }
 
-  public onAttributeChange(
+  public override onAttributeChange(
     name: string,
     _oldValue: string | null,
     newValue: string | null
