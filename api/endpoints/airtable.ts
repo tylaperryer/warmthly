@@ -166,7 +166,7 @@ async function airtableHandler(req: Request, res: Response): Promise<unknown> {
     }
 
     // Parse response
-    const data = await response.json();
+    const data = (await response.json()) as Record<string, unknown>;
 
     // Cache the response
     try {

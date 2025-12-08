@@ -310,7 +310,7 @@
         entryElement.appendChild(booksContainer);
       }
       
-      const card = entryElement.querySelector('.timeline-card');
+      // card is already created above at line 251, just add event listener
       card.addEventListener('click', () => openPopup(entry));
       
       if (entry.signature) {

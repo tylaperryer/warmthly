@@ -42,23 +42,23 @@ class WarmthlyForm extends BaseComponent {
   private submitButton: HTMLButtonElement | null = null;
   private isSubmitting = false;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return ['action', 'method', 'novalidate', 'disabled'];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.formElement = this.query<HTMLFormElement>('form') || this.createFormElement();
     this.setupForm();
   }
 
-  public onDisconnect(): void {
+  public override onDisconnect(): void {
     // Cleanup event listeners
     if (this.formElement) {
       this.formElement.removeEventListener('submit', this.handleSubmit);
     }
   }
 
-  public onAttributeChange(name: string): void {
+  public override onAttributeChange(name: string): void {
     if (!this.formElement) return;
 
     switch (name) {

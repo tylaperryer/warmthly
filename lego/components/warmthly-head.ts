@@ -638,12 +638,17 @@ h1{font-size:var(--font-size-2xl);line-height:1.2;margin-bottom:var(--spacing-6)
       ].join('; ');
 
       const temp = document.createElement('div');
+      // Escape values to prevent XSS
+      const escapedCspPolicy = this.escapeHtmlAttribute(cspPolicy);
+      const escapedCspReportUrl = this.escapeHtmlAttribute(cspReportUrl);
       temp.innerHTML = `
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="${cspPolicy}" />
-  <meta http-equiv="Report-To" content='{"group":"csp-endpoint","max_age":10886400,"endpoints":[{"url":"${cspReportUrl}"}]}' />
+  <meta http-equiv="Content-Security-Policy" content="${escapedCspPolicy}" />
+  <meta http-equiv="Report-To" content='{"group":"csp-endpoint","max_age":10886400,"endpoints":[{"url":"${escapedCspReportUrl}"}]}' />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin" />
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
   <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains; preload" />
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(self 'https://js.yoco.com' 'https://js.verygoodvault.com'), interest-cohort=()" />
@@ -798,6 +803,22 @@ ${JSON.stringify(data, null, 2)}
     const div = document.createElement('div');
     div.textContent = text;
     return div.textContent || '';
+  }
+
+  /**
+   * Escape HTML attribute values
+   * Prevents XSS attacks in HTML attributes
+   *
+   * @param value - Attribute value to escape
+   * @returns Escaped value safe for HTML attributes
+   */
+  private escapeHtmlAttribute(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 }
 

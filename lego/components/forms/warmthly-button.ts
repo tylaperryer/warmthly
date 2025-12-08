@@ -23,15 +23,15 @@ class WarmthlyButton extends BaseComponent {
   private loadingSpinner: HTMLSpanElement | null = null;
   private originalContent: string | null = null;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return ['type', 'variant', 'disabled', 'loading', 'aria-label', 'aria-busy'];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.createButton();
   }
 
-  public onAttributeChange(
+  public override onAttributeChange(
     name: string,
     _oldValue: string | null,
     newValue: string | null
@@ -180,7 +180,7 @@ class WarmthlyButton extends BaseComponent {
   /**
    * Click button programmatically
    */
-  public click(): void {
+  public override click(): void {
     this.buttonElement?.click();
   }
 }

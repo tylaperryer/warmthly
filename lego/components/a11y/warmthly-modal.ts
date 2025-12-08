@@ -27,22 +27,22 @@ class WarmthlyModal extends BaseComponent {
   private focusTrapCleanup: (() => void) | null = null;
   private isOpen = false;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return ['open', 'title', 'aria-label', 'aria-labelledby'];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.createModal();
     if (this.hasAttr('open')) {
       this.open();
     }
   }
 
-  public onDisconnect(): void {
+  public override onDisconnect(): void {
     this.close();
   }
 
-  public onAttributeChange(name: string): void {
+  public override onAttributeChange(name: string): void {
     switch (name) {
       case 'open':
         if (this.hasAttr('open')) {

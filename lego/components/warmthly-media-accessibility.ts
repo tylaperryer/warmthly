@@ -277,14 +277,16 @@ class WarmthlyMediaAccessibility extends HTMLElement {
     // Toggle captions track
     if (video.textTracks && video.textTracks.length > 0) {
       const track = video.textTracks[0];
-      if (track.mode === 'hidden' || track.mode === 'disabled') {
-        track.mode = 'showing';
-        button.textContent = 'Hide Captions';
-        button.setAttribute('aria-label', 'Hide closed captions');
-      } else {
-        track.mode = 'hidden';
-        button.textContent = 'Show Captions';
-        button.setAttribute('aria-label', 'Show closed captions');
+      if (track) {
+        if (track.mode === 'hidden' || track.mode === 'disabled') {
+          track.mode = 'showing';
+          button.textContent = 'Hide Captions';
+          button.setAttribute('aria-label', 'Hide closed captions');
+        } else {
+          track.mode = 'hidden';
+          button.textContent = 'Show Captions';
+          button.setAttribute('aria-label', 'Show closed captions');
+        }
       }
     } else if (this.options.captionsUrl) {
       // Add captions track if not present

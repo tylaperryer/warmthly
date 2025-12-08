@@ -14,7 +14,7 @@
 import { readFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
 import { join, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -94,10 +94,13 @@ function extractTextFromHTML(): string {
   for (const file of htmlFiles) {
     try {
       const content = readFileSync(file, 'utf-8');
-      // Remove script and style tags, then extract text
+      // Remove script and style tags, then extract text - improved for multi-byte characters
       const textOnly = content
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+        .replace(/<object[\s\S]*?<\/object>/gi, '')
+        .replace(/<embed[\s\S]*?<\/embed>/gi, '')
         .replace(/<[^>]+>/g, ' ')
         .replace(/\s+/g, ' ');
       allText += textOnly + ' ';
@@ -133,13 +136,20 @@ function charsToUnicodeRanges(chars: string): string {
     .map(c => c.charCodeAt(0))
     .sort((a, b) => a - b);
 
+  if (codes.length === 0) {
+    return '';
+  }
+
   const ranges: string[] = [];
-  let start = codes[0];
-  let end = codes[0];
+  let start: number = codes[0]!;
+  let end: number = codes[0]!;
 
   for (let i = 1; i < codes.length; i++) {
-    if (codes[i] === end + 1) {
-      end = codes[i];
+    const current = codes[i];
+    if (current === undefined) continue;
+    
+    if (current === end + 1) {
+      end = current;
     } else {
       if (start === end) {
         ranges.push(`U+${start.toString(16).toUpperCase().padStart(4, '0')}`);
@@ -151,8 +161,8 @@ function charsToUnicodeRanges(chars: string): string {
             .padStart(4, '0')}`
         );
       }
-      start = codes[i];
-      end = codes[i];
+      start = current;
+      end = current;
     }
   }
 
@@ -208,7 +218,12 @@ function subsetFontPyftsubset(sourcePath: string, outputPath: string, unicodeRan
     ];
 
     console.log(`  Subsetting ${basename(sourcePath)}...`);
-    execSync(commandArgs[0], commandArgs.slice(1), { stdio: 'inherit', cwd: projectRoot });
+    // Validate unicode ranges to prevent injection
+    const validRangePattern = /^U\+[0-9A-Fa-f]{4}(-[0-9A-Fa-f]{4})?(,U\+[0-9A-Fa-f]{4}(-[0-9A-Fa-f]{4})?)*$/;
+    if (!validRangePattern.test(ranges)) {
+      throw new Error(`Invalid unicode range format: ${ranges}`);
+    }
+    execFileSync('pyftsubset', commandArgs.slice(1), { stdio: 'inherit', cwd: projectRoot });
     console.log(`  ✓ Created ${basename(outputPath)}`);
   } catch (error) {
     console.error(`  ✗ Error subsetting font: ${error}`);
@@ -246,7 +261,11 @@ function subsetFontGlyphhanger(sourcePath: string, outputPath: string, text: str
     ];
 
     console.log(`  Subsetting ${basename(sourcePath)}...`);
-    execSync(commandArgs[0], commandArgs.slice(1), { stdio: 'inherit', cwd: projectRoot });
+    // Validate text input to prevent injection
+    if (text.includes(';') || text.includes('&') || text.includes('|') || text.includes('`')) {
+      throw new Error('Invalid characters in text input');
+    }
+    execFileSync('glyphhanger', commandArgs.slice(1), { stdio: 'inherit', cwd: projectRoot });
     console.log(`  ✓ Created subset font`);
   } catch (error) {
     console.error(`  ✗ Error subsetting font: ${error}`);

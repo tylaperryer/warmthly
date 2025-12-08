@@ -75,7 +75,14 @@ async function getEmailsHandler(req: Request, res: Response): Promise<Response> 
 
     // Verify JWT token with explicit algorithm specification
     // Prevents algorithm confusion attacks
-    jwt.verify(token, jwtSecret, { algorithms: ['HS256'] });
+    if (!token) {
+      return res.status(401).json({ error: { message: 'Authentication required' } });
+    }
+    try {
+      jwt.verify(token, jwtSecret, { algorithms: ['HS256'] });
+    } catch (jwtError) {
+      return res.status(401).json({ error: { message: 'Invalid or expired token' } });
+    }
 
     // Get emails from Redis
     const client = await getRedisClient();

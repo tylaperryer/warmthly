@@ -237,7 +237,23 @@
           emailElements.forEach(el => {
             const email = el.getAttribute('data-email');
             if (email) {
-              el.innerHTML = `<a href="mailto:${email}">${email.replace('@', ' [at] ').replace('.', ' [dot] ')}</a>`;
+              // Escape email to prevent XSS
+              const escapeHtml = (text) => {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.textContent || '';
+              };
+              const escapeHtmlAttribute = (value) => {
+                return String(value)
+                  .replace(/&/g, '&amp;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#x27;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;');
+              };
+              const escapedEmail = escapeHtmlAttribute(email);
+              const displayEmail = escapeHtml(email.replace('@', ' [at] ').replace(/\./g, ' [dot] '));
+              el.innerHTML = `<a href="mailto:${escapedEmail}">${displayEmail}</a>`;
             }
           });
         });

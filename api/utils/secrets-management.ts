@@ -255,6 +255,7 @@ export function detectSecretsInCode(content: string): Array<{
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (!line) continue; // Skip undefined lines
     for (const pattern of patterns) {
       if (pattern.regex.test(line)) {
         // Extract snippet (first 50 chars)

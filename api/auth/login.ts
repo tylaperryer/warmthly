@@ -66,15 +66,15 @@ function generateAdminToken(): string {
  * Handle password verification step
  * Validates password and either issues token or requests TOTP
  */
-async function handlePasswordVerification(
+function handlePasswordVerification(
   res: Response,
   identifier: string,
   password: string | undefined,
   adminPassword: string,
   mfaEnabled: boolean
-): Promise<Response> {
+): Response {
   if (!constantTimeCompare(password || '', adminPassword)) {
-    SecurityLogger.authenticationFailure(identifier, '/api/login');
+    void SecurityLogger.authenticationFailure(identifier, '/api/login');
     return res.status(401).json({ error: { message: 'Incorrect password' } });
   }
 
@@ -82,7 +82,7 @@ async function handlePasswordVerification(
     try {
       const token = generateAdminToken();
       return res.status(200).json({ token });
-    } catch (error) {
+    } catch {
       return res.status(500).json({ error: { message: 'Authentication system not configured.' } });
     }
   }
@@ -116,7 +116,7 @@ async function handleTOTPVerification(
   }
 
   if (!verifyTOTP(secret, totpCode)) {
-    SecurityLogger.authenticationFailure(identifier, '/api/login');
+    void SecurityLogger.authenticationFailure(identifier, '/api/login');
     return res.status(401).json({ error: { message: 'Invalid TOTP code' } });
   }
 
@@ -124,7 +124,7 @@ async function handleTOTPVerification(
     const token = generateAdminToken();
     logger.info('[login] Admin login successful with MFA');
     return res.status(200).json({ token });
-  } catch (error) {
+  } catch {
     return res.status(500).json({ error: { message: 'Authentication system not configured.' } });
   }
 }
@@ -167,4 +167,4 @@ async function loginHandler(req: LoginRequest, res: Response): Promise<Response>
 }
 
 // Export the handler with rate limiting
-export default withRateLimit(loginHandler, loginRateLimitOptions);
+export default withRateLimit(loginHandler as (req: Request, res: Response) => Promise<unknown>, loginRateLimitOptions);

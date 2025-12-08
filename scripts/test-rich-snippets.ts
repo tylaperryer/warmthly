@@ -59,7 +59,9 @@ function extractStructuredData(html: string): Array<{ type: string; data: object
 
   while ((match = scriptRegex.exec(html)) !== null) {
     try {
-      const json = JSON.parse(match[1]);
+      const jsonContent = match[1];
+      if (!jsonContent) continue;
+      const json = JSON.parse(jsonContent);
       const type = json['@type'] || 'Unknown';
       schemas.push({ type, data: json });
     } catch {
@@ -81,7 +83,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://www.warmthly.org/';
     }
-    return `https://www.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://www.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   if (relative.includes('/apps/mint/')) {
@@ -89,7 +91,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://mint.warmthly.org/';
     }
-    return `https://mint.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://mint.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   if (relative.includes('/apps/post/')) {
@@ -97,7 +99,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://post.warmthly.org/';
     }
-    return `https://post.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://post.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   return relative;

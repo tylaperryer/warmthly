@@ -54,9 +54,16 @@ function findHTMLFiles(dir: string, fileList: string[] = []): string[] {
  * Extract text content from HTML
  */
 function extractTextContent(html: string): string {
+  if (!html || typeof html !== 'string') {
+    return '';
+  }
+  // Improved regex to handle multi-byte characters and nested tags
   return html
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+    .replace(/<object[\s\S]*?<\/object>/gi, '')
+    .replace(/<embed[\s\S]*?<\/embed>/gi, '')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -67,7 +74,7 @@ function extractTextContent(html: string): string {
  */
 function extractTitle(html: string): string {
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  return titleMatch ? titleMatch[1].trim() : '';
+  return titleMatch && titleMatch[1] ? titleMatch[1].trim() : '';
 }
 
 /**
@@ -81,7 +88,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://www.warmthly.org/';
     }
-    return `https://www.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://www.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   if (relative.includes('/apps/mint/')) {
@@ -89,7 +96,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://mint.warmthly.org/';
     }
-    return `https://mint.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://mint.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   if (relative.includes('/apps/post/')) {
@@ -97,7 +104,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://post.warmthly.org/';
     }
-    return `https://post.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://post.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   return relative;

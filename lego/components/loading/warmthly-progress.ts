@@ -18,15 +18,15 @@ class WarmthlyProgress extends BaseComponent {
   private labelElement: HTMLSpanElement | null = null;
   private barElement: HTMLDivElement | null = null;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return ['value', 'max', 'indeterminate', 'label', 'aria-label'];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.createProgress();
   }
 
-  public onAttributeChange(name: string): void {
+  public override onAttributeChange(name: string): void {
     if (!this.progressElement) return;
 
     switch (name) {

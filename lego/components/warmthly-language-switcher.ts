@@ -212,18 +212,33 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
       rtl: false,
     };
 
+    // Escape values to prevent XSS
+    const escapeHtml = (text: string): string => {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.textContent || '';
+    };
+    const escapeHtmlAttribute = (value: string): string => {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    };
+
     this.innerHTML = `
       <div class="language-switcher">
         <button 
           class="language-switcher__button"
-          aria-expanded="${this.isOpen}"
+          aria-expanded="${escapeHtmlAttribute(String(this.isOpen))}"
           aria-haspopup="listbox"
           aria-label="Select language"
           id="language-switcher-button"
         >
           <span class="language-switcher__current">
-            <span class="language-switcher__code">${currentLang.code.toUpperCase()}</span>
-            <span class="language-switcher__name">${currentLang.nativeName}</span>
+            <span class="language-switcher__code">${escapeHtml(currentLang.code.toUpperCase())}</span>
+            <span class="language-switcher__name">${escapeHtml(currentLang.nativeName)}</span>
           </span>
           <svg class="language-switcher__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -255,13 +270,13 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
                     lang.code === this.currentLanguage ? 'language-switcher__option--active' : ''
                   }"
                   role="option"
-                  aria-selected="${lang.code === this.currentLanguage}"
-                  data-code="${lang.code}"
-                  tabindex="${index === 0 ? '0' : '-1'}"
+                  aria-selected="${escapeHtmlAttribute(String(lang.code === this.currentLanguage))}"
+                  data-code="${escapeHtmlAttribute(lang.code)}"
+                  tabindex="${escapeHtmlAttribute(String(index === 0 ? '0' : '-1'))}"
                 >
-                  <span class="language-switcher__option-code">${lang.code.toUpperCase()}</span>
-                  <span class="language-switcher__option-name">${lang.nativeName}</span>
-                  <span class="language-switcher__option-name-en">${lang.name}</span>
+                  <span class="language-switcher__option-code">${escapeHtml(lang.code.toUpperCase())}</span>
+                  <span class="language-switcher__option-name">${escapeHtml(lang.nativeName)}</span>
+                  <span class="language-switcher__option-name-en">${escapeHtml(lang.name)}</span>
                   ${
                     lang.rtl
                       ? '<span class="language-switcher__rtl-indicator" aria-label="Right-to-left language">RTL</span>'
@@ -273,7 +288,7 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
                       .join('')
                   : `
                 <div class="language-switcher__empty">
-                  No languages found matching "${this.searchQuery}"
+                  No languages found matching "${escapeHtml(this.searchQuery)}"
                 </div>
               `
               }

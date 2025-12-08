@@ -242,7 +242,7 @@ export class CertificateTransparencyMonitor {
    * @param domain - Domain to query
    * @returns Array of certificate information
    */
-  async queryCTLogs(domain: string): Promise<CertificateInfo[]> {
+  async queryCTLogs(_domain: string): Promise<CertificateInfo[]> {
     // Placeholder - would integrate with actual CT log API
     logger.warn('[certificate-monitoring] CT log querying not implemented');
     return [];
@@ -255,8 +255,8 @@ export class CertificateTransparencyMonitor {
    * @param callback - Callback when new certificate detected
    */
   async monitorCTLogs(
-    domain: string,
-    callback: (certificate: CertificateInfo) => Promise<void>
+    _domain: string,
+    _callback: (certificate: CertificateInfo) => Promise<void>
   ): Promise<void> {
     // Placeholder - would set up periodic monitoring
     logger.warn('[certificate-monitoring] CT log monitoring not implemented');

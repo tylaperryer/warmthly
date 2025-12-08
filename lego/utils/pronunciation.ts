@@ -184,21 +184,58 @@ function showPronunciationTooltip(element: HTMLElement, word: string, phonetic: 
 
   const pronunciation = getPronunciation(word);
 
+  // Escape HTML to prevent XSS
+  const escapeHtml = (text: string): string => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.textContent || '';
+  };
+  const escapeHtmlAttribute = (value: string): string => {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  };
+
   const tooltip = document.createElement('div');
   tooltip.className = 'pronunciation-tooltip';
   tooltip.setAttribute('role', 'dialog');
-  tooltip.setAttribute('aria-label', `Pronunciation of ${word}`);
-  tooltip.innerHTML = `
-    <button class="pronunciation-tooltip-close" aria-label="Close pronunciation">×</button>
-    <h3>${word}</h3>
-    <p class="phonetic">${phonetic}</p>
-    ${pronunciation?.context ? `<p class="pronunciation-context">${pronunciation.context}</p>` : ''}
-    ${
-      pronunciation?.audioUrl
-        ? `<audio controls><source src="${pronunciation.audioUrl}" type="audio/mpeg"></audio>`
-        : ''
-    }
-  `;
+  tooltip.setAttribute('aria-label', `Pronunciation of ${escapeHtml(word)}`);
+  
+  // Use DOM methods instead of innerHTML for better security
+  const closeButton = document.createElement('button');
+  closeButton.className = 'pronunciation-tooltip-close';
+  closeButton.setAttribute('aria-label', 'Close pronunciation');
+  closeButton.textContent = '×';
+  tooltip.appendChild(closeButton);
+
+  const heading = document.createElement('h3');
+  heading.textContent = word;
+  tooltip.appendChild(heading);
+
+  const phoneticP = document.createElement('p');
+  phoneticP.className = 'phonetic';
+  phoneticP.textContent = phonetic;
+  tooltip.appendChild(phoneticP);
+
+  if (pronunciation?.context) {
+    const contextP = document.createElement('p');
+    contextP.className = 'pronunciation-context';
+    contextP.textContent = pronunciation.context;
+    tooltip.appendChild(contextP);
+  }
+
+  if (pronunciation?.audioUrl) {
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    const source = document.createElement('source');
+    source.src = escapeHtmlAttribute(pronunciation.audioUrl);
+    source.type = 'audio/mpeg';
+    audio.appendChild(source);
+    tooltip.appendChild(audio);
+  }
 
   const rect = element.getBoundingClientRect();
   tooltip.style.position = 'fixed';

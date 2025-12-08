@@ -6,15 +6,16 @@
 
 import { Resend } from 'resend';
 
-import { withRateLimit, apiRateLimitOptions } from '../middleware/rate-limit.js';
 import {
   validateString,
   validateEmail,
   validateInputWithAttackDetection,
 } from '../middleware/input-validation.js';
+import { withRateLimit, apiRateLimitOptions } from '../middleware/rate-limit.js';
+import { createErrorResponse } from '../utils/error-response.js';
+import { ErrorCode } from '../utils/error-sanitizer.js';
 import logger from '../utils/logger.js';
 import { getRedisClient } from '../utils/redis-client.js';
-import { createErrorResponse, ErrorCode } from '../utils/error-response.js';
 
 /**
  * Resend client instance
@@ -120,7 +121,8 @@ async function reportsHandler(req: Request, res: Response): Promise<Response> {
 
   try {
     // Get request body
-    const { name, email, type, message } = req.body;
+    const body = (req.body || {}) as { name?: string; email?: string; type?: string; message?: string; [key: string]: unknown };
+    const { name, email, type, message } = body;
 
     // Phase 3 Issue 3.10: Comprehensive input validation with attack detection
     // Validate name with attack detection
@@ -151,7 +153,7 @@ async function reportsHandler(req: Request, res: Response): Promise<Response> {
       );
     }
 
-    const sanitizedName = nameValidation.sanitized || '';
+    const sanitizedName = String(nameValidation.sanitized || '');
 
     // Validate email
     const emailValidation = validateEmail(email, {
@@ -223,7 +225,7 @@ async function reportsHandler(req: Request, res: Response): Promise<Response> {
       );
     }
 
-    const sanitizedMessage = messageValidation.sanitized || '';
+    const sanitizedMessage = String(messageValidation.sanitized || '');
 
     // Get client identifier for logging
     const identifier = getClientIdentifier(req);
@@ -263,7 +265,7 @@ async function reportsHandler(req: Request, res: Response): Promise<Response> {
         const reportTypeLabel = getReportTypeLabel(type);
         const emailSubject = `[Warmthly Report] ${reportTypeLabel} from ${sanitizedName}`;
         // SECURITY: Sanitize HTML to prevent XSS in email
-        const sanitizedMessageHtml = sanitizedMessage
+        const sanitizedMessageHtml = String(sanitizedMessage)
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
@@ -288,7 +290,7 @@ async function reportsHandler(req: Request, res: Response): Promise<Response> {
           to: [adminEmail],
           subject: emailSubject,
           html: emailHtml,
-          replyTo: sanitizedEmail,
+          replyTo: String(sanitizedEmail),
         })) as ResendResponse;
 
         if (result.error) {
@@ -327,4 +329,4 @@ async function reportsHandler(req: Request, res: Response): Promise<Response> {
   }
 }
 
-export default withRateLimit(reportsHandler, apiRateLimitOptions);
+export default withRateLimit(reportsHandler as any, apiRateLimitOptions);

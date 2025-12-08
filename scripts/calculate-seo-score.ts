@@ -122,7 +122,9 @@ function calculateSEOScore(): SEOScore {
       );
       for (const match of matches) {
         try {
-          const json = JSON.parse(match[1]);
+          const jsonContent = match[1];
+          if (!jsonContent) continue;
+          const json = JSON.parse(jsonContent);
           if (json['@type']) {
             schemaTypes.add(json['@type']);
           }
@@ -187,11 +189,13 @@ function calculateSEOScore(): SEOScore {
     totalLinks += links.length;
     links.forEach(link => {
       const hrefMatch = link.match(/href\s*=\s*["']([^"']+)["']/i);
-      if (hrefMatch) {
+      if (hrefMatch && hrefMatch[1]) {
         const href = hrefMatch[1];
+        // Use case-insensitive check to prevent bypasses
+        const normalizedHref = href.trim().toLowerCase();
         if (
-          (!href.startsWith('http://') && !href.startsWith('https://')) ||
-          href.includes('warmthly.org')
+          (!normalizedHref.startsWith('http://') && !normalizedHref.startsWith('https://')) ||
+          normalizedHref.includes('warmthly.org')
         ) {
           internalLinks++;
         }

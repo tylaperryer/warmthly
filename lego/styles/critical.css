@@ -149,11 +149,17 @@ body::before {
   left: 0;
   background: var(--warmthly-orange);
   color: white;
-  padding: var(--spacing-2) var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
   text-decoration: none;
   z-index: 10000;
   border-radius: 0 0 var(--radius-sm) 0;
   font-weight: 600;
+  /* Ensure minimum touch target size (48x48px) for accessibility */
+  min-height: 48px;
+  min-width: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .skip-link:focus {

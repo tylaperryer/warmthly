@@ -27,21 +27,21 @@ class WarmthlyTooltip extends BaseComponent {
   private hideTimeout: number | null = null;
   private isVisible = false;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return ['position', 'delay', 'aria-label'];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.createTooltip();
     this.attachToParent();
   }
 
-  public onDisconnect(): void {
+  public override onDisconnect(): void {
     this.detachFromParent();
     this.clearTimeouts();
   }
 
-  public onAttributeChange(name: string): void {
+  public override onAttributeChange(name: string): void {
     switch (name) {
       case 'position':
         this.updatePosition();

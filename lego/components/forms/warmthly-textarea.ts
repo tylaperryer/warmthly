@@ -24,7 +24,7 @@ class WarmthlyTextarea extends BaseComponent {
   private errorElement: HTMLDivElement | null = null;
   private validationTimeout: number | null = null;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return [
       'name',
       'value',
@@ -43,18 +43,18 @@ class WarmthlyTextarea extends BaseComponent {
     ];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.createTextarea();
     this.setupValidation();
   }
 
-  public onDisconnect(): void {
+  public override onDisconnect(): void {
     if (this.validationTimeout !== null) {
       clearTimeout(this.validationTimeout);
     }
   }
 
-  public onAttributeChange(
+  public override onAttributeChange(
     name: string,
     _oldValue: string | null,
     newValue: string | null
