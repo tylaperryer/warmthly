@@ -1,6 +1,6 @@
 {
   "*.{ts,tsx,js,jsx}": [
-    "eslint --fix --config .config/.eslintrc.json",
+    "eslint --fix --config .config/eslint.config.mjs",
     "prettier --write --config .config/.prettierrc.json"
   ],
   "*.{css}": [
