@@ -58,7 +58,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://www.warmthly.org/';
     }
-    return `https://www.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://www.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   if (relative.includes('/apps/mint/')) {
@@ -66,7 +66,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://mint.warmthly.org/';
     }
-    return `https://mint.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://mint.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   if (relative.includes('/apps/post/')) {
@@ -74,7 +74,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://post.warmthly.org/';
     }
-    return `https://post.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://post.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   if (relative.includes('/apps/admin/')) {
@@ -82,9 +82,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://admin.warmthly.org/';
     }
-    return `https://admin.warmthly.org${path
-      .replace('/index.html', '/')
-      .replace('.html', '.html')}`;
+    return `https://admin.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   return relative;
@@ -126,17 +124,19 @@ function extractInternalLinks(content: string, baseUrl: string): string[] {
 
   while ((match = hrefRegex.exec(content)) !== null) {
     let href = match[1];
+    if (!href) continue;
 
-    // Skip external links, anchors, and special protocols
-    if (href.startsWith('http://') || href.startsWith('https://')) {
+    // Skip external links, anchors, and special protocols - use case-insensitive check
+    const normalizedHref = href.trim().toLowerCase();
+    if (normalizedHref.startsWith('http://') || normalizedHref.startsWith('https://')) {
       // Check if it's internal
-      if (href.includes('warmthly.org')) {
-        links.push(href);
+      if (normalizedHref.includes('warmthly.org')) {
+        links.push(href); // Use original href for output
       }
       continue;
     }
 
-    if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+    if (normalizedHref.startsWith('#') || normalizedHref.startsWith('mailto:') || normalizedHref.startsWith('tel:')) {
       continue;
     }
 
@@ -227,12 +227,23 @@ function analyzeLinkEquity(): void {
   });
 
   // Mark homepage as not orphan (it's the entry point)
-  const homepage = Array.from(pageInfo.values()).find(
-    p => p.url.includes('warmthly.org/') && !p.url.includes('/')
-  );
-  if (homepage) {
+  // Use case-insensitive check - find URLs that are exactly the domain or domain with trailing slash
+  const homepages = Array.from(pageInfo.values()).filter(p => {
+    const urlLower = p.url.toLowerCase();
+    return (
+      urlLower === 'https://www.warmthly.org/' ||
+      urlLower === 'https://www.warmthly.org' ||
+      urlLower === 'https://mint.warmthly.org/' ||
+      urlLower === 'https://mint.warmthly.org' ||
+      urlLower === 'https://post.warmthly.org/' ||
+      urlLower === 'https://post.warmthly.org' ||
+      urlLower === 'https://admin.warmthly.org/' ||
+      urlLower === 'https://admin.warmthly.org'
+    );
+  });
+  homepages.forEach(homepage => {
     homepage.isOrphan = false;
-  }
+  });
 
   // Generate report
   const pages = Array.from(pageInfo.values());
