@@ -1,0 +1,46 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "language": "Language"
+  },
+  "main": {
+    "title": "Rehumanize Our World.",
+    "subtitle": "Warmthly is a global movement to make empathy a measurable part of our systems.",
+    "donate": "Support the Mission",
+    "donateButton": "🤍 Support the Mission"
+  },
+  "mint": {
+    "title": "Mint",
+    "description": "We track your every cent and our every decision right before you. It is our commitment to you that we will forever track and provide utmost transparency for our every action and your every donation."
+  },
+  "post": {
+    "title": "Post",
+    "subtitle": "A living timeline of our organization's story—from founding moments to future plans. Every decision, milestone, and community interaction is recorded here for complete transparency."
+  },
+  "vote": {
+    "title": "The Dissolution Vote",
+    "description": "Our commitment is to our mission and values: Transparency, Honesty, Humility, and Empathy. If we fail to uphold them, we believe we should cease to exist. This page is our community-held kill switch."
+  },
+  "report": {
+    "title": "Report an Issue",
+    "description": "If you have concerns, questions, or need to report something related to Warmthly, please use the form below. We take all reports seriously and will review them promptly."
+  },
+  "yourData": {
+    "title": "Your Data",
+    "description": "Radical Transparency: This is everything we store about you. If you see something we didn't mention, report it."
+  }
+}
