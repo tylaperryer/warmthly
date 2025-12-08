@@ -56,6 +56,12 @@ body > nav.header-right .stoplight-container {
   user-select: none;
   text-decoration: none;
   letter-spacing: var(--letter-spacing-normal);
+  /* Ensure minimum touch target size (48x48px) for accessibility */
+  min-height: 48px;
+  min-width: 48px;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-3);
 }
 
 .nav-link {
