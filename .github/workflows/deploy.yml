@@ -32,11 +32,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        working-directory: ./warmthly
         run: npm ci
 
       - name: Type check
-        working-directory: ./warmthly
         run: |
           if [ -f ".config/tsconfig.json" ]; then
             npm run type-check || echo "Type check completed with warnings"
@@ -45,12 +43,10 @@ jobs:
           fi
 
       - name: Lint
-        working-directory: ./warmthly
         run: |
           npm run lint || echo "Lint completed with warnings (this is okay for initial setup)"
 
       - name: Run unit tests
-        working-directory: ./warmthly
         run: |
           if [ -d "tests" ] && [ "$(find tests -name '*.test.*' -o -name '*.spec.*' | wc -l)" -gt 0 ]; then
             npm run test -- --run
@@ -59,7 +55,6 @@ jobs:
           fi
 
       - name: Check bundle sizes (if build exists)
-        working-directory: ./warmthly
         run: |
           if [ -d "dist" ]; then
             node scripts/check-bundle-size.js dist || echo "Bundle size check completed with warnings"
@@ -85,11 +80,9 @@ jobs:
           cache-dependency-path: './warmthly/package-lock.json'
 
       - name: Install dependencies
-        working-directory: ./warmthly
         run: npm ci
 
       - name: Run full build
-        working-directory: ./warmthly
         run: |
           echo "🚀 Running full build process..."
           echo "This includes: TypeScript compilation, font subsetting, Vite build, and verification"
@@ -97,7 +90,6 @@ jobs:
           echo "✅ Build completed successfully"
 
       - name: Organize Vite output for subdomains
-        working-directory: ./warmthly
         run: |
           set -e
           echo "📦 Organizing Vite build output for subdomain deployment..."
@@ -234,7 +226,6 @@ jobs:
           echo "✅ All apps organized for deployment"
 
       - name: Verify build outputs
-        working-directory: ./warmthly
         run: |
           echo "🔍 Verifying build outputs..."
           for app in main mint post admin; do
@@ -248,7 +239,6 @@ jobs:
           echo "✅ All build outputs verified"
 
       - name: Check bundle sizes
-        working-directory: ./warmthly
         run: |
           echo "📊 Checking bundle sizes..."
           for app in main mint post admin; do
@@ -283,7 +273,6 @@ jobs:
           path: warmthly/build
 
       - name: Verify and fix directory structure
-        working-directory: ./warmthly
         run: |
           set +e  # Don't fail on errors, just report them
           
