@@ -6,7 +6,7 @@
 
 import { Resend } from 'resend';
 
-import { withRateLimit, emailRateLimitOptions } from '../middleware/rate-limit.js';
+import { withRateLimit, emailRateLimitOptions, type Request as RateLimitRequest, type Response as RateLimitResponse } from '../middleware/rate-limit.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -18,29 +18,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
  * Maximum subject length
  */
 const MAX_SUBJECT_LENGTH = 200;
-
-/**
- * Request object interface
- */
-interface Request {
-  readonly method: string;
-  readonly body: {
-    readonly to?: string;
-    readonly subject?: string;
-    readonly html?: string;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
-/**
- * Response object interface
- */
-interface Response {
-  status: (code: number) => Response;
-  json: (data: unknown) => Response;
-  [key: string]: unknown;
-}
 
 /**
  * Resend API response
@@ -107,7 +84,7 @@ function isValidEmail(email: string | null | undefined): boolean {
  * @param res - Response object
  * @returns Response with success or error
  */
-async function sendEmailHandler(req: Request, res: Response): Promise<Response> {
+async function sendEmailHandler(req: RateLimitRequest, res: RateLimitResponse): Promise<unknown> {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: { message: 'Method Not Allowed' } });
   }
@@ -122,7 +99,8 @@ async function sendEmailHandler(req: Request, res: Response): Promise<Response> 
     }
 
     // Get request body
-    const { to, subject, html } = req.body;
+    const body = (req.body || {}) as { to?: string; subject?: string; html?: string; [key: string]: unknown };
+    const { to, subject, html } = body;
 
     // Validate recipient email
     if (!to || typeof to !== 'string') {
