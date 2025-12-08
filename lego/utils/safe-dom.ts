@@ -3,7 +3,7 @@
  * Prevents XSS attacks by using safe DOM methods instead of innerHTML
  */
 
-import { escapeHtml, sanitizeUrl, createElementWithAttributes } from './sanitize.js';
+import { sanitizeUrl, createElementWithAttributes } from './sanitize.js';
 
 /**
  * Safely create a DOM element with text content
@@ -52,7 +52,11 @@ export function createLabelValuePair(
   value: string | HTMLElement,
   className?: string
 ): HTMLDivElement {
-  const container = createSafeElement('div', className);
+  const container = document.createElement('div') as HTMLDivElement;
+  if (className) {
+    container.className = className;
+  }
+  container.align = '';
   
   const labelEl = createSafeElement('div', 'expense-popup-item-label', label);
   container.appendChild(labelEl);
