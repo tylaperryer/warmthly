@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    (function() {
+      function detectLanguage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+          }
+        } catch {}
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script>
+    // API Configuration - Set before other scripts load
+    window.API_BASE_URL = 'https://backend.warmthly.org';
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    // Initialize logger for error tracking
+    import { logger } from '/lego/utils/logger.js';
+    window.logger = logger;
+    
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
+  <warmthly-head 
+    title="Admin Email Sender - Warmthly"
+    description="Administrative email management interface"
+    app="admin"
+    viewport="1.0"
+    robots="noindex, nofollow"
+    preconnects="https://cdn.quilljs.com">
+  </warmthly-head>
+  
+  <link rel="dns-prefetch" href="//cdn.quilljs.com">
+  
+  <!-- Secure token storage (Web Crypto API + IndexedDB) -->
+  <script src="/apps/admin/secure-auth.js"></script>
+
+  <!-- Include the Quill library -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+  <style>
+    /* Hide body until CSS loads to prevent FOUC */
+    body:not(.css-loaded) {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body.css-loaded {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
+    :root { 
+      color-scheme: light;
+      --warmthly-orange: #FF8C42;
+      --warmthly-background: #fff6f1;
+      --text-color: #2c2c2c;
+      --error-color: #D8000C;
+      --success-color: #2ed573;
+    }
+    html {
+      background-color: var(--warmthly-background);
+      min-height: 100%;
+    }
+    body {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease-in-out;
+    }
+    body.fonts-loaded {
+      opacity: 1;
+      visibility: visible;
+    }
+  </style>
+</head>
+<body class="fonts-loading">
+  <warmthly-header app="admin"></warmthly-header>
+  <div style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1rem; align-items: center;">
+    <warmthly-language-switcher></warmthly-language-switcher>
+    <warmthly-reading-level></warmthly-reading-level>
+    <warmthly-stoplight app="admin"></warmthly-stoplight>
+  </div>
+
+  <div id="login-section" class="login-section">
+    <div class="login-container">
+      <h1 data-reading-level-content>Admin Access</h1>
+      <p data-reading-level-content>Enter the password to access the email sender.</p>
+      <form id="login-form">
+        <input 
+          type="password" 
+          id="password-input" 
+          class="password-input" 
+          placeholder="Password" 
+          required 
+          autocomplete="current-password"
+          aria-label="Admin password"
+        />
+        <button type="submit" class="submit-button">Unlock</button>
+      </form>
+      <div id="error-message" class="error-message" role="alert" aria-live="polite">
+        Incorrect password. Please try again.
+      </div>
+    </div>
+  </div>
+
+  <div id="admin-content" class="admin-content">
+  <div class="container">
+      <a href="/" class="back-link" id="back-link">← Back to Admin Dashboard</a>
+      <form id="email-form" novalidate>
+        <h2>Send Email</h2>
+        
+        <div class="form-group">
+          <label for="from">From: <span aria-label="required">*</span></label>
+          <input 
+            type="email" 
+            id="from" 
+            name="from" 
+            required 
+            autocomplete="email"
+            aria-required="true"
+            aria-describedby="from-error"
+          />
+          <span id="from-error" class="error-message" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="to">To: <span aria-label="required">*</span></label>
+          <input 
+            type="email" 
+            id="to" 
+            name="to" 
+            required 
+            autocomplete="email"
+            aria-required="true"
+            aria-describedby="to-error"
+          />
+          <span id="to-error" class="error-message" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Subject: <span aria-label="required">*</span></label>
+          <input 
+            type="text" 
+            id="subject" 
+            name="subject" 
+            required 
+            maxlength="200"
+            aria-required="true"
+            aria-describedby="subject-error"
+          />
+          <span id="subject-error" class="error-message" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="editor">Body: <span aria-label="required">*</span></label>
+          <div id="editor" role="textbox" aria-label="Email body" aria-required="true"></div>
+        </div>
+
+        <button type="submit" id="submit-button">Send Email</button>
+        <div id="status" role="status" aria-live="polite" aria-atomic="true"></div>
+    </form>
+
+      <div class="received-emails-section">
+        <div class="section-header">
+          <h2>Emails</h2>
+          <button class="refresh-button" id="refresh-emails-button" aria-label="Refresh emails list">
+            Refresh
+          </button>
+        </div>
+        <div id="emails-container">
+          <div class="loading-state">Loading emails...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Enhancement 2: Subresource Integrity (SRI) -->
+  <!-- Note: SRI hash not included as Quill.js CDN version may update. For production, pin version and generate hash. -->
+  <script 
+    src="https://cdn.quilljs.com/1.3.6/quill.js" 
+    crossorigin="anonymous">
+  </script>
+  <warmthly-font-loader></warmthly-font-loader>
+
+  <script type="module">
+    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    const backLink = document.getElementById('back-link');
+    if (backLink) {
+      backLink.href = WARMTHLY_CONFIG.urls.admin;
+    }
+
+    const loginForm = document.getElementById('login-form');
+    const passwordInput = document.getElementById('password-input');
+    const loginSection = document.getElementById('login-section');
+    const adminContent = document.getElementById('admin-content');
+    const errorMessage = document.getElementById('error-message');
+
+    // Check authentication using secure storage
+    async function checkAuthentication() {
+      try {
+        if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+          const token = await window.SecureAuth.getAccessToken();
+          return token !== null;
+        } else {
+          // Fallback to sessionStorage if secure storage unavailable
+          return sessionStorage.getItem('warmthly-admin-authenticated') === 'true';
+        }
+      } catch (error) {
+        if (window.logger) {
+          window.logger.error('Auth check failed:', error);
+        } else if (process.env.NODE_ENV !== 'production') {
+          console.error('Auth check failed:', error);
+        }
+        return false;
+      }
+    }
+
+    // Initialize authentication state
+    let isAuthenticated = false;
+    checkAuthentication().then((authenticated) => {
+      isAuthenticated = authenticated;
+      if (authenticated) {
+        loginSection.style.display = 'none';
+        adminContent.classList.add('active');
+      }
+    });
+
+    loginForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const enteredPassword = passwordInput.value;
+      errorMessage.style.display = 'none';
+      
+      const submitButton = loginForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Verifying...';
+
+      try {
+        const apiBase = window.API_BASE_URL || 'https://backend.warmthly.org';
+        const response = await fetch(`${apiBase}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: enteredPassword }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          const token = result.token;
+          
+          if (!token) {
+            throw new Error('No token received from server');
+          }
+          
+          // Store token securely using Web Crypto API + IndexedDB
+          if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+            try {
+              await window.SecureAuth.storeAccessToken(token);
+              // Also set session flag for compatibility
+              sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+            } catch (storageError) {
+              if (window.logger) {
+                window.logger.error('Secure storage failed, using fallback:', storageError);
+              } else if (process.env.NODE_ENV !== 'production') {
+                console.error('Secure storage failed, using fallback:', storageError);
+              }
+              // Fallback to sessionStorage
+              sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+              sessionStorage.setItem('warmthly-admin-token', token);
+            }
+          } else {
+            // Fallback to sessionStorage if secure storage unavailable
+            sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+            sessionStorage.setItem('warmthly-admin-token', token);
+          }
+          loginSection.style.display = 'none';
+          adminContent.classList.add('active');
+          passwordInput.value = '';
+          
+          if (adminContent.classList.contains('active')) {
+            loadReceivedEmails();
+          }
+        } else {
+          errorMessage.style.display = 'block';
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      } catch (error) {
+        errorMessage.textContent = 'An error occurred. Please try again.';
+        errorMessage.style.display = 'block';
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Unlock';
+      }
+    });
+
+    let quill = null;
+    if (isAuthenticated) {
+      initializeEditor();
+    } else {
+      const observer = new MutationObserver((mutations) => {
+        if (adminContent.classList.contains('active') && !quill) {
+          initializeEditor();
+          observer.disconnect();
+        }
+      });
+      observer.observe(adminContent, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    function initializeEditor() {
+      quill = new Quill('#editor', {
+        theme: 'snow',
+      modules: {
+        toolbar: [
+          [{ 'header': [1, 2, false] }],
+          ['bold', 'italic', 'underline'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          ['link', 'image']
+        ]
+        },
+        placeholder: 'Compose your email...'
+      });
+      }
+
+    const emailForm = document.getElementById('email-form');
+    const statusEl = document.getElementById('status');
+    const submitButton = document.getElementById('submit-button');
+
+    emailForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      statusEl.className = '';
+      statusEl.textContent = '';
+      
+      const from = document.getElementById('from').value.trim();
+      const to = document.getElementById('to').value.trim();
+      const subject = document.getElementById('subject').value.trim();
+      const htmlBody = quill ? quill.root.innerHTML : '';
+
+      let isValid = true;
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const fromError = document.getElementById('from-error');
+      if (!from || !emailRegex.test(from)) {
+        fromError.textContent = 'Please enter a valid email address.';
+        fromError.style.display = 'block';
+        isValid = false;
+      } else {
+        fromError.textContent = '';
+        fromError.style.display = 'none';
+      }
+
+      const toError = document.getElementById('to-error');
+      if (!to || !emailRegex.test(to)) {
+        toError.textContent = 'Please enter a valid email address.';
+        toError.style.display = 'block';
+        isValid = false;
+      } else {
+        toError.textContent = '';
+        toError.style.display = 'none';
+      }
+
+      const subjectError = document.getElementById('subject-error');
+      if (!subject) {
+        subjectError.textContent = 'Please enter an email subject.';
+        subjectError.style.display = 'block';
+        isValid = false;
+      } else {
+        subjectError.textContent = '';
+        subjectError.style.display = 'none';
+      }
+
+      const emptyPatterns = [
+        /^<p>\s*<\/p>$/i,
+        /^<p><br\s*\/?><\/p>$/i,
+        /^<p>\s*<br\s*\/?>\s*<\/p>$/i,
+        /^<p>&nbsp;<\/p>$/i,
+      ];
+      const trimmedBody = htmlBody.trim();
+      if (!trimmedBody || emptyPatterns.some(pattern => pattern.test(trimmedBody))) {
+        statusEl.className = 'error';
+        statusEl.textContent = 'Email body cannot be empty.';
+        isValid = false;
+      }
+
+      if (!isValid) {
+        return;
+      }
+
+      submitButton.disabled = true;
+      statusEl.className = 'sending';
+      statusEl.textContent = 'Sending email...';
+
+      const data = {
+        from: from,
+        to: to,
+        subject: subject,
+        html: htmlBody,
+      };
+
+      try {
+        const apiBase = window.API_BASE_URL || 'https://backend.warmthly.org';
+        const response = await fetch(`${apiBase}/api/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          statusEl.className = 'success';
+          statusEl.textContent = 'Success! Email sent successfully.';
+          emailForm.reset();
+          if (quill) {
+            quill.setText('');
+          }
+          
+          setTimeout(() => {
+            loadReceivedEmails();
+          }, 500);
+          
+          setTimeout(() => {
+            statusEl.className = '';
+            statusEl.textContent = '';
+          }, 3000);
+        } else {
+          statusEl.className = 'error';
+          statusEl.textContent = `Error: ${result.error?.message || 'Failed to send email. Please try again.'}`;
+        }
+      } catch (error) {
+        statusEl.className = 'error';
+        statusEl.textContent = 'A network error occurred. Please check your connection and try again.';
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    document.getElementById('from').addEventListener('input', function() {
+      document.getElementById('from-error').style.display = 'none';
+    });
+    document.getElementById('to').addEventListener('input', function() {
+      document.getElementById('to-error').style.display = 'none';
+    });
+    document.getElementById('subject').addEventListener('input', function() {
+      document.getElementById('subject-error').style.display = 'none';
+    });
+
+    const emailsContainer = document.getElementById('emails-container');
+    const refreshButton = document.getElementById('refresh-emails-button');
+
+    async function getStoredToken() {
+      try {
+        if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+          return await window.SecureAuth.getAccessToken();
+        } else {
+          // Fallback to sessionStorage
+          return sessionStorage.getItem('warmthly-admin-token');
+        }
+      } catch (error) {
+        if (window.logger) {
+          window.logger.error('Failed to get token:', error);
+        } else if (process.env.NODE_ENV !== 'production') {
+          console.error('Failed to get token:', error);
+        }
+        // Fallback to sessionStorage
+        return sessionStorage.getItem('warmthly-admin-token');
+      }
+    }
+
+    checkAuthentication().then((authenticated) => {
+      if (authenticated) {
+        getStoredToken().then((token) => {
+          if (token) {
+            loadReceivedEmails();
+          } else {
+            // SECURITY: Use safe DOM methods
+            emailsContainer.textContent = '';
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'empty-state';
+            emptyDiv.textContent = 'Please refresh the page and log in again to view received emails.';
+            emailsContainer.appendChild(emptyDiv);
+          }
+        });
+      }
+    });
+
+    const adminObserver = new MutationObserver((mutations) => {
+      if (adminContent.classList.contains('active')) {
+        getStoredToken().then((token) => {
+          if (token) {
+            loadReceivedEmails();
+          }
+        });
+      }
+    });
+    adminObserver.observe(adminContent, { attributes: true, attributeFilter: ['class'] });
+
+    refreshButton.addEventListener('click', function() {
+      loadReceivedEmails();
+    });
+
+    async function loadReceivedEmails() {
+      const token = await getStoredToken();
+      if (!token) {
+        // SECURITY: Use safe DOM methods
+        emailsContainer.textContent = '';
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-state';
+        emptyDiv.textContent = isAuthenticated 
+          ? 'Session expired. Please refresh the page and log in again.'
+          : 'Please log in to view received emails.';
+        emailsContainer.appendChild(emptyDiv);
+        return;
+      }
+
+      refreshButton.disabled = true;
+      // SECURITY: Use safe DOM methods
+      emailsContainer.textContent = '';
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'loading-state';
+      loadingDiv.textContent = 'Loading emails...';
+      emailsContainer.appendChild(loadingDiv);
+
+      try {
+        const apiBase = window.API_BASE_URL || 'https://backend.warmthly.org';
+        const response = await fetch(`${apiBase}/api/get-emails`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.status === 401) {
+          // Token expired or invalid, clear session
+          if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+            try {
+              await window.SecureAuth.clearAccessToken();
+            } catch (error) {
+              if (window.logger) {
+                window.logger.error('Failed to clear secure storage:', error);
+              } else if (process.env.NODE_ENV !== 'production') {
+                console.error('Failed to clear secure storage:', error);
+              }
+            }
+          }
+          sessionStorage.removeItem('warmthly-admin-authenticated');
+          sessionStorage.removeItem('warmthly-admin-token');
+          // SECURITY: Use safe DOM methods
+          emailsContainer.textContent = '';
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'empty-state';
+          emptyDiv.textContent = 'Session expired. Please refresh the page and log in again.';
+          emailsContainer.appendChild(emptyDiv);
+          return;
+        }
+
+        if (!response.ok) {
+          // Try to get error message from response
+          let errorMessage = 'Failed to fetch emails';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch (e) {
+            // If we can't parse the error, use the status text
+            errorMessage = response.statusText || errorMessage;
+          }
+          
+          // Show specific error messages
+          if (response.status === 500) {
+            emailsContainer.innerHTML = `<div class="empty-state error">Server error: ${escapeHtml(errorMessage)}. Please check your Vercel environment variables (JWT_SECRET and REDIS_URL).</div>`;
+          } else {
+            emailsContainer.innerHTML = `<div class="empty-state error">Error: ${escapeHtml(errorMessage)}</div>`;
+          }
+          return;
+        }
+
+        const emails = await response.json();
+
+        // SECURITY: Clear container and use safe DOM methods instead of innerHTML
+        emailsContainer.textContent = '';
+        
+        if (!Array.isArray(emails)) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'empty-state error';
+          errorDiv.textContent = 'Unexpected response from server. Please try again.';
+          emailsContainer.appendChild(errorDiv);
+          return;
+        }
+
+        if (emails.length === 0) {
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'empty-state';
+          emptyDiv.textContent = 'No emails received yet. Incoming emails will appear here.';
+          emailsContainer.appendChild(emptyDiv);
+        } else {
+          // SECURITY: Create email items using safe DOM methods
+          emails.forEach(email => {
+            const emailItem = document.createElement('div');
+            emailItem.className = 'email-item';
+            
+            const header = document.createElement('div');
+            header.className = 'email-header';
+            
+            const subject = document.createElement('div');
+            subject.className = 'email-subject';
+            subject.textContent = escapeHtml(email.subject || 'No Subject');
+            header.appendChild(subject);
+            
+            const date = document.createElement('div');
+            date.className = 'email-date';
+            date.textContent = formatDate(email.receivedAt);
+            header.appendChild(date);
+            
+            emailItem.appendChild(header);
+            
+            const meta = document.createElement('div');
+            meta.className = 'email-meta';
+            
+            const fromDiv = document.createElement('div');
+            fromDiv.className = 'email-from';
+            const fromLabel = document.createElement('span');
+            fromLabel.className = 'email-label';
+            fromLabel.textContent = 'From:';
+            fromDiv.appendChild(fromLabel);
+            const fromValue = document.createElement('span');
+            fromValue.textContent = escapeHtml(email.from || 'Unknown');
+            fromDiv.appendChild(fromValue);
+            meta.appendChild(fromDiv);
+            
+            const toDiv = document.createElement('div');
+            toDiv.className = 'email-to';
+            const toLabel = document.createElement('span');
+            toLabel.className = 'email-label';
+            toLabel.textContent = 'To:';
+            toDiv.appendChild(toLabel);
+            const toValue = document.createElement('span');
+            toValue.textContent = escapeHtml(email.to || 'Unknown');
+            toDiv.appendChild(toValue);
+            meta.appendChild(toDiv);
+            
+            emailItem.appendChild(meta);
+            emailsContainer.appendChild(emailItem);
+          });
+        }
+      } catch (error) {
+        // SECURITY: Use safe DOM methods for error display
+        emailsContainer.textContent = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'empty-state error';
+        const errorMsg = error.message || 'Unknown error occurred';
+        errorDiv.textContent = `Error loading emails: ${escapeHtml(errorMsg)}. Please check your connection and try again.`;
+        emailsContainer.appendChild(errorDiv);
+      } finally {
+        refreshButton.disabled = false;
+      }
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'Unknown date';
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return dateString;
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
