@@ -1,5 +1,6 @@
 import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import tseslintPlugin from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 import importPlugin from 'eslint-plugin-import';
 import prettierConfig from 'eslint-config-prettier';
 import { resolve } from 'path';
@@ -8,7 +9,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = resolve(__filename, '..');
 
-export default tseslint.config(
+export default [
   // Base ESLint recommended rules
   js.configs.recommended,
 
@@ -18,19 +19,24 @@ export default tseslint.config(
   },
 
   // TypeScript files configuration
-  ...tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
+      parser: tsParser,
       parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
         project: resolve(__dirname, '../tsconfig.json'),
         tsconfigRootDir: resolve(__dirname, '..'),
       },
     },
     plugins: {
+      '@typescript-eslint': tseslintPlugin,
       import: importPlugin,
     },
     rules: {
+      // TypeScript ESLint recommended rules
+      ...tseslintPlugin.configs.recommended.rules,
       // TypeScript ESLint overrides
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'off',
@@ -71,5 +77,5 @@ export default tseslint.config(
       ...prettierConfig.rules,
     },
   },
-);
+];
 
