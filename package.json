@@ -70,7 +70,7 @@
     "@types/node": "20.10.0",
     "@typescript-eslint/eslint-plugin": "6.13.0",
     "@typescript-eslint/parser": "6.13.0",
-    "@vitest/ui": "1.0.0",
+    "@vitest/ui": "1.6.1",
     "@axe-core/playwright": "4.8.0",
     "autoprefixer": "10.4.16",
     "eslint": "8.54.0",
@@ -93,7 +93,7 @@
     "tsx": "4.7.0",
     "typescript": "^5.3.3",
     "vite": "5.0.0",
-    "vitest": "1.0.0",
-    "@vitest/coverage-v8": "^1.0.0"
+    "vitest": "1.6.1",
+    "@vitest/coverage-v8": "1.6.1"
   }
 }
