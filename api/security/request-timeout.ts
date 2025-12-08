@@ -19,7 +19,7 @@ type RequestHandler = (req: Request, res: Response) => Promise<unknown> | unknow
 /**
  * Request object interface (Cloudflare Workers compatible)
  */
-interface Request {
+export interface Request {
   method: string;
   url: string;
   headers: Headers;
@@ -29,7 +29,7 @@ interface Request {
 /**
  * Response object interface (Cloudflare Workers compatible)
  */
-interface Response {
+export interface Response {
   status: (code: number) => Response;
   json: (data: unknown) => Response;
   setHeader: (name: string, value: string | number) => void;
