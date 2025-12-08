@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@lego/*": ["./lego/*"],
+      "@components/*": ["./lego/components/*"],
+      "@utils/*": ["./lego/utils/*"],
+      "@config/*": ["./lego/config/*"],
+      "@styles/*": ["./lego/styles/*"],
+      "@core/*": ["./lego/core/*"],
+      "@apps/*": ["./apps/*"],
+      "@api/*": ["./api/*"],
+      "@assets/*": ["./assets/*"],
+      "@tests/*": ["./tests/*"]
+    }
+  },
+  "include": [
+    "lego/**/*",
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "api/**/*.ts",
+    "scripts/**/*.ts",
+    "*.ts",
+    "*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "scripts/**/*",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

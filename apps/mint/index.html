@@ -1,10 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    // This improves SEO and accessibility by setting the correct language immediately
+    (function() {
+      function detectLanguage() {
+        // Check URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        // Check localStorage
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) {
+              return normalized;
+            }
+          }
+        } catch {}
+        // Check browser language
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      // Set dir for RTL languages
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script>
+    // API Configuration - Set before other scripts load
+    window.API_BASE_URL = 'https://backend.warmthly.org';
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/components/warmthly-fade-in.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    import { logger } from '/lego/utils/logger.js';
+    window.logger = logger;
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
   <warmthly-head 
     title="Mint - Warmthly"
     app="mint"
@@ -14,8 +78,9 @@
   
   
   <link rel="dns-prefetch" href="//warmthly.org">
+  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <!-- Matter.js - Load dynamically when needed (Performance Optimization) -->
   <!-- Firebase SDK - Load asynchronously -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -45,15 +110,22 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
   <div class="preload-fonts">.</div>
   
-  <warmthly-header app="mint"></warmthly-header>
-  
-  <nav class="header-right" role="navigation" aria-label="Main navigation">
-    <warmthly-stoplight app="mint"></warmthly-stoplight>
-  </nav>
+  <header class="header">
+    <div class="header-left">
+      <warmthly-header app="mint"></warmthly-header>
+    </div>
+    <div class="header-right">
+      <warmthly-language-switcher></warmthly-language-switcher>
+      <warmthly-reading-level></warmthly-reading-level>
+      <warmthly-stoplight app="mint"></warmthly-stoplight>
+    </div>
+  </header>
+  <warmthly-fade-in target=".header, .header-right, .top-left-heading" delay="200"></warmthly-fade-in>
+  <warmthly-breadcrumb></warmthly-breadcrumb>
 
   <main class="container" id="main-content" role="main">
-    <h1 class="page-title">Mint</h1>
-    <p class="main-text">
+    <h1 class="page-title" data-reading-level-content>Mint</h1>
+    <p class="main-text" data-reading-level-content>
       <b>We track your every cent and our every decision right before you.</b> It is our commitment to you that we will forever track and provide utmost transparency for our every action and your every donation. Given the nature of our organization, you are able to fork and copy-paste our processes for your refining, those are also available on this page.
     </p>
     
@@ -261,6 +333,36 @@
             }
       }
 
+      // Dynamic Matter.js loader (Performance Optimization)
+      let matterJsPromise = null;
+      async function loadMatterJS() {
+            if (window.Matter) {
+                  return window.Matter;
+            }
+            if (matterJsPromise) {
+                  return matterJsPromise;
+            }
+            matterJsPromise = new Promise((resolve, reject) => {
+                  const script = document.createElement('script');
+                  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js';
+                  script.async = true;
+                  script.crossOrigin = 'anonymous';
+                  // Security Enhancement 2: Subresource Integrity (SRI)
+                  // Note: SRI hash not included as Matter.js CDN version may update. For production, pin version and generate hash.
+                  // To generate: openssl dgst -sha384 -binary matter.min.js | openssl base64 -A
+                  script.onload = () => {
+                        if (window.Matter) {
+                              resolve(window.Matter);
+                        } else {
+                              reject(new Error('Matter.js failed to load'));
+                        }
+                  };
+                  script.onerror = () => reject(new Error('Failed to load Matter.js'));
+                  document.head.appendChild(script);
+            });
+            return matterJsPromise;
+      }
+
       class DonationPool {
             constructor(container) {
                   this.container = container;
@@ -306,6 +408,7 @@
                   this.physicsUpdateSkip = 0;
                   this.donorRandomStrings = new Map();
                   this.highlightedCoins = new Set();
+                  this.matterLoaded = false;
                   
                   this.init();
             }
@@ -502,8 +605,24 @@
                   }
             }
 
-            setupPhysics() {
-                  const { Engine, Render, World, Bodies, Runner, Mouse, MouseConstraint, Events } = Matter;
+            async setupPhysics() {
+                  // Load Matter.js dynamically if not already loaded
+                  if (!this.matterLoaded) {
+                        try {
+                              const Matter = await loadMatterJS();
+                              this.matterLoaded = true;
+                        } catch (error) {
+                              if (window.logger) {
+                                window.logger.error('Failed to load Matter.js:', error);
+                              } else if (process.env.NODE_ENV !== 'production') {
+                                console.error('Failed to load Matter.js:', error);
+                              }
+                              this.showError('Physics engine failed to load. Please refresh the page.');
+                              return;
+                        }
+                  }
+                  
+                  const { Engine, Render, World, Bodies, Runner, Mouse, MouseConstraint, Events } = window.Matter;
 
                   this.engine = Engine.create();
                   this.world = this.engine.world;
@@ -772,7 +891,8 @@
                   
                   try {
                         // Build URL for backend proxy endpoint
-                        let url = `/api/airtable?baseId=${encodeURIComponent(airtableConfig.baseId)}&tableName=${encodeURIComponent(airtableConfig.tableName)}`;
+                        const apiBase = window.API_BASE_URL || 'https://backend.warmthly.org';
+                        let url = `${apiBase}/api/airtable?baseId=${encodeURIComponent(airtableConfig.baseId)}&tableName=${encodeURIComponent(airtableConfig.tableName)}`;
                         if (airtableConfig.viewId) {
                               url += `&viewId=${encodeURIComponent(airtableConfig.viewId)}`;
                         }
@@ -2117,23 +2237,39 @@
                   return popup;
             }
 
-            // Helper to create receipt item
+            // Helper to create receipt item (XSS-safe)
             createReceiptItem(receipt, idx) {
                   const item = document.createElement('div');
                   item.className = 'expense-popup-item';
                   
                   if (receipt.url) {
-                        item.innerHTML = `
-                              <div class="expense-popup-item-label">Receipt ${idx + 1}</div>
-                              <div class="expense-popup-item-value">
-                                    <a href="${sanitizeInput(receipt.url)}" target="_blank" style="color: #33CE79; text-decoration: underline;">${sanitizeInput(receipt.url)}</a>
-                              </div>
-                        `;
+                        // SECURITY: Use safe DOM methods instead of innerHTML
+                        const label = document.createElement('div');
+                        label.className = 'expense-popup-item-label';
+                        label.textContent = `Receipt ${idx + 1}`;
+                        item.appendChild(label);
+                        
+                        const value = document.createElement('div');
+                        value.className = 'expense-popup-item-value';
+                        const link = document.createElement('a');
+                        link.href = sanitizeInput(receipt.url);
+                        link.target = '_blank';
+                        link.style.color = '#33CE79';
+                        link.style.textDecoration = 'underline';
+                        link.textContent = sanitizeInput(receipt.url);
+                        value.appendChild(link);
+                        item.appendChild(value);
                   } else if (receipt.description) {
-                        item.innerHTML = `
-                              <div class="expense-popup-item-label">Receipt ${idx + 1}</div>
-                              <div class="expense-popup-item-value">${sanitizeInput(receipt.description)}</div>
-                        `;
+                        // SECURITY: Use safe DOM methods instead of innerHTML
+                        const label = document.createElement('div');
+                        label.className = 'expense-popup-item-label';
+                        label.textContent = `Receipt ${idx + 1}`;
+                        item.appendChild(label);
+                        
+                        const value = document.createElement('div');
+                        value.className = 'expense-popup-item-value';
+                        value.textContent = sanitizeInput(receipt.description);
+                        item.appendChild(value);
                   }
                   
                   if (receipt.timestamp) {
@@ -2222,16 +2358,32 @@
                   const form = document.createElement('form');
                   form.className = 'expense-popup-form';
                   
-                  // Info section
+                  // Info section (XSS-safe)
                   const infoSection = document.createElement('div');
                   infoSection.className = 'expense-popup-item';
                   infoSection.style.marginBottom = '1rem';
-                  infoSection.innerHTML = `
-                        <div class="expense-popup-item-label">Purpose</div>
-                        <div class="expense-popup-item-value">${sanitizeInput(purpose)}</div>
-                        <div class="expense-popup-item-label" style="margin-top: 0.5rem;">Type</div>
-                        <div class="expense-popup-item-value">${COIN_TYPE_LABELS[coinType] || 'Unknown'}</div>
-                  `;
+                  
+                  // SECURITY: Use safe DOM methods instead of innerHTML
+                  const purposeLabel = document.createElement('div');
+                  purposeLabel.className = 'expense-popup-item-label';
+                  purposeLabel.textContent = 'Purpose';
+                  infoSection.appendChild(purposeLabel);
+                  
+                  const purposeValue = document.createElement('div');
+                  purposeValue.className = 'expense-popup-item-value';
+                  purposeValue.textContent = sanitizeInput(purpose);
+                  infoSection.appendChild(purposeValue);
+                  
+                  const typeLabel = document.createElement('div');
+                  typeLabel.className = 'expense-popup-item-label';
+                  typeLabel.style.marginTop = '0.5rem';
+                  typeLabel.textContent = 'Type';
+                  infoSection.appendChild(typeLabel);
+                  
+                  const typeValue = document.createElement('div');
+                  typeValue.className = 'expense-popup-item-value';
+                  typeValue.textContent = COIN_TYPE_LABELS[coinType] || 'Unknown';
+                  infoSection.appendChild(typeValue);
                   
                   // Textarea
                   const textarea = document.createElement('textarea');
@@ -2523,6 +2675,7 @@
                   tag.className = 'donation-tag';
                   tag.setAttribute('role', 'tooltip');
                   tag.setAttribute('aria-live', 'polite');
+                  tag.setAttribute('aria-label', `Donation information for ${donor}`);
                   
                   // Normal mode - show donor info
                   const data = cent.donationData;
@@ -2555,17 +2708,35 @@
                   
                   const donationId = cent.dataset.donationId;
                   
-                  const tagContent = `
-                        <div class="tag-header">${donor}</div>
-                        <div class="tag-item"><strong>Amount:</strong> $${amount.toFixed(2)}</div>
-                        <div class="tag-item"><strong>Date:</strong> ${formattedDate}</div>
-                        <div class="tag-item"><strong>Purpose:</strong> ${purpose}</div>
-                        <div class="tag-item"><strong>Category:</strong> ${category}</div>
-                        <div class="tag-item"><strong>Transaction ID:</strong> ${transactionId}</div>
-                        <button class="view-cents-button" data-donation-id="${donationId}" aria-label="See every cent of this donation">See Every Cent</button>
-                  `;
+                  // SECURITY: Use safe DOM methods instead of innerHTML to prevent XSS
+                  const tagHeader = document.createElement('div');
+                  tagHeader.className = 'tag-header';
+                  tagHeader.textContent = donor;
+                  tag.appendChild(tagHeader);
                   
-                  tag.innerHTML = tagContent;
+                  const createTagItem = (label, value) => {
+                        const item = document.createElement('div');
+                        item.className = 'tag-item';
+                        const strong = document.createElement('strong');
+                        strong.textContent = `${label}: `;
+                        item.appendChild(strong);
+                        item.appendChild(document.createTextNode(value));
+                        tag.appendChild(item);
+                  };
+                  
+                  createTagItem('Amount', `$${amount.toFixed(2)}`);
+                  createTagItem('Date', formattedDate);
+                  createTagItem('Purpose', purpose);
+                  createTagItem('Category', category);
+                  createTagItem('Transaction ID', transactionId);
+                  
+                  const viewButton = document.createElement('button');
+                  viewButton.className = 'view-cents-button';
+                  viewButton.setAttribute('data-donation-id', donationId);
+                  viewButton.setAttribute('aria-label', 'See every cent of this donation');
+                  viewButton.setAttribute('tabindex', '0'); // Ensure keyboard accessible
+                  viewButton.textContent = 'See Every Cent';
+                  tag.appendChild(viewButton);
                   
                   // Add click handler for the "See Every Cent" button
                   const viewCentsButton = tag.querySelector('.view-cents-button');
@@ -2853,6 +3024,7 @@
 
       // Communication Pool Class
       class CommunicationPool {
+            matterLoaded = false;
             constructor(container) {
                   this.container = container;
                   this.pool = document.getElementById('communicationPoolArea');
@@ -2994,8 +3166,19 @@
                   });
             }
             
-            setupPhysics() {
-                  const { Engine, World, Bodies, Runner, Mouse, MouseConstraint, Events } = Matter;
+            async setupPhysics() {
+                  // Load Matter.js dynamically if not already loaded
+                  if (!this.matterLoaded) {
+                        try {
+                              const Matter = await loadMatterJS();
+                              this.matterLoaded = true;
+                        } catch (error) {
+                              console.error('Failed to load Matter.js:', error);
+                              return;
+                        }
+                  }
+                  
+                  const { Engine, World, Bodies, Runner, Mouse, MouseConstraint, Events } = window.Matter;
                   
                   this.engine = Engine.create();
                   this.world = this.engine.world;

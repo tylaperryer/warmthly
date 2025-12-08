@@ -21,20 +21,20 @@
 }
 
 .login-container {
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+  background: linear-gradient(135deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 15%));
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 3rem;
   max-width: 400px;
   width: 100%;
-  border: 1px solid rgba(255,140,66,0.12);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  border: 1px solid rgb(255 140 66 / 12%);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
   text-align: center;
 }
 
 .login-container h1 {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 2rem;
   font-weight: 600;
   color: var(--warmthly-orange);
@@ -42,7 +42,7 @@
 }
 
 .login-container > p {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.95rem;
   color: var(--text-color);
   opacity: 0.7;
@@ -58,11 +58,11 @@
 .password-input {
   width: 100%;
   padding: 1rem;
-  border: 2px solid rgba(255,140,66,0.2);
+  border: 2px solid rgb(255 140 66 / 20%);
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 1rem;
-  background: rgba(255,255,255,0.5);
+  background: rgb(255 255 255 / 50%);
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
@@ -70,7 +70,7 @@
 .password-input:focus {
   outline: none;
   border-color: var(--warmthly-orange);
-  box-shadow: 0 0 0 3px rgba(255,140,66,0.1);
+  box-shadow: 0 0 0 3px rgb(255 140 66 / 10%);
 }
 
 .submit-button {
@@ -79,7 +79,7 @@
   color: white;
   border: none;
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -89,7 +89,7 @@
 .submit-button:hover {
   background: var(--warmthly-orange-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255,140,66,0.3);
+  box-shadow: 0 4px 12px rgb(255 140 66 / 30%);
 }
 
 .submit-button:disabled {
@@ -101,13 +101,13 @@
 .error-message {
   display: none;
   color: var(--error-color);
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.9rem;
   margin-top: 1rem;
   padding: 0.75rem;
-  background: rgba(216, 0, 12, 0.1);
+  background: rgb(216 0 12 / 10%);
   border-radius: 8px;
-  border: 1px solid rgba(216, 0, 12, 0.2);
+  border: 1px solid rgb(216 0 12 / 20%);
 }
 
 /* Admin Content */
@@ -123,17 +123,17 @@
 }
 
 .admin-content .container {
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+  background: linear-gradient(135deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 15%));
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 3rem;
-  border: 1px solid rgba(255,140,66,0.12);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  border: 1px solid rgb(255 140 66 / 12%);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
 }
 
 .admin-content h1 {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 2.5rem;
   font-weight: 600;
   color: var(--warmthly-orange);
@@ -141,7 +141,7 @@
 }
 
 .welcome-text {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 1.1rem;
   color: var(--text-color);
   opacity: 0.7;
@@ -161,29 +161,29 @@
 .admin-links a {
   display: block;
   padding: 1rem 1.5rem;
-  background: rgba(255,255,255,0.3);
+  background: rgb(255 255 255 / 30%);
   border-radius: 12px;
   color: var(--warmthly-orange);
   text-decoration: none;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255,140,66,0.2);
+  border: 1px solid rgb(255 140 66 / 20%);
 }
 
 .admin-links a:hover {
-  background: rgba(255,255,255,0.5);
+  background: rgb(255 255 255 / 50%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255,140,66,0.2);
+  box-shadow: 0 4px 12px rgb(255 140 66 / 20%);
 }
 
 .logout-button {
   padding: 0.75rem 1.5rem;
-  background: rgba(216, 0, 12, 0.1);
+  background: rgb(216 0 12 / 10%);
   color: var(--error-color);
-  border: 1px solid rgba(216, 0, 12, 0.2);
+  border: 1px solid rgb(216 0 12 / 20%);
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -191,18 +191,18 @@
 }
 
 .logout-button:hover {
-  background: rgba(216, 0, 12, 0.2);
+  background: rgb(216 0 12 / 20%);
   transform: translateY(-2px);
 }
 
 /* Email Form Styles (for emails page) */
 #email-form {
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+  background: linear-gradient(135deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 15%));
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 2rem;
   margin-bottom: 2rem;
-  border: 1px solid rgba(255,140,66,0.12);
+  border: 1px solid rgb(255 140 66 / 12%);
 }
 
 .form-group {
@@ -211,7 +211,7 @@
 
 .form-group label {
   display: block;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 600;
   color: var(--text-color);
   margin-bottom: 0.5rem;
@@ -222,11 +222,11 @@
 .form-group textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid rgba(255,140,66,0.2);
+  border: 2px solid rgb(255 140 66 / 20%);
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.95rem;
-  background: rgba(255,255,255,0.5);
+  background: rgb(255 255 255 / 50%);
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
@@ -235,7 +235,7 @@
 .form-group textarea:focus {
   outline: none;
   border-color: var(--warmthly-orange);
-  box-shadow: 0 0 0 3px rgba(255,140,66,0.1);
+  box-shadow: 0 0 0 3px rgb(255 140 66 / 10%);
 }
 
 #submit-button {
@@ -244,7 +244,7 @@
   color: white;
   border: none;
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -259,35 +259,35 @@
   margin-top: 1rem;
   padding: 1rem;
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
 }
 
 #status.success {
-  background: rgba(46, 213, 115, 0.1);
+  background: rgb(46 213 115 / 10%);
   color: var(--success-color);
-  border: 1px solid rgba(46, 213, 115, 0.2);
+  border: 1px solid rgb(46 213 115 / 20%);
 }
 
 #status.error {
-  background: rgba(216, 0, 12, 0.1);
+  background: rgb(216 0 12 / 10%);
   color: var(--error-color);
-  border: 1px solid rgba(216, 0, 12, 0.2);
+  border: 1px solid rgb(216 0 12 / 20%);
 }
 
 #status.sending {
-  background: rgba(255, 140, 66, 0.1);
+  background: rgb(255 140 66 / 10%);
   color: var(--warmthly-orange);
-  border: 1px solid rgba(255, 140, 66, 0.2);
+  border: 1px solid rgb(255 140 66 / 20%);
 }
 
 /* Received Emails Section */
 .received-emails-section {
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+  background: linear-gradient(135deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 15%));
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 2rem;
-  border: 1px solid rgba(255,140,66,0.12);
+  border: 1px solid rgb(255 140 66 / 12%);
 }
 
 .section-header {
@@ -298,7 +298,7 @@
 }
 
 .section-header h2 {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--warmthly-orange);
@@ -306,33 +306,33 @@
 
 .refresh-button {
   padding: 0.5rem 1rem;
-  background: rgba(255,255,255,0.3);
-  border: 1px solid rgba(255,140,66,0.2);
+  background: rgb(255 255 255 / 30%);
+  border: 1px solid rgb(255 140 66 / 20%);
   border-radius: 8px;
   color: var(--warmthly-orange);
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .refresh-button:hover {
-  background: rgba(255,255,255,0.5);
+  background: rgb(255 255 255 / 50%);
 }
 
 .email-item {
-  background: rgba(255,255,255,0.3);
+  background: rgb(255 255 255 / 30%);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1rem;
-  border: 1px solid rgba(255,140,66,0.1);
+  border: 1px solid rgb(255 140 66 / 10%);
   transition: all 0.3s ease;
 }
 
 .email-item:hover {
-  background: rgba(255,255,255,0.5);
+  background: rgb(255 255 255 / 50%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
 }
 
 .email-header {
@@ -343,14 +343,14 @@
 }
 
 .email-subject {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 600;
   color: var(--text-color);
   font-size: 1.1rem;
 }
 
 .email-date {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.85rem;
   color: var(--text-color);
   opacity: 0.6;
@@ -364,7 +364,7 @@
 
 .email-from,
 .email-to {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.9rem;
   color: var(--text-color);
   opacity: 0.7;
@@ -381,14 +381,14 @@
   padding: 3rem;
   color: var(--text-color);
   opacity: 0.6;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
 }
 
 .empty-state.error {
   color: var(--error-color);
-  background: rgba(216, 0, 12, 0.1);
+  background: rgb(216 0 12 / 10%);
   border-radius: 12px;
-  border: 1px solid rgba(216, 0, 12, 0.2);
+  border: 1px solid rgb(216 0 12 / 20%);
 }
 
 .back-link {
@@ -396,7 +396,7 @@
   margin-bottom: 2rem;
   color: var(--warmthly-orange);
   text-decoration: none;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
   transition: color 0.3s ease;
 }
@@ -406,17 +406,16 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .login-container {
     padding: 2rem 1.5rem;
   }
-  
+
   .admin-content .container {
     padding: 2rem 1.5rem;
   }
-  
+
   .admin-content h1 {
     font-size: 2rem;
   }
 }
-

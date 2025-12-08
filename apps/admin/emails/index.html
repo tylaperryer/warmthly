@@ -1,10 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    (function() {
+      function detectLanguage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+          }
+        } catch {}
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script>
+    // API Configuration - Set before other scripts load
+    window.API_BASE_URL = 'https://backend.warmthly.org';
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    // Initialize logger for error tracking
+    import { logger } from '/lego/utils/logger.js';
+    window.logger = logger;
+    
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
   <warmthly-head 
     title="Admin Email Sender - Warmthly"
     description="Administrative email management interface"
@@ -15,6 +68,9 @@
   </warmthly-head>
   
   <link rel="dns-prefetch" href="//cdn.quilljs.com">
+  
+  <!-- Secure token storage (Web Crypto API + IndexedDB) -->
+  <script src="/apps/admin/secure-auth.js"></script>
 
   <!-- Include the Quill library -->
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
@@ -55,12 +111,16 @@
 </head>
 <body class="fonts-loading">
   <warmthly-header app="admin"></warmthly-header>
-  <warmthly-stoplight app="admin"></warmthly-stoplight>
+  <div style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1rem; align-items: center;">
+    <warmthly-language-switcher></warmthly-language-switcher>
+    <warmthly-reading-level></warmthly-reading-level>
+    <warmthly-stoplight app="admin"></warmthly-stoplight>
+  </div>
 
   <div id="login-section" class="login-section">
     <div class="login-container">
-      <h1>Admin Access</h1>
-      <p>Enter the password to access the email sender.</p>
+      <h1 data-reading-level-content>Admin Access</h1>
+      <p data-reading-level-content>Enter the password to access the email sender.</p>
       <form id="login-form">
         <input 
           type="password" 
@@ -150,7 +210,12 @@
     </div>
   </div>
 
-  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <!-- Security Enhancement 2: Subresource Integrity (SRI) -->
+  <!-- Note: SRI hash not included as Quill.js CDN version may update. For production, pin version and generate hash. -->
+  <script 
+    src="https://cdn.quilljs.com/1.3.6/quill.js" 
+    crossorigin="anonymous">
+  </script>
   <warmthly-font-loader></warmthly-font-loader>
 
   <script type="module">
@@ -166,11 +231,35 @@
     const adminContent = document.getElementById('admin-content');
     const errorMessage = document.getElementById('error-message');
 
-    const isAuthenticated = sessionStorage.getItem('warmthly-admin-authenticated') === 'true';
-    if (isAuthenticated) {
-      loginSection.style.display = 'none';
-      adminContent.classList.add('active');
+    // Check authentication using secure storage
+    async function checkAuthentication() {
+      try {
+        if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+          const token = await window.SecureAuth.getAccessToken();
+          return token !== null;
+        } else {
+          // Fallback to sessionStorage if secure storage unavailable
+          return sessionStorage.getItem('warmthly-admin-authenticated') === 'true';
+        }
+      } catch (error) {
+        if (window.logger) {
+          window.logger.error('Auth check failed:', error);
+        } else if (process.env.NODE_ENV !== 'production') {
+          console.error('Auth check failed:', error);
+        }
+        return false;
+      }
     }
+
+    // Initialize authentication state
+    let isAuthenticated = false;
+    checkAuthentication().then((authenticated) => {
+      isAuthenticated = authenticated;
+      if (authenticated) {
+        loginSection.style.display = 'none';
+        adminContent.classList.add('active');
+      }
+    });
 
     loginForm.addEventListener('submit', async function(event) {
       event.preventDefault();
@@ -182,7 +271,8 @@
       submitButton.textContent = 'Verifying...';
 
       try {
-        const response = await fetch('/api/login', {
+        const apiBase = window.API_BASE_URL || 'https://backend.warmthly.org';
+        const response = await fetch(`${apiBase}/api/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password: enteredPassword }),
@@ -196,8 +286,27 @@
             throw new Error('No token received from server');
           }
           
-          sessionStorage.setItem('warmthly-admin-authenticated', 'true');
-          sessionStorage.setItem('warmthly-admin-token', token);
+          // Store token securely using Web Crypto API + IndexedDB
+          if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+            try {
+              await window.SecureAuth.storeAccessToken(token);
+              // Also set session flag for compatibility
+              sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+            } catch (storageError) {
+              if (window.logger) {
+                window.logger.error('Secure storage failed, using fallback:', storageError);
+              } else if (process.env.NODE_ENV !== 'production') {
+                console.error('Secure storage failed, using fallback:', storageError);
+              }
+              // Fallback to sessionStorage
+              sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+              sessionStorage.setItem('warmthly-admin-token', token);
+            }
+          } else {
+            // Fallback to sessionStorage if secure storage unavailable
+            sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+            sessionStorage.setItem('warmthly-admin-token', token);
+          }
           loginSection.style.display = 'none';
           adminContent.classList.add('active');
           passwordInput.value = '';
@@ -324,7 +433,8 @@
       };
 
       try {
-        const response = await fetch('/api/send-email', {
+        const apiBase = window.API_BASE_URL || 'https://backend.warmthly.org';
+        const response = await fetch(`${apiBase}/api/send-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
@@ -373,25 +483,49 @@
     const emailsContainer = document.getElementById('emails-container');
     const refreshButton = document.getElementById('refresh-emails-button');
 
-    function getStoredToken() {
-      return sessionStorage.getItem('warmthly-admin-token');
-    }
-
-    if (isAuthenticated) {
-      const token = getStoredToken();
-      if (token) {
-        loadReceivedEmails();
-      } else {
-        emailsContainer.innerHTML = '<div class="empty-state">Please refresh the page and log in again to view received emails.</div>';
+    async function getStoredToken() {
+      try {
+        if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+          return await window.SecureAuth.getAccessToken();
+        } else {
+          // Fallback to sessionStorage
+          return sessionStorage.getItem('warmthly-admin-token');
+        }
+      } catch (error) {
+        if (window.logger) {
+          window.logger.error('Failed to get token:', error);
+        } else if (process.env.NODE_ENV !== 'production') {
+          console.error('Failed to get token:', error);
+        }
+        // Fallback to sessionStorage
+        return sessionStorage.getItem('warmthly-admin-token');
       }
     }
 
+    checkAuthentication().then((authenticated) => {
+      if (authenticated) {
+        getStoredToken().then((token) => {
+          if (token) {
+            loadReceivedEmails();
+          } else {
+            // SECURITY: Use safe DOM methods
+            emailsContainer.textContent = '';
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'empty-state';
+            emptyDiv.textContent = 'Please refresh the page and log in again to view received emails.';
+            emailsContainer.appendChild(emptyDiv);
+          }
+        });
+      }
+    });
+
     const adminObserver = new MutationObserver((mutations) => {
       if (adminContent.classList.contains('active')) {
-        const token = getStoredToken();
-        if (token) {
-          loadReceivedEmails();
-        }
+        getStoredToken().then((token) => {
+          if (token) {
+            loadReceivedEmails();
+          }
+        });
       }
     });
     adminObserver.observe(adminContent, { attributes: true, attributeFilter: ['class'] });
@@ -401,22 +535,30 @@
     });
 
     async function loadReceivedEmails() {
-      const token = getStoredToken();
+      const token = await getStoredToken();
       if (!token) {
-        // If authenticated but no token, user needs to re-login
-        if (isAuthenticated) {
-          emailsContainer.innerHTML = '<div class="empty-state">Session expired. Please refresh the page and log in again.</div>';
-        } else {
-          emailsContainer.innerHTML = '<div class="empty-state">Please log in to view received emails.</div>';
-        }
+        // SECURITY: Use safe DOM methods
+        emailsContainer.textContent = '';
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-state';
+        emptyDiv.textContent = isAuthenticated 
+          ? 'Session expired. Please refresh the page and log in again.'
+          : 'Please log in to view received emails.';
+        emailsContainer.appendChild(emptyDiv);
         return;
       }
 
       refreshButton.disabled = true;
-      emailsContainer.innerHTML = '<div class="loading-state">Loading emails...</div>';
+      // SECURITY: Use safe DOM methods
+      emailsContainer.textContent = '';
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'loading-state';
+      loadingDiv.textContent = 'Loading emails...';
+      emailsContainer.appendChild(loadingDiv);
 
       try {
-        const response = await fetch('/api/get-emails', {
+        const apiBase = window.API_BASE_URL || 'https://backend.warmthly.org';
+        const response = await fetch(`${apiBase}/api/get-emails`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -425,9 +567,25 @@
 
         if (response.status === 401) {
           // Token expired or invalid, clear session
+          if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+            try {
+              await window.SecureAuth.clearAccessToken();
+            } catch (error) {
+              if (window.logger) {
+                window.logger.error('Failed to clear secure storage:', error);
+              } else if (process.env.NODE_ENV !== 'production') {
+                console.error('Failed to clear secure storage:', error);
+              }
+            }
+          }
           sessionStorage.removeItem('warmthly-admin-authenticated');
           sessionStorage.removeItem('warmthly-admin-token');
-          emailsContainer.innerHTML = '<div class="empty-state">Session expired. Please refresh the page and log in again.</div>';
+          // SECURITY: Use safe DOM methods
+          emailsContainer.textContent = '';
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'empty-state';
+          emptyDiv.textContent = 'Session expired. Please refresh the page and log in again.';
+          emailsContainer.appendChild(emptyDiv);
           return;
         }
 
@@ -453,36 +611,80 @@
 
         const emails = await response.json();
 
+        // SECURITY: Clear container and use safe DOM methods instead of innerHTML
+        emailsContainer.textContent = '';
+        
         if (!Array.isArray(emails)) {
-          emailsContainer.innerHTML = '<div class="empty-state error">Unexpected response from server. Please try again.</div>';
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'empty-state error';
+          errorDiv.textContent = 'Unexpected response from server. Please try again.';
+          emailsContainer.appendChild(errorDiv);
           return;
         }
 
         if (emails.length === 0) {
-          emailsContainer.innerHTML = '<div class="empty-state">No emails received yet. Incoming emails will appear here.</div>';
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'empty-state';
+          emptyDiv.textContent = 'No emails received yet. Incoming emails will appear here.';
+          emailsContainer.appendChild(emptyDiv);
         } else {
-          emailsContainer.innerHTML = emails.map(email => `
-            <div class="email-item">
-              <div class="email-header">
-                <div class="email-subject">${escapeHtml(email.subject || 'No Subject')}</div>
-                <div class="email-date">${formatDate(email.receivedAt)}</div>
-              </div>
-              <div class="email-meta">
-                <div class="email-from">
-                  <span class="email-label">From:</span>
-                  <span>${escapeHtml(email.from || 'Unknown')}</span>
-                </div>
-                <div class="email-to">
-                  <span class="email-label">To:</span>
-                  <span>${escapeHtml(email.to || 'Unknown')}</span>
-                </div>
-              </div>
-            </div>
-          `).join('');
+          // SECURITY: Create email items using safe DOM methods
+          emails.forEach(email => {
+            const emailItem = document.createElement('div');
+            emailItem.className = 'email-item';
+            
+            const header = document.createElement('div');
+            header.className = 'email-header';
+            
+            const subject = document.createElement('div');
+            subject.className = 'email-subject';
+            subject.textContent = escapeHtml(email.subject || 'No Subject');
+            header.appendChild(subject);
+            
+            const date = document.createElement('div');
+            date.className = 'email-date';
+            date.textContent = formatDate(email.receivedAt);
+            header.appendChild(date);
+            
+            emailItem.appendChild(header);
+            
+            const meta = document.createElement('div');
+            meta.className = 'email-meta';
+            
+            const fromDiv = document.createElement('div');
+            fromDiv.className = 'email-from';
+            const fromLabel = document.createElement('span');
+            fromLabel.className = 'email-label';
+            fromLabel.textContent = 'From:';
+            fromDiv.appendChild(fromLabel);
+            const fromValue = document.createElement('span');
+            fromValue.textContent = escapeHtml(email.from || 'Unknown');
+            fromDiv.appendChild(fromValue);
+            meta.appendChild(fromDiv);
+            
+            const toDiv = document.createElement('div');
+            toDiv.className = 'email-to';
+            const toLabel = document.createElement('span');
+            toLabel.className = 'email-label';
+            toLabel.textContent = 'To:';
+            toDiv.appendChild(toLabel);
+            const toValue = document.createElement('span');
+            toValue.textContent = escapeHtml(email.to || 'Unknown');
+            toDiv.appendChild(toValue);
+            meta.appendChild(toDiv);
+            
+            emailItem.appendChild(meta);
+            emailsContainer.appendChild(emailItem);
+          });
         }
       } catch (error) {
+        // SECURITY: Use safe DOM methods for error display
+        emailsContainer.textContent = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'empty-state error';
         const errorMsg = error.message || 'Unknown error occurred';
-        emailsContainer.innerHTML = `<div class="empty-state error">Error loading emails: ${escapeHtml(errorMsg)}. Please check your connection and try again.</div>`;
+        errorDiv.textContent = `Error loading emails: ${escapeHtml(errorMsg)}. Please check your connection and try again.`;
+        emailsContainer.appendChild(errorDiv);
       } finally {
         refreshButton.disabled = false;
       }

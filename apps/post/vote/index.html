@@ -1,10 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    (function() {
+      function detectLanguage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+          }
+        } catch {}
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
   <warmthly-head 
     title="Vote - Warmthly"
     description="Participate in organizational decisions and dissolution votes"
@@ -31,23 +77,27 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
   <warmthly-header app="post"></warmthly-header>
   
-  <warmthly-stoplight app="post"></warmthly-stoplight>
+  <div style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1rem; align-items: center;">
+    <warmthly-language-switcher></warmthly-language-switcher>
+    <warmthly-reading-level></warmthly-reading-level>
+    <warmthly-stoplight app="post"></warmthly-stoplight>
+  </div>
 
   <div class="container container-narrow" id="main-content" role="main">
-    <h1 class="page-title">The Dissolution Vote</h1>
-    <p class="main-text">
+    <h1 class="page-title" data-reading-level-content>The Dissolution Vote</h1>
+    <p class="main-text" data-reading-level-content>
       Our commitment is to our mission and values: Transparency, Honesty, Humility, and Empathy. If we fail to uphold them, we believe we should cease to exist. This page is our community-held kill switch.
     </p>
 
     <div class="section">
-        <h2 class="section-title">A Legally Binding Promise</h2>
-        <p>
+        <h2 class="section-title" data-reading-level-content>A Legally Binding Promise</h2>
+        <p data-reading-level-content>
             This is not a survey. The Dissolution Vote is a legally binding mechanism enshrined in the bylaws of our organization. Should the vote count reach <strong>100,000</strong>, it will trigger a formal, legally mandated process to dissolve Warmthly. All remaining assets will be transferred to a predetermined successor charity dedicated to mental health and empathy, ensuring our mission outlives our organization. Your vote is your power.
         </p>
     </div>
     
     <div class="section vote-section">
-      <h2 class="section-title">Should Warmthly be dissolved?</h2>
+      <h2 class="section-title" data-reading-level-content>Should Warmthly be dissolved?</h2>
       
       <!-- Parliamentary Chamber -->
       <div class="parliamentary-chamber">
@@ -113,40 +163,73 @@
     </div>
   </div>
   
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <!-- Firebase SDK - Load dynamically when needed (Performance Optimization) -->
   <script>
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
-    if (firebaseConfig.apiKey === "YOUR_API_KEY" || 
-        firebaseConfig.projectId === "YOUR_PROJECT_ID") {
-      const errorEl = document.getElementById('errorMessage');
-      if (errorEl) {
-        errorEl.textContent = 'Voting service is not configured. Please contact the administrator.';
-        errorEl.classList.add('visible');
-      }
-    } else {
-      try {
-        firebase.initializeApp(firebaseConfig);
-      } catch (error) {
-        const errorEl = document.getElementById('errorMessage');
-        if (errorEl) {
-          errorEl.textContent = 'Failed to initialize voting service. Please refresh the page.';
-          errorEl.classList.add('visible');
-        }
-      }
+    // Dynamic Firebase loader (Performance Optimization)
+    let firebasePromise = null;
+    async function loadFirebase() {
+          if (window.firebase) {
+                return window.firebase;
+          }
+          if (firebasePromise) {
+                return firebasePromise;
+          }
+          firebasePromise = new Promise((resolve, reject) => {
+                const scripts = [
+                  { src: 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js' },
+                  { src: 'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js' }
+                ];
+                let loaded = 0;
+                scripts.forEach((scriptInfo, index) => {
+                  const script = document.createElement('script');
+                  script.src = scriptInfo.src;
+                  script.async = true;
+                  script.onload = () => {
+                        loaded++;
+                        if (loaded === scripts.length && window.firebase) {
+                              resolve(window.firebase);
+                        }
+                  };
+                  script.onerror = () => reject(new Error('Failed to load Firebase'));
+                  document.head.appendChild(script);
+                });
+          });
+          return firebasePromise;
     }
     
-    if (firebase.apps.length > 0) {
-      const database = firebase.database();
+    (async function() {
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      };
+
+      if (firebaseConfig.apiKey === "YOUR_API_KEY" || 
+          firebaseConfig.projectId === "YOUR_PROJECT_ID") {
+        const errorEl = document.getElementById('errorMessage');
+        if (errorEl) {
+          errorEl.textContent = 'Voting service is not configured. Please contact the administrator.';
+          errorEl.classList.add('visible');
+        }
+      } else {
+        try {
+          await loadFirebase();
+          window.firebase.initializeApp(firebaseConfig);
+        } catch (error) {
+          const errorEl = document.getElementById('errorMessage');
+          if (errorEl) {
+            errorEl.textContent = 'Failed to initialize voting service. Please refresh the page.';
+            errorEl.classList.add('visible');
+          }
+        }
+      }
+      
+      if (window.firebase && window.firebase.apps.length > 0) {
+        const database = window.firebase.database();
       const voteRef = database.ref('dissolution/votes');
       const VOTE_THRESHOLD = 100000;
 

@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.9rem;
   color: var(--text-color);
   opacity: 0.7;
@@ -42,9 +42,11 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -59,18 +61,18 @@
 }
 
 .stat-item {
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+  background: linear-gradient(135deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 15%));
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 2rem;
-  border: 1px solid rgba(255,140,66,0.12);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  border: 1px solid rgb(255 140 66 / 12%);
+  box-shadow: 0 4px 24px rgb(0 0 0 / 4%);
   text-align: center;
 }
 
 .stat-value {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--warmthly-orange);
@@ -78,7 +80,7 @@
 }
 
 .stat-label {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.95rem;
   color: var(--text-color);
   opacity: 0.7;
@@ -88,15 +90,25 @@
 /* Donation Pool Container */
 .donation-pool-container {
   position: relative;
-  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+  background: linear-gradient(135deg, rgb(255 255 255 / 30%), rgb(255 255 255 / 10%));
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 2rem;
-  border: 1px solid rgba(255,140,66,0.15);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  border: 1px solid rgb(255 140 66 / 15%);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 6%);
   min-height: 500px;
+  max-width: 100%;
   margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent content from overflowing */
+}
+
+/* Ensure donation pool doesn't exceed container */
+.donation-pool-container .donation-pool {
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .pool-legend-toggle {
@@ -106,9 +118,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.3);
+  background: rgb(255 255 255 / 30%);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.25);
+  border: 1px solid rgb(255 255 255 / 25%);
   color: var(--warmthly-orange);
   font-size: 1.2rem;
   cursor: pointer;
@@ -120,7 +132,7 @@
 }
 
 .pool-legend-toggle:hover {
-  background: rgba(255,255,255,0.4);
+  background: rgb(255 255 255 / 40%);
   transform: scale(1.1);
 }
 
@@ -128,13 +140,13 @@
   position: absolute;
   top: 3.5rem;
   right: 1rem;
-  background: rgba(255,255,255,0.95);
+  background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(20px);
   border-radius: 16px;
   padding: 1.5rem;
   min-width: 250px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 12%);
+  border: 1px solid rgb(255 255 255 / 30%);
   z-index: 100;
   opacity: 0;
   visibility: hidden;
@@ -149,7 +161,7 @@
 }
 
 .legend-title {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--warmthly-orange);
@@ -167,7 +179,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.9rem;
   color: var(--text-color);
 }
@@ -179,11 +191,11 @@
 .pool-search input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid rgba(255,140,66,0.2);
+  border: 2px solid rgb(255 140 66 / 20%);
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.95rem;
-  background: rgba(255,255,255,0.5);
+  background: rgb(255 255 255 / 50%);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
@@ -191,7 +203,7 @@
 .pool-search input:focus {
   outline: none;
   border-color: var(--warmthly-orange);
-  box-shadow: 0 0 0 3px rgba(255,140,66,0.1);
+  box-shadow: 0 0 0 3px rgb(255 140 66 / 10%);
 }
 
 .exit-focus-mode {
@@ -201,7 +213,7 @@
   color: white;
   border: none;
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 600;
   cursor: pointer;
   margin-bottom: 1rem;
@@ -223,7 +235,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 16px;
-  background: rgba(255,255,255,0.1);
+  background: rgb(255 255 255 / 10%);
   touch-action: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -233,7 +245,7 @@
   padding: 3rem;
   color: var(--text-color);
   opacity: 0.6;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
 }
 
 /* Donation Details Panel */
@@ -244,12 +256,12 @@
   transform: translateY(-50%);
   width: 380px;
   max-height: 80vh;
-  background: rgba(255,255,255,0.95);
+  background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 12%);
+  border: 1px solid rgb(255 255 255 / 30%);
   transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
   overflow-y: auto;
@@ -260,13 +272,13 @@
 }
 
 .details-header {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--warmthly-orange);
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255,140,66,0.2);
+  border-bottom: 1px solid rgb(255 140 66 / 20%);
 }
 
 .details-section {
@@ -274,7 +286,7 @@
 }
 
 .details-label {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.85rem;
   color: var(--text-color);
   opacity: 0.6;
@@ -285,7 +297,7 @@
 }
 
 .details-value {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 1rem;
   color: var(--text-color);
   font-weight: 500;
@@ -294,7 +306,7 @@
 .details-breakdown {
   margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255,140,66,0.2);
+  border-top: 1px solid rgb(255 140 66 / 20%);
 }
 
 .breakdown-search {
@@ -304,9 +316,9 @@
 .breakdown-search input {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid rgba(255,140,66,0.2);
+  border: 1px solid rgb(255 140 66 / 20%);
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.9rem;
 }
 
@@ -330,7 +342,7 @@
 }
 
 .communication-title {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--warmthly-orange);
@@ -346,11 +358,11 @@
 .communication-toggle,
 .timeline-toggle {
   padding: 0.75rem 1.5rem;
-  background: rgba(255,255,255,0.3);
+  background: rgb(255 255 255 / 30%);
   backdrop-filter: blur(10px);
-  border: 2px solid rgba(255,140,66,0.2);
+  border: 2px solid rgb(255 140 66 / 20%);
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--warmthly-orange);
@@ -363,7 +375,7 @@
 
 .communication-toggle:hover,
 .timeline-toggle:hover {
-  background: rgba(255,255,255,0.4);
+  background: rgb(255 255 255 / 40%);
   border-color: var(--warmthly-orange);
   transform: translateY(-2px);
 }
@@ -380,13 +392,13 @@
 
 .communication-pool-container {
   position: relative;
-  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+  background: linear-gradient(135deg, rgb(255 255 255 / 30%), rgb(255 255 255 / 10%));
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 2rem;
-  border: 1px solid rgba(255,140,66,0.15);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  border: 1px solid rgb(255 140 66 / 15%);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 6%);
   min-height: 500px;
   margin-bottom: 2rem;
 }
@@ -397,7 +409,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 16px;
-  background: rgba(255,255,255,0.1);
+  background: rgb(255 255 255 / 10%);
   touch-action: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -428,9 +440,9 @@
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  background: rgba(255,255,255,0.2);
+  background: rgb(255 255 255 / 20%);
   border-radius: 12px;
-  border: 2px solid rgba(255,140,66,0.3);
+  border: 2px solid rgb(255 140 66 / 30%);
   transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -462,12 +474,12 @@
   transform: translateY(-50%);
   width: 380px;
   max-height: 80vh;
-  background: rgba(255,255,255,0.95);
+  background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 12%);
+  border: 1px solid rgb(255 255 255 / 30%);
   transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
   overflow-y: auto;
@@ -490,46 +502,45 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .stats-dashboard {
     grid-template-columns: 1fr;
   }
-  
+
   .donation-details-panel,
   .communication-details-panel {
     width: calc(100% - 2rem);
     right: -100%;
     max-height: 70vh;
   }
-  
+
   .donation-details-panel.active,
   .communication-details-panel.active {
     right: 1rem;
   }
-  
+
   .donation-pool,
   .communication-pool {
     height: 400px;
   }
-  
+
   .communication-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .communication-controls {
     width: 100%;
     flex-direction: column;
   }
-  
+
   .communication-toggle,
   .timeline-toggle {
     width: 100%;
     justify-content: center;
   }
-  
+
   .communication-pool-container.timeline-mode .communication-pool {
     height: 100px;
   }
 }
-

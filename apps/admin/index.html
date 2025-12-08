@@ -1,10 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    // This improves SEO and accessibility by setting the correct language immediately
+    (function() {
+      function detectLanguage() {
+        // Check URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        // Check localStorage
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) {
+              return normalized;
+            }
+          }
+        } catch {}
+        // Check browser language
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      // Set dir for RTL languages
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script type="module">
+    // SECURITY: Use secure API config instead of hardcoded URL
+    import { SECURE_API_CONFIG } from '/lego/config/secure-api-config.js';
+    // Make API config available globally for backward compatibility
+    // Note: This is read-only and cannot be tampered with
+    Object.defineProperty(window, 'API_BASE_URL', {
+      value: SECURE_API_CONFIG.baseUrl,
+      writable: false,
+      configurable: false,
+    });
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    // Initialize logger for error tracking
+    import { logger } from '/lego/utils/logger.js';
+    window.logger = logger;
+    
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
   <warmthly-head 
     title="Admin Dashboard - Warmthly"
     description="Administrative dashboard for managing Warmthly operations"
@@ -44,12 +116,16 @@
 <body class="fonts-loading">
 
   <warmthly-header app="admin"></warmthly-header>
-  <warmthly-stoplight app="admin"></warmthly-stoplight>
+  <div style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1rem; align-items: center;">
+    <warmthly-language-switcher></warmthly-language-switcher>
+    <warmthly-reading-level></warmthly-reading-level>
+    <warmthly-stoplight app="admin"></warmthly-stoplight>
+  </div>
 
   <div class="login-section" id="login-section">
     <div class="login-container">
-      <h1>Admin Access</h1>
-      <p>Enter the password to access the Warmthly dashboard.</p>
+      <h1 data-reading-level-content>Admin Access</h1>
+      <p data-reading-level-content>Enter the password to access the Warmthly dashboard.</p>
       <form id="login-form">
         <input 
           type="password" 
@@ -70,8 +146,8 @@
 
   <div id="admin-content" class="admin-content">
     <div class="container">
-      <h1>Welcome, Admin</h1>
-      <p class="welcome-text">Manage your Warmthly administration tools and settings.</p>
+      <h1 data-reading-level-content>Welcome, Admin</h1>
+      <p class="welcome-text" data-reading-level-content>Manage your Warmthly administration tools and settings.</p>
       
       <ul class="admin-links">
         <li><a href="/emails">Email Management (Send & View Received)</a></li>
@@ -83,7 +159,10 @@
 
   <warmthly-font-loader></warmthly-font-loader>
 
-  <script>
+  <!-- Secure token storage (Web Crypto API + IndexedDB) -->
+  <script src="/apps/admin/secure-auth.js"></script>
+
+  <script type="module">
     const loginForm = document.getElementById('login-form');
     const passwordInput = document.getElementById('password-input');
     const loginSection = document.getElementById('login-section');
@@ -91,11 +170,33 @@
     const errorMessage = document.getElementById('error-message');
     const logoutButton = document.getElementById('logout-button');
 
-    const isAuthenticated = sessionStorage.getItem('warmthly-admin-authenticated') === 'true';
-    if (isAuthenticated) {
-      loginSection.style.display = 'none';
-      adminContent.classList.add('active');
+    // Check authentication using secure storage
+    async function checkAuthentication() {
+      try {
+        if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+          const token = await window.SecureAuth.getAccessToken();
+          return token !== null;
+        } else {
+          // Fallback to sessionStorage if secure storage unavailable
+          return sessionStorage.getItem('warmthly-admin-authenticated') === 'true';
+        }
+      } catch (error) {
+        if (window.logger) {
+          window.logger.error('Auth check failed:', error);
+        } else if (process.env.NODE_ENV !== 'production') {
+          console.error('Auth check failed:', error);
+        }
+        return false;
+      }
     }
+
+    // Initialize authentication state
+    checkAuthentication().then((authenticated) => {
+      if (authenticated) {
+        loginSection.style.display = 'none';
+        adminContent.classList.add('active');
+      }
+    });
 
     loginForm.addEventListener('submit', async function(event) {
       event.preventDefault();
@@ -107,7 +208,8 @@
       submitButton.textContent = 'Verifying...';
 
       try {
-        const response = await fetch('/api/login', {
+        const apiBase = window.API_BASE_URL || 'https://backend.warmthly.org';
+        const response = await fetch(`${apiBase}/api/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password: enteredPassword }),
@@ -118,8 +220,27 @@
           const token = result.token;
           
           if (token) {
-            sessionStorage.setItem('warmthly-admin-authenticated', 'true');
-            sessionStorage.setItem('warmthly-admin-token', token);
+            // Store token securely using Web Crypto API + IndexedDB
+            if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+              try {
+                await window.SecureAuth.storeAccessToken(token);
+                // Also set session flag for compatibility
+                sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+              } catch (storageError) {
+                if (window.logger) {
+                  window.logger.error('Secure storage failed, using fallback:', storageError);
+                } else if (process.env.NODE_ENV !== 'production') {
+                  console.error('Secure storage failed, using fallback:', storageError);
+                }
+                // Fallback to sessionStorage
+                sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+                sessionStorage.setItem('warmthly-admin-token', token);
+              }
+            } else {
+              // Fallback to sessionStorage if secure storage unavailable
+              sessionStorage.setItem('warmthly-admin-authenticated', 'true');
+              sessionStorage.setItem('warmthly-admin-token', token);
+            }
           }
           
           loginSection.style.display = 'none';
@@ -139,8 +260,21 @@
       }
     });
 
-    logoutButton.addEventListener('click', function() {
+    logoutButton.addEventListener('click', async function() {
       if (confirm('Are you sure you want to logout?')) {
+        // Clear secure storage
+        if (window.SecureAuth && window.SecureAuth.isSecureStorageAvailable()) {
+          try {
+            await window.SecureAuth.clearAccessToken();
+          } catch (error) {
+            if (window.logger) {
+              window.logger.error('Failed to clear secure storage:', error);
+            } else if (process.env.NODE_ENV !== 'production') {
+              console.error('Failed to clear secure storage:', error);
+            }
+          }
+        }
+        // Clear sessionStorage fallback
         sessionStorage.removeItem('warmthly-admin-authenticated');
         sessionStorage.removeItem('warmthly-admin-token');
         adminContent.classList.remove('active');

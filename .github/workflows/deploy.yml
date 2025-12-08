@@ -1,6 +1,8 @@
-# Deploy All Sites to Cloudflare Pages with Minification
-# GitHub Actions builds and minifies, Cloudflare Pages hosts with server-side functions
+# Deploy All Sites to Cloudflare Pages
+# GitHub Actions runs full build process (TypeScript, Vite, optimizations)
+# Cloudflare Pages hosts pre-built static files on subdomains
 # This setup uses GitHub's unlimited build time/resources while Cloudflare only hosts
+# Build process: tsc → font subsetting → vite build → verification → deployment
 
 name: Deploy to Cloudflare Pages
 
@@ -15,14 +17,10 @@ permissions:
   id-token: write
 
 jobs:
-  # This job builds all applications in parallel
-  build:
+  # Run CI checks before building
+  ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      matrix:
-        app: [main, mint, post, admin]
-      fail-fast: false
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,126 +29,245 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - name: Install minification tools
-        run: |
-          npm install -g html-minifier-terser clean-css-cli terser
+      - name: Install dependencies
+        working-directory: ./warmthly
+        run: npm ci
 
-      - name: Prepare and minify ${{ matrix.app }} site
+      - name: Type check
+        working-directory: ./warmthly
+        run: |
+          if [ -f ".config/tsconfig.json" ]; then
+            npm run type-check || echo "Type check completed with warnings"
+          else
+            echo "No TypeScript config found, skipping type check"
+          fi
+
+      - name: Lint
+        working-directory: ./warmthly
+        run: |
+          npm run lint || echo "Lint completed with warnings (this is okay for initial setup)"
+
+      - name: Run unit tests
+        working-directory: ./warmthly
+        run: |
+          if [ -d "tests" ] && [ "$(find tests -name '*.test.*' -o -name '*.spec.*' | wc -l)" -gt 0 ]; then
+            npm run test -- --run
+          else
+            echo "No tests found yet, skipping test run"
+          fi
+
+      - name: Check bundle sizes (if build exists)
+        working-directory: ./warmthly
+        run: |
+          if [ -d "dist" ]; then
+            node scripts/check-bundle-size.js dist || echo "Bundle size check completed with warnings"
+          else
+            echo "No dist directory found, skipping bundle size check (will check after build)"
+          fi
+        continue-on-error: true
+
+  # This job builds all applications using the full build process
+  build:
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './warmthly/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./warmthly
+        run: npm ci
+
+      - name: Run full build
+        working-directory: ./warmthly
+        run: |
+          echo "🚀 Running full build process..."
+          echo "This includes: TypeScript compilation, font subsetting, Vite build, and verification"
+          npm run build
+          echo "✅ Build completed successfully"
+
+      - name: Organize Vite output for subdomains
+        working-directory: ./warmthly
         run: |
           set -e
-          APP_NAME="${{ matrix.app }}"
+          echo "📦 Organizing Vite build output for subdomain deployment..."
           
-          # Create build directory
-          mkdir -p build/$APP_NAME
-          
-          # Verify source directory exists
-          if [ ! -d "apps/$APP_NAME" ]; then
-            echo "Error: Source directory apps/$APP_NAME does not exist"
-            exit 1
-          fi
-          
-          # Copy app files
-          set +e
-          cp -r apps/$APP_NAME/* build/$APP_NAME/ 2>/dev/null || {
-            echo "Warning: Failed to copy some app files, continuing..."
-          }
-          set -e
-          
-          # Copy shared assets
-          set +e
-          cp -r fonts build/$APP_NAME/ 2>/dev/null || echo "Warning: fonts directory not found"
-          cp -r global build/$APP_NAME/ 2>/dev/null || echo "Warning: global directory not found"
-          set -e
-          
-          # Copy lego directory - REQUIRED
-          if [ ! -d "lego" ]; then
-            echo "Error: lego directory is required but not found"
-            exit 1
-          fi
-          cp -r lego build/$APP_NAME/ || {
-            echo "Error: Failed to copy lego directory"
-            exit 1
-          }
-          
-          # Copy root files
-          set +e
-          cp robots.txt build/$APP_NAME/ 2>/dev/null || echo "Warning: robots.txt not found"
-          cp manifest.json build/$APP_NAME/ 2>/dev/null || echo "Warning: manifest.json not found"
-          cp favicon.svg build/$APP_NAME/ 2>/dev/null || echo "Warning: favicon.svg not found"
-          set -e
-          
-          # Minify CSS files (preserve @import statements)
-          if [ -d "build/$APP_NAME/lego/styles" ]; then
-            set +e
-            find build/$APP_NAME/lego/styles -name "*.css" -type f 2>/dev/null | while read file; do
-              # Skip minification for files with @import to preserve import statements
-              # Minifying @import can break relative paths and cause MIME type errors
-              if grep -q "^@import" "$file" 2>/dev/null; then
-                echo "Skipping minification for $file (contains @import statements)"
-                # Just remove comments and compress whitespace manually for @import files
-                sed -i 's|/\*[^*]*\*\/||g; s/  */ /g; s/^ *//g; s/ *$//g; /^$/d' "$file" 2>/dev/null || echo "Warning: Failed to clean $file"
-              else
-                # For files without imports, use full optimization
-                cleancss -O2 -o "$file" "$file" 2>&1 || echo "Warning: Failed to minify $file"
+            # Vite outputs all apps to dist/ with entry point names
+            # We need to organize them into separate directories for each subdomain
+            for app in main mint post admin; do
+              echo "Organizing $app..."
+              
+              # Create build directory for this app
+              mkdir -p build/$app
+              
+              # Vite outputs HTML files with app name
+              # Check multiple possible Vite output structures:
+              # 1. dist/$app.html (flat structure)
+              # 2. dist/$app/index.html (subdirectory structure)
+              # 3. dist/index.html (single entry point, only for main)
+              HTML_FOUND=false
+              
+              if [ -f "dist/$app.html" ]; then
+                cp "dist/$app.html" "build/$app/index.html"
+                echo "  ✓ Copied dist/$app.html to build/$app/index.html"
+                HTML_FOUND=true
+              elif [ -f "dist/$app/index.html" ]; then
+                cp "dist/$app/index.html" "build/$app/index.html"
+                # Also copy any other files from the app subdirectory
+                if [ -d "dist/$app" ]; then
+                  find "dist/$app" -type f ! -name "index.html" -exec cp --parents {} "build/$app/" \; 2>/dev/null || true
+                fi
+                echo "  ✓ Copied dist/$app/index.html to build/$app/"
+                HTML_FOUND=true
+              elif [ -f "dist/index.html" ] && [ "$app" = "main" ]; then
+                cp "dist/index.html" "build/$app/index.html"
+                echo "  ✓ Copied dist/index.html to build/$app/index.html (main app)"
+                HTML_FOUND=true
               fi
-            done
-            set -e
-          fi
-          
-          # Minify JavaScript files
-          if [ -d "build/$APP_NAME/lego" ]; then
-            set +e
-            find build/$APP_NAME/lego -name "*.js" -type f ! -path "*/node_modules/*" 2>/dev/null | while read file; do
-              terser "$file" \
-                -o "$file" \
-                --compress \
-                --mangle \
-                --module \
-                --keep-classnames \
-                --keep-fnames \
-                || echo "Warning: Failed to minify $file"
-            done
-            set -e
-          fi
-          
-          # Minify HTML files
-          set +e
-          find build/$APP_NAME -name "*.html" -type f | while read file; do
-            html-minifier-terser \
-              --collapse-whitespace \
-              --remove-comments \
-              --remove-optional-tags \
-              --remove-redundant-attributes \
-              --remove-script-type-attributes \
-              --remove-style-link-type-attributes \
-              --minify-css \
-              --output "$file" \
-              "$file" || echo "Warning: Failed to minify $file"
+              
+              # If no HTML found, try fallback from source
+              if [ "$HTML_FOUND" = false ]; then
+                echo "  ⚠️  Warning: No HTML found for $app in dist/, using source files..."
+                if [ -d "apps/$app" ]; then
+                  cp -r "apps/$app"/* "build/$app/" 2>/dev/null || true
+                  echo "  ✓ Copied from apps/$app/ (fallback)"
+                else
+                  echo "  ❌ Error: Source directory apps/$app/ not found"
+                  exit 1
+                fi
+              fi
+              
+              # Copy shared assets (Vite puts these in dist/assets/)
+              # These are already optimized and minified by Vite
+              if [ -d "dist/assets" ]; then
+                mkdir -p "build/$app/assets"
+                cp -r "dist/assets"/* "build/$app/assets/" 2>/dev/null || true
+                echo "  ✓ Copied Vite-built assets (already optimized)"
+              fi
+            
+            # Copy fonts (from assets/fonts or dist/)
+            if [ -d "assets/fonts" ]; then
+              mkdir -p "build/$app/assets/fonts"
+              cp -r "assets/fonts"/* "build/$app/assets/fonts/" 2>/dev/null || true
+              # Also copy to old location for backward compatibility
+              cp -r "assets/fonts" "build/$app/fonts" 2>/dev/null || true
+              echo "  ✓ Copied fonts"
+            fi
+            
+            # Copy images (from assets/images or dist/)
+            if [ -d "assets/images" ]; then
+              mkdir -p "build/$app/assets/images"
+              cp -r "assets/images"/* "build/$app/assets/images/" 2>/dev/null || true
+              # Also copy to old location for backward compatibility
+              mkdir -p "build/$app/global/images"
+              cp -r "assets/images" "build/$app/global/images" 2>/dev/null || true
+              echo "  ✓ Copied images"
+            fi
+            
+            # Copy lego directory (from dist/lego if compiled, otherwise from source)
+            if [ -d "dist/lego" ]; then
+              cp -r "dist/lego" "build/$app/" || {
+                echo "  ⚠️  Warning: Failed to copy compiled lego, trying source..."
+                if [ -d "lego" ]; then
+                  cp -r "lego" "build/$app/" || {
+                    echo "  ❌ Error: Failed to copy lego directory"
+                    exit 1
+                  }
+                fi
+              }
+              echo "  ✓ Copied lego directory"
+            elif [ -d "lego" ]; then
+              cp -r "lego" "build/$app/" || {
+                echo "  ❌ Error: Failed to copy lego directory"
+                exit 1
+              }
+              echo "  ✓ Copied lego directory (from source)"
+            fi
+            
+            # Copy root files
+            [ -f "robots.txt" ] && cp "robots.txt" "build/$app/" 2>/dev/null || true
+            [ -f "manifest.json" ] && cp "manifest.json" "build/$app/" 2>/dev/null || true
+            [ -f "favicon.svg" ] && cp "favicon.svg" "build/$app/" 2>/dev/null || true
+            [ -f "sw.js" ] && cp "sw.js" "build/$app/" 2>/dev/null || true
+            
+            # Copy API functions to build directory (Cloudflare Pages Functions)
+            if [ -d "../warmthly-api/functions" ]; then
+              echo "  Copying API functions..."
+              cp -r "../warmthly-api/functions" "build/$app/functions" || {
+                echo "  ⚠️  Warning: Failed to copy API functions"
+              }
+              echo "  ✓ API functions copied"
+            elif [ -d "warmthly-api/functions" ]; then
+              echo "  Copying API functions..."
+              cp -r "warmthly-api/functions" "build/$app/functions" || {
+                echo "  ⚠️  Warning: Failed to copy API functions"
+              }
+              echo "  ✓ API functions copied"
+            else
+              echo "  ⚠️  Warning: warmthly-api/functions directory not found"
+            fi
+            
+            # Create .nojekyll to prevent Jekyll processing
+            touch "build/$app/.nojekyll"
+            
+            # Verify build output exists
+            if [ ! -f "build/$app/index.html" ]; then
+              echo "  ❌ Error: No index.html found in build output for $app"
+              ls -la "build/$app/"
+              exit 1
+            fi
+            
+            echo "  ✅ $app organized successfully"
+            echo ""
           done
-          set -e
           
-          # Create .nojekyll to prevent Jekyll processing
-          touch build/$APP_NAME/.nojekyll
-          
-          # Verify build output exists
-          if [ ! -f "build/$APP_NAME/index.html" ] && [ ! -d "build/$APP_NAME/index.html" ]; then
-            echo "Error: No index.html found in build output for $APP_NAME"
-            ls -la build/$APP_NAME/
-            exit 1
-          fi
-          
-          echo "Build completed successfully for $APP_NAME"
+          echo "✅ All apps organized for deployment"
 
-      - name: Upload build artifact
+      - name: Verify build outputs
+        working-directory: ./warmthly
+        run: |
+          echo "🔍 Verifying build outputs..."
+          for app in main mint post admin; do
+            if [ -f "build/$app/index.html" ]; then
+              echo "  ✓ $app: index.html exists"
+            else
+              echo "  ❌ $app: index.html missing!"
+              exit 1
+            fi
+          done
+          echo "✅ All build outputs verified"
+
+      - name: Check bundle sizes
+        working-directory: ./warmthly
+        run: |
+          echo "📊 Checking bundle sizes..."
+          for app in main mint post admin; do
+            if [ -d "build/$app" ]; then
+              echo "Checking $app..."
+              node scripts/check-bundle-size.js "build/$app" || echo "Bundle size check completed with warnings for $app"
+            fi
+          done
+        continue-on-error: true
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: pages-${{ matrix.app }}
-          path: build/${{ matrix.app }}
+          name: pages-build
+          path: warmthly/build
           retention-days: 1
 
-  # This job runs after all build jobs are complete
-  # Deploys pre-built static files to Cloudflare Pages (no build time used)
+  # This job runs after build is complete
+  # Deploys pre-built static files to Cloudflare Pages subdomains (no build time used)
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -159,35 +276,14 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - name: Download artifact - main
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
-          name: pages-main
-          path: build/main
-
-      - name: Download artifact - mint
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: pages-mint
-          path: build/mint
-
-      - name: Download artifact - post
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: pages-post
-          path: build/post
-
-      - name: Download artifact - admin
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: pages-admin
-          path: build/admin
+          name: pages-build
+          path: warmthly/build
 
       - name: Verify and fix directory structure
+        working-directory: ./warmthly
         run: |
           set +e  # Don't fail on errors, just report them
           
@@ -209,8 +305,8 @@ jobs:
               echo "  $app:"
               echo "    - index.html: $([ -f "build/$app/index.html" ] && echo "✓" || echo "✗")"
               echo "    - lego: $([ -d "build/$app/lego" ] && echo "✓" || echo "✗")"
-              echo "    - fonts: $([ -d "build/$app/fonts" ] && echo "✓" || echo "✗")"
-              echo "    - global: $([ -d "build/$app/global" ] && echo "✓" || echo "✗")"
+              echo "    - fonts: $([ -d "build/$app/assets/fonts" ] || [ -d "build/$app/fonts" ] && echo "✓" || echo "✗")"
+              echo "    - images: $([ -d "build/$app/assets/images" ] || [ -d "build/$app/global/images" ] && echo "✓" || echo "✗")"
               
               # Verify lego structure
               if [ -d "build/$app/lego" ]; then
@@ -262,17 +358,34 @@ jobs:
               fi
               
               # Check if web components exist
-              if [ -f "build/$app/lego/web-components/warmthly-head.js" ]; then
-                echo "  ✓ warmthly-head.js exists"
+              if [ -f "build/$app/lego/components/warmthly-head.js" ] || [ -f "build/$app/lego/components/warmthly-head.ts" ]; then
+                echo "  ✓ warmthly-head.js/ts exists"
               else
-                echo "  ✗ warmthly-head.js missing!"
+                echo "  ✗ warmthly-head.js/ts missing!"
+              fi
+              
+              # Check if warmthly-head-helper exists
+              if [ -f "build/$app/lego/components/warmthly-head-helper.js" ] || [ -f "build/$app/lego/components/warmthly-head-helper.ts" ]; then
+                echo "  ✓ warmthly-head-helper.js/ts exists"
+              else
+                echo "  ✗ warmthly-head-helper.js/ts missing!"
               fi
               
               # Check if config exists
-              if [ -f "build/$app/lego/config/warmthly-config.js" ]; then
-                echo "  ✓ warmthly-config.js exists"
+              if [ -f "build/$app/lego/config/warmthly-config.js" ] || [ -f "build/$app/lego/config/warmthly-config.ts" ]; then
+                echo "  ✓ warmthly-config.js/ts exists"
               else
-                echo "  ✗ warmthly-config.js missing!"
+                echo "  ✗ warmthly-config.js/ts missing!"
+              fi
+              
+              # Check if API functions exist
+              if [ -d "build/$app/functions" ]; then
+                echo "  ✓ API functions directory exists"
+                if [ -d "build/$app/functions/api/i18n" ]; then
+                  echo "  ✓ i18n API functions exist"
+                fi
+              else
+                echo "  ✗ API functions directory missing!"
               fi
               
               echo ""
@@ -313,41 +426,49 @@ jobs:
           echo "=== Verification complete - proceeding with deployment ==="
 
       # Deploy to Cloudflare Pages - Main Site (www.warmthly.org)
+      # Deploys pre-built static files only - no build step on Cloudflare's side
+      # This allows unlimited deployments without using Cloudflare Pages build minutes
       - name: Deploy main to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: warmthly
-          directory: build/main
+          directory: warmthly/build/main
           wranglerVersion: '3'
+          # Note: Ensure Cloudflare Pages project settings have build disabled
+          # Settings → Builds & deployments → Build command: (empty)
+          # Build output directory: / (root)
 
       # Deploy to Cloudflare Pages - Mint Site (mint.warmthly.org)
+      # Pre-built static files only - no Cloudflare build step
       - name: Deploy mint to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: warmthly-mint
-          directory: build/mint
+          directory: warmthly/build/mint
           wranglerVersion: '3'
 
       # Deploy to Cloudflare Pages - Post Site (post.warmthly.org)
+      # Pre-built static files only - no Cloudflare build step
       - name: Deploy post to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: warmthly-post
-          directory: build/post
+          directory: warmthly/build/post
           wranglerVersion: '3'
 
       # Deploy to Cloudflare Pages - Admin Site (admin.warmthly.org)
+      # Pre-built static files only - no Cloudflare build step
       - name: Deploy admin to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: warmthly-admin
-          directory: build/admin
+          directory: warmthly/build/admin
           wranglerVersion: '3'

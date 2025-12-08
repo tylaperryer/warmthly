@@ -1,24 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    // This improves SEO and accessibility by setting the correct language immediately
+    (function() {
+      function detectLanguage() {
+        // Check URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        // Check localStorage
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) {
+              return normalized;
+            }
+          }
+        } catch {}
+        // Check browser language
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      // Set dir for RTL languages
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script type="module">
+    // Secure API Configuration - Immutable module-based config
+    // Prevents global window tampering
+    import { SECURE_API_CONFIG } from '/lego/config/secure-api-config.js';
+    // Make available for legacy code (read-only)
+    Object.defineProperty(window, 'API_BASE_URL', {
+      get: () => SECURE_API_CONFIG.baseUrl,
+      configurable: false,
+      enumerable: true,
+    });
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-media-accessibility.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    // Initialize RTL support based on language
+    import { initRTLSupport } from '/lego/utils/rtl-support.js';
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    initRTLSupport();
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+  </script>
   <warmthly-head 
     title="Warmthly - Rehumanize Our World"
     description="Warmthly is a global movement to make empathy a measurable part of our systems."
     app="main"
     viewport="0.75"
-    preconnects="https://mint.warmthly.org, https://post.warmthly.org">
+    preconnects="https://mint.warmthly.org, https://post.warmthly.org, https://js.yoco.com, https://open.spotify.com">
   </warmthly-head>
 
   <style>
-    /* Hide body until CSS loads - base.css handles the animation */
-    body:not(.css-loaded) {
-      visibility: hidden;
-      opacity: 0;
-    }
     :root { color-scheme: light; }
     html {
       background-color: #fff6f1;
@@ -78,78 +143,6 @@
       border: none;
       border-radius: var(--radius-xl);
     }
-    .video-placeholder {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #000;
-      border-radius: var(--radius-xl);
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-    }
-    .video-placeholder.loaded {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .video-play-button {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      margin-bottom: var(--spacing-4);
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-      position: relative;
-      outline: none;
-    }
-    .video-play-button:hover,
-    .video-play-button:focus {
-      transform: scale(1.08);
-    }
-    .video-play-button:focus-visible {
-      outline: 3px solid var(--warmthly-orange);
-      outline-offset: 4px;
-      border-radius: 50%;
-    }
-    .video-play-button .play-icon {
-      filter: drop-shadow(0 4px 12px rgba(255, 140, 66, 0.4));
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-    .video-play-button:hover .play-icon {
-      filter: drop-shadow(0 6px 20px rgba(255, 140, 66, 0.6));
-    }
-    .video-play-button:hover .play-icon .pulse-ring {
-      animation: pulse 2s ease-in-out infinite;
-    }
-    .video-play-button .play-triangle {
-      transform-origin: center;
-      transition: transform 0.3s ease;
-    }
-    .video-play-button:hover .play-triangle {
-      transform: translateX(2px);
-    }
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 0.2;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 0.4;
-        transform: scale(1.1);
-      }
-    }
-    .video-placeholder-text {
-      color: white;
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-base);
-      line-height: var(--line-height-base);
-      margin: 0;
-    }
     .method-section {
       text-align: left;
       margin: var(--spacing-16) auto;
@@ -162,6 +155,13 @@
       transform: translateY(30px);
       transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1),
                   transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+      /* Ensure text is readable even before animation */
+      color: var(--text-color);
+      visibility: hidden;
+    }
+    
+    .method-section.visible {
+      visibility: visible;
     }
     
     .method-section.visible {
@@ -295,75 +295,74 @@
         <a href="/" class="brand-logo" id="main-brand-logo">Warmthly</a>
     </div>
     <div class="header-right">
+        <warmthly-language-switcher></warmthly-language-switcher>
+        <warmthly-reading-level></warmthly-reading-level>
         <warmthly-stoplight app="main"></warmthly-stoplight>
     </div>
   </header>
+  <warmthly-breadcrumb></warmthly-breadcrumb>
   
   <main id="main-content" role="main" aria-label="Main content">
   <div class="container">
-    <h1 class="logo">Rehumanize Our World.</h1>
-    <p class="subtitle">Warmthly is a global movement to make empathy a measurable part of our systems.</p>
+    <h1 class="logo" data-reading-level-content>Rehumanize Our World.</h1>
+    <p class="subtitle" data-reading-level-content>Warmthly is a global movement to make empathy a measurable part of our systems.</p>
     <div class="video-section">
-      <div class="video-container" id="video-container">
-        <div class="video-placeholder" id="video-placeholder">
-          <button class="video-play-button" id="video-play-button" aria-label="Play video about Warmthly">
-            <svg class="play-icon" width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="40" cy="40" r="38" fill="rgba(255, 140, 66, 0.9)" stroke="rgba(255, 255, 255, 0.3)" stroke-width="2"/>
-              <circle cx="40" cy="40" r="35" fill="transparent" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1" class="pulse-ring"/>
-              <path d="M32 24 L32 56 L56 40 Z" fill="white" class="play-triangle"/>
-            </svg>
-          </button>
-          <p class="video-placeholder-text">Click to play video</p>
-        </div>
-      </div>
+      <div class="video-container" id="video-container"></div>
+      <warmthly-media-accessibility
+        video-id="video-container"
+        sign-language-url="/videos/warmthly-sign-language.mp4"
+        audio-description-url="/audio/warmthly-audio-description.mp3"
+        transcript-url="/transcripts/warmthly-video.txt"
+        captions-url="/captions/warmthly-video.vtt">
+      </warmthly-media-accessibility>
     </div>
     <div class="method-section">
-        <p class="intro-paragraph">
+        <p class="intro-paragraph" data-reading-level-content>
             We are raising $20,000 to legally launch a global movement and demonstrate that empathy is the most powerful force for change.
         </p>
-        <p class="intro-paragraph">
-            Warmthly is an international movement dedicated to bringing empathy into the concrete of global systems. We rehumanize sectors, starting with mental health and education, to make sure that people are no longer treated like numbers. We aim to make empathy a measurable design principle. With your support, we can go from proof-of-concept to international scale in one winter. Join us in building your future.
+        <p class="intro-paragraph" data-reading-level-content>
+            Warmthly is an international movement dedicated to bringing empathy into the concrete of global systems. We rehumanize sectors, starting with mental health and education, to make sure that people are no longer treated like numbers. We aim to make empathy a measurable design principle. With your support, we can go from proof-of-concept to international scale in one winter. Join us in building your future. Learn more in our <a href="/help.html">Help & FAQ</a> or see our <a href="https://mint.warmthly.org">transparency tracking</a>.
         </p>
         
-        <h3 class="section-subtitle">Who are we? What's this about?</h3>
-        <p class="method-step">
+        <h3 class="section-subtitle" data-reading-level-content>Who are we? What's this about?</h3>
+        <p class="method-step" data-reading-level-content>
             I'm Tyla Perryer, 15 (7/13/2010), from Gauteng, South Africa. I've seen too much indifference to sit around, so I'm starting with Warmthly. While my adults cover the legalities, I am the driving vision.
         </p>
-        <p class="method-step">
+        <p class="method-step" data-reading-level-content>
             My team supports me:
         </p>
-        <ul class="method-step" style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
+        <ul class="method-step" style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;" data-reading-level-content>
             <li>My mother, Janine Perryer, is in administration</li>
             <li>My stepfather, Darryl Linington, is the internal PR</li>
         </ul>
-        <p class="method-step">
-            <b>My vow:</b> I am not taking a single cent, clap of applause or like on socials as compensation. These funds cover the operational needs for our mission, and my time is volunteer pro bono.
+        <p class="method-step" data-reading-level-content>
+            <b>My vow:</b> I am not taking a single cent, clap of applause or like on socials as compensation. These funds cover the operational needs for our mission, and my time is volunteer pro bono. Every transaction is tracked publicly on our <a href="https://mint.warmthly.org">Mint page</a>.
         </p>
         
-        <h3 class="section-subtitle">Our Launch: Tbilisi, Georgia, Europe</h3>
-        <p class="method-step">
+        <h3 class="section-subtitle" data-reading-level-content>Our Launch: Tbilisi, Georgia, Europe</h3>
+        <p class="method-step" data-reading-level-content>
             Warmthly will launch with a first focus on mental health through an empathy-first lens. To maximise the impact of your every cent and speed up our timeline, we are following our launch and initial proof-of-concept in Tbilisi, Georgia.
         </p>
-        <p class="method-step">
+        <p class="method-step" data-reading-level-content>
             This allows us to:
         </p>
-        <div class="method-step">
+        <div class="method-step" data-reading-level-content>
             <h3><span>1. Speed up efficiency:</span></h3>
             <p>Georgia offers visa-free entry for South African citizens for up to 365 days.</p>
         </div>
-        <div class="method-step">
+        <div class="method-step" data-reading-level-content>
             <h3><span>2. Speed up legal status:</span></h3>
             <p>We are actively seeking a fiscal sponsor, which is an established U.S. 501(c)(3) non-profit, to accept tax-deductible donations and allow us to operate within Georgia legally from day one.</p>
         </div>
         
-        <h3 class="section-subtitle">Our flagship pilot: Where Wildflowers Bloom.</h3>
-        <p class="method-step">
+        <h3 class="section-subtitle" data-reading-level-content>Our flagship pilot: Where Wildflowers Bloom.</h3>
+        <p class="method-step" data-reading-level-content>
             Our pilot redesigns local mental health facilities with an empathy-first lens, backed by studies in environmental psychology. We will work on light, colour, and personalisation to improve patient experiences.
         </p>
         
-        <h3 class="section-subtitle">Where Your $20,000 Goes</h3>
-        <p class="method-step">
-            This "seed" funding covers "startup" costs and develops our pilot. Every cent will be tracked on a public, live transparency archive, showing all our donations, expenses, and receipts.
+        <h3 class="section-subtitle" data-reading-level-content>Where Your $20,000 Goes</h3>
+        <p class="method-step" data-reading-level-content>
+            This "seed" funding covers "startup" costs and develops our pilot. Every cent will be tracked on a public, live transparency archive, showing all our donations, expenses, and receipts. View real-time tracking on our <a href="https://mint.warmthly.org">Mint page</a> and see our complete timeline on our <a href="https://post.warmthly.org">Post page</a>.
         </p>
         
         <div class="method-step">
@@ -401,33 +400,33 @@
             <b>Total:</b> $20,000.00
         </p>
         
-        <h3 class="section-subtitle">FAQ</h3>
+        <h3 class="section-subtitle" data-reading-level-content>FAQ</h3>
         
-        <div class="method-step">
+        <div class="method-step" data-reading-level-content>
             <h3><span>Why trust a 15 year old?</span></h3>
             <p>I want to build the future that I want to grow up in. One where we all hear each other, where we can all see eye to eye, where we can all sit down and handle conflict. While I lead with vision, I'm supported by adults with many years of experience. A full board will be built post-pilot.</p>
         </div>
         
-        <div class="method-step">
+        <div class="method-step" data-reading-level-content>
             <h3><span>Why Georgia, Europe, instead of ZA?</span></h3>
             <p>We are focusing on global reach. The Georgia launch is designed to secure the legal status and maximise the impact of our first pilot with the seed funding. We will pursue U.S. 501(c)(3) status for long-term funding.</p>
         </div>
         
-        <div class="method-step">
+        <div class="method-step" data-reading-level-content>
             <h3><span>How will you measure impact?</span></h3>
             <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
                 <li>Patient surveys and incident logs.</li>
                 <li>20% improvement in measured stress levels.</li>
             </ul>
-            <p style="margin-top: 1rem;">We pre-commit to publishing a detailed, academic-style report on the pilot's findings, which will serve as the proof-of-concept for larger funding.</p>
+            <p style="margin-top: 1rem;">We pre-commit to publishing a detailed, academic-style report on the pilot's findings, which will serve as the proof-of-concept for larger funding. All findings will be shared on our <a href="https://post.warmthly.org">Post page</a> for complete transparency.</p>
         </div>
         
-        <div class="method-step">
+        <div class="method-step" data-reading-level-content>
             <h3><span>What is the Dissolution Clause?</span></h3>
             <p>Should Warmthly fail to stand up to its values and/or achieve its initial launch or pilot goals, a formal, transparent dissolution vote is held on our website. Don't like what we're doing? 100,000 votes dissolves us. We ensure your funds will be handled with the right hands, in open-air, even in the worst of circumstances.</p>
         </div>
         
-        <div class="method-step">
+        <div class="method-step" data-reading-level-content>
             <h3><span>What's after my $20,000?</span></h3>
             <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
                 <li><b>Phase 1 (Winter 25):</b> Legal fiscal sponor setup in the U.S., operating in Georgia, pilot initiation, building partnerships.</li>
@@ -436,7 +435,7 @@
             </ul>
         </div>
         
-        <div class="method-step">
+        <div class="method-step" data-reading-level-content>
             <h3><span>Sources for our pilot:</span></h3>
             <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
                 <li>The Impact of Color in Healthcare Environments, 2024.</li>
@@ -445,19 +444,19 @@
             <p style="margin-top: 1rem; font-size: 0.9em; opacity: 0.8;">(The full list of our sources will be available at warmthly.org/research)</p>
         </div>
         
-        <h3 class="section-subtitle">Lend us a hand</h3>
-        <p class="intro-paragraph">
+        <h3 class="section-subtitle" data-reading-level-content>Lend us a hand</h3>
+        <p class="intro-paragraph" data-reading-level-content>
             Let's rethink our world with empathy. For just $20,000, you can help us:
         </p>
-        <ul class="method-step" style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
+        <ul class="method-step" style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;" data-reading-level-content>
             <li>Legally launch Warmthly with radical transparency and accountability</li>
             <li>Prove that empathy works with a pilot</li>
             <li>And open doors to larger funding with our proven models</li>
         </ul>
-        <p class="method-step">
+        <p class="method-step" data-reading-level-content>
             Follow: <a href="https://warmthly.org" style="color: var(--warmthly-orange); text-decoration: underline;">@bewarmthly / warmthly.org</a>
         </p>
-        <p class="intro-paragraph" style="margin-top: 2rem; font-size: 1.2em;">
+        <p class="intro-paragraph" style="margin-top: 2rem; font-size: 1.2em;" data-reading-level-content>
             ❤️ Donate today. Let's thaw frozen systems, together.
         </p>
     </div>
@@ -472,7 +471,7 @@
         </div>
       </div>
     </div>
-    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer">GitHub</a>. Our work is not ours, it's yours.</p>
+    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer" aria-label="View Warmthly source code on GitHub">GitHub</a>. Our work is not ours, it's yours. <a href="/privacy.html">Privacy Policy</a> | <a href="/easy-read.html">Easy Read Version</a></p>
   </div>
   
   <div class="donation-modal" id="donationModal" aria-hidden="true" role="dialog" aria-labelledby="donationModalTitle" aria-modal="true">
@@ -482,6 +481,10 @@
         <p>Choose an amount or enter a custom donation. All amounts will be converted to South African Rand (ZAR) using current exchange rates:</p>
         <div class="currency-selector-wrapper">
           <label style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-color); opacity: 0.8; margin-right: 0.5rem;">Currency:</label>
+          <span class="field-help" style="font-size: 0.75rem; color: var(--text-color-light); margin-left: 0.5rem;">
+            Select your preferred currency
+            <a href="/help.html#donations-heading" class="field-help-link" target="_blank" rel="noopener noreferrer" aria-label="Get more help about currency selection">?</a>
+          </span>
           <div class="custom-currency-dropdown" id="currencyDropdown">
             <div class="custom-currency-select" id="currencySelect">
               <span class="currency-display">USD ($)</span>
@@ -511,7 +514,16 @@
           <button class="amount-btn" data-amount="5000">$50</button>
           <button class="amount-btn" data-amount="10000">$100</button>
         </div>
-        <input type="number" id="customAmount" placeholder="Custom amount" min="1" step="1">
+        <div style="margin-top: var(--spacing-4);">
+          <label for="customAmount" style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-color); opacity: 0.8; display: block; margin-bottom: var(--spacing-2);">
+            Custom Amount:
+          </label>
+          <input type="number" id="customAmount" placeholder="Custom amount" min="1" step="1" aria-describedby="customAmountHelp">
+          <span id="customAmountHelp" class="field-help" style="font-size: 0.75rem; color: var(--text-color-light); margin-top: 0.25rem; display: block;">
+            Enter any amount you'd like to donate
+            <a href="/help.html#donations-heading" class="field-help-link" target="_blank" rel="noopener noreferrer" aria-label="Get more help about donation amounts">?</a>
+          </span>
+        </div>
         <p id="conversionNotice" style="font-size: 0.85rem; color: var(--text-color); opacity: 0.7; margin-top: 0.5rem; text-align: center; font-family: 'Inter', sans-serif; display: none;">
           💱 Amounts will be converted to South African Rand (ZAR) at current exchange rates
         </p>
@@ -569,115 +581,26 @@
   <script type="module">
     import { trapFocus } from '/lego/utils/focus-trap.js';
     import { ariaAnnouncer } from '/lego/utils/aria-announcer.js';
+    import { lockBodyScroll, forceUnlockScroll, cleanupYocoState, initYocoStyleObserver } from '/lego/utils/scroll-lock.js';
+    import { initLinkPrefetch } from '/lego/utils/prefetch.js';
+    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    import { getErrorPopupTimeout, getSuccessPopupTimeout } from '/lego/utils/user-preferences.js';
+    import { initTextSpacing } from '/lego/utils/text-spacing.js';
+    
+    // Initialize text spacing on page load (WCAG 2.1 AAA 1.4.8)
+    initTextSpacing();
     
     window.trapFocus = trapFocus;
     window.ariaAnnouncer = ariaAnnouncer;
-  </script>
-  <script>
-    let savedScrollPosition = 0;
+    window.lockBodyScroll = lockBodyScroll;
+    window.forceUnlockScroll = forceUnlockScroll;
+    window.cleanupYocoState = cleanupYocoState;
     
-    window.lockBodyScroll = function() {
+    function showPaymentErrorPopup(message) {
       try {
-        savedScrollPosition = window.scrollY || document.documentElement.scrollTop || 0;
-        document.body.classList.add('modal-open');
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${savedScrollPosition}px`;
-        document.body.style.width = '100%';
-        document.body.style.overflow = 'hidden';
-        
-        return savedScrollPosition;
-      } catch (error) {
-        return 0;
-      }
-    };
-    
-    window.forceUnlockScroll = function() {
-      try {
-        const yocoStyles = document.querySelectorAll(
-          '#yc-injected-styles, ' +
-          'style[id*="yoco" i], ' +
-          'style[id*="yc-" i], ' +
-          'style[class*="yoco" i]'
-        );
-        
-        yocoStyles.forEach((styleTag) => {
-          styleTag.remove();
-        });
-        document.body.classList.remove('modal-open', 'yoco-active');
-        document.documentElement.classList.remove('modal-open', 'yoco-active');
-        document.body.classList.add('force-scroll-unlock', 'scroll-unlocked');
-        document.documentElement.classList.add('force-scroll-unlock', 'scroll-unlocked');
-        const elementsToReset = [document.body, document.documentElement];
-        elementsToReset.forEach(el => {
-          el.style.position = '';
-          el.style.top = '';
-          el.style.left = '';
-          el.style.width = '';
-          el.style.height = '';
-          el.style.overflow = '';
-          el.style.overflowX = '';
-          el.style.overflowY = '';
-        });
-        
-        void document.body.offsetHeight;
-        
-        if (savedScrollPosition > 0) {
-          window.scrollTo(0, savedScrollPosition);
-          savedScrollPosition = 0;
-        }
-        
-        setTimeout(() => {
-          document.body.classList.remove('force-scroll-unlock');
-          document.documentElement.classList.remove('force-scroll-unlock');
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
-        }, 100);
-        
-        setTimeout(() => {
-          if (document.body.classList.contains('modal-open') || 
-              document.body.classList.contains('yoco-active')) {
-            document.body.classList.remove('modal-open', 'yoco-active');
-            document.documentElement.classList.remove('modal-open', 'yoco-active');
-          }
-          
-          const currentScroll = window.scrollY || 0;
-          if (currentScroll === 0 && savedScrollPosition > 0) {
-            window.scrollTo(0, savedScrollPosition);
-          }
-        }, 300);
-        
-      } catch (error) {
-        document.body.className = document.body.className
-          .replace(/modal-open|yoco-active/g, '')
-          .trim();
-        document.body.style.cssText = '';
-        document.documentElement.style.cssText = '';
-      }
-    };
-    
-    window.cleanupYocoState = function() {
-      try {
-        window.forceUnlockScroll();
-        const donateButton = document.getElementById('donateButton');
-        const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-        const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
-        
-        if (donateButton) donateButton.style.display = 'inline-block';
-        if (yocoPaymentEmbed) yocoPaymentEmbed.style.display = 'none';
-        if (yocoEmbedContainer) yocoEmbedContainer.innerHTML = '';
-        
-      } catch (error) {
-        window.forceUnlockScroll();
-      }
-    };
-    
-    window.showPaymentErrorPopup = function(message) {
-      try {
-        
         const errorPopup = document.getElementById('errorPopup');
         const errorMessage = document.getElementById('errorMessage');
         
-        // Set custom message if provided
         if (message && errorMessage) {
           errorMessage.textContent = message;
         }
@@ -702,14 +625,12 @@
               errorMessage.textContent = 'Your payment was not processed. This could be due to insufficient funds, a declined card, or the payment was cancelled.';
             }
             
-            window.forceUnlockScroll();
+            forceUnlockScroll();
           };
           
           const errorButton = document.getElementById('errorPopupButton');
           if (errorButton) {
-            // Remove old listeners
             errorButton.onclick = null;
-            // Add new listener
             errorButton.onclick = closeErrorPopup;
           }
           
@@ -728,633 +649,612 @@
             });
           }
           
-          setTimeout(closeErrorPopup, 8000);
+          // Use user preference for timeout (WCAG 2.1 AAA 2.2.3 - No Timing)
+          const errorTimeout = getErrorPopupTimeout(WARMTHLY_CONFIG.constants.errorPopupTimeout);
+          if (errorTimeout !== null) {
+            setTimeout(closeErrorPopup, errorTimeout);
+          }
         }
         
       } catch (error) {
-        alert('Payment was not completed. Please try again.');
+        // Phase 8 Issue 8.11: Use error popup instead of alert
+        showPaymentErrorPopup('Payment was not completed. Please try again.');
       }
+    }
+    
+    window.showPaymentErrorPopup = showPaymentErrorPopup;
+    
+    const currencyDisplayNames = {
+      USD: 'USD ($)',
+      EUR: 'EUR (€)',
+      GBP: 'GBP (£)',
+      CAD: 'CAD (C$)',
+      AUD: 'AUD (A$)',
+      JPY: 'JPY (¥)',
+      CHF: 'CHF (Fr)',
+      NZD: 'NZD (NZ$)',
+      SEK: 'SEK (kr)',
+      NOK: 'NOK (kr)',
+      DKK: 'DKK (kr)',
+      SGD: 'SGD (S$)',
+      HKD: 'HKD (HK$)',
+      ZAR: 'ZAR (R)'
     };
     
-    const yocoStyleObserver = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach((node) => {
-            // Check if this is a Yoco style injection
-            if (node.nodeType === 1 && node.tagName === 'STYLE') {
-              const isYocoStyle = 
-                node.id === 'yc-injected-styles' ||
-                (node.id && node.id.toLowerCase().includes('yoco')) ||
-                (node.className && node.className.toLowerCase().includes('yoco')) ||
-                (node.textContent && node.textContent.toLowerCase().includes('yoco'));
-              
-              if (isYocoStyle) {
-                node.remove();
-                setTimeout(() => {
-                  window.forceUnlockScroll();
-                }, 50);
-              }
-            }
-          });
-        }
+    const currencyInfo = {
+      USD: { symbol: '$', name: 'USD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      EUR: { symbol: '€', name: 'EUR', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      GBP: { symbol: '£', name: 'GBP', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      CAD: { symbol: 'C$', name: 'CAD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      AUD: { symbol: 'A$', name: 'AUD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      JPY: { symbol: '¥', name: 'JPY', usesCents: false, defaultAmounts: [1000, 2500, 5000, 10000] },
+      CHF: { symbol: 'Fr', name: 'CHF', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      NZD: { symbol: 'NZ$', name: 'NZD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      SEK: { symbol: 'kr', name: 'SEK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      NOK: { symbol: 'kr', name: 'NOK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      DKK: { symbol: 'kr', name: 'DKK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      SGD: { symbol: 'S$', name: 'SGD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      HKD: { symbol: 'HK$', name: 'HKD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
+      ZAR: { symbol: 'R', name: 'ZAR', usesCents: true, defaultAmounts: [10000, 25000, 50000, 100000] }
+    };
+    
+    const fallbackRates = {
+      USD: 17, EUR: 18, GBP: 21, CAD: 12, AUD: 11, JPY: 0.11,
+      CHF: 19, NZD: 10, SEK: 1.5, NOK: 1.5, DKK: 2.3, SGD: 12, HKD: 2.2, ZAR: 1
+    };
+    
+    function formatAmount(amount, currency) {
+      const info = currencyInfo[currency];
+      if (!info) return amount.toString();
+      
+      const displayAmount = info.usesCents ? (amount / 100) : amount;
+      const formatted = displayAmount.toLocaleString('en-US', { 
+        minimumFractionDigits: info.usesCents ? 2 : 0,
+        maximumFractionDigits: info.usesCents ? 2 : 0
       });
-    });
+      return `${info.symbol}${formatted}`;
+    }
     
-    // Observe both head and body for style injections
-    yocoStyleObserver.observe(document.head, { childList: true, subtree: true });
-    yocoStyleObserver.observe(document.body, { childList: true, subtree: true });
-    
-    const yocoStyleChecker = setInterval(() => {
-      const yocoStyles = document.querySelectorAll(
-        '#yc-injected-styles, ' +
-        'style[id*="yoco" i], ' +
-        'style[id*="yc-" i]'
-      );
-      
-      if (yocoStyles.length > 0) {
-        yocoStyles.forEach(style => style.remove());
-        window.forceUnlockScroll();
-      }
-    }, 500);
-    
-    setTimeout(() => {
-      clearInterval(yocoStyleChecker);
-    }, 30000);
-    
-    (function() {
-      function prefetchPages() {
-        const pagesToPrefetch = [
-          '/post/index.html',
-          '/mint/index.html',
-          '/post/vote.html',
-          '/mint/research.html'
-        ];
+    async function convertToZAR(amountInCents, fromCurrency) {
+      try {
+        // SECURITY: Validate currency code client-side before API call
+        const { validateCurrency } = await import('/lego/utils/currency-validation.js');
+        validateCurrency(fromCurrency);
+        validateCurrency('ZAR'); // Always converting to ZAR
         
-        pagesToPrefetch.forEach(page => {
-          const link = document.createElement('link');
-          link.rel = 'prefetch';
-          link.href = page;
-          link.as = 'document';
-          document.head.appendChild(link);
-        });
-      }
-      
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => {
-          setTimeout(prefetchPages, 1000);
-        });
-      } else {
-        setTimeout(prefetchPages, 2000);
-      }
-      
-      document.addEventListener('mouseover', function(e) {
-        const link = e.target.closest('a');
-        if (link && link.href && link.href.startsWith(window.location.origin)) {
-          const url = new URL(link.href);
-          if (url.pathname.endsWith('.html') || !url.pathname.includes('.')) {
-            const prefetchLink = document.createElement('link');
-            prefetchLink.rel = 'prefetch';
-            prefetchLink.href = link.href;
-            prefetchLink.as = 'document';
-            document.head.appendChild(prefetchLink);
-          }
+        const { getApiUrl } = await import('/lego/config/secure-api-config.js');
+        const response = await fetch(getApiUrl(`api/convert-currency?amount=${amountInCents}&from=${fromCurrency}&to=ZAR`));
+        if (!response.ok) {
+          throw new Error('Failed to convert currency');
         }
-      }, { passive: true });
-    })();
+        const data = await response.json();
+        return {
+          zarCents: data.convertedAmount,
+          rate: data.rate,
+          formattedOriginal: data.formattedOriginal,
+          formattedZAR: data.formattedConverted
+        };
+      } catch (error) {
+        // SECURITY: Do not use fallback rates - block payment when live rates unavailable
+        // This prevents abuse by forcing network failures to charge incorrect amounts
+        throw new Error('Currency conversion unavailable. Please try again later or contact support.');
+      }
+    }
     
-    (function() {
-      const donateButton = document.getElementById('donateButton');
-      const donationModal = document.getElementById('donationModal');
-      const proceedButton = document.getElementById('proceedDonation');
-      const cancelButton = document.getElementById('cancelDonation');
-      const customAmountInput = document.getElementById('customAmount');
-      const amountButtons = document.querySelectorAll('.amount-btn');
-      const conversionNotice = document.getElementById('conversionNotice');
-      const currencyDropdown = document.getElementById('currencyDropdown');
-      const currencySelect = document.getElementById('currencySelect');
-      const currencyOptions = document.getElementById('currencyOptions');
-      const currencyDisplay = currencySelect ? currencySelect.querySelector('.currency-display') : null;
+    const donateButton = document.getElementById('donateButton');
+    const donationModal = document.getElementById('donationModal');
+    const proceedButton = document.getElementById('proceedDonation');
+    const cancelButton = document.getElementById('cancelDonation');
+    const customAmountInput = document.getElementById('customAmount');
+    const amountButtons = document.querySelectorAll('.amount-btn');
+    const conversionNotice = document.getElementById('conversionNotice');
+    const currencyDropdown = document.getElementById('currencyDropdown');
+    const currencySelect = document.getElementById('currencySelect');
+    const currencyOptions = document.getElementById('currencyOptions');
+    const currencyDisplay = currencySelect ? currencySelect.querySelector('.currency-display') : null;
+    
+    let selectedAmount = null;
+    let convertedAmount = null;
+    let currentCurrency = 'USD';
+    let paymentSucceeded = false;
+    let paymentAttempted = false;
+    
+    function updateButtonLabels() {
+      const info = currencyInfo[currentCurrency];
+      amountButtons.forEach((btn, index) => {
+        const amount = info.defaultAmounts[index] || info.defaultAmounts[0];
+        btn.dataset.amount = amount;
+        btn.textContent = formatAmount(amount, currentCurrency);
+      });
       
-      let selectedAmount = null;
-      let convertedAmount = null;
-      let currentCurrency = 'USD';
-      
-      const currencyDisplayNames = {
-        USD: 'USD ($)',
-        EUR: 'EUR (€)',
-        GBP: 'GBP (£)',
-        CAD: 'CAD (C$)',
-        AUD: 'AUD (A$)',
-        JPY: 'JPY (¥)',
-        CHF: 'CHF (Fr)',
-        NZD: 'NZD (NZ$)',
-        SEK: 'SEK (kr)',
-        NOK: 'NOK (kr)',
-        DKK: 'DKK (kr)',
-        SGD: 'SGD (S$)',
-        HKD: 'HKD (HK$)',
-        ZAR: 'ZAR (R)'
-      };
-      
-      const currencyInfo = {
-        USD: { symbol: '$', name: 'USD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        EUR: { symbol: '€', name: 'EUR', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        GBP: { symbol: '£', name: 'GBP', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        CAD: { symbol: 'C$', name: 'CAD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        AUD: { symbol: 'A$', name: 'AUD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        JPY: { symbol: '¥', name: 'JPY', usesCents: false, defaultAmounts: [1000, 2500, 5000, 10000] },
-        CHF: { symbol: 'Fr', name: 'CHF', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        NZD: { symbol: 'NZ$', name: 'NZD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        SEK: { symbol: 'kr', name: 'SEK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        NOK: { symbol: 'kr', name: 'NOK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        DKK: { symbol: 'kr', name: 'DKK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        SGD: { symbol: 'S$', name: 'SGD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        HKD: { symbol: 'HK$', name: 'HKD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        ZAR: { symbol: 'R', name: 'ZAR', usesCents: true, defaultAmounts: [10000, 25000, 50000, 100000] }
-      };
-      
-      let paymentSucceeded = false;
-      let paymentAttempted = false;
-
-      function formatAmount(amount, currency) {
-        const info = currencyInfo[currency];
-        if (!info) return amount.toString();
-        
-        const displayAmount = info.usesCents ? (amount / 100) : amount;
-        const formatted = displayAmount.toLocaleString('en-US', { 
+      customAmountInput.placeholder = `Custom amount (${info.symbol})`;
+    }
+    
+    function updateConversionNotice() {
+      if (selectedAmount && selectedAmount > 0 && convertedAmount) {
+        const info = currencyInfo[currentCurrency];
+        const originalAmount = info.usesCents ? (selectedAmount / 100) : selectedAmount;
+        const zarAmount = (convertedAmount / 100).toFixed(2);
+        const formattedOriginal = originalAmount.toLocaleString('en-US', {
           minimumFractionDigits: info.usesCents ? 2 : 0,
           maximumFractionDigits: info.usesCents ? 2 : 0
         });
-        return `${info.symbol}${formatted}`;
+        conversionNotice.textContent = `💱 ${info.symbol}${formattedOriginal} ${currentCurrency} will be converted to approximately R${zarAmount} ZAR at current exchange rates`;
+        conversionNotice.style.display = 'block';
+      } else if (selectedAmount && selectedAmount > 0) {
+        conversionNotice.textContent = '💱 Amounts will be converted to South African Rand (ZAR) at current exchange rates';
+        conversionNotice.style.display = 'block';
+      } else {
+        conversionNotice.style.display = 'none';
       }
-
-      function updateButtonLabels() {
-        const info = currencyInfo[currentCurrency];
-        amountButtons.forEach((btn, index) => {
-          const amount = info.defaultAmounts[index] || info.defaultAmounts[0];
-          btn.dataset.amount = amount;
-          btn.textContent = formatAmount(amount, currentCurrency);
+    }
+    
+    currencySelect.addEventListener('click', (e) => {
+      e.stopPropagation();
+      currencySelect.classList.toggle('active');
+      currencyOptions.classList.toggle('show');
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!currencyDropdown.contains(e.target)) {
+        currencySelect.classList.remove('active');
+        currencyOptions.classList.remove('show');
+      }
+    });
+    
+    currencyOptions.querySelectorAll('.currency-option').forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const value = option.dataset.value;
+        currentCurrency = value;
+        if (currencyDisplay) {
+          currencyDisplay.textContent = currencyDisplayNames[value];
+        }
+        if (currencyOptions) {
+          currencyOptions.querySelectorAll('.currency-option').forEach(opt => {
+            opt.classList.remove('selected');
+          });
+        }
+        option.classList.add('selected');
+        currencySelect.classList.remove('active');
+        currencyOptions.classList.remove('show');
+        updateButtonLabels();
+        selectedAmount = null;
+        convertedAmount = null;
+        customAmountInput.value = '';
+        amountButtons.forEach(b => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        updateConversionNotice();
+      });
+    });
+    
+    const selectedCurrencyOption = currencyOptions.querySelector(`[data-value="${currentCurrency}"]`);
+    if (selectedCurrencyOption) {
+      selectedCurrencyOption.classList.add('selected');
+    }
+    updateButtonLabels();
+    
+    amountButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        amountButtons.forEach(b => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('selected');
+        btn.setAttribute('aria-pressed', 'true');
+        selectedAmount = parseInt(btn.dataset.amount) || 0;
+        customAmountInput.value = '';
+        updateConversionNotice();
+        convertToZAR(selectedAmount, currentCurrency).then(result => {
+          convertedAmount = result.zarCents;
+          updateConversionNotice();
+        });
+      });
+    });
+    
+    customAmountInput.addEventListener('input', (e) => {
+      const rawValue = e.target.value.trim();
+      // Phase 8 Issue 8.4: Enhanced input validation
+      // Input validation: Only allow numbers and decimal point
+      if (!/^\d*\.?\d*$/.test(rawValue)) {
+        e.target.value = rawValue.replace(/[^\d.]/g, '');
+        return;
+      }
+      
+      // Prevent multiple decimal points
+      const parts = rawValue.split('.');
+      if (parts.length > 2) {
+        e.target.value = parts[0] + '.' + parts.slice(1).join('');
+        return;
+      }
+      
+      // Limit decimal places (max 2 for currencies with cents)
+      const info = currencyInfo[currentCurrency];
+      if (info.usesCents && parts[1] && parts[1].length > 2) {
+        e.target.value = parts[0] + '.' + parts[1].substring(0, 2);
+        return;
+      }
+      
+      const value = parseFloat(rawValue);
+      
+      // Phase 8 Issue 8.4: Validate value is a valid number
+      if (isNaN(value) || !isFinite(value)) {
+        selectedAmount = null;
+        convertedAmount = null;
+        updateConversionNotice();
+        return;
+      }
+      
+      const minAmount = info.usesCents ? 0.01 : 1;
+      const maxAmount = info.usesCents ? 1000000 : 1000000; // Max $10,000 or equivalent
+      
+      // Phase 8 Issue 8.4: Validate currency code
+      if (!currentCurrency || !currencyInfo[currentCurrency]) {
+        selectedAmount = null;
+        convertedAmount = null;
+        updateConversionNotice();
+        return;
+      }
+      
+      if (value && value > 0 && value >= minAmount && value <= maxAmount) {
+        selectedAmount = info.usesCents ? Math.round(value * 100) : Math.round(value);
+        amountButtons.forEach(b => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        updateConversionNotice();
+        convertToZAR(selectedAmount, currentCurrency).then(result => {
+          convertedAmount = result.zarCents;
+          updateConversionNotice();
+        }).catch(() => {
+          // Conversion failed - handled by convertToZAR
+          selectedAmount = null;
+          convertedAmount = null;
+          updateConversionNotice();
+        });
+      } else {
+        selectedAmount = null;
+        convertedAmount = null;
+        updateConversionNotice();
+      }
+    });
+    
+    function closeModal() {
+      try {
+        const donationModal = document.getElementById('donationModal');
+        
+        if (donationModal) {
+          donationModal.classList.remove('active');
+          donationModal.setAttribute('aria-hidden', 'true');
+        }
+        
+        if (window.donationModalFocusTrap) {
+          window.donationModalFocusTrap();
+          window.donationModalFocusTrap = null;
+        }
+        
+        if (donateButton) {
+          donateButton.focus();
+        }
+        
+        setTimeout(() => {
+          forceUnlockScroll();
+        }, WARMTHLY_CONFIG.constants.scrollUnlockDelay);
+        
+        selectedAmount = null;
+        convertedAmount = null;
+        if (customAmountInput) {
+          customAmountInput.value = '';
+        }
+        amountButtons.forEach(b => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        if (proceedButton) {
+          proceedButton.disabled = false;
+          proceedButton.textContent = 'Proceed to Payment';
+        }
+        if (currencyDisplay) {
+          currentCurrency = 'USD';
+          currencyDisplay.textContent = currencyDisplayNames['USD'];
+        }
+        if (currencyOptions) {
+          currencyOptions.querySelectorAll('.currency-option').forEach(opt => {
+            opt.classList.remove('selected');
+          });
+          const usdOption = currencyOptions.querySelector('[data-value="USD"]');
+          if (usdOption) {
+            usdOption.classList.add('selected');
+          }
+          updateButtonLabels();
+        }
+        updateConversionNotice();
+        
+        const donationForm = document.getElementById('donationForm');
+        const yocoPaymentContainer = document.getElementById('yocoPaymentContainer');
+        const yocoIframeContainer = document.getElementById('yocoIframeContainer');
+        
+        if (donationForm) donationForm.style.display = 'block';
+        if (yocoPaymentContainer) yocoPaymentContainer.style.display = 'none';
+        if (yocoIframeContainer) yocoIframeContainer.innerHTML = '';
+        
+      } catch (error) {
+        forceUnlockScroll();
+      }
+    }
+    
+    donateButton.addEventListener('click', () => {
+      try {
+        if (proceedButton) {
+          proceedButton.disabled = false;
+          proceedButton.textContent = 'Proceed to Payment';
+        }
+        lockBodyScroll();
+        donationModal.classList.add('active');
+        donationModal.setAttribute('aria-hidden', 'false');
+        donationModal.setAttribute('role', 'dialog');
+        donationModal.setAttribute('aria-labelledby', 'donationModalTitle');
+        
+        const modalTitle = donationModal.querySelector('h2');
+        if (modalTitle && !modalTitle.id) {
+          modalTitle.id = 'donationModalTitle';
+        }
+        
+        if (trapFocus) {
+          window.donationModalFocusTrap = trapFocus(donationModal);
+        }
+        
+        const firstFocusable = donationModal.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (firstFocusable) {
+          setTimeout(() => firstFocusable.focus(), WARMTHLY_CONFIG.constants.modalFocusDelay);
+        }
+        
+        if (ariaAnnouncer) {
+          ariaAnnouncer.announce('Donation modal opened', 'polite');
+        }
+      } catch (error) {
+      }
+    });
+    
+    cancelButton.addEventListener('click', closeModal);
+    
+    donationModal.addEventListener('click', (e) => {
+      if (e.target === donationModal) {
+        closeModal();
+      }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && donationModal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+    
+    proceedButton.addEventListener('click', async () => {
+      const info = currencyInfo[currentCurrency];
+      const minAmount = info.usesCents ? 100 : 1;
+      if (!selectedAmount || selectedAmount < minAmount) {
+        const minDisplay = info.usesCents ? '1.00' : '1';
+        // Phase 8 Issue 8.11: Use error popup instead of alert
+        showPaymentErrorPopup(`Please select or enter an amount (minimum ${info.symbol}${minDisplay})`);
+        return;
+      }
+      
+      // AUDIT: Log donation initiation
+      const { logPaymentEvent } = await import('/lego/utils/payment-audit.js');
+      await logPaymentEvent({
+        eventType: 'donation_initiated',
+        amount: selectedAmount,
+        currency: currentCurrency,
+        context: { source: 'website' },
+      });
+      
+      proceedButton.disabled = true;
+      proceedButton.textContent = 'Converting...';
+      proceedButton.setAttribute('aria-busy', 'true');
+      
+      if (ariaAnnouncer) {
+        ariaAnnouncer.announce('Converting currency, please wait', 'polite');
+      }
+      
+      let conversionResult;
+      try {
+        conversionResult = await convertToZAR(selectedAmount, currentCurrency);
+        convertedAmount = conversionResult.zarCents;
+        
+        // AUDIT: Log currency conversion
+        await logPaymentEvent({
+          eventType: 'currency_conversion',
+          amount: selectedAmount,
+          currency: currentCurrency,
+          convertedAmount: convertedAmount,
+          conversionRate: conversionResult.rate,
         });
         
-        // Update placeholder
-        customAmountInput.placeholder = `Custom amount (${info.symbol})`;
+        proceedButton.setAttribute('aria-busy', 'false');
+      } catch (error) {
+        proceedButton.disabled = false;
+        proceedButton.textContent = 'Proceed to Payment';
+        proceedButton.setAttribute('aria-busy', 'false');
+        if (ariaAnnouncer) {
+          ariaAnnouncer.announce('Failed to convert currency. Please try again.', 'assertive');
+        }
+        // Phase 8 Issue 8.11: Use error popup instead of alert
+        showPaymentErrorPopup('Failed to convert currency. Please try again.');
+        return;
       }
-
-      function updateConversionNotice() {
-        if (selectedAmount && selectedAmount > 0 && convertedAmount) {
+      
+      if (!proceedButton) {
+        return;
+      }
+      
+      const originalText = proceedButton.textContent;
+      proceedButton.textContent = 'Processing...';
+      
+      let yocoSDK = null;
+      let yocoSDKPromise = null;
+      
+      // Dynamic Yoco SDK loader (Performance Optimization)
+      async function loadYocoSDK() {
+            if (window.YocoSDK) {
+                  return window.YocoSDK;
+            }
+            if (yocoSDKPromise) {
+                  return yocoSDKPromise;
+            }
+            yocoSDKPromise = new Promise((resolve, reject) => {
+                  const script = document.createElement('script');
+                  // SECURITY: Use version-pinned URL for supply chain protection
+                  script.src = 'https://js.yoco.com/sdk/v1/yoco-sdk-web.js';
+                  script.async = true;
+                  script.crossOrigin = 'anonymous';
+                  // SECURITY: Add referrer policy
+                  script.referrerPolicy = 'strict-origin-when-cross-origin';
+                  // SECURITY: Subresource Integrity (SRI) hash
+                  // TODO: Contact Yoco support to obtain the SRI hash for this specific version
+                  // Once obtained, uncomment and add the hash:
+                  // script.integrity = 'sha384-...'; // Get from Yoco support
+                  // For now, we rely on HTTPS and version pinning for security
+                  // script.integrity = 'sha384-...';
+                  script.onload = () => {
+                        if (window.YocoSDK) {
+                              resolve(window.YocoSDK);
+                        } else {
+                              reject(new Error('Yoco SDK failed to load'));
+                        }
+                  };
+                  script.onerror = () => reject(new Error('Failed to load Yoco SDK'));
+                  document.head.appendChild(script);
+            });
+            return yocoSDKPromise;
+      }
+      
+      async function initializeYocoSDK() {
+        try {
+          await loadYocoSDK();
+        } catch (error) {
+          throw new Error('Yoco SDK not loaded. Please refresh the page and try again.');
+        }
+        
+        if (typeof window.YocoSDK === 'undefined') {
+          throw new Error('Yoco SDK not available after loading.');
+        }
+        
+        let publicKey;
+        try {
+          const { getApiUrl, validateOrigin } = await import('/lego/config/secure-api-config.js');
+          const keyUrl = getApiUrl('api/get-yoco-public-key');
+          
+          // SECURITY: Validate origin before fetching
+          if (!validateOrigin(keyUrl)) {
+            throw new Error('Invalid API origin');
+          }
+          
+          const keyResponse = await fetch(keyUrl, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            // SECURITY: Enforce HTTPS and origin validation
+            mode: 'cors',
+            credentials: 'omit',
+          });
+          
+          if (!keyResponse.ok) {
+            throw new Error('Failed to fetch public key from server');
+          }
+          
+          // SECURITY: Validate response origin
+          const responseOrigin = new URL(keyResponse.url).origin;
+          const expectedOrigin = new URL(keyUrl).origin;
+          if (responseOrigin !== expectedOrigin) {
+            throw new Error('Origin mismatch in key response');
+          }
+          
+          const keyData = await keyResponse.json();
+          publicKey = keyData.publicKey;
+          
+          // SECURITY: Validate public key format
+          if (!publicKey || typeof publicKey !== 'string' || !publicKey.startsWith('pk_')) {
+            throw new Error('Invalid public key format');
+          }
+        } catch (keyError) {
+          throw new Error('Yoco public key is not configured. Please contact support.');
+        }
+        
+        try {
+          yocoSDK = new window.YocoSDK({
+            publicKey: publicKey
+          });
+        } catch (sdkError) {
+          throw new Error('Failed to initialize Yoco SDK: ' + (sdkError.message || 'Unknown error'));
+        }
+        
+        lockBodyScroll();
+        donationModal.classList.remove('active');
+        
+        const donationSection = document.getElementById('donationSection');
+        const donateButton = document.getElementById('donateButton');
+        const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
+        const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
+        
+        if (!donationSection || !donateButton || !yocoPaymentEmbed || !yocoEmbedContainer) {
+          throw new Error('Required payment elements not found on page.');
+        }
+        
+        donateButton.style.display = 'none';
+        yocoPaymentEmbed.style.display = 'block';
+        yocoEmbedContainer.innerHTML = '';
+        
+        setTimeout(() => {
+          try {
+            yocoPaymentEmbed.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } catch (scrollError) {
+          }
+        }, WARMTHLY_CONFIG.constants.scrollUnlockDelay);
+        
+        const callbackUrl = window.location.origin + window.location.pathname + '?payment=success';
+        const cancelUrl = window.location.origin + window.location.pathname + '?payment=cancelled';
+        document.body.classList.add('yoco-active');
+        paymentSucceeded = false;
+        paymentAttempted = true;
+        
+        try {
+          const zarAmount = (convertedAmount / 100).toFixed(2);
           const info = currencyInfo[currentCurrency];
           const originalAmount = info.usesCents ? (selectedAmount / 100) : selectedAmount;
-          const zarAmount = (convertedAmount / 100).toFixed(2);
           const formattedOriginal = originalAmount.toLocaleString('en-US', {
             minimumFractionDigits: info.usesCents ? 2 : 0,
             maximumFractionDigits: info.usesCents ? 2 : 0
           });
-          conversionNotice.textContent = `💱 ${info.symbol}${formattedOriginal} ${currentCurrency} will be converted to approximately R${zarAmount} ZAR at current exchange rates`;
-          conversionNotice.style.display = 'block';
-        } else if (selectedAmount && selectedAmount > 0) {
-          conversionNotice.textContent = '💱 Amounts will be converted to South African Rand (ZAR) at current exchange rates';
-          conversionNotice.style.display = 'block';
-        } else {
-          conversionNotice.style.display = 'none';
-        }
-      }
-
-      async function convertToZAR(amountInCents, fromCurrency) {
-        try {
-          const response = await fetch(`/api/convert-currency?amount=${amountInCents}&from=${fromCurrency}&to=ZAR`);
-          if (!response.ok) {
-            throw new Error('Failed to convert currency');
-          }
-          const data = await response.json();
-          return {
-            zarCents: data.convertedAmount,
-            rate: data.rate,
-            formattedOriginal: data.formattedOriginal,
-            formattedZAR: data.formattedConverted
-          };
-        } catch (error) {
-          const fallbackRates = {
-            USD: 17, EUR: 18, GBP: 21, CAD: 12, AUD: 11, JPY: 0.11,
-            CHF: 19, NZD: 10, SEK: 1.5, NOK: 1.5, DKK: 2.3, SGD: 12, HKD: 2.2, ZAR: 1
-          };
-          const fallbackRate = fallbackRates[fromCurrency] || 17;
-          return {
-            zarCents: Math.round(amountInCents * fallbackRate),
-            rate: fallbackRate,
-            formattedOriginal: (amountInCents / 100).toFixed(2),
-            formattedZAR: ((amountInCents * fallbackRate) / 100).toFixed(2)
-          };
-        }
-      }
-
-      currencySelect.addEventListener('click', (e) => {
-        e.stopPropagation();
-        currencySelect.classList.toggle('active');
-        currencyOptions.classList.toggle('show');
-      });
-      
-      document.addEventListener('click', (e) => {
-        if (!currencyDropdown.contains(e.target)) {
-          currencySelect.classList.remove('active');
-          currencyOptions.classList.remove('show');
-        }
-      });
-      
-      currencyOptions.querySelectorAll('.currency-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const value = option.dataset.value;
-          currentCurrency = value;
-          if (currencyDisplay) {
-            currencyDisplay.textContent = currencyDisplayNames[value];
-          }
-          if (currencyOptions) {
-            currencyOptions.querySelectorAll('.currency-option').forEach(opt => {
-              opt.classList.remove('selected');
-            });
-          }
-          option.classList.add('selected');
-          currencySelect.classList.remove('active');
-          currencyOptions.classList.remove('show');
-          updateButtonLabels();
-          selectedAmount = null;
-          convertedAmount = null;
-          customAmountInput.value = '';
-          amountButtons.forEach(b => {
-            b.classList.remove('selected');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          updateConversionNotice();
-        });
-      });
-      
-      const selectedCurrencyOption = currencyOptions.querySelector(`[data-value="${currentCurrency}"]`);
-      if (selectedCurrencyOption) {
-        selectedCurrencyOption.classList.add('selected');
-      }
-      updateButtonLabels();
-
-      amountButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          amountButtons.forEach(b => {
-            b.classList.remove('selected');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          btn.classList.add('selected');
-          btn.setAttribute('aria-pressed', 'true');
-          selectedAmount = parseInt(btn.dataset.amount) || 0;
-          customAmountInput.value = '';
-          updateConversionNotice();
-          convertToZAR(selectedAmount, currentCurrency).then(result => {
-            convertedAmount = result.zarCents;
-            updateConversionNotice();
-          });
-        });
-      });
-
-      customAmountInput.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        if (value && value > 0) {
-          const info = currencyInfo[currentCurrency];
-          selectedAmount = info.usesCents ? Math.round(value * 100) : Math.round(value);
-          amountButtons.forEach(b => {
-            b.classList.remove('selected');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          updateConversionNotice();
-          convertToZAR(selectedAmount, currentCurrency).then(result => {
-            convertedAmount = result.zarCents;
-            updateConversionNotice();
-          });
-        } else {
-          selectedAmount = null;
-          convertedAmount = null;
-          updateConversionNotice();
-        }
-      });
-
-      donateButton.addEventListener('click', () => {
-        try {
-          if (proceedButton) {
-            proceedButton.disabled = false;
-            proceedButton.textContent = 'Proceed to Payment';
-          }
-          window.lockBodyScroll();
-          donationModal.classList.add('active');
-          donationModal.setAttribute('aria-hidden', 'false');
-          donationModal.setAttribute('role', 'dialog');
-          donationModal.setAttribute('aria-labelledby', 'donationModalTitle');
           
-          const modalTitle = donationModal.querySelector('h2');
-          if (modalTitle && !modalTitle.id) {
-            modalTitle.id = 'donationModalTitle';
-          }
-          
-          if (window.trapFocus) {
-            window.donationModalFocusTrap = window.trapFocus(donationModal);
-          }
-          
-          const firstFocusable = donationModal.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
-          if (firstFocusable) {
-            setTimeout(() => firstFocusable.focus(), 100);
-          }
-          
-          if (window.ariaAnnouncer) {
-            window.ariaAnnouncer.announce('Donation modal opened', 'polite');
-          }
-        } catch (error) {
-        }
-      });
-
-      function closeModal() {
-        try {
-          const donationModal = document.getElementById('donationModal');
-          
-          if (donationModal) {
-            donationModal.classList.remove('active');
-            donationModal.setAttribute('aria-hidden', 'true');
-          }
-          
-          if (window.donationModalFocusTrap) {
-            window.donationModalFocusTrap();
-            window.donationModalFocusTrap = null;
-          }
-          
-          if (donateButton) {
-            donateButton.focus();
-          }
-          
-          setTimeout(() => {
-            window.forceUnlockScroll();
-          }, 100);
-          
-          selectedAmount = null;
-          convertedAmount = null;
-          if (customAmountInput) {
-            customAmountInput.value = '';
-          }
-          amountButtons.forEach(b => {
-            b.classList.remove('selected');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          if (proceedButton) {
-            proceedButton.disabled = false;
-            proceedButton.textContent = 'Proceed to Payment';
-          }
-          if (currencyDisplay) {
-            currentCurrency = 'USD';
-            currencyDisplay.textContent = currencyDisplayNames['USD'];
-          }
-          if (currencyOptions) {
-            currencyOptions.querySelectorAll('.currency-option').forEach(opt => {
-              opt.classList.remove('selected');
-            });
-            const usdOption = currencyOptions.querySelector('[data-value="USD"]');
-            if (usdOption) {
-              usdOption.classList.add('selected');
-            }
-            updateButtonLabels();
-          }
-          updateConversionNotice();
-          
-          const donationForm = document.getElementById('donationForm');
-          const yocoPaymentContainer = document.getElementById('yocoPaymentContainer');
-          const yocoIframeContainer = document.getElementById('yocoIframeContainer');
-          
-          if (donationForm) donationForm.style.display = 'block';
-          if (yocoPaymentContainer) yocoPaymentContainer.style.display = 'none';
-          if (yocoIframeContainer) yocoIframeContainer.innerHTML = '';
-          
-        } catch (error) {
-          window.forceUnlockScroll();
-        }
-      }
-
-      cancelButton.addEventListener('click', closeModal);
-
-      donationModal.addEventListener('click', (e) => {
-        if (e.target === donationModal) {
-          closeModal();
-        }
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && donationModal.classList.contains('active')) {
-          closeModal();
-        }
-      });
-
-      proceedButton.addEventListener('click', async () => {
-        const info = currencyInfo[currentCurrency];
-        const minAmount = info.usesCents ? 100 : 1; // Minimum 1 unit
-        if (!selectedAmount || selectedAmount < minAmount) {
-          const minDisplay = info.usesCents ? '1.00' : '1';
-          alert(`Please select or enter an amount (minimum ${info.symbol}${minDisplay})`);
-          return;
-        }
-
-        proceedButton.disabled = true;
-        proceedButton.textContent = 'Converting...';
-        proceedButton.setAttribute('aria-busy', 'true');
-        
-        if (window.ariaAnnouncer) {
-          window.ariaAnnouncer.announce('Converting currency, please wait', 'polite');
-        }
-        
-        let conversionResult;
-        try {
-          conversionResult = await convertToZAR(selectedAmount, currentCurrency);
-          convertedAmount = conversionResult.zarCents;
-          proceedButton.setAttribute('aria-busy', 'false');
-        } catch (error) {
-          proceedButton.disabled = false;
-          proceedButton.textContent = 'Proceed to Payment';
-          proceedButton.setAttribute('aria-busy', 'false');
-          if (window.ariaAnnouncer) {
-            window.ariaAnnouncer.announce('Failed to convert currency. Please try again.', 'assertive');
-          }
-          alert('Failed to convert currency. Please try again.');
-          return;
-        }
-
-        if (!proceedButton) {
-          return;
-        }
-
-        const originalText = proceedButton.textContent;
-        proceedButton.textContent = 'Processing...';
-
-        let yocoSDK = null;
-
-        try {
-          if (typeof window.YocoSDK === 'undefined') {
-            throw new Error('Yoco SDK not loaded. Please refresh the page and try again.');
-          }
-
-          let publicKey;
-          try {
-            const keyResponse = await fetch('/api/get-yoco-public-key');
-            if (!keyResponse.ok) {
-              throw new Error('Failed to fetch public key from server');
-            }
-            const keyData = await keyResponse.json();
-            publicKey = keyData.publicKey;
-            if (!publicKey) {
-              throw new Error('Public key not returned from server');
-            }
-          } catch (keyError) {
-            throw new Error('Yoco public key is not configured. Please contact support.');
-          }
-
-          try {
-            yocoSDK = new window.YocoSDK({
-              publicKey: publicKey
-            });
-          } catch (sdkError) {
-            throw new Error('Failed to initialize Yoco SDK: ' + (sdkError.message || 'Unknown error'));
-          }
-
-          savedScrollPosition = window.lockBodyScroll();
-          donationModal.classList.remove('active');
-          
-          const donationSection = document.getElementById('donationSection');
-          const donateButton = document.getElementById('donateButton');
-          const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-          const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
-          
-          if (!donationSection || !donateButton || !yocoPaymentEmbed || !yocoEmbedContainer) {
-            throw new Error('Required payment elements not found on page.');
-          }
-          
-          donateButton.style.display = 'none';
-          yocoPaymentEmbed.style.display = 'block';
-          yocoEmbedContainer.innerHTML = '';
-          
-          setTimeout(() => {
-            try {
-              yocoPaymentEmbed.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } catch (scrollError) {
-            }
-          }, 100);
-          
-          const callbackUrl = window.location.origin + window.location.pathname + '?payment=success';
-          const cancelUrl = window.location.origin + window.location.pathname + '?payment=cancelled';
-          document.body.classList.add('yoco-active');
-          paymentSucceeded = false;
-          paymentAttempted = true;
-          
-          try {
-            const zarAmount = (convertedAmount / 100).toFixed(2);
-            const info = currencyInfo[currentCurrency];
-            const originalAmount = info.usesCents ? (selectedAmount / 100) : selectedAmount;
-            const formattedOriginal = originalAmount.toLocaleString('en-US', {
-              minimumFractionDigits: info.usesCents ? 2 : 0,
-              maximumFractionDigits: info.usesCents ? 2 : 0
-            });
-            
-            yocoSDK.showPopup({
-              amountInCents: Math.round(convertedAmount),
-              currency: 'ZAR',
-              name: 'Warmthly Donation',
-              description: `Pay R${zarAmount} (${info.symbol}${formattedOriginal} ${currentCurrency} converted at current rate) - Thank you for supporting our mission to rehumanize our world!`,
-              callbackUrl: callbackUrl,
-              cancelUrl: cancelUrl,
-              metadata: {
-                source: 'website_donation',
-                originalAmountUSD: selectedAmount,
-                convertedAmountZAR: convertedAmount,
-                conversionRate: conversionResult.rate
-              },
-              onClose: () => {
-                setTimeout(() => {
-                  try {
-                    if (paymentAttempted && !paymentSucceeded) {
-                      window.showPaymentErrorPopup(
-                        'Payment was not completed. If you encountered an error, please try again or use a different payment method.'
-                      );
-                    }
-                    
-                    paymentSucceeded = false;
-                    paymentAttempted = false;
-                    window.cleanupYocoState();
-                    
-                    if (proceedButton) {
-                      proceedButton.disabled = false;
-                      proceedButton.textContent = originalText;
-                    }
-                    
-                    const donationModal = document.getElementById('donationModal');
-                    if (donationModal && donationModal.classList.contains('active')) {
-                      donationModal.classList.remove('active');
-                    }
-                    
-                    setTimeout(() => {
-                      window.forceUnlockScroll();
-                    }, 200);
-                    
-                  } catch (error) {
-                    window.forceUnlockScroll();
-                  }
-                }, 300);
-              },
-              onSuccess: (data) => {
-                paymentSucceeded = true;
-                paymentAttempted = true;
-                
+          yocoSDK.showPopup({
+            amountInCents: Math.round(convertedAmount),
+            currency: 'ZAR',
+            name: 'Warmthly Donation',
+            description: `Pay R${zarAmount} (${info.symbol}${formattedOriginal} ${currentCurrency} converted at current rate) - Thank you for supporting our mission to rehumanize our world!`,
+            callbackUrl: callbackUrl,
+            cancelUrl: cancelUrl,
+            metadata: {
+              source: 'website_donation',
+              originalAmountUSD: selectedAmount,
+              convertedAmountZAR: convertedAmount,
+              conversionRate: conversionResult.rate
+            },
+            onClose: () => {
+              setTimeout(() => {
                 try {
-                  const amount = (selectedAmount / 100).toFixed(2);
-                  window.cleanupYocoState();
-                  
-                  const successPopup = document.getElementById('successPopup');
-                  const successAmount = document.getElementById('successAmount');
-                  
-                  if (successAmount) {
-                    successAmount.textContent = `R${amount}`;
+                  if (paymentAttempted && !paymentSucceeded) {
+                    showPaymentErrorPopup(
+                      'Payment was not completed. If you encountered an error, please try again or use a different payment method.'
+                    );
                   }
                   
-                  if (successPopup) {
-                    successPopup.style.display = 'flex';
-                    successPopup.style.zIndex = '100000';
-                    successPopup.classList.add('active');
-                    successPopup.setAttribute('aria-hidden', 'false');
-                    
-                    if (window.ariaAnnouncer) {
-                      window.ariaAnnouncer.announce(`Thank you! Your donation of R${amount} was successful!`, 'polite');
-                    }
-                    
-                    const closeSuccessPopup = () => {
-                      successPopup.classList.remove('active');
-                      successPopup.style.display = 'none';
-                      successPopup.setAttribute('aria-hidden', 'true');
-                      const donateButton = document.getElementById('donateButton');
-                      if (donateButton) {
-                        donateButton.style.display = 'inline-block';
-                      }
-                      window.forceUnlockScroll();
-                    };
-                    
-                    const successButton = document.getElementById('successPopupButton');
-                    if (successButton) {
-                      successButton.onclick = closeSuccessPopup;
-                    }
-                    
-                    const handleSuccessClickOutside = (e) => {
-                      if (e.target === successPopup) {
-                        closeSuccessPopup();
-                        successPopup.removeEventListener('click', handleSuccessClickOutside);
-                      }
-                    };
-                    successPopup.addEventListener('click', handleSuccessClickOutside);
-                    
-                    const successContent = successPopup.querySelector('.success-popup-content');
-                    if (successContent) {
-                      successContent.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                      });
-                    }
-                    
-                    setTimeout(closeSuccessPopup, 5000);
-                  }
+                  paymentSucceeded = false;
+                  paymentAttempted = false;
+                  cleanupYocoState();
                   
                   if (proceedButton) {
                     proceedButton.disabled = false;
@@ -1362,65 +1262,211 @@
                   }
                   
                   const donationModal = document.getElementById('donationModal');
-                  if (donationModal) {
+                  if (donationModal && donationModal.classList.contains('active')) {
                     donationModal.classList.remove('active');
                   }
                   
                   setTimeout(() => {
-                    window.forceUnlockScroll();
-                  }, 300);
+                    forceUnlockScroll();
+                  }, WARMTHLY_CONFIG.constants.scrollUnlockTimeout);
                   
                 } catch (error) {
-                  window.forceUnlockScroll();
+                  forceUnlockScroll();
                 }
-              },
-              onError: (error) => {
-                try {
-                  paymentAttempted = true;
-                  paymentSucceeded = false;
-                  const errorMsg = error.message || 'A technical error occurred. Please try again.';
-                  window.showPaymentErrorPopup(errorMsg);
-                  window.cleanupYocoState();
-                  window.forceUnlockScroll();
+              }, WARMTHLY_CONFIG.constants.scrollUnlockTimeout);
+            },
+            onSuccess: async (data) => {
+              paymentSucceeded = true;
+              paymentAttempted = true;
+              
+              // SECURITY: Extract payment ID for server-side verification
+              const paymentId = data?.id || data?.checkoutId || data?.paymentId;
+              const zarAmount = (convertedAmount / 100).toFixed(2);
+              
+              // AUDIT: Log payment success
+              const { logPaymentEvent } = await import('/lego/utils/payment-audit.js');
+              await logPaymentEvent({
+                eventType: 'donation_succeeded',
+                amount: selectedAmount,
+                currency: currentCurrency,
+                convertedAmount: convertedAmount,
+                context: { paymentId, source: 'yoco' },
+              });
+              
+              // SECURITY: Redirect to success URL with payment ID for server-side verification
+              if (paymentId) {
+                const successUrl = `${window.location.origin}${window.location.pathname}?payment=success&id=${encodeURIComponent(paymentId)}&amount=${encodeURIComponent(zarAmount)}`;
+                window.location.href = successUrl;
+                return;
+              }
+              
+              // Fallback: Show success popup if no payment ID (should not happen)
+              try {
+                const amount = (selectedAmount / 100).toFixed(2);
+                cleanupYocoState();
+                
+                const successPopup = document.getElementById('successPopup');
+                const successAmount = document.getElementById('successAmount');
+                
+                if (successAmount) {
+                  successAmount.textContent = `R${amount}`;
+                }
+                
+                if (successPopup) {
+                  successPopup.style.display = 'flex';
+                  successPopup.style.zIndex = '100000';
+                  successPopup.classList.add('active');
+                  successPopup.setAttribute('aria-hidden', 'false');
                   
-                  if (proceedButton) {
-                    proceedButton.disabled = false;
-                    proceedButton.textContent = originalText;
+                  if (ariaAnnouncer) {
+                    ariaAnnouncer.announce(`Thank you! Your donation of R${amount} was successful!`, 'polite');
                   }
                   
-                } catch (handlerError) {
-                  window.cleanupYocoState();
-                  window.forceUnlockScroll();
-                  alert('Payment error. Please try again.');
+                  const closeSuccessPopup = () => {
+                    successPopup.classList.remove('active');
+                    successPopup.style.display = 'none';
+                    successPopup.setAttribute('aria-hidden', 'true');
+                    const donateButton = document.getElementById('donateButton');
+                    if (donateButton) {
+                      donateButton.style.display = 'inline-block';
+                    }
+                    forceUnlockScroll();
+                  };
+                  
+                  const successButton = document.getElementById('successPopupButton');
+                  if (successButton) {
+                    successButton.onclick = closeSuccessPopup;
+                  }
+                  
+                  const handleSuccessClickOutside = (e) => {
+                    if (e.target === successPopup) {
+                      closeSuccessPopup();
+                      successPopup.removeEventListener('click', handleSuccessClickOutside);
+                    }
+                  };
+                  successPopup.addEventListener('click', handleSuccessClickOutside);
+                  
+                  const successContent = successPopup.querySelector('.success-popup-content');
+                  if (successContent) {
+                    successContent.addEventListener('click', (e) => {
+                      e.stopPropagation();
+                    });
+                  }
+                  
+                  // Use user preference for timeout (WCAG 2.1 AAA 2.2.3 - No Timing)
+                  const successTimeout = getSuccessPopupTimeout(WARMTHLY_CONFIG.constants.successPopupTimeout);
+                  if (successTimeout !== null) {
+                    setTimeout(closeSuccessPopup, successTimeout);
+                  }
                 }
+                
+                if (proceedButton) {
+                  proceedButton.disabled = false;
+                  proceedButton.textContent = originalText;
+                }
+                
+                const donationModal = document.getElementById('donationModal');
+                if (donationModal) {
+                  donationModal.classList.remove('active');
+                }
+                
+                setTimeout(() => {
+                  forceUnlockScroll();
+                }, WARMTHLY_CONFIG.constants.scrollUnlockTimeout);
+                
+              } catch (error) {
+                forceUnlockScroll();
+              }
+            },
+            onError: async (error) => {
+              try {
+                paymentAttempted = true;
+                paymentSucceeded = false;
+                
+                // AUDIT: Log payment failure
+                const { logPaymentEvent } = await import('/lego/utils/payment-audit.js');
+                await logPaymentEvent({
+                  eventType: 'donation_failed',
+                  amount: selectedAmount,
+                  currency: currentCurrency,
+                  error: error.message || 'Unknown error',
+                  context: { source: 'yoco' },
+                });
+                
+                // SECURITY: Sanitize error message
+                const { sanitizeErrorMessage } = await import('/lego/utils/error-sanitizer.js');
+                const errorMsg = sanitizeErrorMessage(error, 'payment_processing');
+                showPaymentErrorPopup(errorMsg);
+                cleanupYocoState();
+                forceUnlockScroll();
+                
+                if (proceedButton) {
+                  proceedButton.disabled = false;
+                  proceedButton.textContent = originalText;
+                }
+                
+              } catch (handlerError) {
+                cleanupYocoState();
+                forceUnlockScroll();
+                // Phase 8 Issue 8.11: Use error popup instead of alert
+                showPaymentErrorPopup('Payment error. Please try again.');
+              }
+            }
+          });
+        } catch (popupError) {
+          throw new Error('Failed to show Yoco payment popup: ' + (popupError.message || 'Unknown error'));
+        }
+        
+        setTimeout(() => {
+          try {
+            const yocoElements = document.querySelectorAll('[class*="yoco" i], [id*="yoco" i], iframe[src*="yoco" i]');
+            yocoElements.forEach(el => {
+              try {
+                const style = window.getComputedStyle(el);
+                if (style.position === 'fixed') {
+                  el.style.zIndex = '999999';
+                }
+              } catch (elError) {
               }
             });
-          } catch (popupError) {
-            throw new Error('Failed to show Yoco payment popup: ' + (popupError.message || 'Unknown error'));
+          } catch (zIndexError) {
           }
-          
-          setTimeout(() => {
-            try {
-              const yocoElements = document.querySelectorAll('[class*="yoco" i], [id*="yoco" i], iframe[src*="yoco" i]');
-              yocoElements.forEach(el => {
-                try {
-                  const style = window.getComputedStyle(el);
-                  if (style.position === 'fixed') {
-                    el.style.zIndex = '999999';
-                  }
-                } catch (elError) {
-                }
-              });
-            } catch (zIndexError) {
-            }
-          }, 100);
-
-        } catch (error) {
-          window.cleanupYocoState();
-          window.forceUnlockScroll();
-          const errorMessage = error.message || 'An unexpected error occurred. Please try again or contact support if the problem persists.';
-          alert('Sorry, there was an error processing your donation:\n\n' + errorMessage);
-          
+        }, WARMTHLY_CONFIG.constants.scrollUnlockDelay);
+        
+      } catch (error) {
+        cleanupYocoState();
+        forceUnlockScroll();
+        
+        // SECURITY: Sanitize error messages to prevent information leakage
+        const { sanitizeErrorMessage, logErrorSecurely } = await import('/lego/utils/error-sanitizer.js');
+        const sanitizedMessage = sanitizeErrorMessage(error, 'payment_initialization');
+        logErrorSecurely(error, 'payment_initialization', { selectedAmount, currentCurrency });
+        
+        // Phase 8 Issue 8.11: Replace alert with user-friendly error modal
+        // SECURITY: Use generic error message for users
+        showPaymentErrorPopup('Sorry, there was an error processing your donation. Please try again or contact support if the problem persists.');
+        
+        const donateButton = document.getElementById('donateButton');
+        const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
+        if (donateButton) {
+          donateButton.style.display = 'inline-block';
+        }
+        if (yocoPaymentEmbed) {
+          yocoPaymentEmbed.style.display = 'none';
+        }
+        
+        if (proceedButton) {
+          proceedButton.disabled = false;
+          proceedButton.textContent = originalText;
+        }
+      }
+    });
+    
+    const cancelPaymentBtn = document.getElementById('cancelPayment');
+    if (cancelPaymentBtn) {
+      cancelPaymentBtn.addEventListener('click', () => {
+        try {
+          cleanupYocoState();
           const donateButton = document.getElementById('donateButton');
           const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
           if (donateButton) {
@@ -1429,173 +1475,138 @@
           if (yocoPaymentEmbed) {
             yocoPaymentEmbed.style.display = 'none';
           }
-          
-          if (proceedButton) {
-            proceedButton.disabled = false;
-            proceedButton.textContent = originalText;
-          }
+        } catch (error) {
+          cleanupYocoState();
         }
       });
-      
-      const cancelPaymentBtn = document.getElementById('cancelPayment');
-      if (cancelPaymentBtn) {
-        cancelPaymentBtn.addEventListener('click', () => {
-          try {
-            window.cleanupYocoState();
-            const donateButton = document.getElementById('donateButton');
-            const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-            if (donateButton) {
-              donateButton.style.display = 'inline-block';
-            }
-            if (yocoPaymentEmbed) {
-              yocoPaymentEmbed.style.display = 'none';
-            }
-          } catch (error) {
-            console.error('Error canceling payment:', error);
-            window.cleanupYocoState();
-          }
-        });
-      }
-    })();
+    }
     
-    (function() {
-      try {
-        setTimeout(() => {
-          if (typeof window.forceUnlockScroll === 'function') {
-            window.forceUnlockScroll();
-          }
-        }, 100);
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const paymentStatus = urlParams.get('payment');
-        
-        if (paymentStatus === 'success') {
-          setTimeout(() => {
-            const successPopup = document.getElementById('successPopup');
-            const successAmount = document.getElementById('successAmount');
-            
-            if (successPopup && successAmount) {
-              const amount = urlParams.get('amount') || '0.00';
-              successAmount.textContent = 'R' + parseFloat(amount).toFixed(2);
-              successPopup.style.display = 'flex';
-              successPopup.style.zIndex = '100000';
-              successPopup.classList.add('active');
-              
-              const closeSuccessPopup = () => {
-                successPopup.classList.remove('active');
-                successPopup.style.display = 'none';
-                window.history.replaceState({}, document.title, window.location.pathname);
-                const donateButton = document.getElementById('donateButton');
-                if (donateButton) {
-                  donateButton.style.display = 'inline-block';
-                }
-                if (typeof window.forceUnlockScroll === 'function') {
-                  window.forceUnlockScroll();
-                }
-              };
-              
-              const successButton = document.getElementById('successPopupButton');
-              if (successButton) {
-                successButton.onclick = closeSuccessPopup;
-              }
-              
-              const handleSuccessClickOutside = (e) => {
-                if (e.target === successPopup) {
-                  closeSuccessPopup();
-                  successPopup.removeEventListener('click', handleSuccessClickOutside);
-                }
-              };
-              successPopup.addEventListener('click', handleSuccessClickOutside);
-              
-              const successContent = successPopup.querySelector('.success-popup-content');
-              if (successContent) {
-                successContent.addEventListener('click', (e) => {
-                  e.stopPropagation();
-                });
-              }
-              
-              setTimeout(closeSuccessPopup, 5000);
-            }
-          }, 500);
-          
-          window.history.replaceState({}, document.title, window.location.pathname);
-        } else if (paymentStatus === 'cancelled') {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        
+    try {
+      setTimeout(() => {
         if (typeof window.forceUnlockScroll === 'function') {
-          window.forceUnlockScroll();
+          forceUnlockScroll();
         }
-        setTimeout(() => {
-          if (typeof window.forceUnlockScroll === 'function') {
-            window.forceUnlockScroll();
-          }
-        }, 500);
-      } catch (error) {
+      }, WARMTHLY_CONFIG.constants.scrollUnlockDelay);
+      
+      // SECURITY: Payment success must be verified server-side
+      // URL parameters can be forged, so we verify with the server
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentStatus = urlParams.get('payment');
+      const paymentId = urlParams.get('id');
+      const urlAmount = urlParams.get('amount');
+      
+      if (paymentStatus === 'success' && paymentId && urlAmount) {
+        // Phase 8 Issue 8.3: Show loading state until verification completes
+        // Never show success message before server verification
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.id = 'paymentVerificationLoading';
+        loadingIndicator.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 999999; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;';
+        loadingIndicator.textContent = 'Verifying payment...';
+        document.body.appendChild(loadingIndicator);
+        
         try {
+          // Verify payment server-side before showing success
+          const { verifyPaymentSuccess } = await import('/lego/utils/payment-audit.js');
+          const verified = await verifyPaymentSuccess(paymentId, parseFloat(urlAmount));
+          
+          // Remove loading indicator
+          if (loadingIndicator.parentNode) {
+            loadingIndicator.parentNode.removeChild(loadingIndicator);
+          }
+          
+          if (!verified) {
+            // Payment not verified - do not show success message
+            window.history.replaceState({}, document.title, window.location.pathname);
+            // Phase 8 Issue 8.11: Use error popup instead of alert
+            showPaymentErrorPopup('Payment verification failed. Please contact support if you completed a payment.');
+            return;
+          }
+        } catch (error) {
+          // Remove loading indicator on error
+          if (loadingIndicator.parentNode) {
+            loadingIndicator.parentNode.removeChild(loadingIndicator);
+          }
+          // Payment verification failed - do not show success
           window.history.replaceState({}, document.title, window.location.pathname);
-          if (typeof window.forceUnlockScroll === 'function') {
-            window.forceUnlockScroll();
-          }
-        } catch (cleanupError) {
+          // Phase 8 Issue 8.11: Use error popup instead of alert
+          showPaymentErrorPopup('Unable to verify payment. Please contact support if you completed a payment.');
+          return;
         }
-      }
-    })();
-    
-    const videoPlaceholder = document.getElementById('video-placeholder');
-    const videoContainer = document.getElementById('video-container');
-    const videoPlayButton = document.getElementById('video-play-button');
-    
-    function loadVideo() {
-      const iframe = document.createElement('iframe');
-      iframe.src = 'https://www.youtube-nocookie.com/embed/kVausES-mjk';
-      iframe.title = 'Warmthly Video';
-      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-      iframe.allowFullscreen = true;
-      iframe.style.position = 'absolute';
-      iframe.style.top = '0';
-      iframe.style.left = '0';
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.border = 'none';
-      iframe.style.borderRadius = '20px';
-      
-      videoContainer.appendChild(iframe);
-      videoPlaceholder.classList.add('loaded');
-      videoPlaceholder.removeEventListener('click', loadVideo);
-      videoPlayButton.removeEventListener('click', loadVideo);
-    }
-    
-    if (videoPlaceholder && videoPlayButton) {
-      videoPlaceholder.addEventListener('click', loadVideo);
-      videoPlayButton.addEventListener('click', loadVideo);
-    }
-    
-    (function() {
-      const methodSection = document.querySelector('.method-section');
-      if (!methodSection) return;
-      
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
+        
+        setTimeout(() => {
+          const successPopup = document.getElementById('successPopup');
+          const successAmount = document.getElementById('successAmount');
+          
+          if (successPopup && successAmount) {
+            const amount = parseFloat(urlAmount) || 0.00;
+            successAmount.textContent = 'R' + amount.toFixed(2);
+            successPopup.style.display = 'flex';
+            successPopup.style.zIndex = '100000';
+            successPopup.classList.add('active');
+            
+            const closeSuccessPopup = () => {
+              successPopup.classList.remove('active');
+              successPopup.style.display = 'none';
+              window.history.replaceState({}, document.title, window.location.pathname);
+              const donateButton = document.getElementById('donateButton');
+              if (donateButton) {
+                donateButton.style.display = 'inline-block';
+              }
+              if (typeof window.forceUnlockScroll === 'function') {
+                forceUnlockScroll();
+              }
+            };
+            
+            const successButton = document.getElementById('successPopupButton');
+            if (successButton) {
+              successButton.onclick = closeSuccessPopup;
+            }
+            
+            const handleSuccessClickOutside = (e) => {
+              if (e.target === successPopup) {
+                closeSuccessPopup();
+                successPopup.removeEventListener('click', handleSuccessClickOutside);
+              }
+            };
+            successPopup.addEventListener('click', handleSuccessClickOutside);
+            
+            const successContent = successPopup.querySelector('.success-popup-content');
+            if (successContent) {
+              successContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+              });
+            }
+            
+            // Use user preference for timeout (WCAG 2.1 AAA 2.2.3 - No Timing)
+            const successTimeout = getSuccessPopupTimeout(WARMTHLY_CONFIG.constants.successPopupTimeout);
+            if (successTimeout !== null) {
+              setTimeout(closeSuccessPopup, successTimeout);
+            }
           }
-        });
-      }, {
-        threshold: 0.2,
-        rootMargin: '0px 0px -50px 0px'
-      });
-      
-      observer.observe(methodSection);
-    })();
-
-    import('/lego/config/warmthly-config.js').then(module => {
-      const brandLogo = document.getElementById('main-brand-logo');
-      if (brandLogo) {
-        brandLogo.href = module.WARMTHLY_CONFIG.urls.main;
+        }, WARMTHLY_CONFIG.constants.paymentStatusDelay);
+        
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (paymentStatus === 'cancelled') {
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
-    });
+      
+      if (typeof window.forceUnlockScroll === 'function') {
+        forceUnlockScroll();
+      }
+      setTimeout(() => {
+        if (typeof window.forceUnlockScroll === 'function') {
+          forceUnlockScroll();
+        }
+      }, WARMTHLY_CONFIG.constants.paymentStatusDelay * 10);
+    } catch (error) {
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        if (typeof window.forceUnlockScroll === 'function') {
+          forceUnlockScroll();
+        }
+      } catch (cleanupError) {
+      }
+    }
     
     const cookieButton = document.getElementById('cookieButton');
     const cookiePopup = document.getElementById('cookiePopup');
@@ -1640,12 +1651,80 @@
         }, 200);
       });
     }
+    
+    const methodSection = document.querySelector('.method-section');
+    if (methodSection) {
+      // Fallback: Show immediately if IntersectionObserver is not supported
+      if (typeof IntersectionObserver === 'undefined') {
+        methodSection.classList.add('visible');
+      } else {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.2,
+          rootMargin: '0px 0px -50px 0px'
+        });
+        
+        observer.observe(methodSection);
+        
+        // Fallback: Show after 1 second if still not visible (in case observer fails)
+        setTimeout(() => {
+          if (!methodSection.classList.contains('visible')) {
+            methodSection.classList.add('visible');
+          }
+        }, 1000);
+      }
+    }
+    
+    const videoContainer = document.getElementById('video-container');
+    if (videoContainer) {
+      const iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube-nocookie.com/embed/kVausES-mjk';
+      iframe.title = 'Warmthly Video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      iframe.loading = 'lazy';
+      // SECURITY: Add sandbox attribute with restrictive permissions
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox');
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.style.position = 'absolute';
+      iframe.style.top = '0';
+      iframe.style.left = '0';
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      iframe.style.borderRadius = '20px';
+      
+      videoContainer.appendChild(iframe);
+    }
+    
+    initLinkPrefetch();
+    initYocoStyleObserver();
+    
+    import('/lego/config/warmthly-config.js').then(module => {
+      const brandLogo = document.getElementById('main-brand-logo');
+      if (brandLogo) {
+        brandLogo.href = module.WARMTHLY_CONFIG.urls.main;
+      }
+    });
   </script>
   
   </main>
   
+  <script type="module" src="/lego/components/warmthly-last-updated.js"></script>
+  <warmthly-last-updated date="2025-01-15"></warmthly-last-updated>
+  
+  <script type="module" src="/lego/components/warmthly-social-share.js"></script>
+  <warmthly-social-share></warmthly-social-share>
+  
   <warmthly-font-loader></warmthly-font-loader>
-  <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
+  <!-- Yoco SDK - Load dynamically when needed (Performance Optimization) -->
   
   </body>
 </html>
+

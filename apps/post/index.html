@@ -1,10 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    // This improves SEO and accessibility by setting the correct language immediately
+    (function() {
+      function detectLanguage() {
+        // Check URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        // Check localStorage
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) {
+              return normalized;
+            }
+          }
+        } catch {}
+        // Check browser language
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      // Set dir for RTL languages
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/components/warmthly-fade-in.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
   <warmthly-head 
     title="Post - Warmthly"
     description="Post-transaction transparency and reporting. View detailed breakdowns of how donations are used and report any concerns."
@@ -16,16 +74,23 @@
   
 </head>
 <body class="fonts-loading">
-    <warmthly-header app="post"></warmthly-header>
-    
-    <nav class="header-right" role="navigation" aria-label="Main navigation">
-      <warmthly-stoplight app="post"></warmthly-stoplight>
-    </nav>
+    <header class="header">
+      <div class="header-left">
+        <warmthly-header app="post"></warmthly-header>
+      </div>
+      <div class="header-right">
+        <warmthly-language-switcher></warmthly-language-switcher>
+        <warmthly-reading-level></warmthly-reading-level>
+        <warmthly-stoplight app="post"></warmthly-stoplight>
+      </div>
+    </header>
+    <warmthly-fade-in target=".header, .header-right, .top-left-heading" delay="200"></warmthly-fade-in>
+    <warmthly-breadcrumb></warmthly-breadcrumb>
 
     <div class="container">
       <div class="hero-section">
-        <h1 class="page-title">Post</h1>
-        <p class="subtitle">
+        <h1 class="page-title" data-reading-level-content>Post</h1>
+        <p class="subtitle" data-reading-level-content>
           A living timeline of our organization's story—from founding moments to future plans. Every decision, milestone, and community interaction is recorded here for complete transparency.
         </p>
       </div>
@@ -173,38 +238,112 @@
       entryElement.className = 'timeline-entry';
       entryElement.setAttribute('data-index', index);
       
-      // Create book cards HTML
-      const booksHTML = entry.comments ? entry.comments.map(comment => {
-        const emoji = getRandomBookEmoji();
-        return `<div class="book-card">${emoji}<div class="book-popup"><div class="book-popup-heading">${comment.heading}</div><div class="book-popup-description">${comment.description}</div></div></div>`;
-      }).join('') : '';
+      // SECURITY: Use safe DOM methods instead of innerHTML to prevent XSS
+      const connector = document.createElement('div');
+      connector.className = 'timeline-connector';
+      entryElement.appendChild(connector);
       
-      entryElement.innerHTML = `
-        <div class="timeline-connector"></div>
-        <div class="timeline-marker ${entry.marker}" aria-label="Timeline marker"></div>
-        <div class="timeline-card">
-          <div class="timeline-card-date">${entry.date}</div>
-          <h3 class="timeline-card-title">${entry.title}</h3>
-          <p class="timeline-card-description">${entry.description}</p>
-          <span class="timeline-card-read-more">Read more →</span>
-        </div>
-        ${entry.comments ? `<div class="timeline-books">${booksHTML}</div>` : ''}
-      `;
+      const marker = document.createElement('div');
+      marker.className = `timeline-marker ${entry.marker}`;
+      marker.setAttribute('aria-label', `Timeline marker for ${entry.title}`);
+      entryElement.appendChild(marker);
+      
+      const card = document.createElement('div');
+      card.className = 'timeline-card';
+      card.setAttribute('role', 'article');
+      card.setAttribute('aria-labelledby', `timeline-title-${index}`);
+      
+      const date = document.createElement('div');
+      date.className = 'timeline-card-date';
+      date.textContent = entry.date;
+      date.setAttribute('aria-label', `Date: ${entry.date}`);
+      card.appendChild(date);
+      
+      const title = document.createElement('h3');
+      title.className = 'timeline-card-title';
+      title.id = `timeline-title-${index}`;
+      title.textContent = entry.title;
+      card.appendChild(title);
+      
+      const description = document.createElement('p');
+      description.className = 'timeline-card-description';
+      description.textContent = entry.description;
+      card.appendChild(description);
+      
+      const readMore = document.createElement('span');
+      readMore.className = 'timeline-card-read-more';
+      readMore.textContent = 'Read more →';
+      readMore.setAttribute('role', 'button');
+      readMore.setAttribute('tabindex', '0'); // Ensure keyboard accessible
+      readMore.setAttribute('aria-label', `Read more about ${entry.title}`);
+      card.appendChild(readMore);
+      
+      entryElement.appendChild(card);
+      
+      // Create book cards safely if comments exist
+      if (entry.comments && entry.comments.length > 0) {
+        const booksContainer = document.createElement('div');
+        booksContainer.className = 'timeline-books';
+        
+        entry.comments.forEach(comment => {
+          const bookCard = document.createElement('div');
+          bookCard.className = 'book-card';
+          bookCard.textContent = getRandomBookEmoji();
+          
+          const popup = document.createElement('div');
+          popup.className = 'book-popup';
+          
+          const heading = document.createElement('div');
+          heading.className = 'book-popup-heading';
+          heading.textContent = comment.heading;
+          popup.appendChild(heading);
+          
+          const desc = document.createElement('div');
+          desc.className = 'book-popup-description';
+          desc.textContent = comment.description;
+          popup.appendChild(desc);
+          
+          bookCard.appendChild(popup);
+          booksContainer.appendChild(bookCard);
+        });
+        
+        entryElement.appendChild(booksContainer);
+      }
       
       const card = entryElement.querySelector('.timeline-card');
       card.addEventListener('click', () => openPopup(entry));
       
       if (entry.signature) {
-        const sig = document.createElement('img');
-        sig.src = '/global/images/signature.png';
-        sig.alt = "Founder's handwritten signature";
-        sig.style.cssText = `
+        // Use responsive image with modern formats
+        const picture = document.createElement('picture');
+        picture.style.cssText = `
           max-height: 60px;
           margin: 1.5rem auto 0;
           display: block;
           opacity: 0.85;
           filter: brightness(1.1);
         `;
+        
+        // AVIF source (best compression)
+        const avifSource = document.createElement('source');
+        avifSource.srcset = '/assets/images/signature.avif';
+        avifSource.type = 'image/avif';
+        picture.appendChild(avifSource);
+        
+        // WebP source (good compression, wider support)
+        const webpSource = document.createElement('source');
+        webpSource.srcset = '/assets/images/signature.webp';
+        webpSource.type = 'image/webp';
+        picture.appendChild(webpSource);
+        
+        // Fallback img
+        const sig = document.createElement('img');
+        sig.src = '/assets/images/signature.png';
+        sig.alt = "Founder's handwritten signature";
+        sig.loading = 'lazy';
+        sig.setAttribute('fetchpriority', 'low');
+        sig.style.cssText = 'max-width: 100%; height: auto;';
+        picture.appendChild(sig);
         entryElement.querySelector('.timeline-card').appendChild(sig);
       }
       
@@ -252,7 +391,11 @@
     function openPopup(entry) {
       popupDate.textContent = entry.date;
       popupTitle.textContent = entry.title;
-      popupContent.innerHTML = entry.content;
+      // SECURITY: Use textContent for plain text, or sanitize if HTML is needed
+      // If entry.content contains HTML, it should be sanitized first
+      // For now, using textContent to prevent XSS
+      popupContent.textContent = entry.content;
+      // If HTML content is required, use: setSafeHtml(popupContent, sanitizeHtml(entry.content))
       
       popup.classList.add('active');
       document.body.classList.add('popup-open');
@@ -322,7 +465,7 @@
           }
           
           .dot {
-            fill: #FFB88C;
+            fill: #87CEEB;
             opacity: 0.6;
           }
         `;
@@ -336,7 +479,8 @@
 
       async loadSVG() {
         try {
-          const paths = ['/global/images/worlddots.svg'];
+          const paths = ['/assets/images/worlddots.svg'];
+          // Note: SVG will have aria-label added when rendered
           let svgText = null;
           
           for (const path of paths) {
@@ -355,8 +499,18 @@
             throw new Error('SVG file not found.');
           }
           
-          this.svgContainer.innerHTML = svgText;
-          this.svg = this.svgContainer.querySelector('svg');
+          // SECURITY: Parse SVG as XML to ensure it's valid before inserting
+          // SVG content is from trusted source (local file), but still validate
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+          const svgElement = svgDoc.documentElement;
+          if (svgElement && svgElement.tagName === 'svg') {
+            this.svgContainer.textContent = ''; // Clear container
+            this.svgContainer.appendChild(svgElement);
+            this.svg = svgElement;
+          } else {
+            throw new Error('Invalid SVG content');
+          }
           
           if (!this.svg) {
             throw new Error('SVG element not found in loaded content');
@@ -366,13 +520,24 @@
             this.svg.setAttribute('viewBox', '0 0 3129 1736');
           }
           
+          // Add accessibility attributes to SVG
+          if (!this.svg.getAttribute('aria-label') && !this.svg.querySelector('title')) {
+            this.svg.setAttribute('aria-label', 'World map showing Warmthly activity locations');
+            this.svg.setAttribute('role', 'img');
+          }
+          
           this.svg.querySelectorAll('circle').forEach(circle => {
-            circle.setAttribute('fill', '#FFB88C');
+            circle.setAttribute('fill', '#87CEEB');
             circle.setAttribute('opacity', '0.6');
           });
           
         } catch (error) {
-          this.svgContainer.innerHTML = '<p style="color: red;">Error loading map.</p>';
+          // SECURITY: Use safe DOM methods for error message
+          this.svgContainer.textContent = '';
+          const errorP = document.createElement('p');
+          errorP.style.color = '#87CEEB';
+          errorP.textContent = 'Error loading map.';
+          this.svgContainer.appendChild(errorP);
         }
       }
 

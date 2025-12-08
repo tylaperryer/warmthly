@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Warmthly i18n Translation Schema",
+  "description": "Schema for validating translation JSON files",
+  "type": "object",
+  "required": ["common", "main", "mint", "post", "vote", "report", "yourData"],
+  "properties": {
+    "common": {
+      "type": "object",
+      "required": [
+        "loading",
+        "error",
+        "success",
+        "cancel",
+        "submit",
+        "close",
+        "back",
+        "next",
+        "save",
+        "delete",
+        "edit",
+        "view",
+        "search",
+        "filter",
+        "sort",
+        "language"
+      ],
+      "properties": {
+        "loading": { "type": "string" },
+        "error": { "type": "string" },
+        "success": { "type": "string" },
+        "cancel": { "type": "string" },
+        "submit": { "type": "string" },
+        "close": { "type": "string" },
+        "back": { "type": "string" },
+        "next": { "type": "string" },
+        "save": { "type": "string" },
+        "delete": { "type": "string" },
+        "edit": { "type": "string" },
+        "view": { "type": "string" },
+        "search": { "type": "string" },
+        "filter": { "type": "string" },
+        "sort": { "type": "string" },
+        "language": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "main": {
+      "type": "object",
+      "required": ["title", "subtitle", "donate", "donateButton"],
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "donate": { "type": "string" },
+        "donateButton": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "mint": {
+      "type": "object",
+      "required": ["title", "description"],
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "post": {
+      "type": "object",
+      "required": ["title", "subtitle"],
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "vote": {
+      "type": "object",
+      "required": ["title", "description"],
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "report": {
+      "type": "object",
+      "required": ["title", "description"],
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "yourData": {
+      "type": "object",
+      "required": ["title", "description"],
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
