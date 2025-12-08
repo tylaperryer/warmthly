@@ -75,6 +75,10 @@
     initAbbreviations();
     initGlossary();
   </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Warmthly - Rehumanize Our World</title>
+  <meta name="description" content="Warmthly is a global movement to make empathy a measurable part of our systems.">
+  
   <warmthly-head 
     title="Warmthly - Rehumanize Our World"
     description="Warmthly is a global movement to make empathy a measurable part of our systems."
@@ -82,6 +86,10 @@
     viewport="0.75"
     preconnects="https://mint.warmthly.org, https://post.warmthly.org, https://js.yoco.com, https://open.spotify.com">
   </warmthly-head>
+
+  <!-- Fallback stylesheet - ensures styles load even if JavaScript fails -->
+  <link rel="stylesheet" href="/lego/styles/common.css">
+  <link rel="stylesheet" href="/lego/styles/main.css">
 
   <style>
     :root { color-scheme: light; }
@@ -655,7 +663,6 @@
             setTimeout(closeErrorPopup, errorTimeout);
           }
         }
-        
       } catch (error) {
         // Phase 8 Issue 8.11: Use error popup instead of alert
         showPaymentErrorPopup('Payment was not completed. Please try again.');
@@ -1142,86 +1149,87 @@
           throw new Error('Yoco SDK not available after loading.');
         }
         
-        let publicKey;
         try {
-          const { getApiUrl, validateOrigin } = await import('/lego/config/secure-api-config.js');
-          const keyUrl = getApiUrl('api/get-yoco-public-key');
-          
-          // SECURITY: Validate origin before fetching
-          if (!validateOrigin(keyUrl)) {
-            throw new Error('Invalid API origin');
-          }
-          
-          const keyResponse = await fetch(keyUrl, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            // SECURITY: Enforce HTTPS and origin validation
-            mode: 'cors',
-            credentials: 'omit',
-          });
-          
-          if (!keyResponse.ok) {
-            throw new Error('Failed to fetch public key from server');
-          }
-          
-          // SECURITY: Validate response origin
-          const responseOrigin = new URL(keyResponse.url).origin;
-          const expectedOrigin = new URL(keyUrl).origin;
-          if (responseOrigin !== expectedOrigin) {
-            throw new Error('Origin mismatch in key response');
-          }
-          
-          const keyData = await keyResponse.json();
-          publicKey = keyData.publicKey;
-          
-          // SECURITY: Validate public key format
-          if (!publicKey || typeof publicKey !== 'string' || !publicKey.startsWith('pk_')) {
-            throw new Error('Invalid public key format');
-          }
-        } catch (keyError) {
-          throw new Error('Yoco public key is not configured. Please contact support.');
-        }
-        
-        try {
-          yocoSDK = new window.YocoSDK({
-            publicKey: publicKey
-          });
-        } catch (sdkError) {
-          throw new Error('Failed to initialize Yoco SDK: ' + (sdkError.message || 'Unknown error'));
-        }
-        
-        lockBodyScroll();
-        donationModal.classList.remove('active');
-        
-        const donationSection = document.getElementById('donationSection');
-        const donateButton = document.getElementById('donateButton');
-        const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-        const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
-        
-        if (!donationSection || !donateButton || !yocoPaymentEmbed || !yocoEmbedContainer) {
-          throw new Error('Required payment elements not found on page.');
-        }
-        
-        donateButton.style.display = 'none';
-        yocoPaymentEmbed.style.display = 'block';
-        yocoEmbedContainer.innerHTML = '';
-        
-        setTimeout(() => {
+          let publicKey;
           try {
-            yocoPaymentEmbed.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          } catch (scrollError) {
+            const { getApiUrl, validateOrigin } = await import('/lego/config/secure-api-config.js');
+            const keyUrl = getApiUrl('api/get-yoco-public-key');
+            
+            // SECURITY: Validate origin before fetching
+            if (!validateOrigin(keyUrl)) {
+              throw new Error('Invalid API origin');
+            }
+            
+            const keyResponse = await fetch(keyUrl, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              // SECURITY: Enforce HTTPS and origin validation
+              mode: 'cors',
+              credentials: 'omit',
+            });
+            
+            if (!keyResponse.ok) {
+              throw new Error('Failed to fetch public key from server');
+            }
+            
+            // SECURITY: Validate response origin
+            const responseOrigin = new URL(keyResponse.url).origin;
+            const expectedOrigin = new URL(keyUrl).origin;
+            if (responseOrigin !== expectedOrigin) {
+              throw new Error('Origin mismatch in key response');
+            }
+            
+            const keyData = await keyResponse.json();
+            publicKey = keyData.publicKey;
+            
+            // SECURITY: Validate public key format
+            if (!publicKey || typeof publicKey !== 'string' || !publicKey.startsWith('pk_')) {
+              throw new Error('Invalid public key format');
+            }
+          } catch (keyError) {
+            throw new Error('Yoco public key is not configured. Please contact support.');
           }
-        }, WARMTHLY_CONFIG.constants.scrollUnlockDelay);
-        
-        const callbackUrl = window.location.origin + window.location.pathname + '?payment=success';
-        const cancelUrl = window.location.origin + window.location.pathname + '?payment=cancelled';
-        document.body.classList.add('yoco-active');
-        paymentSucceeded = false;
-        paymentAttempted = true;
-        
-        try {
+          
+          try {
+            yocoSDK = new window.YocoSDK({
+              publicKey: publicKey
+            });
+          } catch (sdkError) {
+            throw new Error('Failed to initialize Yoco SDK: ' + (sdkError.message || 'Unknown error'));
+          }
+          
+          lockBodyScroll();
+          donationModal.classList.remove('active');
+          
+          const donationSection = document.getElementById('donationSection');
+          const donateButton = document.getElementById('donateButton');
+          const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
+          const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
+          
+          if (!donationSection || !donateButton || !yocoPaymentEmbed || !yocoEmbedContainer) {
+            throw new Error('Required payment elements not found on page.');
+          }
+          
+          donateButton.style.display = 'none';
+          yocoPaymentEmbed.style.display = 'block';
+          yocoEmbedContainer.innerHTML = '';
+          
+          setTimeout(() => {
+            try {
+              yocoPaymentEmbed.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (scrollError) {
+            }
+          }, WARMTHLY_CONFIG.constants.scrollUnlockDelay);
+          
+          const callbackUrl = window.location.origin + window.location.pathname + '?payment=success';
+          const cancelUrl = window.location.origin + window.location.pathname + '?payment=cancelled';
+          document.body.classList.add('yoco-active');
+          paymentSucceeded = false;
+          paymentAttempted = true;
+          
+          try {
           const zarAmount = (convertedAmount / 100).toFixed(2);
           const info = currencyInfo[currentCurrency];
           const originalAmount = info.usesCents ? (selectedAmount / 100) : selectedAmount;
