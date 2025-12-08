@@ -89,6 +89,7 @@ export function markPronunciations(text: string): string {
 
   for (const word of words) {
     const pronunciation = PRONUNCIATION_DICTIONARY[word];
+    if (!pronunciation) continue;
     const regex = new RegExp(`\\b${word}\\b`, 'gi');
     result = result.replace(regex, match => {
       if (match.includes('data-pronunciation')) {
