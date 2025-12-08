@@ -90,7 +90,7 @@ async function incrementViolationCount(identifier: string, ttl: number = 3600000
     const client = await getRedisClient();
     const key = `ratelimit:violations:${identifier}`;
     await client.incr(key);
-    await client.pexpire(key, ttl);
+    await client.pExpire(key, ttl);
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('[rate-limit-enhanced] Error incrementing violation count:', errorMessage);
@@ -147,7 +147,7 @@ function calculateBackoff(
  */
 export async function checkRateLimitWithBackoff(
   req: Request,
-  options: RateLimitOptions,
+  _options: RateLimitOptions,
   baseResult: RateLimitResult
 ): Promise<EnhancedRateLimitResult> {
   // If request is allowed, reset violation count (good behavior)
