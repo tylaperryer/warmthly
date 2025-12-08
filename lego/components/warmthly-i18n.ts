@@ -20,10 +20,10 @@ async function validateLanguageCode(langCode: string): Promise<boolean> {
   }
 
   // Normalize language code (remove locale suffix, convert to lowercase)
-  const normalized = langCode.toLowerCase().split('-')[0].split('_')[0];
+  const normalized = langCode.toLowerCase().split('-')[0]?.split('_')[0];
 
   // Basic validation: 2-3 letter codes
-  if (normalized.length < 2 || normalized.length > 3) {
+  if (!normalized || normalized.length < 2 || normalized.length > 3) {
     return false;
   }
 
@@ -92,7 +92,10 @@ class WarmthlyI18n extends HTMLElement {
       const urlParams = new URLSearchParams(window.location.search);
       const langFromUrl = urlParams.get('lang');
 
-      let currentLang = langFromUrl || getLanguage();
+      let currentLang = langFromUrl || getLanguage() || 'en';
+      if (!currentLang || typeof currentLang !== 'string') {
+        currentLang = 'en';
+      }
 
       // Validate language code
       const isValid = await validateLanguageCode(currentLang);
@@ -230,7 +233,9 @@ class WarmthlyI18n extends HTMLElement {
         } else if (element.hasAttribute('data-i18n-html')) {
           // Phase 7 Issue 7.1: Use sanitized HTML to prevent XSS
           // Sanitize HTML content from translations to prevent XSS attacks
-          setSafeHtml(element, translation);
+          if (element instanceof HTMLElement) {
+            setSafeHtml(element, translation);
+          }
         } else {
           element.textContent = translation;
         }
