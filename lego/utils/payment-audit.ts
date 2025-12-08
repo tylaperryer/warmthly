@@ -21,12 +21,20 @@ function getSessionId(): string {
   if (typeof sessionStorage !== 'undefined') {
     let sessionId = sessionStorage.getItem('warmthly_session_id');
     if (!sessionId) {
-      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Use crypto.getRandomValues for secure randomness
+      const array = new Uint8Array(9);
+      crypto.getRandomValues(array);
+      const randomPart = Array.from(array, byte => byte.toString(36)).join('').substring(0, 9);
+      sessionId = `session_${Date.now()}_${randomPart}`;
       sessionStorage.setItem('warmthly_session_id', sessionId);
     }
     return sessionId;
   }
-  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // Use crypto.getRandomValues for secure randomness
+  const array = new Uint8Array(9);
+  crypto.getRandomValues(array);
+  const randomPart = Array.from(array, byte => byte.toString(36)).join('').substring(0, 9);
+  return `session_${Date.now()}_${randomPart}`;
 }
 
 export async function logPaymentEvent(
