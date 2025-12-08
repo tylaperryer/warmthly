@@ -20,15 +20,15 @@ class WarmthlyFieldGroup extends BaseComponent {
   private errorElement: HTMLDivElement | null = null;
   private fieldElement: HTMLElement | null = null;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return ['label', 'help', 'help-link', 'error', 'required', 'id'];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.createFieldGroup();
   }
 
-  public onAttributeChange(name: string): void {
+  public override onAttributeChange(name: string): void {
     switch (name) {
       case 'label':
         this.updateLabel(this.getAttr('label'));
