@@ -784,8 +784,8 @@ function initPrivacyControls(): PrivacyControls {
           const imageData = ctx.getImageData(0, 0, this.width, this.height);
           for (let i = 0; i < imageData.data.length; i += 4) {
             // Add 1-bit noise to prevent exact fingerprinting
-            if (Math.random() < 0.01) {
-              imageData.data[i] = Math.min(255, imageData.data[i] + 1);
+            if (Math.random() < 0.01 && imageData.data[i] !== undefined) {
+              imageData.data[i] = Math.min(255, (imageData.data[i] ?? 0) + 1);
             }
           }
           ctx.putImageData(imageData, 0, 0);
@@ -824,8 +824,8 @@ function initPrivacyControls(): PrivacyControls {
             originalGetFloatFrequencyData(array);
             // Add 0.1% noise to prevent exact fingerprinting
             for (let i = 0; i < array.length; i++) {
-              if (Math.random() < 0.001) {
-                array[i] += (Math.random() - 0.5) * 0.01;
+              if (Math.random() < 0.001 && array[i] !== undefined) {
+                array[i] = (array[i] ?? 0) + (Math.random() - 0.5) * 0.01;
               }
             }
           };
