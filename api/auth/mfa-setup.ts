@@ -6,37 +6,10 @@
 
 import jwt from 'jsonwebtoken';
 
-import { withRateLimit, apiRateLimitOptions } from '../middleware/rate-limit.js';
+import { withRateLimit, apiRateLimitOptions, type Request, type Response } from '../middleware/rate-limit.js';
 import logger from '../utils/logger.js';
 
 import { generateTOTPSecret, generateTOTPQRCode, storeTOTPSecret } from './totp.js';
-
-
-/**
- * Request object interface
- */
-interface Request {
-  readonly method: string;
-  readonly headers: {
-    readonly authorization?: string;
-    [key: string]: string | undefined;
-  };
-  readonly body: {
-    readonly action?: 'generate' | 'verify' | 'enable';
-    readonly code?: string;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
-/**
- * Response object interface
- */
-interface Response {
-  status: (code: number) => Response;
-  json: (data: unknown) => Response;
-  [key: string]: unknown;
-}
 
 /**
  * Verify JWT token and extract user
@@ -47,6 +20,10 @@ function verifyAuthToken(authHeader: string | undefined): { valid: boolean; user
   }
 
   const token = authHeader.split(' ')[1];
+  if (!token) {
+    return { valid: false };
+  }
+
   const jwtSecret = process.env.JWT_SECRET;
 
   if (!jwtSecret) {
@@ -54,8 +31,12 @@ function verifyAuthToken(authHeader: string | undefined): { valid: boolean; user
   }
 
   try {
-    const decoded = jwt.verify(token, jwtSecret, { algorithms: ['HS256'] }) as { user?: string };
-    return { valid: true, user: decoded.user };
+    const decoded = jwt.verify(token, jwtSecret, { algorithms: ['HS256'] });
+    if (typeof decoded === 'object' && decoded !== null && 'user' in decoded) {
+      const user = (decoded as { user?: string }).user;
+      return { valid: true, user };
+    }
+    return { valid: false };
   } catch {
     return { valid: false };
   }
@@ -64,7 +45,7 @@ function verifyAuthToken(authHeader: string | undefined): { valid: boolean; user
 /**
  * MFA setup handler
  */
-async function mfaSetupHandler(req: Request, res: Response): Promise<Response> {
+async function mfaSetupHandler(req: Request, res: Response): Promise<unknown> {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: { message: 'Method Not Allowed' } });
   }
@@ -75,7 +56,13 @@ async function mfaSetupHandler(req: Request, res: Response): Promise<Response> {
     return res.status(401).json({ error: { message: 'Authentication required' } });
   }
 
-  const { action, code } = req.body;
+  const body = req.body as {
+    action?: 'generate' | 'verify' | 'enable';
+    code?: string;
+    secret?: string;
+    [key: string]: unknown;
+  };
+  const { action, code } = body;
 
   try {
     if (action === 'generate') {
@@ -89,7 +76,6 @@ async function mfaSetupHandler(req: Request, res: Response): Promise<Response> {
 
       // Store secret temporarily (will be enabled after verification)
       // In production, store in a temporary key with expiration
-      const tempKey = `admin:totp:temp:${Date.now()}`;
       // For now, we'll store it in the response and require immediate verification
 
       return res.status(200).json({
@@ -113,9 +99,9 @@ async function mfaSetupHandler(req: Request, res: Response): Promise<Response> {
       return res.status(400).json({
         error: { message: 'Please use the generate action first, then verify with the secret' },
       });
-    } else if (action === 'enable' && code && req.body.secret) {
+    } else if (action === 'enable' && code && body.secret) {
       // Enable MFA with verified secret
-      const secret = req.body.secret as string;
+      const secret = body.secret as string;
       const verificationCode = code ;
 
       // Verify the code
