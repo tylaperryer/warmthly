@@ -451,9 +451,9 @@ class I18n {
     // Check browser language
     const browserLang =
       navigator.language || (navigator.languages && navigator.languages[0]) || 'en';
-    const langCode = browserLang.split('-')[0].toLowerCase();
+    const langCode = browserLang.split('-')[0]?.toLowerCase();
 
-    return langCode;
+    return langCode || 'en';
   }
 
   /**
