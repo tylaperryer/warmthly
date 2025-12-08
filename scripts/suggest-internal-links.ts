@@ -65,19 +65,23 @@ function extractKeywords(content: string, title: string): string[] {
   const titleWords = title.toLowerCase().match(/\b\w{4,}\b/g) || [];
   keywords.push(...titleWords);
 
-  // Extract from headings
-  const headings = content.match(/<h[1-6][^>]*>([^<]+)<\/h[1-6]>/gi) || [];
+  // Extract from headings - improved to handle multi-byte characters
+  const headings = content.match(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi) || [];
   headings.forEach(heading => {
-    const text = heading.replace(/<[^>]+>/g, '').toLowerCase();
-    const words = text.match(/\b\w{4,}\b/g) || [];
+    // Remove all HTML tags, not just first level
+    let text = heading.replace(/<[^>]+>/g, '').toLowerCase();
+    // Handle multi-byte word boundaries better
+    const words = text.match(/[\p{L}\p{N}]{4,}/gu) || [];
     keywords.push(...words);
   });
 
-  // Extract from strong/em tags
-  const emphasis = content.match(/<(strong|em|b)[^>]*>([^<]+)<\/(strong|em|b)>/gi) || [];
+  // Extract from strong/em tags - improved to handle multi-byte characters
+  const emphasis = content.match(/<(strong|em|b)[^>]*>([\s\S]*?)<\/(strong|em|b)>/gi) || [];
   emphasis.forEach(em => {
-    const text = em.replace(/<[^>]+>/g, '').toLowerCase();
-    const words = text.match(/\b\w{4,}\b/g) || [];
+    // Remove all HTML tags, not just first level
+    let text = em.replace(/<[^>]+>/g, '').toLowerCase();
+    // Handle multi-byte word boundaries better
+    const words = text.match(/[\p{L}\p{N}]{4,}/gu) || [];
     keywords.push(...words);
   });
 
@@ -111,7 +115,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://www.warmthly.org/';
     }
-    return `https://www.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://www.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   if (relative.includes('/apps/mint/')) {
@@ -119,7 +123,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://mint.warmthly.org/';
     }
-    return `https://mint.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://mint.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   if (relative.includes('/apps/post/')) {
@@ -127,7 +131,7 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://post.warmthly.org/';
     }
-    return `https://post.warmthly.org${path.replace('/index.html', '/').replace('.html', '.html')}`;
+    return `https://post.warmthly.org${path.replace('/index.html', '/')}`;
   }
 
   return relative;
@@ -137,9 +141,16 @@ function getUrlFromPath(filePath: string): string {
  * Extract text content from HTML
  */
 function extractTextContent(html: string): string {
+  if (!html || typeof html !== 'string') {
+    return '';
+  }
+  // Improved regex to handle multi-byte characters and nested tags
   return html
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+    .replace(/<object[\s\S]*?<\/object>/gi, '')
+    .replace(/<embed[\s\S]*?<\/embed>/gi, '')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -198,8 +209,8 @@ function generateSuggestions(): void {
     pages.push({
       file: file.replace(projectRoot, '').replace(/\\/g, '/'),
       url: getUrlFromPath(file),
-      title,
-      keywords: extractKeywords(content, title),
+      title: title || basename(file, '.html'),
+      keywords: extractKeywords(content, title || basename(file, '.html')),
       content: textContent,
     });
   });
