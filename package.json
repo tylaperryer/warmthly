@@ -87,7 +87,7 @@
     "resend": "^3.0.0",
     "rollup-plugin-visualizer": "5.12.0",
     "stylelint": "16.0.2",
-    "stylelint-config-prettier": "9.0.5",
+    "stylelint-config-prettier": "^10.0.0",
     "stylelint-config-standard": "36.0.0",
     "terser": "5.24.0",
     "tsx": "4.7.0",
