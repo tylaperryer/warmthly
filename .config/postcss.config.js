@@ -10,7 +10,7 @@ export default {
     'postcss-nesting': {},
 
     // Container Queries - responsive design based on container size
-    'postcss-container-queries': {},
+    '@csstools/postcss-container-queries': {},
 
     // Autoprefixer - automatically add vendor prefixes
     autoprefixer: {
