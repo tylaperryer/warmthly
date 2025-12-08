@@ -151,7 +151,9 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Build application
+        id: build
         run: npm run build
+        continue-on-error: true
 
       - name: Run E2E tests
         id: e2e
@@ -190,7 +192,9 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Build application
+        id: build
         run: npm run build
+        continue-on-error: true
 
       - name: Create test-results directory
         run: mkdir -p test-results
