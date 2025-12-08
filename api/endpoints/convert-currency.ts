@@ -10,6 +10,7 @@ import { withTimeout } from '../security/request-timeout.js';
 import { setCacheHeaders, CacheConfigs } from '../utils/cache-headers.js';
 import { createErrorResponse, ErrorCode } from '../utils/error-response.js';
 import logger from '../utils/logger.js';
+import type { Request, Response } from '../security/request-timeout.js';
 
 /**
  * API timeout in milliseconds
@@ -64,29 +65,6 @@ const ALLOWED_CURRENCIES: readonly string[] = [
 ] as const;
 
 /**
- * Request object interface
- */
-interface Request {
-  readonly method: string;
-  readonly query: {
-    readonly amount?: string;
-    readonly from?: string;
-    readonly to?: string;
-    [key: string]: string | undefined;
-  };
-  [key: string]: unknown;
-}
-
-/**
- * Response object interface
- */
-interface Response {
-  status: (code: number) => Response;
-  json: (data: unknown) => Response;
-  [key: string]: unknown;
-}
-
-/**
  * Exchange rate API response
  */
 interface ExchangeRateResponse {
@@ -114,13 +92,14 @@ interface ConversionResponse {
  * @param res - Response object
  * @returns Response with conversion result or error
  */
-async function convertCurrencyHandler(req: Request, res: Response): Promise<Response> {
+async function convertCurrencyHandler(req: Request, res: Response): Promise<unknown> {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { amount, from = 'USD', to = 'ZAR' } = req.query;
+    const query = ((req as { query?: Record<string, string | string[] | undefined> }).query || {}) as { amount?: string; from?: string; to?: string; [key: string]: string | string[] | undefined };
+    const { amount, from = 'USD', to = 'ZAR' } = query;
 
     // Validate currency codes against whitelist (security)
     if (!ALLOWED_CURRENCIES.includes(from)) {
@@ -151,7 +130,7 @@ async function convertCurrencyHandler(req: Request, res: Response): Promise<Resp
       };
 
       // Phase 3 Issue 3.12: Add cache headers for currency conversion
-      setCacheHeaders(res, CacheConfigs.currencyRates());
+      setCacheHeaders(res as { setHeader: (name: string, value: string | number) => void; [key: string]: unknown }, CacheConfigs.currencyRates());
 
       return res.status(200).json(responseData);
     }
@@ -236,7 +215,7 @@ async function convertCurrencyHandler(req: Request, res: Response): Promise<Resp
     };
 
     // Phase 3 Issue 3.12: Add cache headers for currency conversion
-    setCacheHeaders(res, CacheConfigs.currencyRates());
+    setCacheHeaders(res as { setHeader: (name: string, value: string | number) => void; [key: string]: unknown }, CacheConfigs.currencyRates());
 
     return res.status(200).json(responseData);
   } catch (error: unknown) {
