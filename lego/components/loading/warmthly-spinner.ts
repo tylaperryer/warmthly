@@ -22,15 +22,15 @@ class WarmthlySpinner extends BaseComponent {
   private spinnerElement: HTMLDivElement | null = null;
   private labelElement: HTMLSpanElement | null = null;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return ['size', 'label', 'aria-label'];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.createSpinner();
   }
 
-  public onAttributeChange(name: string): void {
+  public override onAttributeChange(name: string): void {
     switch (name) {
       case 'size':
         this.updateSize();
