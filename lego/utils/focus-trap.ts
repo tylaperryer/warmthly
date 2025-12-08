@@ -113,6 +113,10 @@ export function trapFocus(element: HTMLElement | null): FocusTrapCleanup {
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
 
+    if (!firstElement || !lastElement) {
+      return;
+    }
+
     // Handle Shift+Tab (backward navigation)
     if (event.shiftKey) {
       if (document.activeElement === firstElement || !element.contains(document.activeElement)) {
