@@ -43,16 +43,25 @@ export function generateTOTP(secret: string, time?: number): string {
 
   // Create HMAC-SHA1 hash
   const hmac = crypto.createHmac(TOTP_ALGORITHM, secretBytes);
-  hmac.update(Buffer.allocUnsafe(8).fill(0).writeBigUInt64BE(BigInt(timestamp), 0));
+  const timeBuffer = Buffer.allocUnsafe(8);
+  timeBuffer.writeBigUInt64BE(BigInt(timestamp), 0);
+  hmac.update(timeBuffer);
   const hash = hmac.digest();
 
   // Dynamic truncation (RFC 4226)
-  const offset = hash[hash.length - 1] & 0x0f;
+  const lastByte = hash[hash.length - 1];
+  if (lastByte === undefined) {
+    throw new Error('Invalid hash for TOTP');
+  }
+  const offset = lastByte & 0x0f;
+  if (offset + 3 >= hash.length) {
+    throw new Error('Invalid hash length for TOTP');
+  }
   const binary =
-    ((hash[offset] & 0x7f) << 24) |
-    ((hash[offset + 1] & 0xff) << 16) |
-    ((hash[offset + 2] & 0xff) << 8) |
-    (hash[offset + 3] & 0xff);
+    ((hash[offset]! & 0x7f) << 24) |
+    ((hash[offset + 1]! & 0xff) << 16) |
+    ((hash[offset + 2]! & 0xff) << 8) |
+    (hash[offset + 3]! & 0xff);
 
   const otp = binary % Math.pow(10, TOTP_DIGITS);
 
@@ -115,8 +124,11 @@ function base32Encode(buffer: Buffer): string {
     let bitCount = 0;
 
     for (let j = 0; j < 5 && i + j < buffer.length; j++) {
-      bits = (bits << 8) | buffer[i + j];
-      bitCount += 8;
+      const byte = buffer[i + j];
+      if (byte !== undefined) {
+        bits = (bits << 8) | byte;
+        bitCount += 8;
+      }
     }
 
     while (bitCount >= 5) {
@@ -140,7 +152,10 @@ function base32Decode(encoded: string): Buffer {
   const map: Record<string, number> = {};
 
   for (let i = 0; i < alphabet.length; i++) {
-    map[alphabet[i]] = i;
+    const char = alphabet[i];
+    if (char !== undefined) {
+      map[char] = i;
+    }
   }
 
   encoded = encoded.toUpperCase().replace(/=+$/, '');
@@ -149,11 +164,12 @@ function base32Decode(encoded: string): Buffer {
   let bitCount = 0;
 
   for (const char of encoded) {
-    if (!(char in map)) {
+    const mapValue = map[char];
+    if (mapValue === undefined) {
       throw new Error(`Invalid base32 character: ${char}`);
     }
 
-    bits = (bits << 5) | map[char];
+    bits = (bits << 5) | mapValue;
     bitCount += 5;
 
     if (bitCount >= 8) {
