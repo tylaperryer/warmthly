@@ -75,13 +75,16 @@ function extractExternalLinks(
 
     while ((match = linkRegex.exec(line)) !== null) {
       const url = match[1];
+      if (!url) continue;
       const attributes = match[2] || '';
-      const anchorText = match[3].replace(/<[^>]+>/g, '').trim();
+      const anchorTextMatch = match[3];
+      const anchorText = anchorTextMatch ? anchorTextMatch.replace(/<[^>]+>/g, '').trim() : '';
 
-      // Only external links
-      if (url.startsWith('http://') || url.startsWith('https://')) {
+      // Only external links - use case-insensitive check
+      const normalizedUrl = url.trim().toLowerCase();
+      if (normalizedUrl.startsWith('http://') || normalizedUrl.startsWith('https://')) {
         // Skip internal warmthly.org links
-        if (!url.includes('warmthly.org')) {
+        if (!normalizedUrl.includes('warmthly.org')) {
           links.push({
             url,
             line: index + 1,
