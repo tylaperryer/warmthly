@@ -11,14 +11,14 @@ export function sanitizeErrorMessage(error: unknown, context?: string): string {
   const errorMessage = error instanceof Error ? error.message : String(error);
 
   // Generic error messages for common scenarios
-  const genericMessages: Record<string, string> = {
+  const genericMessages = {
     network: 'Network error. Please check your connection and try again.',
     timeout: 'Request timed out. Please try again.',
     payment: 'Payment processing error. Please try again or use a different payment method.',
     currency: 'Currency conversion error. Please try again.',
     validation: 'Invalid input. Please check your information and try again.',
     server: 'Server error. Please try again later or contact support.',
-  };
+  } as const;
 
   // Check for specific error patterns
   if (
