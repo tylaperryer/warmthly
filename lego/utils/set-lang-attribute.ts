@@ -57,10 +57,10 @@ function normalizeLanguageCode(lang: string): string | null {
   }
 
   // Remove locale suffix and convert to lowercase
-  const normalized = lang.toLowerCase().split('-')[0].split('_')[0].split('.')[0];
+  const normalized = lang?.toLowerCase().split('-')[0]?.split('_')[0]?.split('.')[0];
 
   // Basic validation: 2-3 letter codes
-  if (normalized.length >= 2 && normalized.length <= 3) {
+  if (normalized && normalized.length >= 2 && normalized.length <= 3) {
     return normalized;
   }
 
