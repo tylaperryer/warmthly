@@ -6,11 +6,11 @@
  * Phase 3 Issue 3.12: Added response caching headers
  */
 
-import { withTimeout } from '../security/request-timeout.js';
-import { setCacheHeaders, CacheConfigs } from '../utils/cache-headers.js';
-import { createErrorResponse, ErrorCode } from '../utils/error-response.js';
-import logger from '../utils/logger.js';
 import type { Request, Response } from '../security/request-timeout.js';
+import { withTimeout } from '../security/request-timeout.js';
+import { createErrorResponse, ErrorCode } from '../utils/error-response.js';
+import { setCacheHeaders, CacheConfigs } from '../utils/cache-headers.js';
+import logger from '../utils/logger.js';
 
 /**
  * API timeout in milliseconds
@@ -102,14 +102,16 @@ async function convertCurrencyHandler(req: Request, res: Response): Promise<unkn
     const { amount, from = 'USD', to = 'ZAR' } = query;
 
     // Validate currency codes against whitelist (security)
-    if (!ALLOWED_CURRENCIES.includes(from)) {
+    const fromCurrency = String(from);
+    const toCurrency = String(to);
+    if (!ALLOWED_CURRENCIES.includes(fromCurrency)) {
       return res.status(400).json(
-        createErrorResponse(ErrorCode.VALIDATION_ERROR, `Invalid source currency: ${from}`)
+        createErrorResponse(ErrorCode.VALIDATION_ERROR, `Invalid source currency: ${fromCurrency}`)
       );
     }
-    if (!ALLOWED_CURRENCIES.includes(to)) {
+    if (!ALLOWED_CURRENCIES.includes(toCurrency)) {
       return res.status(400).json(
-        createErrorResponse(ErrorCode.VALIDATION_ERROR, `Invalid target currency: ${to}`)
+        createErrorResponse(ErrorCode.VALIDATION_ERROR, `Invalid target currency: ${toCurrency}`)
       );
     }
 
@@ -119,7 +121,7 @@ async function convertCurrencyHandler(req: Request, res: Response): Promise<unkn
     }
 
     // Same currency - no conversion needed
-    if (from === to) {
+    if (fromCurrency === toCurrency) {
       const amountNum = parseFloat(amount);
       const responseData = {
         originalAmount: amountNum,
