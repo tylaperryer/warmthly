@@ -1,0 +1,329 @@
+/**
+ * Broken Link Detector
+ * Detects broken internal and external links across all HTML files
+ *
+ * Usage: npm run detect:broken-links
+ */
+
+import { readFileSync, readdirSync, statSync } from 'fs';
+import { join, extname, dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = join(__dirname, '..');
+
+/**
+ * Validate file path to prevent path traversal attacks
+ * Phase 4 Issue 4.2: Add input validation for file paths
+ */
+function validatePath(filePath: string): boolean {
+  const resolvedPath = resolve(filePath);
+  const resolvedRoot = resolve(projectRoot);
+  return resolvedPath.startsWith(resolvedRoot);
+}
+
+interface BrokenLink {
+  file: string;
+  line: number;
+  url: string;
+  type: 'internal' | 'external';
+  issue: string;
+  context: string;
+}
+
+
+/**
+ * Find all HTML files recursively
+ * Phase 4 Issue 4.2: Add path validation
+ */
+function findHTMLFiles(dir: string, fileList: string[] = []): string[] {
+  // Validate directory path
+  if (!validatePath(dir)) {
+    throw new Error(`Invalid directory path: ${dir}`);
+  }
+  
+  const files = readdirSync(dir);
+
+  files.forEach((file: string) => {
+    const filePath = join(dir, file);
+    const stat = statSync(filePath);
+
+    if (stat.isDirectory()) {
+      if (!file.startsWith('.') && file !== 'node_modules' && file !== 'dist' && file !== 'build') {
+        findHTMLFiles(filePath, fileList);
+      }
+    } else if (extname(file) === '.html') {
+      fileList.push(filePath);
+    }
+  });
+
+  return fileList;
+}
+
+/**
+ * Extract all links from HTML content
+ */
+function extractLinks(
+  content: string
+): Array<{ url: string; line: number; context: string }> {
+  const links: Array<{ url: string; line: number; context: string }> = [];
+  const lines = content.split('\n');
+
+  lines.forEach((line, index) => {
+    // Match href attributes
+    const hrefRegex = /href\s*=\s*["']([^"']+)["']/gi;
+    let match;
+
+    while ((match = hrefRegex.exec(line)) !== null) {
+      const url = match[1];
+
+      // Skip anchors, mailto, tel, javascript, data URIs
+      if (
+        url.startsWith('#') ||
+        url.startsWith('mailto:') ||
+        url.startsWith('tel:') ||
+        url.startsWith('javascript:') ||
+        url.startsWith('data:')
+      ) {
+        continue;
+      }
+
+      links.push({
+        url,
+        line: index + 1,
+        context: line.trim().substring(0, 100),
+      });
+    }
+  });
+
+  return links;
+}
+
+/**
+ * Check if internal file exists
+ */
+function checkInternalFile(url: string, basePath: string): boolean {
+  try {
+    // Remove query params and hash
+    const cleanUrl = url.split('?')[0].split('#')[0];
+
+    // Convert URL to file path
+    let filePath = cleanUrl;
+
+    // Handle absolute URLs
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+      if (cleanUrl.includes('warmthly.org')) {
+        // Extract path from URL
+        const urlObj = new URL(cleanUrl);
+        filePath = urlObj.pathname;
+      } else {
+        // External URL, skip
+        return true; // Assume external URLs are valid
+      }
+    }
+
+    // Handle relative paths
+    if (filePath.startsWith('/')) {
+      // Remove leading slash and map to apps directory
+      const pathWithoutSlash = filePath.substring(1);
+
+      // Try different app directories
+      const apps = ['main', 'mint', 'post', 'admin'];
+      for (const app of apps) {
+        const fullPath = join(projectRoot, 'apps', app, pathWithoutSlash);
+        if (statSync(fullPath).isFile() || statSync(fullPath).isDirectory()) {
+          return true;
+        }
+
+        // Try with .html extension
+        const htmlPath = join(projectRoot, 'apps', app, pathWithoutSlash + '.html');
+        if (statSync(htmlPath).isFile()) {
+          return true;
+        }
+
+        // Try index.html
+        const indexPath = join(projectRoot, 'apps', app, pathWithoutSlash, 'index.html');
+        if (statSync(indexPath).isFile()) {
+          return true;
+        }
+      }
+
+      // Check if it's a root file
+      const rootPath = join(projectRoot, pathWithoutSlash);
+      if (statSync(rootPath).isFile() || statSync(rootPath).isDirectory()) {
+        return true;
+      }
+
+      return false;
+    } else {
+      // Relative path from current file
+      const dir = dirname(basePath);
+      const fullPath = join(dir, filePath);
+      if (statSync(fullPath).isFile() || statSync(fullPath).isDirectory()) {
+        return true;
+      }
+      return false;
+    }
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check external URL (basic validation)
+ */
+async function checkExternalUrl(
+  url: string
+): Promise<{ valid: boolean; status?: number; error?: string }> {
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      redirect: 'follow',
+      signal: AbortSignal.timeout(5000), // 5 second timeout
+    });
+
+    return {
+      valid: response.ok,
+      status: response.status,
+    };
+  } catch (error) {
+    return {
+      valid: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+/**
+ * Detect broken links
+ */
+async function detectBrokenLinks(): Promise<void> {
+  console.log('🔍 Detecting broken links...\n');
+
+  const appsDir = join(projectRoot, 'apps');
+  const htmlFiles = findHTMLFiles(appsDir);
+
+  console.log(`Found ${htmlFiles.length} HTML files to check\n`);
+
+  const brokenLinks: BrokenLink[] = [];
+  const externalLinks: Array<{ url: string; file: string; line: number }> = [];
+
+  // First pass: Check internal links
+  htmlFiles.forEach(file => {
+    const content = readFileSync(file, 'utf-8');
+    const relativePath = file.replace(projectRoot, '').replace(/\\/g, '/');
+    const links = extractLinks(content);
+
+    links.forEach(link => {
+      const isExternal = link.url.startsWith('http://') || link.url.startsWith('https://');
+
+      if (isExternal) {
+        // External links - check later
+        if (link.url.includes('warmthly.org')) {
+          // Internal URL but external format
+          if (!checkInternalFile(link.url, file)) {
+            brokenLinks.push({
+              file: relativePath,
+              line: link.line,
+              url: link.url,
+              type: 'internal',
+              issue: 'Internal URL points to non-existent page',
+              context: link.context,
+            });
+          }
+        } else {
+          // External URL - queue for checking
+          externalLinks.push({
+            url: link.url,
+            file: relativePath,
+            line: link.line,
+          });
+        }
+      } else {
+        // Internal relative link
+        if (!checkInternalFile(link.url, file)) {
+          brokenLinks.push({
+            file: relativePath,
+            line: link.line,
+            url: link.url,
+            type: 'internal',
+            issue: 'Link points to non-existent file or page',
+            context: link.context,
+          });
+        }
+      }
+    });
+  });
+
+  // Second pass: Check external links (limited to avoid rate limiting)
+  console.log(
+    `Checking ${Math.min(
+      externalLinks.length,
+      20
+    )} external links (limited to 20 for performance)...\n`
+  );
+
+  for (let i = 0; i < Math.min(externalLinks.length, 20); i++) {
+    const link = externalLinks[i];
+    const result = await checkExternalUrl(link.url);
+
+    if (!result.valid) {
+      brokenLinks.push({
+        file: link.file,
+        line: link.line,
+        url: link.url,
+        type: 'external',
+        issue: result.error || `HTTP ${result.status}`,
+        context: '',
+      });
+    }
+
+    // Rate limiting
+    if (i < externalLinks.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+
+  // Report results
+  if (brokenLinks.length === 0) {
+    console.log('✅ No broken links found!\n');
+    return;
+  }
+
+  console.log(`⚠️  Found ${brokenLinks.length} broken link(s):\n`);
+
+  // Group by file
+  const linksByFile = new Map<string, BrokenLink[]>();
+  brokenLinks.forEach(link => {
+    const fileLinks = linksByFile.get(link.file) || [];
+    fileLinks.push(link);
+    linksByFile.set(link.file, fileLinks);
+  });
+
+  linksByFile.forEach((fileLinks, file) => {
+    console.log(`📄 ${file}:`);
+    fileLinks.forEach(link => {
+      console.log(`   Line ${link.line}: ${link.type === 'internal' ? '🔗' : '🌐'} ${link.url}`);
+      console.log(`   Issue: ${link.issue}`);
+      console.log(`   Context: ${link.context}`);
+      console.log('');
+    });
+  });
+
+  console.log('\n💡 Recommendations:');
+  console.log('   - Fix or remove broken internal links');
+  console.log('   - Update external links that are no longer valid');
+  console.log('   - Use relative paths for internal links when possible');
+  console.log('   - Test links regularly to catch issues early\n');
+
+  process.exit(brokenLinks.length > 0 ? 1 : 0);
+}
+
+// Run detection
+detectBrokenLinks().catch(error => {
+  console.error('❌ Error detecting broken links:', error);
+  process.exit(1);
+});
+
+export { detectBrokenLinks };
