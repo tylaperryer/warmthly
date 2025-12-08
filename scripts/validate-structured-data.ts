@@ -5,9 +5,10 @@
  * Usage: npm run validate:structured-data
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs';
-import { join, extname, dirname } from 'path';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { findHTMLFiles } from './utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,48 +22,37 @@ interface ValidationIssue {
 }
 
 /**
- * Find all HTML files recursively
- */
-function findHTMLFiles(dir: string, fileList: string[] = []): string[] {
-  const files = readdirSync(dir);
-
-  files.forEach((file: string) => {
-    const filePath = join(dir, file);
-    const stat = statSync(filePath);
-
-    if (stat.isDirectory()) {
-      if (!file.startsWith('.') && file !== 'node_modules' && file !== 'dist') {
-        findHTMLFiles(filePath, fileList);
-      }
-    } else if (extname(file) === '.html') {
-      fileList.push(filePath);
-    }
-  });
-
-  return fileList;
-}
-
-/**
  * Extract JSON-LD scripts from HTML
+ * Handles multiline scripts properly
  */
 function extractStructuredData(html: string): Array<{ json: object; line: number }> {
   const scripts: Array<{ json: object; line: number }> = [];
-  const lines = html.split('\n');
 
-  lines.forEach((line, index) => {
-    // Match script tags with type="application/ld+json"
-    const scriptMatch = line.match(
-      /<script[^>]*type=["']application\/ld\+json["'][^>]*>(.*?)<\/script>/s
-    );
-    if (scriptMatch) {
-      try {
-        const json = JSON.parse(scriptMatch[1]);
-        scripts.push({ json, line: index + 1 });
-      } catch (error) {
-        // Invalid JSON - will be caught in validation
-      }
+  // Match script tags with type="application/ld+json" (handles multiline)
+  const scriptRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
+
+  // Find line numbers for matches
+  while ((match = scriptRegex.exec(html)) !== null) {
+    const jsonContent = match[1];
+    if (!jsonContent) continue;
+
+    // Calculate line number by counting newlines before the match
+    const beforeMatch = html.substring(0, match.index);
+    const lineNumber = (beforeMatch.match(/\n/g) || []).length + 1;
+
+    try {
+      const json = JSON.parse(jsonContent.trim());
+      scripts.push({ json, line: lineNumber });
+    } catch (error) {
+      // Invalid JSON - will be caught in validation
+      // Add an issue for invalid JSON
+      scripts.push({
+        json: {},
+        line: lineNumber,
+      });
     }
-  });
+  }
 
   return scripts;
 }
@@ -72,6 +62,17 @@ function extractStructuredData(html: string): Array<{ json: object; line: number
  */
 function validateSchema(schema: object, line: number, file: string): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
+
+  // Check if schema is empty (invalid JSON)
+  if (Object.keys(schema).length === 0) {
+    issues.push({
+      file,
+      line,
+      issue: 'Invalid JSON in structured data script',
+      schema: '{}',
+    });
+    return issues;
+  }
 
   // Check required fields
   if (!('@context' in schema)) {
@@ -248,13 +249,25 @@ function validateSchema(schema: object, line: number, file: string): ValidationI
  */
 function auditFile(filePath: string): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
-  const content = readFileSync(filePath, 'utf-8');
-  const structuredData = extractStructuredData(content);
+  
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    const structuredData = extractStructuredData(content);
 
-  structuredData.forEach(({ json, line }) => {
-    const fileIssues = validateSchema(json, line, filePath.replace(projectRoot, ''));
-    issues.push(...fileIssues);
-  });
+    structuredData.forEach(({ json, line }) => {
+      const relativePath = filePath.replace(projectRoot, '').replace(/\\/g, '/');
+      const fileIssues = validateSchema(json, line, relativePath);
+      issues.push(...fileIssues);
+    });
+  } catch (error) {
+    const relativePath = filePath.replace(projectRoot, '').replace(/\\/g, '/');
+    issues.push({
+      file: relativePath,
+      line: 1,
+      issue: `Error reading file: ${error instanceof Error ? error.message : String(error)}`,
+      schema: '',
+    });
+  }
 
   return issues;
 }
@@ -274,12 +287,16 @@ function validateStructuredData(): void {
   let totalSchemas = 0;
 
   htmlFiles.forEach(file => {
-    const issues = auditFile(file);
-    allIssues.push(...issues);
+    try {
+      const issues = auditFile(file);
+      allIssues.push(...issues);
 
-    const content = readFileSync(file, 'utf-8');
-    const schemas = extractStructuredData(content);
-    totalSchemas += schemas.length;
+      const content = readFileSync(file, 'utf-8');
+      const schemas = extractStructuredData(content);
+      totalSchemas += schemas.length;
+    } catch (error) {
+      console.warn(`Warning: Could not process ${file}: ${error}`);
+    }
   });
 
   // Report results
