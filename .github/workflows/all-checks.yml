@@ -375,14 +375,16 @@ jobs:
             fi
           } >> $GITHUB_STEP_SUMMARY
           
-          # Set exit code based on results (but don't fail the summary job itself)
+          # Report status but don't fail the summary job itself
+          # The individual jobs will show their failures, this just aggregates them
           if [ "${{ needs.core-checks.result }}" != "success" ] || \
              [ "${{ needs.build-checks.result }}" != "success" ] || \
              [ "${{ needs.e2e-tests.result }}" != "success" ] || \
              [ "${{ needs.accessibility.result }}" != "success" ] || \
              [ "${{ needs.seo-audit.result }}" != "success" ]; then
-            echo "Some checks failed - see summary above"
-            exit 1
+            echo "Some checks failed - see summary above for details"
+          else
+            echo "All checks passed successfully!"
           fi
 
       - name: Comment on PR with summary
