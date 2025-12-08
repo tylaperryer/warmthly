@@ -22,15 +22,15 @@ export type SkeletonVariant = 'text' | 'rect' | 'circle' | 'custom';
 class WarmthlySkeleton extends BaseComponent {
   private skeletonElement: HTMLDivElement | null = null;
 
-  static get observedAttributes(): readonly string[] {
+  static override get observedAttributes(): readonly string[] {
     return ['width', 'height', 'variant', 'lines', 'size', 'animated'];
   }
 
-  public onConnect(): void {
+  public override onConnect(): void {
     this.createSkeleton();
   }
 
-  public onAttributeChange(): void {
+  public override onAttributeChange(): void {
     this.createSkeleton();
   }
 
