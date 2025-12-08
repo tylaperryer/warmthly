@@ -215,7 +215,7 @@ function simplifyWord(word: string, config: ReadingLevelConfig): string {
   const simplified = WORD_SIMPLIFICATIONS[lowerWord];
 
   if (simplified) {
-    if (word[0] === word[0].toUpperCase()) {
+    if (word && word[0] && word[0] === word[0].toUpperCase()) {
       return simplified.charAt(0).toUpperCase() + simplified.slice(1);
     }
     return simplified;
