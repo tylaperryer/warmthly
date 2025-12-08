@@ -9,8 +9,14 @@ export default {
     // CSS Nesting - allows nested selectors (CSS Nesting spec)
     'postcss-nesting': {},
 
-    // Container Queries - responsive design based on container size
-    '@csstools/postcss-container-queries': {},
+    // PostCSS Preset Env - includes container queries and other modern CSS features
+    // Replaces deprecated @csstools/postcss-container-queries
+    'postcss-preset-env': {
+      stage: 3, // Use stage 3 features (stable proposals)
+      features: {
+        'container-queries': true, // Enable container queries support
+      },
+    },
 
     // Autoprefixer - automatically add vendor prefixes
     autoprefixer: {
