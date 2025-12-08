@@ -105,6 +105,8 @@ export function sanitizeHtml(html: string): string {
   }
 
   // Create a temporary container
+  // SECURITY: Using innerHTML here is intentional for sanitization - we parse then sanitize
+  // The input is expected to be HTML that needs sanitization, and we remove dangerous content
   const temp = document.createElement('div');
   temp.innerHTML = html;
 
