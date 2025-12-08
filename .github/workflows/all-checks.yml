@@ -192,6 +192,9 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Create test-results directory
+        run: mkdir -p test-results
+
       - name: Run accessibility tests
         id: a11y-tests
         run: npm run test:a11y
@@ -205,6 +208,7 @@ jobs:
       - name: Upload accessibility report
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: accessibility-report
           path: test-results/
