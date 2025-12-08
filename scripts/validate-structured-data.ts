@@ -92,16 +92,26 @@ function validateSchema(schema: object, line: number, file: string): ValidationI
     });
   }
 
-  // Validate @context
+  // Validate @context - use case-insensitive check and proper URL validation
   if ('@context' in schema) {
     const context = (schema as { '@context': unknown })['@context'];
-    if (typeof context !== 'string' || !context.startsWith('https://schema.org')) {
+    if (typeof context !== 'string') {
       issues.push({
         file,
         line,
-        issue: 'Invalid @context - must be a schema.org URL',
+        issue: 'Invalid @context - must be a string',
         schema: JSON.stringify(schema).substring(0, 100),
       });
+    } else {
+      const normalizedContext = context.trim().toLowerCase();
+      if (!normalizedContext.startsWith('https://schema.org')) {
+        issues.push({
+          file,
+          line,
+          issue: 'Invalid @context - must be a schema.org URL',
+          schema: JSON.stringify(schema).substring(0, 100),
+        });
+      }
     }
   }
 
