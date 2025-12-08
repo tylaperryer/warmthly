@@ -142,6 +142,7 @@ export function sanitizeHtml(html: string): string {
 
       for (let i = 0; i < element.attributes.length; i++) {
         const attr = element.attributes[i];
+        if (!attr) continue;
         const attrName = attr.name.toLowerCase();
 
         // Skip event handlers and dangerous attributes
@@ -167,7 +168,9 @@ export function sanitizeHtml(html: string): string {
 
       // Recursively sanitize children
       for (let i = 0; i < element.childNodes.length; i++) {
-        const sanitizedChild = sanitizeNode(element.childNodes[i]);
+        const childNode = element.childNodes[i];
+        if (!childNode) continue;
+        const sanitizedChild = sanitizeNode(childNode);
         if (sanitizedChild) {
           sanitized.appendChild(sanitizedChild);
         }
@@ -182,7 +185,9 @@ export function sanitizeHtml(html: string): string {
   // Sanitize all nodes in the temp container
   const sanitizedContainer = document.createElement('div');
   for (let i = 0; i < temp.childNodes.length; i++) {
-    const sanitized = sanitizeNode(temp.childNodes[i]);
+    const childNode = temp.childNodes[i];
+    if (!childNode) continue;
+    const sanitized = sanitizeNode(childNode);
     if (sanitized) {
       sanitizedContainer.appendChild(sanitized);
     }
