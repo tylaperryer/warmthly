@@ -77,20 +77,25 @@ function extractLinks(
 
     while ((match = hrefRegex.exec(line)) !== null) {
       const url = match[1];
+      if (!url) continue;
 
       // Skip anchors, mailto, tel, javascript, data URIs
+      // Use case-insensitive check to prevent bypasses
+      const normalizedUrl = url.trim().toLowerCase();
       if (
-        url.startsWith('#') ||
-        url.startsWith('mailto:') ||
-        url.startsWith('tel:') ||
-        url.startsWith('javascript:') ||
-        url.startsWith('data:')
+        normalizedUrl.startsWith('#') ||
+        normalizedUrl.startsWith('mailto:') ||
+        normalizedUrl.startsWith('tel:') ||
+        normalizedUrl.startsWith('javascript:') ||
+        normalizedUrl.startsWith('data:') ||
+        normalizedUrl.startsWith('vbscript:') ||
+        normalizedUrl.startsWith('file:')
       ) {
         continue;
       }
 
       links.push({
-        url,
+        url: url,
         line: index + 1,
         context: line.trim().substring(0, 100),
       });
@@ -106,66 +111,136 @@ function extractLinks(
 function checkInternalFile(url: string, basePath: string): boolean {
   try {
     // Remove query params and hash
-    const cleanUrl = url.split('?')[0].split('#')[0];
+    const cleanUrl = url.split('?')[0]?.split('#')[0];
+    if (!cleanUrl) {
+      return false;
+    }
 
     // Convert URL to file path
-    let filePath = cleanUrl;
+    let filePath: string = cleanUrl;
 
-    // Handle absolute URLs
-    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
-      if (cleanUrl.includes('warmthly.org')) {
+    // Handle absolute URLs - use case-insensitive check
+    const normalizedCleanUrl = cleanUrl.trim().toLowerCase();
+    if (normalizedCleanUrl.startsWith('http://') || normalizedCleanUrl.startsWith('https://')) {
+      if (normalizedCleanUrl.includes('warmthly.org')) {
         // Extract path from URL
-        const urlObj = new URL(cleanUrl);
-        filePath = urlObj.pathname;
+        try {
+          const urlObj = new URL(cleanUrl);
+          filePath = urlObj.pathname;
+        } catch {
+          // Invalid URL, skip
+          return false;
+        }
       } else {
         // External URL, skip
         return true; // Assume external URLs are valid
       }
     }
 
+    // Validate path to prevent traversal
+    if (!validatePath(basePath)) {
+      return false;
+    }
+
     // Handle relative paths
-    if (filePath.startsWith('/')) {
+    if (filePath && filePath.startsWith('/')) {
       // Remove leading slash and map to apps directory
       const pathWithoutSlash = filePath.substring(1);
+
+      // Validate path doesn't contain traversal sequences
+      if (pathWithoutSlash.includes('..') || pathWithoutSlash.includes('~')) {
+        return false;
+      }
 
       // Try different app directories
       const apps = ['main', 'mint', 'post', 'admin'];
       for (const app of apps) {
         const fullPath = join(projectRoot, 'apps', app, pathWithoutSlash);
-        if (statSync(fullPath).isFile() || statSync(fullPath).isDirectory()) {
-          return true;
+        
+        // Validate resolved path is still within project
+        if (!validatePath(fullPath)) {
+          continue;
+        }
+
+        try {
+          const stat = statSync(fullPath);
+          if (stat.isFile() || stat.isDirectory()) {
+            return true;
+          }
+        } catch {
+          // File doesn't exist, try alternatives
         }
 
         // Try with .html extension
         const htmlPath = join(projectRoot, 'apps', app, pathWithoutSlash + '.html');
-        if (statSync(htmlPath).isFile()) {
-          return true;
+        if (validatePath(htmlPath)) {
+          try {
+            if (statSync(htmlPath).isFile()) {
+              return true;
+            }
+          } catch {
+            // File doesn't exist
+          }
         }
 
         // Try index.html
         const indexPath = join(projectRoot, 'apps', app, pathWithoutSlash, 'index.html');
-        if (statSync(indexPath).isFile()) {
-          return true;
+        if (validatePath(indexPath)) {
+          try {
+            if (statSync(indexPath).isFile()) {
+              return true;
+            }
+          } catch {
+            // File doesn't exist
+          }
         }
       }
 
       // Check if it's a root file
       const rootPath = join(projectRoot, pathWithoutSlash);
-      if (statSync(rootPath).isFile() || statSync(rootPath).isDirectory()) {
-        return true;
+      if (validatePath(rootPath)) {
+        try {
+          const stat = statSync(rootPath);
+          if (stat.isFile() || stat.isDirectory()) {
+            return true;
+          }
+        } catch {
+          // File doesn't exist
+        }
       }
 
       return false;
-    } else {
+    } else if (filePath) {
       // Relative path from current file
       const dir = dirname(basePath);
       const fullPath = join(dir, filePath);
-      if (statSync(fullPath).isFile() || statSync(fullPath).isDirectory()) {
-        return true;
+      
+      // Validate path
+      if (!validatePath(fullPath)) {
+        return false;
+      }
+
+      // Validate path doesn't contain traversal
+      if (filePath.includes('..') || filePath.includes('~')) {
+        return false;
+      }
+
+      try {
+        const stat = statSync(fullPath);
+        if (stat.isFile() || stat.isDirectory()) {
+          return true;
+        }
+      } catch {
+        // File doesn't exist
       }
       return false;
+    } else {
+      // No valid filePath
+      return false;
     }
-  } catch {
+  } catch (error) {
+    // Log error for debugging but don't fail the check
+    console.warn(`Warning: Error checking file ${url}: ${error}`);
     return false;
   }
 }
@@ -216,7 +291,9 @@ async function detectBrokenLinks(): Promise<void> {
     const links = extractLinks(content);
 
     links.forEach(link => {
-      const isExternal = link.url.startsWith('http://') || link.url.startsWith('https://');
+      // Use case-insensitive check to prevent bypasses
+      const normalizedUrl = link.url.trim().toLowerCase();
+      const isExternal = normalizedUrl.startsWith('http://') || normalizedUrl.startsWith('https://');
 
       if (isExternal) {
         // External links - check later
@@ -266,6 +343,8 @@ async function detectBrokenLinks(): Promise<void> {
 
   for (let i = 0; i < Math.min(externalLinks.length, 20); i++) {
     const link = externalLinks[i];
+    if (!link) continue;
+    
     const result = await checkExternalUrl(link.url);
 
     if (!result.valid) {
