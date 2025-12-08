@@ -144,7 +144,7 @@ async function getSecretFromVault(secretPath: string): Promise<string | null> {
       // If multiple keys, return JSON string; if single key, return value
       const secretData = data.data.data;
       const keys = Object.keys(secretData);
-      if (keys.length === 1) {
+      if (keys.length === 1 && keys[0]) {
         return secretData[keys[0]];
       }
       return JSON.stringify(secretData);
