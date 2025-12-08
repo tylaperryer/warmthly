@@ -76,7 +76,10 @@ export function isRTL(langCode: string): boolean {
     return false;
   }
 
-  const normalizedCode = langCode.toLowerCase().split('-')[0].split('_')[0];
+  const normalizedCode = langCode.toLowerCase().split('-')[0]?.split('_')[0];
+  if (!normalizedCode) {
+    return false;
+  }
 
   // Check static list first (fast path)
   if (RTL_LANGUAGES.has(normalizedCode)) {
@@ -128,7 +131,10 @@ export function setDocumentDirection(langCode: string): void {
   }
 
   const html = document.documentElement;
-  const normalizedCode = langCode.toLowerCase().split('-')[0].split('_')[0];
+  const normalizedCode = langCode.toLowerCase().split('-')[0]?.split('_')[0];
+  if (!normalizedCode) {
+    return;
+  }
   const isRTL = RTL_LANGUAGES.has(normalizedCode);
 
   if (isRTL) {
