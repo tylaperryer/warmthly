@@ -101,8 +101,8 @@ async function mfaSetupHandler(req: Request, res: Response): Promise<unknown> {
       });
     } else if (action === 'enable' && code && body.secret) {
       // Enable MFA with verified secret
-      const secret = body.secret as string;
-      const verificationCode = code ;
+      const secret = body.secret;
+      const verificationCode = code;
 
       // Verify the code
       const { verifyTOTP } = await import('./totp.js');
