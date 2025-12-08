@@ -62,6 +62,9 @@ export interface Request {
   readonly connection?: {
     readonly remoteAddress?: string;
   };
+  readonly query?: Record<string, string | string[] | undefined>;
+  readonly body?: unknown;
+  readonly on?: (event: string, listener: (...args: unknown[]) => void) => void;
   [key: string]: unknown;
 }
 
@@ -132,18 +135,23 @@ async function checkRateLimit(
   try {
     const client = await getRedisClient();
 
-    // Use pipeline for atomic operations
-    const pipeline = client.pipeline();
-    pipeline.incr(key);
-    pipeline.pttl(key);
-    const results = await pipeline.exec();
+    // Use multi for atomic operations
+    const multi = client.multi();
+    multi.incr(key);
+    multi.pTTL(key);
+    const results = await multi.exec();
 
     if (!results || results.length < 2) {
       throw new Error('Redis pipeline execution failed');
     }
 
-    const count = results[0]?.[1];
-    const ttl = results[1]?.[1];
+    // Results are in format: [error, value] or just value
+    const countResult = results[0];
+    const ttlResult = results[1];
+    
+    // Handle both tuple format [error, value] and direct value format
+    const count = Array.isArray(countResult) ? countResult[1] : countResult;
+    const ttl = Array.isArray(ttlResult) ? ttlResult[1] : ttlResult;
 
     if (typeof count !== 'number' || typeof ttl !== 'number') {
       throw new Error('Invalid Redis response');
@@ -151,13 +159,13 @@ async function checkRateLimit(
 
     // Set expiration if this is the first request or key has no TTL
     if (count === 1) {
-      await client.pexpire(key, windowMs);
+      await client.pExpire(key, windowMs);
     } else if (ttl === -1) {
-      await client.pexpire(key, windowMs);
+      await client.pExpire(key, windowMs);
     }
 
     // Get actual TTL
-    const actualTtl = await client.pttl(key);
+    const actualTtl = await client.pTTL(key);
     const actualResetTime = now + (actualTtl > 0 ? actualTtl : windowMs);
 
     if (count > max) {
