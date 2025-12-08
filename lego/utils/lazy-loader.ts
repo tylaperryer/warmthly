@@ -50,7 +50,8 @@ export function lazyLoadOnVisible(
   return new Promise((resolve, reject) => {
     if (!('IntersectionObserver' in window)) {
       // Fallback: load immediately if IntersectionObserver not supported
-      return lazyLoadComponent(componentPath).then(resolve).catch(reject);
+      lazyLoadComponent(componentPath).then(resolve).catch(reject);
+      return;
     }
 
     const observer = new IntersectionObserver(
