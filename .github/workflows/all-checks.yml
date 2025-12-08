@@ -319,59 +319,70 @@ jobs:
     steps:
       - name: Generate comprehensive summary
         run: |
-          echo "# 📊 All Checks Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## ✅ Core Checks" >> $GITHUB_STEP_SUMMARY
-          echo "- **Type Check**: ${{ needs.core-checks.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Lint**: ${{ needs.core-checks.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Format**: ${{ needs.core-checks.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **i18n Validation**: ${{ needs.core-checks.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Security Audit**: ${{ needs.core-checks.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Unit Tests**: ${{ needs.core-checks.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 🏗️ Build Checks" >> $GITHUB_STEP_SUMMARY
-          echo "- **Build**: ${{ needs.build-checks.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Bundle Size**: ${{ needs.build-checks.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 🧪 E2E Tests" >> $GITHUB_STEP_SUMMARY
-          echo "- **E2E Tests**: ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## ♿ Accessibility" >> $GITHUB_STEP_SUMMARY
-          echo "- **Accessibility Tests**: ${{ needs.accessibility.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Accessibility Audit**: ${{ needs.accessibility.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 🔍 SEO Audit" >> $GITHUB_STEP_SUMMARY
-          echo "- **SEO Checks**: ${{ needs.seo-audit.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "# All Checks Summary"
+            echo ""
+            echo "## Core Checks"
+            echo "- **Type Check**: ${{ needs.core-checks.result }}"
+            echo "- **Lint**: ${{ needs.core-checks.result }}"
+            echo "- **Format**: ${{ needs.core-checks.result }}"
+            echo "- **i18n Validation**: ${{ needs.core-checks.result }}"
+            echo "- **Security Audit**: ${{ needs.core-checks.result }}"
+            echo "- **Unit Tests**: ${{ needs.core-checks.result }}"
+            echo ""
+            echo "## Build Checks"
+            echo "- **Build**: ${{ needs.build-checks.result }}"
+            echo "- **Bundle Size**: ${{ needs.build-checks.result }}"
+            echo ""
+            echo "## E2E Tests"
+            echo "- **E2E Tests**: ${{ needs.e2e-tests.result }}"
+            echo ""
+            echo "## Accessibility"
+            echo "- **Accessibility Tests**: ${{ needs.accessibility.result }}"
+            echo "- **Accessibility Audit**: ${{ needs.accessibility.result }}"
+            echo ""
+            echo "## SEO Audit"
+            echo "- **SEO Checks**: ${{ needs.seo-audit.result }}"
+            echo ""
+            
+            # Determine overall status
+            FAILED_JOBS=""
+            if [ "${{ needs.core-checks.result }}" != "success" ]; then
+              FAILED_JOBS="${FAILED_JOBS}Core Checks, "
+            fi
+            if [ "${{ needs.build-checks.result }}" != "success" ]; then
+              FAILED_JOBS="${FAILED_JOBS}Build Checks, "
+            fi
+            if [ "${{ needs.e2e-tests.result }}" != "success" ]; then
+              FAILED_JOBS="${FAILED_JOBS}E2E Tests, "
+            fi
+            if [ "${{ needs.accessibility.result }}" != "success" ]; then
+              FAILED_JOBS="${FAILED_JOBS}Accessibility, "
+            fi
+            if [ "${{ needs.seo-audit.result }}" != "success" ]; then
+              FAILED_JOBS="${FAILED_JOBS}SEO Audit, "
+            fi
+            
+            if [ -n "$FAILED_JOBS" ]; then
+              echo "## Failed Checks"
+              echo "${FAILED_JOBS%, }"
+              echo ""
+              echo "⚠️ **Some checks failed. Please review the individual job logs for details.**"
+            else
+              echo "## All Checks Passed!"
+              echo ""
+              echo "🎉 All checks completed successfully!"
+            fi
+          } >> $GITHUB_STEP_SUMMARY
           
-          # Determine overall status
-          FAILED_JOBS=""
-          if [ "${{ needs.core-checks.result }}" != "success" ]; then
-            FAILED_JOBS="${FAILED_JOBS}Core Checks, "
-          fi
-          if [ "${{ needs.build-checks.result }}" != "success" ]; then
-            FAILED_JOBS="${FAILED_JOBS}Build Checks, "
-          fi
-          if [ "${{ needs.e2e-tests.result }}" != "success" ]; then
-            FAILED_JOBS="${FAILED_JOBS}E2E Tests, "
-          fi
-          if [ "${{ needs.accessibility.result }}" != "success" ]; then
-            FAILED_JOBS="${FAILED_JOBS}Accessibility, "
-          fi
-          if [ "${{ needs.seo-audit.result }}" != "success" ]; then
-            FAILED_JOBS="${FAILED_JOBS}SEO Audit, "
-          fi
-          
-          if [ -n "$FAILED_JOBS" ]; then
-            echo "## ❌ Failed Checks" >> $GITHUB_STEP_SUMMARY
-            echo "${FAILED_JOBS%, }" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "⚠️ **Some checks failed. Please review the individual job logs for details.**" >> $GITHUB_STEP_SUMMARY
+          # Set exit code based on results (but don't fail the summary job itself)
+          if [ "${{ needs.core-checks.result }}" != "success" ] || \
+             [ "${{ needs.build-checks.result }}" != "success" ] || \
+             [ "${{ needs.e2e-tests.result }}" != "success" ] || \
+             [ "${{ needs.accessibility.result }}" != "success" ] || \
+             [ "${{ needs.seo-audit.result }}" != "success" ]; then
+            echo "Some checks failed - see summary above"
             exit 1
-          else
-            echo "## ✅ All Checks Passed!" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "🎉 All checks completed successfully!" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Comment on PR with summary
