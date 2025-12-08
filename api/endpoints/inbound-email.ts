@@ -8,7 +8,9 @@
 import { Resend } from 'resend';
 
 import { withTimeout } from '../security/request-timeout.js';
-import { createErrorResponse, ErrorCode } from '../utils/error-response.js';
+import type { Request, Response } from '../security/request-timeout.js';
+import { createErrorResponse } from '../utils/error-response.js';
+import { ErrorCode } from '../utils/error-sanitizer.js';
 import logger from '../utils/logger.js';
 import { getRedisClient } from '../utils/redis-client.js';
 
@@ -17,30 +19,6 @@ import { getRedisClient } from '../utils/redis-client.js';
  */
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-/**
- * Request object interface
- */
-interface Request {
-  readonly method: string;
-  readonly headers: {
-    readonly 'svix-signature'?: string;
-    readonly 'svix-id'?: string;
-    readonly 'svix-timestamp'?: string;
-    [key: string]: string | undefined;
-  };
-  readonly body?: unknown;
-  on: (event: string, callback: (chunk?: Buffer) => void) => void;
-  [key: string]: unknown;
-}
-
-/**
- * Response object interface
- */
-interface Response {
-  status: (code: number) => Response;
-  json: (data: unknown) => Response;
-  [key: string]: unknown;
-}
 
 /**
  * Email data from webhook
@@ -83,13 +61,21 @@ interface StoredEmail {
 function getRawBody(req: Request): Promise<Buffer> {
   return new Promise<Buffer>((resolve, reject) => {
     const chunks: Buffer[] = [];
-    req.on('data', (chunk: Buffer) => {
-      chunks.push(chunk);
-    });
-    req.on('error', reject);
-    req.on('end', () => {
-      resolve(Buffer.concat(chunks));
-    });
+    const reqWithOn = req as Request & { on?: (event: string, callback: (...args: unknown[]) => void) => void };
+    if (reqWithOn.on) {
+      reqWithOn.on('data', (...args: unknown[]) => {
+        const chunk = args[0] as Buffer | undefined;
+        if (chunk) {
+          chunks.push(chunk);
+        }
+      });
+      reqWithOn.on('error', reject);
+      reqWithOn.on('end', () => {
+        resolve(Buffer.concat(chunks));
+      });
+    } else {
+      reject(new Error('Request does not support streaming'));
+    }
   });
 }
 
@@ -101,7 +87,7 @@ function getRawBody(req: Request): Promise<Buffer> {
  * @param res - Response object
  * @returns Response with success or error
  */
-async function inboundEmailHandler(req: Request, res: Response): Promise<Response> {
+async function inboundEmailHandler(req: Request, res: Response): Promise<unknown> {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: { message: 'Method Not Allowed' } });
   }
@@ -116,17 +102,18 @@ async function inboundEmailHandler(req: Request, res: Response): Promise<Respons
       logger.error('[inbound-email] Error getting raw body:', errorMessage);
 
       // Fallback: try to get from parsed body
-      if (req.body) {
-        rawBody = Buffer.from(JSON.stringify(req.body));
+      const reqWithBody = req as Request & { body?: unknown };
+      if (reqWithBody.body) {
+        rawBody = Buffer.from(JSON.stringify(reqWithBody.body));
       } else {
         throw new Error('Could not get request body');
       }
     }
 
     // Get webhook headers
-    const signature = req.headers['svix-signature'];
-    const id = req.headers['svix-id'];
-    const timestamp = req.headers['svix-timestamp'];
+    const signature = req.headers.get('svix-signature') || undefined;
+    const id = req.headers.get('svix-id') || undefined;
+    const timestamp = req.headers.get('svix-timestamp') || undefined;
     const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
 
     // Validate webhook secret
@@ -138,13 +125,14 @@ async function inboundEmailHandler(req: Request, res: Response): Promise<Respons
     // Verify webhook signature
     let event: WebhookEvent;
     try {
-      event = resend.webhooks.verify({
-        body: rawBody,
-        headers: {
-          'svix-id': id || '',
-          'svix-timestamp': timestamp || '',
-          'svix-signature': signature || '',
-        },
+      const headers: Record<string, string> = {};
+      if (id) headers['svix-id'] = id;
+      if (timestamp) headers['svix-timestamp'] = timestamp;
+      if (signature) headers['svix-signature'] = signature;
+      
+      event = (resend.webhooks.verify as any)({
+        payload: rawBody.toString('utf-8'),
+        headers: headers as any,
         secret: webhookSecret,
       }) as WebhookEvent;
     } catch (verifyError: unknown) {
