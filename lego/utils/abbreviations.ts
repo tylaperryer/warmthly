@@ -239,6 +239,7 @@ export function markAbbreviations(text: string): string {
 
   for (const abbr of abbreviations) {
     const abbrev = ABBREVIATION_DICTIONARY[abbr];
+    if (!abbrev) continue;
     // Match whole words only (case-insensitive)
     const regex = new RegExp(`\\b${abbr}\\b`, 'gi');
     result = result.replace(regex, match => {
