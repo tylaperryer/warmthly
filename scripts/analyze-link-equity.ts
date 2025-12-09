@@ -126,15 +126,23 @@ function extractInternalLinks(content: string, baseUrl: string): string[] {
     let href = match[1];
     if (!href) continue;
 
-    // Skip external links, anchors, and special protocols - use case-insensitive check
-    const normalizedHref = href.trim().toLowerCase();
-    if (normalizedHref.startsWith('http://') || normalizedHref.startsWith('https://')) {
-      // Check if it's internal
-      if (normalizedHref.includes('warmthly.org')) {
-        links.push(href); // Use original href for output
+    // Skip external links, anchors, and special protocols - validate URL properly
+    try {
+      const urlObj = new URL(href, 'https://www.warmthly.org');
+      // Only allow http and https schemes
+      if (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') {
+        // Check if it's internal warmthly.org domain
+        if (urlObj.hostname.toLowerCase().endsWith('warmthly.org')) {
+          links.push(href); // Use original href for output
+        }
+        continue;
       }
-      continue;
+    } catch {
+      // Not a valid absolute URL, check if relative
     }
+
+    // Handle relative URLs and special protocols
+    const normalizedHref = href.trim().toLowerCase();
 
     if (normalizedHref.startsWith('#') || normalizedHref.startsWith('mailto:') || normalizedHref.startsWith('tel:')) {
       continue;
@@ -200,9 +208,9 @@ function analyzeLinkEquity(): void {
     const internalLinks = extractInternalLinks(content, sourceUrl);
 
     internalLinks.forEach(targetUrl => {
-      // Normalize URL
-      const normalizedTarget = targetUrl.replace(/\/$/, '') || targetUrl;
-      const normalizedSource = sourceUrl.replace(/\/$/, '') || sourceUrl;
+      // Normalize URL - only remove trailing slash if it exists
+      const normalizedTarget = targetUrl.endsWith('/') ? targetUrl.slice(0, -1) : targetUrl;
+      const normalizedSource = sourceUrl.endsWith('/') ? sourceUrl.slice(0, -1) : sourceUrl;
 
       // Skip self-links
       if (normalizedTarget === normalizedSource) return;
@@ -227,19 +235,21 @@ function analyzeLinkEquity(): void {
   });
 
   // Mark homepage as not orphan (it's the entry point)
-  // Use case-insensitive check - find URLs that are exactly the domain or domain with trailing slash
+  // Validate URLs properly using URL constructor
   const homepages = Array.from(pageInfo.values()).filter(p => {
-    const urlLower = p.url.toLowerCase();
-    return (
-      urlLower === 'https://www.warmthly.org/' ||
-      urlLower === 'https://www.warmthly.org' ||
-      urlLower === 'https://mint.warmthly.org/' ||
-      urlLower === 'https://mint.warmthly.org' ||
-      urlLower === 'https://post.warmthly.org/' ||
-      urlLower === 'https://post.warmthly.org' ||
-      urlLower === 'https://admin.warmthly.org/' ||
-      urlLower === 'https://admin.warmthly.org'
-    );
+    try {
+      const urlObj = new URL(p.url);
+      const hostname = urlObj.hostname.toLowerCase();
+      const pathname = urlObj.pathname;
+      return (
+        ((hostname === 'www.warmthly.org' || hostname === 'warmthly.org') && (pathname === '/' || pathname === '')) ||
+        (hostname === 'mint.warmthly.org' && (pathname === '/' || pathname === '')) ||
+        (hostname === 'post.warmthly.org' && (pathname === '/' || pathname === '')) ||
+        (hostname === 'admin.warmthly.org' && (pathname === '/' || pathname === ''))
+      );
+    } catch {
+      return false;
+    }
   });
   homepages.forEach(homepage => {
     homepage.isOrphan = false;
