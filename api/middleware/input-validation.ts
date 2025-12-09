@@ -398,7 +398,7 @@ export function sanitizeHtml(html: string): string {
     $('script, style, iframe, object, embed, noscript, form').remove();
 
     // Remove event handler attributes (onclick, onerror, etc.)
-    $('*').each((_index, element) => {
+    $('*').each((_index: number, element) => {
       const $element = $(element);
       const attrs = $element.attr();
       if (attrs) {
