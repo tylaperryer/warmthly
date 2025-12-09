@@ -1,13 +1,16 @@
 name: Security Scanning
+# DISABLED - Consolidated into all-checks.yml
+# This workflow is kept for reference but disabled
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-  schedule:
-    # Run weekly on Mondays at 00:00 UTC
-    - cron: '0 0 * * 1'
+  workflow_dispatch: # Only allow manual runs
+  # push:
+  #   branches: [main, develop]
+  # pull_request:
+  #   branches: [main, develop]
+  # schedule:
+  #   # Run weekly on Mondays at 00:00 UTC
+  #   - cron: '0 0 * * 1'
 
 permissions:
   contents: read
