@@ -227,7 +227,9 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
         .replace(/>/g, '&gt;');
     };
 
-    this.innerHTML = `
+    // Use DOMParser instead of innerHTML for safer parsing (prevents XSS)
+    const parser = new DOMParser();
+    const template = `
       <div class="language-switcher">
         <button 
           class="language-switcher__button"
@@ -304,6 +306,13 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
         }
       </div>
     `;
+    const doc = parser.parseFromString(template, 'text/html');
+    const container = doc.body.firstElementChild;
+    if (container) {
+      // Clear existing content and append new content
+      this.textContent = '';
+      this.appendChild(container);
+    }
   }
 
   /**
