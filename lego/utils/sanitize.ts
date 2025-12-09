@@ -105,10 +105,11 @@ export function sanitizeHtml(html: string): string {
   }
 
   // Create a temporary container
-  // SECURITY: Using innerHTML here is intentional for sanitization - we parse then sanitize
+  // SECURITY: Using DOMParser instead of innerHTML for safer parsing
   // The input is expected to be HTML that needs sanitization, and we remove dangerous content
-  const temp = document.createElement('div');
-  temp.innerHTML = html;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const temp = doc.body;
 
   // Recursively sanitize nodes
   function sanitizeNode(node: Node): Node | null {

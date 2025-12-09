@@ -23,6 +23,21 @@ function validatePath(filePath: string): boolean {
   return resolvedPath.startsWith(resolvedRoot);
 }
 
+/**
+ * Validate URL scheme to prevent protocol-based attacks
+ * Only allows http: and https: protocols
+ */
+function isValidUrlScheme(url: string): boolean {
+  try {
+    const urlObj = new URL(url);
+    // Whitelist allowed schemes only
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+  } catch {
+    // Invalid URL format
+    return false;
+  }
+}
+
 interface BrokenLink {
   file: string;
   line: number;
@@ -119,22 +134,23 @@ function checkInternalFile(url: string, basePath: string): boolean {
     // Convert URL to file path
     let filePath: string = cleanUrl;
 
-    // Handle absolute URLs - use case-insensitive check
-    const normalizedCleanUrl = cleanUrl.trim().toLowerCase();
-    if (normalizedCleanUrl.startsWith('http://') || normalizedCleanUrl.startsWith('https://')) {
-      if (normalizedCleanUrl.includes('warmthly.org')) {
-        // Extract path from URL
-        try {
-          const urlObj = new URL(cleanUrl);
-          filePath = urlObj.pathname;
-        } catch {
-          // Invalid URL, skip
-          return false;
-        }
+    // Handle absolute URLs - validate scheme first
+    try {
+      const urlObj = new URL(cleanUrl);
+      // Validate scheme (only http/https allowed)
+      if (!isValidUrlScheme(cleanUrl)) {
+        return false; // Invalid scheme
+      }
+      if (urlObj.hostname.toLowerCase().includes('warmthly.org')) {
+        // Internal URL - extract path
+        filePath = urlObj.pathname;
       } else {
         // External URL, skip
         return true; // Assume external URLs are valid
       }
+    } catch {
+      // Not a valid URL, treat as relative path
+      // Continue with filePath = cleanUrl
     }
 
     // Validate path to prevent traversal

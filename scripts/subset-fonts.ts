@@ -94,14 +94,14 @@ function extractTextFromHTML(): string {
   for (const file of htmlFiles) {
     try {
       const content = readFileSync(file, 'utf-8');
-      // Remove script and style tags, then extract text - improved for multi-byte characters
+      // Remove script and style tags, then extract text - Unicode-aware for multi-byte characters
       const textOnly = content
-        .replace(/<script[\s\S]*?<\/script>/gi, '')
-        .replace(/<style[\s\S]*?<\/style>/gi, '')
-        .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
-        .replace(/<object[\s\S]*?<\/object>/gi, '')
-        .replace(/<embed[\s\S]*?<\/embed>/gi, '')
-        .replace(/<[^>]+>/g, ' ')
+        .replace(/<script[\s\S]*?<\/script>/giu, '')
+        .replace(/<style[\s\S]*?<\/style>/giu, '')
+        .replace(/<iframe[\s\S]*?<\/iframe>/giu, '')
+        .replace(/<object[\s\S]*?<\/object>/giu, '')
+        .replace(/<embed[\s\S]*?<\/embed>/giu, '')
+        .replace(/<\/?[a-z][\s\S]*?>/giu, ' ')
         .replace(/\s+/g, ' ');
       allText += textOnly + ' ';
     } catch (error) {

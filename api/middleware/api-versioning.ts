@@ -212,7 +212,7 @@ export function extractAPIVersion(req: {
   if (req.url) {
     const versionMatch = req.url.match(/\/api\/(v\d+)\//);
     if (versionMatch) {
-      return versionMatch[1] || null;
+      return versionMatch[1] ?? null;
     }
   }
 
@@ -230,7 +230,7 @@ export function extractAPIVersion(req: {
   if (req.headers?.accept) {
     const acceptMatch = req.headers.accept.match(/vnd\.warmthly\.(v\d+)/);
     if (acceptMatch) {
-      return acceptMatch[1] || null;
+      return acceptMatch[1] ?? null;
     }
   }
 
