@@ -108,9 +108,7 @@ async function initializeGeoIP(config: LocationBasedConfig): Promise<void> {
 
   try {
     // Dynamic import to avoid requiring maxmind if not used
-    // TypeScript: using any to handle optional dependency
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const maxmind = await import('maxmind').catch(() => null) as any;
+    const maxmind = await import('maxmind');
     if (maxmind && maxmind.open) {
       geoipDb = await maxmind.open(config.maxmindDbPath);
       logger.info('[anomaly-detection] GeoIP database initialized');
@@ -118,7 +116,7 @@ async function initializeGeoIP(config: LocationBasedConfig): Promise<void> {
       logger.warn('[anomaly-detection] maxmind package not installed - GeoIP features disabled');
     }
   } catch (error) {
-    logger.error('[anomaly-detection] Failed to initialize GeoIP database:', error);
+    logger.warn('[anomaly-detection] maxmind package not installed - GeoIP features disabled');
   }
 }
 
