@@ -11,9 +11,8 @@ import {
   validateEmail,
   validateInputWithAttackDetection,
 } from '../middleware/input-validation.js';
-import { withRateLimit, apiRateLimitOptions } from '../middleware/rate-limit.js';
-import { createErrorResponse } from '../utils/error-response.js';
-import { ErrorCode } from '../utils/error-sanitizer.js';
+import { withRateLimit, apiRateLimitOptions, type Request, type Response } from '../middleware/rate-limit.js';
+import { createErrorResponse, ErrorCode } from '../utils/error-response.js';
 import logger from '../utils/logger.js';
 import { getRedisClient } from '../utils/redis-client.js';
 
@@ -36,38 +35,6 @@ const MAX_NAME_LENGTH = 200;
  * Report types
  */
 const VALID_REPORT_TYPES = ['media', 'concern', 'admin', 'other'] as const;
-
-/**
- * Request object interface
- */
-interface Request {
-  readonly method: string;
-  readonly body: {
-    readonly name?: string;
-    readonly email?: string;
-    readonly type?: string;
-    readonly message?: string;
-    [key: string]: unknown;
-  };
-  readonly headers?: {
-    readonly 'x-forwarded-for'?: string;
-    readonly 'x-real-ip'?: string;
-    readonly [key: string]: string | undefined;
-  };
-  readonly connection?: {
-    readonly remoteAddress?: string;
-  };
-  [key: string]: unknown;
-}
-
-/**
- * Response object interface
- */
-interface Response {
-  status: (code: number) => Response;
-  json: (data: unknown) => Response;
-  [key: string]: unknown;
-}
 
 /**
  * Resend API response
@@ -114,13 +81,13 @@ function getReportTypeLabel(type: string): string {
  * @param res - Response object
  * @returns Response with success or error
  */
-async function reportsHandler(req: Request, res: Response): Promise<Response> {
+async function reportsHandler(req: Request, res: Response): Promise<unknown> {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: { message: 'Method Not Allowed' } });
   }
 
   try {
-    // Get request body
+    // Get request body and validate type
     const body = (req.body || {}) as { name?: string; email?: string; type?: string; message?: string; [key: string]: unknown };
     const { name, email, type, message } = body;
 
@@ -329,4 +296,4 @@ async function reportsHandler(req: Request, res: Response): Promise<Response> {
   }
 }
 
-export default withRateLimit(reportsHandler as any, apiRateLimitOptions);
+export default withRateLimit(reportsHandler, apiRateLimitOptions);
