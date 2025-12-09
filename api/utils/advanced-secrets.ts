@@ -52,7 +52,7 @@ const DEFAULT_CACHE_TTL = 5 * 60 * 1000;
 /**
  * Get secret from environment variable
  */
-async function getSecretFromEnv(name: string): Promise<string | null> {
+function getSecretFromEnv(name: string): string | null {
   return process.env[name] ?? null;
 }
 
