@@ -5,6 +5,7 @@
  */
 
 import { load } from 'cheerio';
+
 import { safeToString } from '../utils/string-utils.js';
 
 /**
@@ -111,6 +112,7 @@ export function validateString(
   }
 
   // Sanitize: remove control characters except newlines and tabs
+  // eslint-disable-next-line no-control-regex
   const sanitized = str.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
 
   return { valid: true, sanitized };
@@ -318,7 +320,7 @@ export function detectAttackPatterns(input: string): {
   // SQL injection patterns (even though we don't use SQL, detect for logging)
   const sqlPatterns = [
     /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|SCRIPT)\b)/i,
-    /('|(\\')|(;)|(--)|(\/\*)|(\*\/)|(\+)|(\%27)|(\%22))/i,
+    /('|(\\')|(;)|(--)|(\/\*)|(\*\/)|(\+)|(%27)|(%22))/i,
     /(\bOR\b\s*\d+\s*=\s*\d+)/i,
     /(\bAND\b\s*\d+\s*=\s*\d+)/i,
     /(\bUNION\b.*\bSELECT\b)/i,
@@ -396,15 +398,15 @@ export function sanitizeHtml(html: string): string {
     $('script, style, iframe, object, embed, noscript, form').remove();
 
     // Remove event handler attributes (onclick, onerror, etc.)
-    $('*').each(function (this: Element) {
-      const element = $(this);
-      const attrs = element.attr();
+    $('*').each((_index, element) => {
+      const $element = $(element);
+      const attrs = $element.attr();
       if (attrs) {
         Object.keys(attrs).forEach(attr => {
           const attrLower = attr.toLowerCase();
           // Remove event handlers
           if (attrLower.startsWith('on')) {
-            element.removeAttr(attr);
+            $element.removeAttr(attr);
           }
           // Remove javascript: protocol from href and src
           const value = attrs[attr] || '';
@@ -416,7 +418,7 @@ export function sanitizeHtml(html: string): string {
               valueLower.startsWith('file:') ||
               (valueLower.startsWith('data:') && !valueLower.startsWith('data:image/'))
             ) {
-              element.removeAttr(attr);
+              $element.removeAttr(attr);
             }
           }
         });
@@ -460,18 +462,19 @@ export function validateInputWithAttackDetection(
     // Log attack attempt if enabled
     if (options.logAttack !== false) {
       // Import security monitor dynamically to avoid circular dependencies
-      import('../security/security-monitor.js').then(({ SecurityLogger }) => {
+      // Fire-and-forget logging - explicitly mark as void to acknowledge Promise
+      void import('../security/security-monitor.js').then(({ SecurityLogger }) => {
         if (attack.attackType === 'xss') {
-          SecurityLogger.xssAttempt('unknown', undefined, {
+          void SecurityLogger.xssAttempt('unknown', undefined, {
             field: options.fieldName,
             pattern: attack.pattern,
             input: value.substring(0, 100), // Log first 100 chars only
           });
         } else if (attack.attackType === 'sql_injection') {
           // Use generic suspicious activity for SQL injection
-          import('../security/security-monitor.js').then(
+          void import('../security/security-monitor.js').then(
             ({ logSecurityEvent, SecurityEventSeverity }) => {
-              logSecurityEvent({
+              void logSecurityEvent({
                 type: 'sql_injection_attempt',
                 severity: SecurityEventSeverity.CRITICAL,
                 timestamp: Date.now(),
