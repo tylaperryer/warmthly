@@ -78,7 +78,7 @@ function extractExternalLinks(
       if (!url) continue;
       const attributes = match[2] || '';
       const anchorTextMatch = match[3];
-      const anchorText = anchorTextMatch ? anchorTextMatch.replace(/<[^>]+>/g, '').trim() : '';
+      const anchorText = anchorTextMatch ? anchorTextMatch.replace(/<\/?[a-z][\s\S]*?>/giu, '').trim() : '';
 
       // Only external links - use case-insensitive check
       const normalizedUrl = url.trim().toLowerCase();
