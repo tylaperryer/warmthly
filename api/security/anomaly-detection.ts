@@ -115,7 +115,7 @@ async function initializeGeoIP(config: LocationBasedConfig): Promise<void> {
     } else {
       logger.warn('[anomaly-detection] maxmind package not installed - GeoIP features disabled');
     }
-  } catch (error) {
+  } catch {
     logger.warn('[anomaly-detection] maxmind package not installed - GeoIP features disabled');
   }
 }
