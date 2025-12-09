@@ -2,12 +2,15 @@
 # This runs on every push and PR, before deployment
 
 name: CI
+# DISABLED - Consolidated into all-checks.yml
+# This workflow is kept for reference but disabled
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+  workflow_dispatch: # Only allow manual runs
+  # push:
+  #   branches: [main, develop]
+  # pull_request:
+  #   branches: [main, develop]
 
 permissions:
   contents: read
