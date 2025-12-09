@@ -3,12 +3,15 @@
 # Runs on every push and PR
 
 name: Bundle Size Check
+# DISABLED - Consolidated into all-checks.yml
+# This workflow is kept for reference but disabled
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+  workflow_dispatch: # Only allow manual runs
+  # push:
+  #   branches: [main, develop]
+  # pull_request:
+  #   branches: [main, develop]
 
 permissions:
   contents: read
