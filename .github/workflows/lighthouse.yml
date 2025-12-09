@@ -1,10 +1,13 @@
 name: Lighthouse CI
+# DISABLED - Consolidated into all-checks.yml
+# This workflow is kept for reference but disabled
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
+  workflow_dispatch: # Only allow manual runs
+  # pull_request:
+  #   branches: [main]
+  # push:
+  #   branches: [main]
 
 jobs:
   lighthouse:
