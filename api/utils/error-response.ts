@@ -6,6 +6,9 @@
 
 import { ErrorCode, sanitizeError } from './error-sanitizer.js';
 
+// Re-export ErrorCode for convenience (enum is both type and value)
+export { ErrorCode };
+
 /**
  * Standard error response structure
  */
