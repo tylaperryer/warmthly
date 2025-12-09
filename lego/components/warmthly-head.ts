@@ -637,11 +637,11 @@ h1{font-size:var(--font-size-2xl);line-height:1.2;margin-bottom:var(--spacing-6)
         `report-to csp-endpoint`,
       ].join('; ');
 
-      const temp = document.createElement('div');
-      // Escape values to prevent XSS
+      // Use DOMParser instead of innerHTML for safer parsing (prevents XSS)
       const escapedCspPolicy = this.escapeHtmlAttribute(cspPolicy);
       const escapedCspReportUrl = this.escapeHtmlAttribute(cspReportUrl);
-      temp.innerHTML = `
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="${escapedCspPolicy}" />
   <meta http-equiv="Report-To" content='{"group":"csp-endpoint","max_age":10886400,"endpoints":[{"url":"${escapedCspReportUrl}"}]}' />
@@ -724,8 +724,9 @@ ${JSON.stringify(data, null, 2)}
   </script>`
   )
   .join('\n')}
-`;
-
+`, 'text/html');
+      const temp = doc.body;
+      
       // Inject elements into head
       while (temp.firstChild) {
         const child = temp.firstChild;
