@@ -57,15 +57,16 @@ function extractTextContent(html: string): string {
   if (!html || typeof html !== 'string') {
     return '';
   }
-  // Improved regex to handle multi-byte characters and nested tags
+  // Unicode-aware regex to handle multi-byte characters and nested tags
+  // Use Unicode flag (u) for proper multi-character support
   return html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
-    .replace(/<object[\s\S]*?<\/object>/gi, '')
-    .replace(/<embed[\s\S]*?<\/embed>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/<script[\s\S]*?<\/script>/giu, '')
+    .replace(/<style[\s\S]*?<\/style>/giu, '')
+    .replace(/<iframe[\s\S]*?<\/iframe>/giu, '')
+    .replace(/<object[\s\S]*?<\/object>/giu, '')
+    .replace(/<embed[\s\S]*?<\/embed>/giu, '')
+    .replace(/<\/?[a-z][\s\S]*?>/giu, ' ')
+    .replace(/[\s\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]+/gu, ' ')
     .trim();
 }
 
