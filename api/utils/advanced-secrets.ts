@@ -2,9 +2,8 @@
  * Advanced Secrets Management
  * Supports multiple secret storage backends:
  * - Environment variables (default)
- * - AWS Secrets Manager
  * - HashiCorp Vault
- * - Azure Key Vault
+ * - Oracle Cloud Vault (via environment variables or OCI SDK)
  *
  * Provides runtime secret fetching, caching, and rotation support
  */
@@ -16,9 +15,8 @@ import logger from './logger.js';
  */
 export enum SecretProvider {
   ENV = 'env',
-  AWS_SECRETS_MANAGER = 'aws',
   HASHICORP_VAULT = 'vault',
-  AZURE_KEY_VAULT = 'azure',
+  ORACLE_VAULT = 'oracle',
 }
 
 /**
@@ -58,51 +56,6 @@ async function getSecretFromEnv(name: string): Promise<string | null> {
   return process.env[name] ?? null;
 }
 
-/**
- * Get secret from AWS Secrets Manager
- * Requires: AWS SDK v3 (@aws-sdk/client-secrets-manager)
- */
-async function getSecretFromAWS(secretName: string): Promise<string | null> {
-  try {
-    // Dynamic import to avoid requiring AWS SDK if not used
-    const { SecretsManagerClient, GetSecretValueCommand } = await import(
-      '@aws-sdk/client-secrets-manager'
-    );
-
-    const client = new SecretsManagerClient({
-      region: process.env.AWS_REGION || 'us-east-1',
-    });
-
-    const command = new GetSecretValueCommand({
-      SecretId: secretName,
-    });
-
-    const response = await client.send(command);
-
-    if (response.SecretString) {
-      // If secret is JSON, parse it
-      try {
-        const parsed = JSON.parse(response.SecretString);
-        // Return the value if it's a single key, or the whole object
-        return typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
-      } catch {
-        return response.SecretString;
-      }
-    }
-
-    if (response.SecretBinary) {
-      return Buffer.from(response.SecretBinary).toString('utf-8');
-    }
-
-    return null;
-  } catch (error) {
-    logger.error(
-      `[secrets] Failed to fetch secret from AWS Secrets Manager (${secretName}):`,
-      error
-    );
-    return null;
-  }
-}
 
 /**
  * Get secret from HashiCorp Vault
@@ -158,28 +111,30 @@ async function getSecretFromVault(secretPath: string): Promise<string | null> {
 }
 
 /**
- * Get secret from Azure Key Vault
- * Requires: @azure/keyvault-secrets
+ * Get secret from Oracle Cloud Vault
+ * Oracle Cloud Vault secrets are typically accessed via OCI SDK or environment variables
+ * For now, we support reading from environment variables prefixed with OCI_VAULT_
+ * or direct environment variable access (Oracle Vault secrets are often injected as env vars)
  */
-async function getSecretFromAzure(secretName: string): Promise<string | null> {
+async function getSecretFromOracle(secretName: string): Promise<string | null> {
   try {
-    // Dynamic import to avoid requiring Azure SDK if not used
-    const { SecretClient } = await import('@azure/keyvault-secrets');
-    const { DefaultAzureCredential } = await import('@azure/identity');
-
-    const vaultUrl = process.env.AZURE_KEY_VAULT_URL;
-    if (!vaultUrl) {
-      logger.error('[secrets] AZURE_KEY_VAULT_URL not configured');
-      return null;
+    // Try OCI_VAULT_ prefix first (common pattern for OCI Vault secrets)
+    const ociKey = `OCI_VAULT_${secretName}`;
+    if (process.env[ociKey]) {
+      return process.env[ociKey];
     }
 
-    const credential = new DefaultAzureCredential();
-    const client = new SecretClient(vaultUrl, credential);
+    // Fallback to direct environment variable
+    if (process.env[secretName]) {
+      return process.env[secretName];
+    }
 
-    const secret = await client.getSecret(secretName);
-    return secret.value ?? null;
+    // If OCI SDK is available, could use it here
+    // For now, Oracle Vault secrets are typically injected as environment variables
+    logger.warn(`[secrets] Oracle Vault secret not found: ${secretName} (check OCI_VAULT_${secretName} or ${secretName} env var)`);
+    return null;
   } catch (error) {
-    logger.error(`[secrets] Failed to fetch secret from Azure Key Vault (${secretName}):`, error);
+    logger.error(`[secrets] Failed to fetch secret from Oracle Cloud Vault (${secretName}):`, error);
     return null;
   }
 }
@@ -211,16 +166,12 @@ export async function getSecret(config: SecretConfig): Promise<string | null> {
       value = await getSecretFromEnv(secretKey);
       break;
 
-    case SecretProvider.AWS_SECRETS_MANAGER:
-      value = await getSecretFromAWS(secretKey);
-      break;
-
     case SecretProvider.HASHICORP_VAULT:
       value = await getSecretFromVault(secretKey);
       break;
 
-    case SecretProvider.AZURE_KEY_VAULT:
-      value = await getSecretFromAzure(secretKey);
+    case SecretProvider.ORACLE_VAULT:
+      value = await getSecretFromOracle(secretKey);
       break;
 
     default:
