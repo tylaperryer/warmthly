@@ -379,17 +379,34 @@ export function detectAttackPatterns(input: string): {
  * @returns Sanitized HTML
  */
 export function sanitizeHtml(html: string): string {
-  // Remove script tags and their content
-  let sanitized = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  if (!html || typeof html !== 'string') {
+    return '';
+  }
 
-  // Remove event handlers (onclick, onerror, etc.)
-  sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
+  let sanitized = html;
 
-  // Remove javascript: protocol
+  // Remove script tags and their content - Unicode-aware regex to handle multi-byte characters
+  // Use [\s\S] with Unicode flag (u) to match newlines and all characters including Unicode
+  sanitized = sanitized.replace(/<script[\s\S]*?<\/script>/giu, '');
+
+  // Remove style tags and their content
+  sanitized = sanitized.replace(/<style[\s\S]*?<\/style>/giu, '');
+
+  // Remove iframe, object, embed tags
+  sanitized = sanitized.replace(/<(iframe|object|embed)[\s\S]*?<\/\1>/giu, '');
+
+  // Remove event handlers (onclick, onerror, etc.) - Unicode-aware
+  sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][\s\S]*?["']/giu, '');
+
+  // Remove javascript: protocol (case-insensitive, handle encoded characters)
+  sanitized = sanitized.replace(/j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:/gi, '');
   sanitized = sanitized.replace(/javascript:/gi, '');
 
-  // Remove data: URLs in img/src (except data:image)
-  sanitized = sanitized.replace(/src\s*=\s*["']data:(?!image)[^"']*["']/gi, '');
+  // Remove data: URLs in img/src (except data:image) - improved regex
+  sanitized = sanitized.replace(/src\s*=\s*["']data:(?!image\/)[\s\S]*?["']/gi, '');
+  
+  // Remove dangerous protocols in href attributes
+  sanitized = sanitized.replace(/href\s*=\s*["'](javascript|vbscript|file|data):[\s\S]*?["']/gi, '');
 
   return sanitized;
 }
