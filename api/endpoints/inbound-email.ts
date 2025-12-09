@@ -131,8 +131,9 @@ async function inboundEmailHandler(req: Request, res: Response): Promise<unknown
       if (signature) headers['svix-signature'] = signature;
       
       // Type assertion needed because resend types may not be complete
+      // Cast through unknown first to avoid type overlap issues
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      const verifyResult = (resend.webhooks.verify as (
+      const verifyResult = (resend.webhooks.verify as unknown as (
         options: {
           payload: string;
           headers: Record<string, string>;
