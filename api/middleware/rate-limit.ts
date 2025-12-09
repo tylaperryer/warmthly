@@ -81,7 +81,7 @@ export interface Response {
 /**
  * Request handler type
  */
-type RequestHandler = (req: Request, res: Response) => Promise<unknown> | unknown;
+type RequestHandler = (req: Request, res: Response) => Promise<unknown> | Response | void;
 
 /**
  * Get client identifier from request
