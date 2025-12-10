@@ -22,6 +22,7 @@ const pathAliases: Record<string, string> = {
   '@core/': '/lego/core/',
   '@styles/': '/lego/styles/',
   '@lego/': '/lego/',
+  '@api/': '/api/',
 };
 
 function resolveImportsInFile(filePath: string): void {
