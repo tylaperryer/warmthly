@@ -84,35 +84,47 @@
       width: 100%;
       height: 100%;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.7);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       border-radius: var(--radius-xl);
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: opacity 0.3s ease;
     }
     .video-placeholder:hover {
-      background: rgba(0, 0, 0, 0.8);
+      opacity: 0.9;
     }
     .video-placeholder:focus {
       outline: 3px solid var(--warmthly-orange);
       outline-offset: 2px;
     }
     .play-button {
-      font-size: 4rem;
-      color: white;
-      margin-bottom: var(--spacing-4);
-      transition: transform 0.3s ease;
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 0, 0, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, background 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 2;
+    }
+    .play-button::before {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 24px solid white;
+      border-top: 14px solid transparent;
+      border-bottom: 14px solid transparent;
+      margin-left: 4px;
     }
     .video-placeholder:hover .play-button {
       transform: scale(1.1);
-    }
-    .video-placeholder p {
-      color: white;
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-lg);
-      font-weight: 500;
+      background: rgba(255, 0, 0, 1);
     }
     .method-section {
       text-align: left;
@@ -279,9 +291,8 @@
     <div class="video-section">
       <div class="video-container" id="video-container">
         <!-- Placeholder that loads YouTube on click -->
-        <div class="video-placeholder" id="video-placeholder" role="button" tabindex="0" aria-label="Load video">
-          <div class="play-button" aria-hidden="true">▶</div>
-          <p>Click to load video</p>
+        <div class="video-placeholder" id="video-placeholder" role="button" tabindex="0" aria-label="Load video" style="background-image: url('https://img.youtube.com/vi/kVausES-mjk/maxresdefault.jpg');">
+          <div class="play-button" aria-hidden="true"></div>
         </div>
       </div>
     </div>
