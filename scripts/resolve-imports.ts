@@ -43,12 +43,32 @@ function resolveImportsInFile(filePath: string): void {
       'g'
     );
 
+    // Match side-effect imports: import '@config/...' (no 'from')
+    const sideEffectImportRegex = new RegExp(
+      `(import\\s+['"])${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^'"]+)(['"])`,
+      'g'
+    );
+
+    // Match dynamic imports: import('@config/...')
+    const dynamicImportRegex = new RegExp(
+      `(import\\s*\\(\\s*['"])${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^'"]+)(['"]\\s*\\))`,
+      'g'
+    );
+
     const newContent = content
       .replace(importRegex, (_match, before, path, quote) => {
         modified = true;
         return `${before}${replacement}${path}${quote}`;
       })
       .replace(exportRegex, (_match, before, path, quote) => {
+        modified = true;
+        return `${before}${replacement}${path}${quote}`;
+      })
+      .replace(sideEffectImportRegex, (_match, before, path, quote) => {
+        modified = true;
+        return `${before}${replacement}${path}${quote}`;
+      })
+      .replace(dynamicImportRegex, (_match, before, path, quote) => {
         modified = true;
         return `${before}${replacement}${path}${quote}`;
       });
