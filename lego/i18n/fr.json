@@ -1,0 +1,46 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "submit": "Soumettre",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "language": "Langue"
+  },
+  "main": {
+    "title": "Réhumaniser Notre Monde.",
+    "subtitle": "Warmthly est un mouvement mondial pour faire de l'empathie une partie mesurable de nos systèmes.",
+    "donate": "Soutenir la Mission",
+    "donateButton": "🤍 Soutenir la Mission"
+  },
+  "mint": {
+    "title": "Monnayer",
+    "description": "Nous suivons chaque centime et chaque décision juste devant vous. C'est notre engagement envers vous que nous suivrons toujours et fournirons une transparence maximale pour chacune de nos actions et chacune de vos donations."
+  },
+  "post": {
+    "title": "Publier",
+    "subtitle": "Une chronologie vivante de l'histoire de notre organisation, des moments fondateurs aux plans futurs. Chaque décision, jalon et interaction communautaire est enregistrée ici pour une transparence totale."
+  },
+  "vote": {
+    "title": "Le Vote de Dissolution",
+    "description": "Notre engagement est envers notre mission et nos valeurs : Transparence, Honnêteté, Humilité et Empathie. Si nous ne les respectons pas, nous pensons que nous devrions cesser d'exister. Cette page est notre interrupteur d'arrêt tenu par la communauté."
+  },
+  "report": {
+    "title": "Signaler un Problème",
+    "description": "Si vous avez des préoccupations, des questions ou besoin de signaler quelque chose lié à Warmthly, veuillez utiliser le formulaire ci-dessous. Nous prenons tous les rapports au sérieux et les examinerons rapidement."
+  },
+  "yourData": {
+    "title": "Vos Données",
+    "description": "Transparence Radicale : Voici tout ce que nous stockons à votre sujet. Si vous voyez quelque chose que nous n'avons pas mentionné, signalez-le."
+  }
+}
