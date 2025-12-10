@@ -77,6 +77,43 @@
       border: none;
       border-radius: var(--radius-xl);
     }
+    .video-placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .video-placeholder:hover {
+      background: rgba(0, 0, 0, 0.8);
+    }
+    .video-placeholder:focus {
+      outline: 3px solid var(--warmthly-orange);
+      outline-offset: 2px;
+    }
+    .play-button {
+      font-size: 4rem;
+      color: white;
+      margin-bottom: var(--spacing-4);
+      transition: transform 0.3s ease;
+    }
+    .video-placeholder:hover .play-button {
+      transform: scale(1.1);
+    }
+    .video-placeholder p {
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: var(--font-size-lg);
+      font-weight: 500;
+    }
     .method-section {
       text-align: left;
       margin: var(--spacing-16) auto;
@@ -241,7 +278,11 @@
     <p class="subtitle">Warmthly is a global movement to make empathy a measurable part of our systems.</p>
     <div class="video-section">
       <div class="video-container" id="video-container">
-        <iframe src="https://www.youtube-nocookie.com/embed/kVausES-mjk" title="Warmthly Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        <!-- Placeholder that loads YouTube on click -->
+        <div class="video-placeholder" id="video-placeholder" role="button" tabindex="0" aria-label="Load video">
+          <div class="play-button" aria-hidden="true">▶</div>
+          <p>Click to load video</p>
+        </div>
       </div>
     </div>
     <div class="method-section">
@@ -498,24 +539,6 @@
     
     window.trapFocus = trapFocus;
     window.ariaAnnouncer = ariaAnnouncer;
-  </script>
-  <script>
-    // #region agent log
-    (function() {
-      try {
-        const bodyBefore = window.getComputedStyle(document.body, '::before');
-        const htmlBg = window.getComputedStyle(document.documentElement).backgroundColor;
-        const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-        const viewportHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-        const bodyBeforeHeight = bodyBefore.height;
-        const bodyBeforePosition = bodyBefore.position;
-        const bodyBeforeBackground = bodyBefore.background;
-        
-        fetch('http://127.0.0.1:7242/ingest/d5b70cef-0776-4ac0-864b-289eb71a6fa1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:500',message:'Gradient analysis - body::before styles',data:{bodyBeforeHeight,bodyBeforePosition,hasGradient:bodyBeforeBackground.includes('gradient'),viewportHeight,documentHeight,htmlBg,bodyBg},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A'})}).catch(()=>{});
-      } catch(e) {}
-    })();
-    // #endregion
   </script>
   <script>
     let savedScrollPosition = 0;
@@ -1486,6 +1509,34 @@
       }
     })();
     
+    // Lazy load YouTube video
+    (function() {
+      const placeholder = document.getElementById('video-placeholder');
+      const container = document.getElementById('video-container');
+      
+      if (placeholder && container) {
+        function loadYouTube() {
+          const iframe = document.createElement('iframe');
+          iframe.src = 'https://www.youtube-nocookie.com/embed/kVausES-mjk';
+          iframe.title = 'Warmthly Video';
+          iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          iframe.allowFullscreen = true;
+          iframe.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: var(--radius-xl);';
+          
+          container.innerHTML = '';
+          container.appendChild(iframe);
+        }
+        
+        placeholder.addEventListener('click', loadYouTube, { once: true });
+        placeholder.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            loadYouTube();
+          }
+        }, { once: true });
+      }
+    })();
+    
     (function() {
       const methodSection = document.querySelector('.method-section');
       if (!methodSection) return;
@@ -1526,28 +1577,6 @@
         }
       }, 1000);
     })();
-    
-    // #region agent log
-    (function() {
-      setTimeout(() => {
-        try {
-          const viewportHeight = window.innerHeight;
-          const documentHeight = document.documentElement.scrollHeight;
-          const bodyStyles = window.getComputedStyle(document.body);
-          const htmlStyles = window.getComputedStyle(document.documentElement);
-          const bodyBefore = window.getComputedStyle(document.body, '::before');
-          const hasGradient = bodyBefore.backgroundImage && bodyBefore.backgroundImage !== 'none';
-          const gradientHeight = bodyBefore.height;
-          const isFixed = bodyBefore.position === 'fixed';
-          const contentExceedsViewport = documentHeight > viewportHeight;
-          const bodyBeforeContent = bodyBefore.content;
-          const gradientRemoved = bodyBeforeContent === 'none' || bodyBeforeContent === 'normal' || !hasGradient;
-          
-          fetch('http://127.0.0.1:7242/ingest/d5b70cef-0776-4ac0-864b-289eb71a6fa1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:1510',message:'Page load - gradient visibility check (post-fix)',data:{viewportHeight,documentHeight,contentExceedsViewport,hasGradient,gradientHeight,isFixed,bodyBeforeContent,gradientRemoved,htmlBg:htmlStyles.backgroundColor,bodyBg:bodyStyles.backgroundColor},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
-        } catch(e) {}
-      }, 500);
-    })();
-    // #endregion
 
     import('/lego/config/warmthly-config.js').then(module => {
       const brandLogo = document.getElementById('main-brand-logo');
