@@ -40,7 +40,7 @@ export function initStoplight(stoplightId = 'stoplight', menuId = 'dropdown-menu
 
   // Validate elements exist
   if (!stoplightElement || !dropdownMenuElement) {
-    if (import.meta.env.DEV) {
+    if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
       console.warn(
         `Stoplight initialization failed: elements not found (stoplight: ${stoplightId}, menu: ${menuId})`
       );
@@ -50,7 +50,7 @@ export function initStoplight(stoplightId = 'stoplight', menuId = 'dropdown-menu
 
   // Ensure elements are correct types
   if (!(stoplightElement instanceof HTMLElement) || !(dropdownMenuElement instanceof HTMLElement)) {
-    if (import.meta.env.DEV) {
+    if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
       console.warn('Stoplight initialization failed: invalid element types');
     }
     return;
