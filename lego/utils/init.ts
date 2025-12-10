@@ -19,7 +19,7 @@ export function initApp(): void {
   initRUM();
   initImageOptimization();
 
-  if (import.meta.env.DEV) {
+  if (import.meta.env?.DEV) {
     console.debug('Warmthly app initialized');
   }
 }
