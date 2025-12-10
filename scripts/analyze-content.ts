@@ -87,7 +87,8 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://www.warmthly.org/';
     }
-    return `https://www.warmthly.org${path.replace('/index.html', '/')}`;
+    const cleanPath = path.includes('/index.html') ? path.replace('/index.html', '/') : path;
+    return `https://www.warmthly.org${cleanPath}`;
   }
 
   if (relative.includes('/apps/mint/')) {
@@ -95,7 +96,8 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://mint.warmthly.org/';
     }
-    return `https://mint.warmthly.org${path.replace('/index.html', '/')}`;
+    const cleanPath = path.includes('/index.html') ? path.replace('/index.html', '/') : path;
+    return `https://mint.warmthly.org${cleanPath}`;
   }
 
   if (relative.includes('/apps/post/')) {
@@ -103,7 +105,8 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://post.warmthly.org/';
     }
-    return `https://post.warmthly.org${path.replace('/index.html', '/')}`;
+    const cleanPath = path.includes('/index.html') ? path.replace('/index.html', '/') : path;
+    return `https://post.warmthly.org${cleanPath}`;
   }
 
   return relative;
