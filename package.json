@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config .config/vite.config.ts",
-    "build": "tsc --project tsconfig.json && tsx --tsconfig scripts/tsconfig.json scripts/resolve-imports.ts && tsx --tsconfig scripts/tsconfig.json scripts/preserve-lego.ts backup && npm run subset:fonts && vite build --config .config/vite.config.ts && tsx --tsconfig scripts/tsconfig.json scripts/preserve-lego.ts restore && tsx --tsconfig scripts/tsconfig.json scripts/resolve-imports.ts && npm run verify:bundle-size && npm run verify:build && npm run verify:accessibility",
+    "build": "tsc --project tsconfig.json && tsx --tsconfig scripts/tsconfig.json scripts/compile-lego.ts && tsx --tsconfig scripts/tsconfig.json scripts/resolve-imports.ts && tsx --tsconfig scripts/tsconfig.json scripts/preserve-lego.ts backup && npm run subset:fonts && vite build --config .config/vite.config.ts && tsx --tsconfig scripts/tsconfig.json scripts/preserve-lego.ts restore && tsx --tsconfig scripts/tsconfig.json scripts/resolve-imports.ts && tsx --tsconfig scripts/tsconfig.json scripts/copy-lego-to-apps.ts && npm run verify:bundle-size && npm run verify:build && npm run verify:accessibility",
     "verify:build": "tsx --tsconfig scripts/tsconfig.json scripts/verify-build.ts",
     "verify:bundle-size": "node scripts/check-bundle-size.js dist",
     "verify:accessibility": "npm run audit:accessibility",
