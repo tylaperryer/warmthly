@@ -120,22 +120,9 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-/* Background Gradient */
+/* Background - Pure white, no overlay */
 body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background:
-    radial-gradient(circle at 20% 30%, rgb(255 140 66 / 15%) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgb(255 182 193 / 12%) 0%, transparent 50%),
-    radial-gradient(circle at 40% 70%, rgb(173 216 230 / 10%) 0%, transparent 50%),
-    radial-gradient(circle at 90% 80%, rgb(144 238 144 / 8%) 0%, transparent 50%),
-    linear-gradient(135deg, var(--warmthly-background) 0%, var(--warmthly-background-alt) 100%);
-  z-index: -1;
-  pointer-events: none;
+  display: none;
 }
 
 /* Selection */
@@ -363,7 +350,7 @@ a + button {
 
 /* AAA Requirements: 
  *   - 2px outline minimum thickness (we use 3px for better visibility)
- *   - 3:1 contrast ratio (orange #FF8C42 on white #fff6f1 meets this)
+ *   - 3:1 contrast ratio (orange #FF8C42 on #fff6f1 meets this)
  *   - Visible area ≥ 2px × 2px CSS pixels (3px outline + 2px offset ensures this)
  */
 :focus-visible {
@@ -426,9 +413,9 @@ textarea:focus-visible,
     opacity: 1 !important;
   }
 
-  /* Disable background gradient animations if any */
+  /* Remove background overlays in reduced motion mode */
   body::before {
-    animation: none !important;
+    display: none !important;
   }
 }
 
@@ -473,9 +460,9 @@ textarea:focus-visible,
     color: var(--text-color);
   }
 
-  /* Remove background gradients in high contrast mode */
+  /* Remove background overlays in high contrast mode */
   body::before {
-    background: var(--warmthly-background) !important;
+    display: none !important;
   }
 
   /* Ensure buttons and links have visible borders */
