@@ -1,0 +1,97 @@
+# Bundle Size Monitoring
+# Monitors bundle sizes and fails if budgets are exceeded
+# Runs on every push and PR
+
+name: Bundle Size Check
+# DISABLED - Consolidated into all-checks.yml
+# This workflow is kept for reference but disabled
+
+on:
+  workflow_dispatch: # Only allow manual runs
+  # push:
+  #   branches: [main, develop]
+  # pull_request:
+  #   branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  bundle-size:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Analyze bundle sizes
+        run: npm run analyze:bundle
+        continue-on-error: true
+
+      - name: Check bundle size budgets
+        run: node scripts/check-bundle-size.js
+        id: bundle-check
+
+      - name: Comment on PR
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 📦 Bundle Size Check Failed\n\n';
+            
+            try {
+              const report = fs.readFileSync('bundle-size-report.json', 'utf-8');
+              const data = JSON.parse(report);
+              
+              comment += '### Bundle Size Report\n\n';
+              comment += '| Chunk | Size | Budget | Status |\n';
+              comment += '|-------|------|--------|--------|\n';
+              
+              let hasExceeded = false;
+              for (const chunk of data.chunks || []) {
+                const status = chunk.size > chunk.budget ? '❌ Exceeded' : '✅ OK';
+                if (chunk.size > chunk.budget) hasExceeded = true;
+                comment += `| ${chunk.name} | ${(chunk.size / 1024).toFixed(2)} KB | ${(chunk.budget / 1024).toFixed(2)} KB | ${status} |\n`;
+              }
+              
+              if (hasExceeded) {
+                comment += '\n⚠️ Some bundles exceed their size budgets. Please review and optimize.\n';
+              }
+            } catch (error) {
+              comment += '⚠️ Could not generate detailed report.\n';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Upload bundle analysis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: |
+            bundle-size-report.json
+            dist/stats.html
+          retention-days: 7
+

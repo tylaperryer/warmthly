@@ -1,0 +1,112 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-validation:
+    name: PR Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const description = pr.body || '';
+            const title = pr.title || '';
+            
+            // Check minimum description length
+            if (description.length < 50) {
+              core.setFailed('PR description is too short. Please provide a detailed description of your changes.');
+            }
+            
+            // Check for checklist in description
+            if (!description.includes('- [ ]')) {
+              console.log('⚠️  PR description does not include a checklist. Consider adding one.');
+            }
+            
+            // Check title format (optional)
+            if (title.length < 10) {
+              console.log('⚠️  PR title is very short. Consider making it more descriptive.');
+            }
+
+      - name: Check commit messages
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            const invalidCommits = commits.filter(commit => {
+              const message = commit.commit.message;
+              // Check for common prefixes (optional)
+              const hasPrefix = /^(feat|fix|docs|test|refactor|chore|style|perf|ci):/.test(message);
+              return !hasPrefix && message.length < 10;
+            });
+            
+            if (invalidCommits.length > 0) {
+              console.log('⚠️  Some commit messages could be more descriptive:');
+              invalidCommits.forEach(commit => {
+                console.log(`  - ${commit.commit.message.split('\n')[0]}`);
+              });
+            }
+
+      - name: Check file changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            // Check for large files
+            const largeFiles = files.filter(file => file.additions > 1000);
+            if (largeFiles.length > 0) {
+              console.log('⚠️  Large files detected. Consider splitting into smaller PRs:');
+              largeFiles.forEach(file => {
+                console.log(`  - ${file.filename} (+${file.additions} lines)`);
+              });
+            }
+            
+            // Check for deleted tests without replacement
+            const deletedTests = files.filter(file => 
+              file.status === 'removed' && file.filename.includes('.test.')
+            );
+            const addedTests = files.filter(file => 
+              file.status === 'added' && file.filename.includes('.test.')
+            );
+            
+            if (deletedTests.length > addedTests.length) {
+              console.log('⚠️  More test files deleted than added. Ensure test coverage is maintained.');
+            }
+
+      - name: Comment PR status
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const status = '${{ job.status }}';
+            const comment = status === 'success' 
+              ? '✅ PR validation passed!'
+              : '❌ PR validation failed. Please check the logs.';
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment,
+            });
+
