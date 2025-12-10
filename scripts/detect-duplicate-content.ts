@@ -117,7 +117,8 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://post.warmthly.org/';
     }
-    return `https://post.warmthly.org${path.replace('/index.html', '/')}`;
+    const cleanPath = path.includes('/index.html') ? path.replace('/index.html', '/') : path;
+    return `https://post.warmthly.org${cleanPath}`;
   }
 
   return relative;
