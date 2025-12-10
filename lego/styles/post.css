@@ -1,5 +1,14 @@
 /* Post App Specific Styles */
 
+/* Ensure proper background */
+body {
+  background: var(--warmthly-background) !important;
+}
+
+html {
+  background: var(--warmthly-background) !important;
+}
+
 /* Post-specific header text color */
 .top-left-heading .post-text {
   color: var(--red-dot);
@@ -43,15 +52,18 @@
 
 /* Section Styles */
 .section {
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+  background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25));
   padding: 3.5rem;
   border-radius: 28px;
-  border: 1px solid rgba(255,140,66,0.12);
+  border: 1px solid rgba(255,140,66,0.15);
   margin: 4rem 0;
   text-align: left;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
 .section-title {
@@ -119,6 +131,8 @@
   max-width: 1000px;
   margin: 6rem auto;
   padding: 0 32px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .timeline-entry {
@@ -158,12 +172,12 @@
 
 .timeline-card {
   width: calc(50% - 48px);
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+  background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25));
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: 20px;
   padding: 2rem;
-  border: 1px solid rgba(255,140,66,0.12);
+  border: 1px solid rgba(255,140,66,0.15);
   box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -171,6 +185,7 @@
   z-index: 5;
   transform: translateZ(0) scale(1);
   -webkit-transform: translateZ(0) scale(1);
+  box-sizing: border-box;
 }
 
 .timeline-card:hover {
@@ -501,6 +516,8 @@
     padding-top: 100px;
     padding-left: 20px;
     padding-right: 20px;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .page-title {
@@ -601,12 +618,13 @@
   max-width: 1200px;
   margin: 3rem auto;
   padding: 2rem;
-  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2));
   backdrop-filter: blur(10px);
   border-radius: 28px;
-  border: 1px solid rgba(255,140,66,0.12);
+  border: 1px solid rgba(255,140,66,0.15);
   box-shadow: 0 8px 32px rgba(0,0,0,0.06);
   min-height: 600px;
+  box-sizing: border-box;
 }
 
 .chamber-header {
