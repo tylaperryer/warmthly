@@ -77,8 +77,26 @@
     
     .progress-text {
       font-size: 20px;
-      margin-bottom: 50px;
+      margin-bottom: 15px;
       font-weight: 300;
+    }
+    
+    .progress-bar-container {
+      width: 100%;
+      max-width: 600px;
+      height: 4px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 50px;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-color: #ffffff;
+      width: 0%;
+      transition: width 0.3s ease-out;
+      border-radius: 2px;
     }
     
     .info-text {
@@ -149,7 +167,10 @@
     </div>
     
     <div class="progress-section">
-      <div class="progress-text">85% complete</div>
+      <div class="progress-text" id="progress-text">0% complete</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
     </div>
     
     <div class="info-text">
@@ -162,7 +183,93 @@
     </div>
   </div>
   
+  <script>
+    // Animated progress bar - runs immediately with random jumps
+    (function() {
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      let currentProgress = 0;
+      const targetProgress = 100;
+      const homepageUrl = 'https://www.warmthly.org';
+      let hasReached100 = false;
+      
+      function updateProgress(percentage) {
+        currentProgress = Math.min(Math.max(percentage, 0), 100);
+        if (progressBar) {
+          progressBar.style.width = currentProgress + '%';
+        }
+        if (progressText) {
+          progressText.textContent = Math.round(currentProgress) + '% complete';
+        }
+      }
+      
+      function incrementProgress() {
+        if (currentProgress >= targetProgress && !hasReached100) {
+          hasReached100 = true;
+          updateProgress(100);
+          // Wait 5 seconds at 100% then redirect
+          setTimeout(() => {
+            window.location.href = homepageUrl;
+          }, 5000);
+          return;
+        }
+        
+        if (hasReached100) {
+          return; // Already at 100%, waiting for redirect
+        }
+        
+        // Random jump: sometimes small increments, sometimes big jumps
+        let increment;
+        const jumpType = Math.random();
+        
+        if (jumpType < 0.3) {
+          // 30% chance: Big jump (5% to 30%)
+          increment = Math.random() * 25 + 5;
+        } else if (jumpType < 0.6) {
+          // 30% chance: Medium jump (2% to 15%)
+          increment = Math.random() * 13 + 2;
+        } else {
+          // 40% chance: Small increment (0.5% to 5%)
+          increment = Math.random() * 4.5 + 0.5;
+        }
+        
+        const newProgress = Math.min(currentProgress + increment, targetProgress);
+        
+        // Random delay: sometimes very short, sometimes longer waits
+        let delay;
+        const delayType = Math.random();
+        
+        if (delayType < 0.2) {
+          // 20% chance: Long wait (2 to 4 seconds)
+          delay = Math.random() * 2000 + 2000;
+        } else if (delayType < 0.5) {
+          // 30% chance: Medium wait (500ms to 2 seconds)
+          delay = Math.random() * 1500 + 500;
+        } else {
+          // 50% chance: Short wait (100ms to 500ms)
+          delay = Math.random() * 400 + 100;
+        }
+        
+        updateProgress(newProgress);
+        
+        setTimeout(incrementProgress, delay);
+      }
+      
+      // Start the animation when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          updateProgress(0);
+          setTimeout(incrementProgress, 500);
+        });
+      } else {
+        updateProgress(0);
+        setTimeout(incrementProgress, 500);
+      }
+    })();
+  </script>
+  
   <script type="module">
+    // Update logo link if config loads
     import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
     const logo = document.getElementById('warmthly-logo');
     if (logo) {
