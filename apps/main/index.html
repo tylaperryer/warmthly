@@ -1575,6 +1575,21 @@
       const methodSection = document.querySelector('.method-section');
       if (!methodSection) return;
       
+      // Fallback: Show immediately if already in viewport
+      const checkVisibility = () => {
+        const rect = methodSection.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        if (isVisible) {
+          methodSection.classList.add('visible');
+          return true;
+        }
+        return false;
+      };
+      
+      // Check immediately
+      if (checkVisibility()) return;
+      
+      // Use IntersectionObserver as primary method
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
@@ -1583,11 +1598,18 @@
           }
         });
       }, {
-        threshold: 0.2,
-        rootMargin: '0px 0px -50px 0px'
+        threshold: 0.1,
+        rootMargin: '100px 0px 100px 0px'
       });
       
       observer.observe(methodSection);
+      
+      // Fallback timeout: show after 1 second if observer hasn't triggered
+      setTimeout(() => {
+        if (!methodSection.classList.contains('visible')) {
+          methodSection.classList.add('visible');
+        }
+      }, 1000);
     })();
 
     import('/lego/config/warmthly-config.js').then(module => {
