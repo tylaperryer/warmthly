@@ -49,7 +49,7 @@ body > nav.header-right .stoplight-container {
 .brand-logo {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-weight: 700;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-3xl);
   line-height: var(--line-height-tight);
   color: var(--warmthly-orange);
   user-select: none;
