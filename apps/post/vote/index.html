@@ -63,6 +63,10 @@
     preconnects="https://www.warmthly.org, https://post.warmthly.org">
   </warmthly-head>
   
+  <!-- Fallback stylesheet - ensures styles load even if JavaScript fails -->
+  <link rel="stylesheet" href="/lego/styles/common.css">
+  <link rel="stylesheet" href="/lego/styles/post.css">
+  
   <style>
     /* Hide body until CSS loads to prevent FOUC */
     body:not(.css-loaded) {
@@ -83,7 +87,6 @@
   
   <div style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1rem; align-items: center;">
     <warmthly-language-switcher></warmthly-language-switcher>
-    <warmthly-reading-level></warmthly-reading-level>
     <warmthly-stoplight app="post"></warmthly-stoplight>
   </div>
 
@@ -150,7 +153,7 @@
           <div class="progress-bar-container">
             <div class="progress-bar" id="progressBar"></div>
           </div>
-          <div style="text-align: center; font-family: 'Inter', sans-serif; font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
+          <div style="text-align: center; font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
             <span id="progressPercentage">0%</span> of threshold reached
           </div>
         </div>
@@ -305,7 +308,7 @@
         // If there are more votes than visible, show indicator
         if (votes > maxVisibleSeats) {
           const moreIndicator = document.createElement('div');
-          moreIndicator.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 1rem; font-family: Inter, sans-serif; font-size: 0.9rem; opacity: 0.7;';
+          moreIndicator.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 1rem; font-size: 0.9rem; opacity: 0.7;';
           moreIndicator.textContent = `+${(votes - maxVisibleSeats).toLocaleString()} more votes`;
           yesSeatsGrid.appendChild(moreIndicator);
         }
@@ -396,8 +399,13 @@
       });
 
       updateUIBasedOnVote();
-    }
+      }
+    })();
   </script>
+  
+  <div style="position: fixed; bottom: 1rem; right: 1rem; z-index: 1000; display: flex; gap: 0.5rem; align-items: center;">
+    <warmthly-reading-level></warmthly-reading-level>
+  </div>
   
   <warmthly-font-loader></warmthly-font-loader>
 </body>
