@@ -33,7 +33,7 @@
       margin: 0 auto;
       padding: var(--spacing-24) var(--spacing-6) var(--spacing-10);
       text-align: center;
-      color: var(--text-color);
+      color: var(--text-color-light);
       position: relative;
       z-index: 1;
     }
@@ -43,13 +43,12 @@
       font-weight: 600;
       line-height: var(--line-height-tight);
       margin-bottom: var(--spacing-4);
-      color: var(--warmthly-orange);
+      color: var(--text-color-light);
       letter-spacing: var(--letter-spacing-tight);
     }
     .subtitle {
       font-size: var(--font-size-base);
-      color: var(--text-color);
-      opacity: 0.8;
+      color: var(--text-color-light);
       font-weight: 400;
       line-height: var(--line-height-base);
       margin-bottom: var(--spacing-12);
@@ -78,78 +77,6 @@
       border: none;
       border-radius: var(--radius-xl);
     }
-    .video-placeholder {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #000;
-      border-radius: var(--radius-xl);
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-    }
-    .video-placeholder.loaded {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .video-play-button {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      margin-bottom: var(--spacing-4);
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-      position: relative;
-      outline: none;
-    }
-    .video-play-button:hover,
-    .video-play-button:focus {
-      transform: scale(1.08);
-    }
-    .video-play-button:focus-visible {
-      outline: 3px solid var(--warmthly-orange);
-      outline-offset: 4px;
-      border-radius: 50%;
-    }
-    .video-play-button .play-icon {
-      filter: drop-shadow(0 4px 12px rgba(255, 140, 66, 0.4));
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-    .video-play-button:hover .play-icon {
-      filter: drop-shadow(0 6px 20px rgba(255, 140, 66, 0.6));
-    }
-    .video-play-button:hover .play-icon .pulse-ring {
-      animation: pulse 2s ease-in-out infinite;
-    }
-    .video-play-button .play-triangle {
-      transform-origin: center;
-      transition: transform 0.3s ease;
-    }
-    .video-play-button:hover .play-triangle {
-      transform: translateX(2px);
-    }
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 0.2;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 0.4;
-        transform: scale(1.1);
-      }
-    }
-    .video-placeholder-text {
-      color: white;
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-base);
-      line-height: var(--line-height-base);
-      margin: 0;
-    }
     .method-section {
       text-align: left;
       margin: var(--spacing-16) auto;
@@ -173,7 +100,7 @@
       font-size: var(--font-size-xl);
       font-weight: 600;
       line-height: var(--line-height-tight);
-      color: var(--warmthly-orange);
+      color: var(--text-color-light);
       margin-bottom: var(--spacing-4);
       text-align: center;
     }
@@ -182,7 +109,7 @@
       font-size: var(--font-size-lg);
       font-weight: 600;
       line-height: var(--line-height-tight);
-      color: var(--text-color);
+      color: var(--text-color-light);
       margin-top: var(--spacing-12);
       margin-bottom: var(--spacing-6);
       text-align: center;
@@ -194,11 +121,11 @@
       text-align: center;
       font-size: var(--font-size-lg);
       line-height: var(--line-height-base);
-      opacity: 0.8;
+      color: var(--text-color-light);
       margin-bottom: var(--spacing-10);
     }
     .method-section .intro-paragraph strong {
-      color: var(--text-color);
+      color: var(--text-color-light);
       font-weight: 600;
     }
     .method-step {
@@ -234,18 +161,27 @@
       font-size: var(--font-size-xl);
       font-weight: 600;
       line-height: var(--line-height-tight);
-      color: var(--text-color);
+      color: var(--text-color-light);
       margin-bottom: var(--spacing-2);
     }
     .method-step h3 span {
-      color: var(--warmthly-orange);
+      color: var(--text-color-light);
       margin-right: var(--spacing-2);
     }
     .method-step p {
       font-size: var(--font-size-lg);
-      opacity: 0.8;
+      color: var(--text-color-light);
       line-height: var(--line-height-base);
       padding-left: var(--spacing-10);
+    }
+    .method-step ul,
+    .method-step li {
+      color: var(--text-color-light);
+    }
+    .method-step b,
+    .method-step strong {
+      color: var(--text-color-light);
+      font-weight: 600;
     }
     .footer {
       margin-top: var(--spacing-16);
@@ -305,16 +241,7 @@
     <p class="subtitle">Warmthly is a global movement to make empathy a measurable part of our systems.</p>
     <div class="video-section">
       <div class="video-container" id="video-container">
-        <div class="video-placeholder" id="video-placeholder">
-          <button class="video-play-button" id="video-play-button" aria-label="Play video about Warmthly">
-            <svg class="play-icon" width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="40" cy="40" r="38" fill="rgba(255, 140, 66, 0.9)" stroke="rgba(255, 255, 255, 0.3)" stroke-width="2"/>
-              <circle cx="40" cy="40" r="35" fill="transparent" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1" class="pulse-ring"/>
-              <path d="M32 24 L32 56 L56 40 Z" fill="white" class="play-triangle"/>
-            </svg>
-          </button>
-          <p class="video-placeholder-text">Click to play video</p>
-        </div>
+        <iframe src="https://www.youtube-nocookie.com/embed/kVausES-mjk" title="Warmthly Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
     </div>
     <div class="method-section">
@@ -1541,35 +1468,6 @@
         }
       }
     })();
-    
-    const videoPlaceholder = document.getElementById('video-placeholder');
-    const videoContainer = document.getElementById('video-container');
-    const videoPlayButton = document.getElementById('video-play-button');
-    
-    function loadVideo() {
-      const iframe = document.createElement('iframe');
-      iframe.src = 'https://www.youtube-nocookie.com/embed/kVausES-mjk';
-      iframe.title = 'Warmthly Video';
-      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-      iframe.allowFullscreen = true;
-      iframe.style.position = 'absolute';
-      iframe.style.top = '0';
-      iframe.style.left = '0';
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.border = 'none';
-      iframe.style.borderRadius = '20px';
-      
-      videoContainer.appendChild(iframe);
-      videoPlaceholder.classList.add('loaded');
-      videoPlaceholder.removeEventListener('click', loadVideo);
-      videoPlayButton.removeEventListener('click', loadVideo);
-    }
-    
-    if (videoPlaceholder && videoPlayButton) {
-      videoPlaceholder.addEventListener('click', loadVideo);
-      videoPlayButton.addEventListener('click', loadVideo);
-    }
     
     (function() {
       const methodSection = document.querySelector('.method-section');
