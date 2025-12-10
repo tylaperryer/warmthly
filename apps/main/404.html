@@ -1,252 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
-  <warmthly-head 
-    title="404 - Page Not Found - Warmthly"
-    description="The page you're looking for doesn't exist"
-    app="main"
-    viewport="0.75"
-    robots="noindex, nofollow">
-  </warmthly-head>
-  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found</title>
   <style>
-    /* Critical CSS - Must be inline for performance */
-    :root { color-scheme: light; }
-    html { background-color: #fff6f1; min-height: 100%; }
-    body.fonts-loaded { opacity: 1; visibility: visible; }
-    
-    /* Page-specific styles */
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: var(--spacing-24) var(--spacing-8) var(--spacing-16);
-      color: var(--text-color);
-      position: relative;
-      text-align: center;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
     
-    .big-404 {
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-4xl);
-      font-weight: 600;
-      line-height: var(--line-height-tight);
-      color: var(--warmthly-orange);
-      margin-bottom: var(--spacing-4);
-      user-select: none;
-      position: relative;
-      letter-spacing: var(--letter-spacing-tight);
-      opacity: 0;
-      transform: translateY(-20px);
-      animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s forwards;
+    @font-face {
+      font-family: 'Cormorant Garamond';
+      font-style: normal;
+      font-weight: 300 700;
+      font-display: swap;
+      src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype');
     }
     
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .page-title {
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-2xl);
-      line-height: var(--line-height-tight);
-      color: var(--warmthly-orange);
-      margin-bottom: var(--spacing-4);
-      font-weight: 600;
-      letter-spacing: var(--letter-spacing-normal);
-      opacity: 0;
-      animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 0.4s forwards;
-    }
-    
-    .subtitle {
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-lg);
-      line-height: var(--line-height-base);
-      color: var(--text-color);
-      opacity: 0.8;
-      margin-bottom: var(--spacing-12);
-      opacity: 0;
-      animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 0.6s forwards;
-    }
-    
-    .music-section {
-      background: linear-gradient(135deg, rgba(255, 140, 66, 0.08), rgba(255, 140, 66, 0.03));
-      padding: var(--spacing-12) var(--spacing-10);
-      border-radius: var(--radius-xl);
-      margin: var(--spacing-12) 0;
-      border: 1px solid rgba(255, 140, 66, 0.15);
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 0.8s forwards;
-    }
-    
-    .music-title {
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-xl);
-      line-height: var(--line-height-tight);
-      color: var(--warmthly-orange);
-      margin-bottom: var(--spacing-6);
-      font-weight: 600;
-    }
-    
-    .music-description {
-      color: var(--text-color);
-      opacity: 0.8;
-      margin-bottom: var(--spacing-8);
-      line-height: var(--line-height-base);
-      font-size: var(--font-size-lg);
-    }
-    
-    .spotify-embed {
-      margin: 0 auto;
-      max-width: 100%;
-      box-shadow: 0 var(--spacing-2) var(--spacing-6) rgba(255, 140, 66, 0.15);
-      border-radius: var(--radius-md);
+    html, body {
+      height: 100%;
+      width: 100%;
       overflow: hidden;
     }
-    .spotify-embed iframe {
-      border-radius: var(--radius-md);
+    
+    body {
+      background-color: #0078d7;
+      color: #ffffff;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      padding: 0;
+      position: relative;
     }
     
-    .navigation-help {
-      margin: var(--spacing-12) 0;
-      opacity: 0;
-      animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 1s forwards;
-    }
-    
-    .nav-title {
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-xl);
-      line-height: var(--line-height-tight);
-      color: var(--warmthly-orange);
-      margin-bottom: var(--spacing-6);
-      font-weight: 600;
-    }
-    
-    .nav-buttons {
-      display: flex;
-      justify-content: center;
-      gap: var(--spacing-6);
-      flex-wrap: wrap;
-      margin-bottom: var(--spacing-8);
-    }
-    
-    .nav-button {
-      padding: var(--spacing-4) var(--spacing-8);
-      border: 2px solid var(--warmthly-orange);
-      border-radius: var(--radius-md);
-      background: transparent;
-      color: var(--warmthly-orange);
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: var(--font-size-base);
-      line-height: var(--line-height-base);
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    .warmthly-logo {
+      position: fixed;
+      top: 1.5rem;
+      left: 1.5rem;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 700;
+      font-size: 2.5rem;
+      line-height: 1.2;
+      color: #ffffff;
+      user-select: none;
       text-decoration: none;
-      display: inline-block;
-      letter-spacing: var(--letter-spacing-normal);
+      letter-spacing: normal;
+      z-index: 1000;
     }
     
-    .nav-button:hover,
-    .nav-button:focus {
-      background: var(--warmthly-orange);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 var(--spacing-2) var(--spacing-4) rgba(255, 140, 66, 0.2);
-      outline: none;
+    .warmthly-logo:hover {
+      opacity: 0.9;
     }
     
-    .nav-button:focus-visible {
-      outline: 3px solid var(--warmthly-orange);
-      outline-offset: 2px;
+    .bsod-container {
+      width: 100%;
+      max-width: 700px;
+      padding: 100px 80px 60px;
+      text-align: left;
+      margin: 0 auto;
     }
     
-    .nav-button:active {
-      transform: translateY(0px) scale(0.98);
+    .sad-face {
+      font-size: 90px;
+      line-height: 1;
+      margin-bottom: 30px;
+      font-weight: normal;
+    }
+    
+    .main-message {
+      font-size: 26px;
+      line-height: 1.4;
+      margin-bottom: 30px;
+      font-weight: 300;
+    }
+    
+    .progress-section {
+      margin-bottom: 30px;
+    }
+    
+    .progress-text {
+      font-size: 20px;
+      margin-bottom: 50px;
+      font-weight: 300;
+    }
+    
+    .info-text {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      font-weight: 300;
+    }
+    
+    .support-info {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 30px;
+      font-weight: 300;
+    }
+    
+    .stop-code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-weight: 400;
     }
     
     @media (max-width: 768px) {
-      .container {
-        padding: var(--spacing-20) var(--spacing-6) var(--spacing-10);
+      .warmthly-logo {
+        font-size: 2rem;
+        top: 1rem;
+        left: 1rem;
       }
-      .big-404 {
-        font-size: var(--font-size-3xl);
+      
+      .bsod-container {
+        padding: 80px 30px 40px;
       }
-      .page-title {
-        font-size: var(--font-size-xl);
+      
+      .sad-face {
+        font-size: 70px;
+        margin-bottom: 25px;
       }
-      .subtitle {
-        font-size: var(--font-size-base);
+      
+      .main-message {
+        font-size: 20px;
+        margin-bottom: 25px;
       }
-      .music-section {
-        padding: var(--spacing-8) var(--spacing-6);
+      
+      .progress-text {
+        font-size: 18px;
+        margin-bottom: 35px;
       }
-      .nav-buttons {
-        flex-direction: column;
-        align-items: center;
+      
+      .info-text {
+        font-size: 14px;
       }
-      .nav-button {
-        min-width: 250px;
-        width: 100%;
-        max-width: 300px;
+      
+      .support-info {
+        font-size: 12px;
       }
     }
   </style>
-  
-  
-  <!-- DNS prefetch for external domains -->
-  <link rel="dns-prefetch" href="//warmthly.org">
-  
-  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
 </head>
-<body class="fonts-loading">
-  <div class="preload-fonts"></div>
+<body>
+  <a href="#" class="warmthly-logo" id="warmthly-logo">Warmthly</a>
   
-  <warmthly-header app="main"></warmthly-header>
-  
-  <warmthly-stoplight app="main"></warmthly-stoplight>
-
-  <div class="container">
-    <div class="big-404">404</div>
-    <h1 class="page-title">This page went on a little adventure.</h1>
-    <p class="subtitle">
-      It seems the page you were looking for has wandered off.
-    </p>
+  <div class="bsod-container">
+    <div class="sad-face">:(</div>
     
-    <div class="music-section">
-      <h3 class="music-title">An Unexpected Interlude</h3>
-      <p class="music-description">
-        Sometimes getting lost leads to exactly what we need to hear. Here’s a song for this quiet moment.
-      </p>
-      <div class="spotify-embed">
-        <iframe src="https://open.spotify.com/embed/track/3G69U3e9pdEdrD1yUkpWuZ?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-      </div>
+    <div class="main-message">
+      Your PC ran into a problem and needs to restart. We're<br>
+      just collecting some error info, and then we'll restart for<br>
+      you.
     </div>
     
-    <div class="navigation-help">
-      <h3 class="nav-title">Let's find your way.</h3>
-      <div class="nav-buttons">
-        <a href="/" class="nav-button" id="home-link">Return Home</a>
-        <button class="nav-button" type="button" onclick="window.history.back()" aria-label="Go back to previous page">Go Back</button>
-      </div>
+    <div class="progress-section">
+      <div class="progress-text">85% complete</div>
     </div>
     
+    <div class="info-text">
+      For more information about this issue and possible fixes, visit our website.
+    </div>
+    
+    <div class="support-info">
+      If you call a support person, give them this info:<br>
+      Stop code: <span class="stop-code">0x00000000</span>
+    </div>
   </div>
   
-  <!-- Font Loader Component -->
-  <warmthly-font-loader></warmthly-font-loader>
-  
   <script type="module">
-    // Update home link URL from config
     import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
-    const homeLink = document.getElementById('home-link');
-    if (homeLink) {
-      homeLink.href = WARMTHLY_CONFIG.urls.main;
+    const logo = document.getElementById('warmthly-logo');
+    if (logo) {
+      logo.href = WARMTHLY_CONFIG.urls.main;
     }
   </script>
 </body>
