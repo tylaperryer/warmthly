@@ -87,18 +87,62 @@ jobs:
         continue-on-error: true
         run: |
           echo "🚀 Running full build process..."
-          echo "This includes: TypeScript compilation, font subsetting, Vite build, and verification"
-          # Run TypeScript check (non-blocking)
-          npm run type-check || echo "⚠️ TypeScript check completed with errors (continuing anyway)"
-          # Run font subsetting (non-blocking)
-          npm run subset:fonts || echo "⚠️ Font subsetting completed with warnings"
-          # Run Vite build (this is critical - must succeed or have output)
-          vite build --config .config/vite.config.ts || echo "⚠️ Vite build completed with warnings"
-          # Run verification steps (non-blocking)
-          npm run verify:bundle-size || echo "⚠️ Bundle size check completed with warnings"
-          npm run verify:build || echo "⚠️ Build verification completed with warnings"
-          npm run verify:accessibility || echo "⚠️ Accessibility check completed with warnings"
+          echo "This includes: TypeScript compilation, lego compilation, font subsetting, Vite build, and verification"
+          # Run the FULL build command which includes all steps:
+          # - tsc compilation
+          # - compile-lego.ts (creates dist/lego/)
+          # - resolve-imports.ts
+          # - preserve-lego.ts backup
+          # - subset:fonts
+          # - vite build (clears dist, but preserve-lego restores it)
+          # - preserve-lego.ts restore
+          # - resolve-imports.ts
+          # - copy-lego-to-apps.ts (verifies dist/lego/ exists)
+          # - verify:bundle-size
+          # - verify:build
+          # - verify:accessibility
+          npm run build || echo "⚠️ Build completed with warnings"
           echo "✅ Build process completed"
+          
+          # Verify dist/lego/ exists after build
+          if [ ! -d "dist/lego" ]; then
+            echo "❌ ERROR: dist/lego/ directory not found after build!"
+            echo "This means the build process failed to create the lego directory."
+            exit 1
+          fi
+          
+          # Verify key files exist
+          if [ ! -d "dist/lego/components" ]; then
+            echo "❌ ERROR: dist/lego/components/ directory not found!"
+            exit 1
+          fi
+          
+          if [ ! -d "dist/lego/utils" ]; then
+            echo "❌ ERROR: dist/lego/utils/ directory not found!"
+            exit 1
+          fi
+          
+          echo "✓ Verified dist/lego/ exists with components and utils"
+
+      - name: Verify dist/lego exists before organizing
+        run: |
+          echo "🔍 Verifying dist/lego/ exists after build..."
+          if [ ! -d "dist/lego" ]; then
+            echo "❌ ERROR: dist/lego/ directory not found!"
+            echo "The build process should have created this."
+            exit 1
+          fi
+          if [ ! -d "dist/lego/components" ]; then
+            echo "❌ ERROR: dist/lego/components/ directory not found!"
+            exit 1
+          fi
+          if [ ! -d "dist/lego/utils" ]; then
+            echo "❌ ERROR: dist/lego/utils/ directory not found!"
+            exit 1
+          fi
+          echo "✓ Verified dist/lego/ exists with components and utils"
+          echo "  Components: $(find dist/lego/components -name '*.js' | wc -l) .js files"
+          echo "  Utils: $(find dist/lego/utils -name '*.js' | wc -l) .js files"
 
       - name: Organize Vite output for subdomains
         continue-on-error: true
@@ -178,24 +222,24 @@ jobs:
               echo "  ✓ Copied images"
             fi
             
-            # Copy lego directory (from dist/lego if compiled, otherwise from source)
+            # Copy lego directory (from dist/lego - MUST exist after build)
             if [ -d "dist/lego" ]; then
+              # Verify dist/lego has the required structure
+              if [ ! -d "dist/lego/components" ] || [ ! -d "dist/lego/utils" ]; then
+                echo "  ❌ Error: dist/lego/ exists but missing components or utils directories"
+                echo "  This means the build process did not complete correctly."
+                exit 1
+              fi
               cp -r "dist/lego" "build/$app/" || {
-                echo "  ⚠️  Warning: Failed to copy compiled lego, trying source..."
-                if [ -d "lego" ]; then
-                  cp -r "lego" "build/$app/" || {
-                    echo "  ❌ Error: Failed to copy lego directory"
-                    exit 1
-                  }
-                fi
-              }
-              echo "  ✓ Copied lego directory"
-            elif [ -d "lego" ]; then
-              cp -r "lego" "build/$app/" || {
-                echo "  ❌ Error: Failed to copy lego directory"
+                echo "  ❌ Error: Failed to copy compiled lego directory"
                 exit 1
               }
-              echo "  ✓ Copied lego directory (from source)"
+              echo "  ✓ Copied compiled lego directory from dist/lego/"
+            else
+              echo "  ❌ ERROR: dist/lego/ directory not found!"
+              echo "  The build process should have created this directory."
+              echo "  Check that 'npm run build' completed successfully."
+              exit 1
             fi
             
             # Copy root files
