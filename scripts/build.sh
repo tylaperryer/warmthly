@@ -68,9 +68,9 @@ for app in main mint post admin; do
       cp -r assets/images "dist/$app/global/images" 2>/dev/null || true
     fi
     
-    # Copy lego directory
-    if [ -d "lego" ]; then
-      cp -r lego "dist/$app/" 2>/dev/null || true
+    # Copy compiled lego directory from dist/lego to each app
+    if [ -d "dist/lego" ]; then
+      cp -r dist/lego "dist/$app/" 2>/dev/null || true
     fi
     
     # Copy root files
