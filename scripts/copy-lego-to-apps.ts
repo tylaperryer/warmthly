@@ -43,13 +43,24 @@ function copyRecursive(src: string, dest: string) {
 }
 
 async function copyLegoToApps() {
-  console.log('📋 Copying lego directory to each app...');
+  console.log('📋 Copying lego directory...');
 
   if (!existsSync(distLegoDir)) {
     console.warn('⚠️  dist/lego directory not found, nothing to copy');
     return;
   }
 
+  // Ensure dist/lego/ exists at root for Cloudflare Pages (serves /lego/ from root)
+  // Note: preserve-lego.ts should have already restored this, but we verify it exists
+  const rootLegoDir = join(rootDir, 'dist', 'lego');
+  if (!existsSync(rootLegoDir)) {
+    console.log('  Creating dist/lego/ at root for Cloudflare Pages...');
+    copyRecursive(distLegoDir, rootLegoDir);
+  } else {
+    console.log('  ✓ dist/lego/ already exists at root (preserved by preserve-lego.ts)');
+  }
+
+  // Copy to each app's directory for relative path support
   for (const app of apps) {
     const appDir = join(rootDir, 'dist', 'apps', app);
     const appLegoDir = join(appDir, 'lego');
@@ -63,7 +74,7 @@ async function copyLegoToApps() {
     copyRecursive(distLegoDir, appLegoDir);
   }
 
-  console.log('✅ Lego directory copied to all apps');
+  console.log('✅ Lego directory available at root and all apps');
 }
 
 // Run if called directly
