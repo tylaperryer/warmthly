@@ -50,7 +50,6 @@
   <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
   <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
   <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
-  <script type="module" src="/lego/components/warmthly-media-accessibility.js"></script>
   <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
   <script type="module" src="/lego/utils/init.js"></script>
   <script type="module" src="./main-app-loader.js"></script>
@@ -75,6 +74,10 @@
     html {
       background-color: #fff6f1;
       min-height: 100%;
+    }
+    body {
+      background-color: #fff6f1;
+      min-height: 100vh;
     }
     body.fonts-loaded {
       opacity: 1;
@@ -130,6 +133,30 @@
       border: none;
       border-radius: var(--radius-xl);
     }
+    
+    .sign-language-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--warmthly-orange);
+      animation: pulse 2s ease-in-out infinite;
+      cursor: pointer;
+      box-shadow: 0 0 0 0 rgba(255, 140, 66, 0.7);
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 140, 66, 0.7);
+      }
+      50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+        box-shadow: 0 0 0 8px rgba(255, 140, 66, 0);
+      }
+    }
+    
     .method-section {
       text-align: left;
       margin: var(--spacing-16) auto;
@@ -138,22 +165,13 @@
       border-radius: var(--radius-xl);
       border: 1px solid rgba(255, 140, 66, 0.15);
       max-width: 700px;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1),
-                  transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
-      /* Ensure text is readable even before animation */
-      color: var(--text-color);
-      visibility: hidden;
-    }
-    
-    .method-section.visible {
-      visibility: visible;
-    }
-    
-    .method-section.visible {
       opacity: 1;
       transform: translateY(0);
+      transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1),
+                  transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+      /* Ensure text is readable */
+      color: var(--text-color);
+      visibility: visible;
     }
     .method-section .section-title {
       font-family: 'Inter', sans-serif;
@@ -283,30 +301,26 @@
     </div>
     <div class="header-right">
         <warmthly-language-switcher></warmthly-language-switcher>
-        <warmthly-reading-level></warmthly-reading-level>
         <warmthly-stoplight app="main"></warmthly-stoplight>
     </div>
   </header>
   <main id="main-content" role="main" aria-label="Main content">
   <div class="container">
-    <h1 class="logo" data-reading-level-content>Rehumanize Our World.</h1>
+    <h1 class="logo" data-reading-level-content data-no-glossary>Rehumanize Our World.</h1>
     <p class="subtitle" data-reading-level-content>Warmthly is a global movement to make empathy a measurable part of our systems.</p>
     <div class="video-section">
-      <div class="video-container" id="video-container"></div>
-      <warmthly-media-accessibility
-        video-id="video-container"
-        sign-language-url="/videos/warmthly-sign-language.mp4"
-        audio-description-url="/audio/warmthly-audio-description.mp3"
-        transcript-url="/transcripts/warmthly-video.txt"
-        captions-url="/captions/warmthly-video.vtt">
-      </warmthly-media-accessibility>
+      <div class="video-container" id="video-container" style="position: relative;">
+        <div class="sign-language-indicator" style="position: absolute; top: 1rem; right: 1rem; z-index: 10;" title="Sign language video available" aria-label="Sign language video available">
+          <div class="sign-language-dot"></div>
+        </div>
+      </div>
     </div>
     <div class="method-section">
         <p class="intro-paragraph" data-reading-level-content>
             We are raising $20,000 to legally launch a global movement and demonstrate that empathy is the most powerful force for change.
         </p>
         <p class="intro-paragraph" data-reading-level-content>
-            Warmthly is an international movement dedicated to bringing empathy into the concrete of global systems. We rehumanize sectors, starting with mental health and education, to make sure that people are no longer treated like numbers. We aim to make empathy a measurable design principle. With your support, we can go from proof-of-concept to international scale in one winter. Join us in building your future. Learn more in our <a href="/help.html">Help & FAQ</a> or see our <a href="https://mint.warmthly.org">transparency tracking</a>.
+            Warmthly is an international movement dedicated to bringing empathy into the concrete of global systems. We rehumanize sectors, starting with mental health and education, to make sure that people are no longer treated like numbers. We aim to make empathy a measurable design principle. With your support, we can go from proof-of-concept to international scale in one winter. Join us in building your future. Learn more about our <a href="https://mint.warmthly.org">transparency tracking</a>.
         </p>
         
         <h2 class="section-subtitle" data-reading-level-content>Who are we? What's this about?</h2>
@@ -456,7 +470,7 @@
         </div>
       </div>
     </div>
-    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer" aria-label="View Warmthly source code on GitHub">GitHub</a>. Our work is not ours, it's yours. <a href="/privacy.html">Privacy Policy</a> | <a href="/easy-read.html">Easy Read Version</a></p>
+    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer" aria-label="View Warmthly source code on GitHub">GitHub</a>. Our work is not ours, it's yours. <a href="/easy-read">Easy Read Version</a></p>
   </div>
   
   <div class="donation-modal" id="donationModal" aria-hidden="true" role="dialog" aria-labelledby="donationModalTitle" aria-modal="true">
@@ -468,7 +482,6 @@
           <label style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-color); opacity: 0.8; margin-right: 0.5rem;">Currency:</label>
           <span class="field-help" style="font-size: 0.75rem; color: var(--text-color-light); margin-left: 0.5rem;">
             Select your preferred currency
-            <a href="/help.html#donations-heading" class="field-help-link" target="_blank" rel="noopener noreferrer" aria-label="Get more help about currency selection">?</a>
           </span>
           <div class="custom-currency-dropdown" id="currencyDropdown">
             <div class="custom-currency-select" id="currencySelect">
@@ -506,7 +519,6 @@
           <input type="number" id="customAmount" placeholder="Custom amount" min="1" step="1" aria-describedby="customAmountHelp">
           <span id="customAmountHelp" class="field-help" style="font-size: 0.75rem; color: var(--text-color-light); margin-top: 0.25rem; display: block;">
             Enter any amount you'd like to donate
-            <a href="/help.html#donations-heading" class="field-help-link" target="_blank" rel="noopener noreferrer" aria-label="Get more help about donation amounts">?</a>
           </span>
         </div>
         <p id="conversionNotice" style="font-size: 0.85rem; color: var(--text-color); opacity: 0.7; margin-top: 0.5rem; text-align: center; font-family: 'Inter', sans-serif; display: none;">
@@ -564,7 +576,11 @@
   </div>
   </main>
 
-  <script type="module" src="/apps/main/payment-handler.js"></script>
+  <script type="module" src="./payment-handler.js"></script>
+  
+  <div style="position: fixed; bottom: 1rem; right: 1rem; z-index: 1000; display: flex; gap: 0.5rem; align-items: center;">
+    <warmthly-reading-level></warmthly-reading-level>
+  </div>
   
   <warmthly-font-loader></warmthly-font-loader>
   <!-- Yoco SDK - Load dynamically when needed (Performance Optimization) -->
