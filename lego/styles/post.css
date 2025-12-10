@@ -9,6 +9,16 @@ html {
   background: var(--warmthly-background) !important;
 }
 
+/* Post-specific container - add top padding for spacing */
+.container {
+  padding-top: 8rem;
+}
+
+/* Post-specific header - make it bigger */
+.top-left-heading {
+  font-size: var(--font-size-2xl) !important;
+}
+
 /* Post-specific header text color */
 .top-left-heading .post-text {
   color: var(--red-dot);
@@ -22,6 +32,7 @@ html {
 
 /* Hero Section */
 .hero-section {
+  margin-top: 4rem;
   margin-bottom: 8rem;
 }
 
