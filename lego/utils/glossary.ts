@@ -213,11 +213,14 @@ export function initGlossary(): void {
         return;
       }
 
-      // Exclude title element and head elements from glossary processing
+      // Exclude title element, head elements, h1 elements, and elements with data-no-glossary from glossary processing
       if (
         parent.tagName === 'TITLE' ||
+        parent.tagName === 'H1' ||
         parent.closest('head') ||
-        parent.closest('title')
+        parent.closest('title') ||
+        parent.hasAttribute('data-no-glossary') ||
+        parent.closest('[data-no-glossary]')
       ) {
         return;
       }
