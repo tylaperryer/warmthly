@@ -1,5 +1,14 @@
 /* Mint App Specific Styles */
 
+/* Container for mint page - limit width */
+main.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-24) var(--spacing-6) var(--spacing-10);
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Mint-specific header text color */
 .top-left-heading .mint-text {
   color: var(--warmthly-orange);
@@ -98,8 +107,8 @@
   border: 1px solid rgb(255 140 66 / 15%);
   box-shadow: 0 8px 32px rgb(0 0 0 / 6%);
   min-height: 500px;
-  max-width: 100%;
-  margin-bottom: 2rem;
+  max-width: 1200px;
+  margin: 0 auto 2rem;
   width: 100%;
   box-sizing: border-box;
   overflow: hidden; /* Prevent content from overflowing */

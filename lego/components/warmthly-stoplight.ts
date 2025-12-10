@@ -152,7 +152,7 @@ class WarmthlyStoplight extends HTMLElement {
           initStoplight(stoplightId, menuId);
         } catch (error: unknown) {
           // Fallback: show menu if initialization fails
-          if (import.meta.env.DEV) {
+          if (import.meta.env?.DEV) {
             console.warn('Failed to initialize stoplight:', error);
           }
 
@@ -166,7 +166,7 @@ class WarmthlyStoplight extends HTMLElement {
       })();
     } catch (error: unknown) {
       // Log error in development
-      if (import.meta.env.DEV) {
+      if (import.meta.env?.DEV) {
         console.error('Error in warmthly-stoplight connectedCallback:', error);
       }
     }

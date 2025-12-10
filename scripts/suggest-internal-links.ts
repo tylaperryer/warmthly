@@ -136,7 +136,8 @@ function getUrlFromPath(filePath: string): string {
     if (path === '/index.html' || path === '/') {
       return 'https://www.warmthly.org/';
     }
-    return `https://www.warmthly.org${path.replace('/index.html', '/')}`;
+    const cleanPath = path.includes('/index.html') ? path.replace('/index.html', '/') : path;
+    return `https://www.warmthly.org${cleanPath}`;
   }
 
   if (relative.includes('/apps/mint/')) {

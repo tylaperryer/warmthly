@@ -73,6 +73,8 @@ export function initStoplight(stoplightId = 'stoplight', menuId = 'dropdown-menu
     stoplight.setAttribute('aria-expanded', String(isOpen));
 
     if (isOpen) {
+      // Show menu
+      dropdownMenu.classList.add('active');
       // Focus first menu item when opening
       if (menuItems.length > 0) {
         currentFocusIndex = 0;
@@ -85,6 +87,8 @@ export function initStoplight(stoplightId = 'stoplight', menuId = 'dropdown-menu
         windowWithTrapFocus.trapFocus(dropdownMenu);
       }
     } else {
+      // Hide menu
+      dropdownMenu.classList.remove('active');
       // Return focus to stoplight button when closing
       stoplight.focus();
       currentFocusIndex = -1;
@@ -97,6 +101,7 @@ export function initStoplight(stoplightId = 'stoplight', menuId = 'dropdown-menu
   function closeMenu(): void {
     if (isOpen) {
       isOpen = false;
+      dropdownMenu.classList.remove('active');
       dropdownMenu.setAttribute('aria-hidden', 'true');
       stoplight.setAttribute('aria-expanded', 'false');
       stoplight.focus();

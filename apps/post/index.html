@@ -87,7 +87,6 @@
       </div>
       <div class="header-right">
         <warmthly-language-switcher></warmthly-language-switcher>
-        <warmthly-reading-level></warmthly-reading-level>
         <warmthly-stoplight app="post"></warmthly-stoplight>
       </div>
     </header>
@@ -112,7 +111,7 @@
         <div class="timeline-container" id="timeline-container">
         </div>
       </div>
-    </div>
+    </main>
     
     <div class="chronicle-popup" id="chronicle-popup">
       <button class="chronicle-popup-close" id="popup-close" aria-label="Close popup">×</button>
@@ -555,5 +554,9 @@
 
     customElements.define('world-map-svg', WorldMapSVG);
   </script>
+  
+  <div style="position: fixed; bottom: 1rem; right: 1rem; z-index: 1000; display: flex; gap: 0.5rem; align-items: center;">
+    <warmthly-reading-level></warmthly-reading-level>
+  </div>
 </body>
 </html>

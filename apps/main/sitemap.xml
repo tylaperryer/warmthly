@@ -35,19 +35,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://www.warmthly.org/privacy.html</loc>
-    <lastmod>2025-12-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-
-    <image:image>
-      <image:loc>https://www.warmthly.org/favicon.svg</image:loc>
-      <image:title>Warmthly Privacy Policy</image:title>
-      <image:caption>Privacy policy page</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://www.warmthly.org/easy-read.html</loc>
+    <loc>https://www.warmthly.org/easy-read</loc>
     <lastmod>2025-12-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -59,19 +47,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://www.warmthly.org/help.html</loc>
-    <lastmod>2025-12-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-
-    <image:image>
-      <image:loc>https://www.warmthly.org/favicon.svg</image:loc>
-      <image:title>Warmthly Help</image:title>
-      <image:caption>Help and FAQ page for Warmthly</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://www.warmthly.org/404.html</loc>
+    <loc>https://www.warmthly.org/404</loc>
     <lastmod>2025-12-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.1</priority>

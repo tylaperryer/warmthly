@@ -44,7 +44,7 @@
 }
 
 .pronunciation-tooltip .phonetic {
-  font-family: monospace;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: var(--font-size-lg);
   color: var(--text-color);
   margin: var(--spacing-2) 0;
@@ -98,7 +98,7 @@
 }
 
 .pronunciation-list .phonetic {
-  font-family: monospace;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: var(--font-size-lg);
 }
 

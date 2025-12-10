@@ -1,4 +1,4 @@
-﻿import { trapFocus } from '/lego/utils/focus-trap.js';
+import { trapFocus } from '/lego/utils/focus-trap.js';
 import { ariaAnnouncer } from '/lego/utils/aria-announcer.js';
 import {
   lockBodyScroll,
@@ -1064,7 +1064,8 @@ void (async () => {
 
 const cookieButton = document.getElementById('cookieButton');
 const cookiePopup = document.getElementById('cookiePopup');
-const hasSeenCookiePopup = localStorage.getItem('warmthly_cookie_popup_seen') === 'true';
+// Cookie popup removed - no data collection
+const hasSeenCookiePopup = true;
 
 if (!hasSeenCookiePopup) {
   setTimeout(() => {
@@ -1083,7 +1084,7 @@ if (!hasSeenCookiePopup) {
     if (!cookieButton.contains(e.target) && !cookiePopup.contains(e.target)) {
       if (cookiePopup.classList.contains('visible')) {
         cookiePopup.classList.remove('visible');
-        localStorage.setItem('warmthly_cookie_popup_seen', 'true');
+        // No data collection - removed localStorage
         setTimeout(() => {
           cookieButton.classList.remove('visible');
           setTimeout(() => {
@@ -1096,7 +1097,7 @@ if (!hasSeenCookiePopup) {
 
   cookiePopup.addEventListener('click', () => {
     cookiePopup.classList.remove('visible');
-    localStorage.setItem('warmthly_cookie_popup_seen', 'true');
+    // No data collection - removed localStorage
     setTimeout(() => {
       cookieButton.classList.remove('visible');
       setTimeout(() => {
