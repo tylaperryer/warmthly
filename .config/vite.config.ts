@@ -120,49 +120,58 @@ function preserveLegoScripts(): Plugin {
       // which backs it up before vite build and restores it after
 
       // After bundle is written, re-add the script tags to HTML files
-      const htmlFiles = [
-        join(distDir, 'apps/main/index.html'),
-        join(distDir, 'apps/mint/index.html'),
-        join(distDir, 'apps/post/index.html'),
-        join(distDir, 'apps/admin/index.html'),
-      ];
+      // Vite outputs HTML files as dist/main.html, dist/mint.html, etc. based on rollup input
+      const apps = ['main', 'mint', 'post', 'admin'];
+      
+      for (const appName of apps) {
+        // Try multiple possible locations for HTML files
+        const possibleHtmlFiles = [
+          join(distDir, `${appName}.html`), // Vite output: dist/main.html
+          join(distDir, appName, 'index.html'), // Alternative: dist/main/index.html
+          join(distDir, 'apps', appName, 'index.html'), // Legacy: dist/apps/main/index.html
+        ];
 
-      for (const htmlFile of htmlFiles) {
-        if (existsSync(htmlFile)) {
-          let html = readFileSync(htmlFile, 'utf-8');
+        let htmlFile: string | null = null;
+        for (const file of possibleHtmlFiles) {
+          if (existsSync(file)) {
+            htmlFile = file;
+            break;
+          }
+        }
 
-          // Remove any existing /lego/ script tags that might be in wrong place
-          html = html.replace(/<script[^>]*src=["']\/lego\/[^"']+["'][^>]*><\/script>\s*/g, '');
+        if (!htmlFile) {
+          console.warn(`⚠️  HTML file not found for ${appName}, skipping script tag restoration`);
+          continue;
+        }
 
-          // Find the closing </head> tag and insert scripts before it
-          const headCloseIndex = html.indexOf('</head>');
-          if (headCloseIndex !== -1) {
-            // Get scripts for this file (match by checking if it's the right app)
-            const appName = htmlFile.includes('/main/')
-              ? 'main'
-              : htmlFile.includes('/mint/')
-                ? 'mint'
-                : htmlFile.includes('/post/')
-                  ? 'post'
-                  : 'admin';
+        let html = readFileSync(htmlFile, 'utf-8');
 
-            // Find scripts from source HTML
-            const sourceHtml = readFileSync(
-              resolve(__dirname, `../apps/${appName}/index.html`),
-              'utf-8'
-            );
-            const legoScriptRegex = /<script[^>]*src=["'](\/lego\/[^"']+)["'][^>]*><\/script>/g;
-            const scripts: string[] = [];
-            let match;
-            while ((match = legoScriptRegex.exec(sourceHtml)) !== null) {
-              scripts.push(match[0]);
-            }
+        // Remove any existing /lego/ script tags that might be in wrong place
+        html = html.replace(/<script[^>]*src=["']\/lego\/[^"']+["'][^>]*><\/script>\s*/g, '');
 
-            if (scripts.length > 0) {
-              const scriptsHtml = '\n  ' + scripts.join('\n  ') + '\n  ';
-              html = html.slice(0, headCloseIndex) + scriptsHtml + html.slice(headCloseIndex);
-              writeFileSync(htmlFile, html, 'utf-8');
-            }
+        // Find the closing </head> tag and insert scripts before it
+        const headCloseIndex = html.indexOf('</head>');
+        if (headCloseIndex !== -1) {
+          // Find scripts from source HTML
+          const sourceHtmlPath = resolve(__dirname, `../apps/${appName}/index.html`);
+          if (!existsSync(sourceHtmlPath)) {
+            console.warn(`⚠️  Source HTML not found for ${appName}: ${sourceHtmlPath}`);
+            continue;
+          }
+
+          const sourceHtml = readFileSync(sourceHtmlPath, 'utf-8');
+          const legoScriptRegex = /<script[^>]*src=["'](\/lego\/[^"']+)["'][^>]*><\/script>/g;
+          const scripts: string[] = [];
+          let match;
+          while ((match = legoScriptRegex.exec(sourceHtml)) !== null) {
+            scripts.push(match[0]);
+          }
+
+          if (scripts.length > 0) {
+            const scriptsHtml = '\n  ' + scripts.join('\n  ') + '\n  ';
+            html = html.slice(0, headCloseIndex) + scriptsHtml + html.slice(headCloseIndex);
+            writeFileSync(htmlFile, html, 'utf-8');
+            console.log(`✅ Restored ${scripts.length} lego script tags to ${htmlFile.replace(distDir, '')}`);
           }
         }
       }
