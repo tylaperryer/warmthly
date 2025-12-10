@@ -1,0 +1,78 @@
+#!/usr/bin/env tsx
+/**
+ * Copy compiled lego directory to each app's dist folder
+ * This ensures lego components are available at /lego/ path for each app
+ */
+
+import { existsSync, mkdirSync, readdirSync, statSync, copyFileSync } from 'fs';
+import { resolve, join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const rootDir = resolve(__dirname, '..');
+const distLegoDir = join(rootDir, 'dist', 'lego');
+const apps = ['main', 'mint', 'post', 'admin'];
+
+function copyRecursive(src: string, dest: string) {
+  if (!existsSync(src)) return;
+
+  const stat = statSync(src);
+  if (stat.isDirectory()) {
+    if (!existsSync(dest)) {
+      mkdirSync(dest, { recursive: true });
+    }
+    const entries = readdirSync(src);
+    for (const entry of entries) {
+      // Skip .map and .d.ts files - we only need .js, .css, .json, etc.
+      if (entry.endsWith('.map') || entry.endsWith('.d.ts')) {
+        continue;
+      }
+      copyRecursive(join(src, entry), join(dest, entry));
+    }
+  } else {
+    // Copy all files except .map and .d.ts
+    if (!src.endsWith('.map') && !src.endsWith('.d.ts')) {
+      const destDir = dirname(dest);
+      if (!existsSync(destDir)) {
+        mkdirSync(destDir, { recursive: true });
+      }
+      copyFileSync(src, dest);
+    }
+  }
+}
+
+async function copyLegoToApps() {
+  console.log('📋 Copying lego directory to each app...');
+
+  if (!existsSync(distLegoDir)) {
+    console.warn('⚠️  dist/lego directory not found, nothing to copy');
+    return;
+  }
+
+  for (const app of apps) {
+    const appDir = join(rootDir, 'dist', 'apps', app);
+    const appLegoDir = join(appDir, 'lego');
+
+    if (!existsSync(appDir)) {
+      console.warn(`⚠️  App directory not found: ${appDir}`);
+      continue;
+    }
+
+    console.log(`  Copying to ${app}/lego/...`);
+    copyRecursive(distLegoDir, appLegoDir);
+  }
+
+  console.log('✅ Lego directory copied to all apps');
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('copy-lego-to-apps.ts')) {
+  copyLegoToApps().catch(error => {
+    console.error('Fatal error:', error);
+    process.exit(1);
+  });
+}
+
+export { copyLegoToApps };
+
