@@ -1,0 +1,39 @@
+# This is the full and correct code for your top-level wrangler.toml file
+
+# Default settings that apply to all projects unless overridden
+name = "warmthly" # Sets the default project name
+
+# =================================================================
+# Main Site Configuration (warmthly.org)
+# =================================================================
+[env.main]
+pages_build_output_dir = "./apps/main"
+[env.main.vars]
+# You can add environment-specific variables here if needed
+
+# =================================================================
+# Mint Site Configuration (mint.warmthly.org)
+# =================================================================
+[env.mint]
+name = "warmthly-mint" # Overrides the default name
+pages_build_output_dir = "./apps/mint"
+[env.mint.vars]
+# You can add environment-specific variables here if needed
+
+# =================================================================
+# Post Site Configuration (post.warmthly.org)
+# =================================================================
+[env.post]
+name = "warmthly-post" # Overrides the default name
+pages_build_output_dir = "./apps/post"
+[env.post.vars]
+# You can add environment-specific variables here if needed
+
+# =================================================================
+# Admin Site Configuration (admin.warmthly.org)
+# =================================================================
+[env.admin]
+name = "warmthly-admin" # Overrides the default name
+pages_build_output_dir = "./apps/admin"
+[env.admin.vars]
+# You can add environment-specific variables here if needed

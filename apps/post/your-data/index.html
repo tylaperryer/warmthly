@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <warmthly-head 
+    title="Your Data - Warmthly"
+    description="View and manage all data we store about you. Complete transparency on what we know."
+    app="post"
+    viewport="1.0"
+    preconnects="https://www.warmthly.org, https://post.warmthly.org">
+  </warmthly-head>
+  
+  <style>
+    /* Hide body until CSS loads to prevent FOUC */
+    body:not(.css-loaded) {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body.css-loaded {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
+  </style>
+</head>
+<body class="fonts-loading">
+  <warmthly-header app="post"></warmthly-header>
+  
+  <warmthly-stoplight app="post"></warmthly-stoplight>
+
+  <div class="container container-narrow" id="main-content" role="main">
+    <h1 class="page-title">Your Data</h1>
+    <p class="main-text">
+      <b>Radical Transparency:</b> This is everything we store about you. If you see something we didn't mention, <a href="/report/">report it</a>.
+    </p>
+
+    <div class="section">
+      <h2 class="section-title">What We Know About You</h2>
+      
+      <div class="data-item">
+        <strong>Cookie Popup Seen:</strong>
+        <span id="cookieData">Not stored</span>
+        <button onclick="deleteCookieData()">Delete</button>
+      </div>
+      
+      <div class="data-item">
+        <strong>Vote Data:</strong>
+        <span id="voteData">No vote recorded</span>
+        <button onclick="deleteVoteData()">Delete</button>
+      </div>
+      
+      <div class="data-item">
+        <strong>Report Submissions:</strong>
+        <span id="reportData">None</span>
+        <button onclick="viewReports()">View</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button onclick="exportAllData()">Export All My Data</button>
+      <button onclick="deleteAllData()" class="danger">Delete All My Data</button>
+    </div>
+  </div>
+
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
+
+  <script>
+
+    // Placeholder functions
+    function deleteCookieData() { alert('Functionality coming soon'); }
+    function deleteVoteData() { alert('Functionality coming soon'); }
+    function viewReports() { alert('Functionality coming soon'); }
+    function exportAllData() { alert('Functionality coming soon'); }
+    function deleteAllData() { 
+      if (confirm('Are you sure you want to delete all your data? This cannot be undone.')) {
+        alert('Functionality coming soon');
+      }
+    }
+  </script>
+</body>
+</html>
+
