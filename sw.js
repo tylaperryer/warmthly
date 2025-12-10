@@ -21,7 +21,7 @@ const PRECACHE_ASSETS = [
   '/lego/styles/common.css',
   '/lego/styles/variables.css',
   '/lego/styles/base.css',
-  '/favicon.svg',
+  '/Oalien.svg',
   '/manifest.json',
 ];
 
