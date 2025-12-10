@@ -50,29 +50,56 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
    */
   private async loadLanguages(): Promise<void> {
     try {
-      const response = await fetch(API_CONFIG.getUrl('api/i18n/languages'));
-      if (response.ok) {
-        const data = await response.json();
-        const languageCodes: string[] = data.languages || [];
-
-        // Fetch language metadata for each code
-        // For now, we'll create basic info from codes
-        // In production, fetch full metadata from API
-        this.languages = languageCodes.map((code: string) => {
-          // Basic language info (can be enhanced with full metadata)
-          return {
-            code,
-            name: this.getLanguageName(code),
-            nativeName: this.getNativeName(code),
-            locale: `${code}_${code.toUpperCase()}`,
-            rtl: isRTL(code),
-          };
+      // Try to fetch from API, but fallback gracefully if it fails
+      let response: Response;
+      try {
+        response = await fetch(API_CONFIG.getUrl('api/i18n/languages'), {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
         });
-
-        // Sort alphabetically by English name
-        this.languages.sort((a, b) => a.name.localeCompare(b.name));
+      } catch (fetchError) {
+        // Network error - use fallback
+        this.languages = this.getFallbackLanguages();
         this.filteredLanguages = [...this.languages];
+        return;
       }
+
+      if (response.ok) {
+        try {
+          const data = await response.json();
+          const languageCodes: string[] = data.languages || [];
+
+          if (languageCodes.length > 0) {
+            // Fetch language metadata for each code
+            this.languages = languageCodes.map((code: string) => {
+              // Basic language info (can be enhanced with full metadata)
+              return {
+                code,
+                name: this.getLanguageName(code),
+                nativeName: this.getNativeName(code),
+                locale: `${code}_${code.toUpperCase()}`,
+                rtl: isRTL(code),
+              };
+            });
+
+            // Sort alphabetically by English name
+            this.languages.sort((a, b) => a.name.localeCompare(b.name));
+            this.filteredLanguages = [...this.languages];
+            return;
+          }
+        } catch (jsonError) {
+          // JSON parse error - use fallback
+          this.languages = this.getFallbackLanguages();
+          this.filteredLanguages = [...this.languages];
+          return;
+        }
+      }
+      
+      // If we get here, API didn't return valid data - use fallback
+      this.languages = this.getFallbackLanguages();
+      this.filteredLanguages = [...this.languages];
     } catch (error: unknown) {
       // Use error boundary for consistent error handling
       const errorBoundary = getErrorBoundary();

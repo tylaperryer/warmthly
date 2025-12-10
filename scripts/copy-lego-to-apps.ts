@@ -80,6 +80,26 @@ async function copyLegoToApps() {
 
   console.log('✅ Lego directory available at root and all apps');
   console.log(`   Root: ${distLegoDir}`);
+
+  // Copy Oalien.svg to each app's dist directory
+  const oalienSvg = join(rootDir, 'Oalien.svg');
+  if (existsSync(oalienSvg)) {
+    console.log('📋 Copying Oalien.svg to all apps...');
+    for (const app of apps) {
+      const appDir = join(rootDir, 'dist', 'apps', app);
+      if (existsSync(appDir)) {
+        const destSvg = join(appDir, 'Oalien.svg');
+        copyFileSync(oalienSvg, destSvg);
+        console.log(`  ✓ Copied to ${app}/Oalien.svg`);
+      }
+    }
+    // Also copy to root dist
+    const rootDistSvg = join(rootDir, 'dist', 'Oalien.svg');
+    copyFileSync(oalienSvg, rootDistSvg);
+    console.log('  ✓ Copied to dist/Oalien.svg');
+  } else {
+    console.warn('⚠️  Oalien.svg not found in root directory');
+  }
 }
 
 // Run if called directly

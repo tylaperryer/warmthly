@@ -76,7 +76,7 @@ for app in main mint post admin; do
     # Copy root files
     [ -f "robots.txt" ] && cp robots.txt "dist/$app/" 2>/dev/null || true
     [ -f "manifest.json" ] && cp manifest.json "dist/$app/" 2>/dev/null || true
-    [ -f "favicon.svg" ] && cp favicon.svg "dist/$app/" 2>/dev/null || true
+    [ -f "Oalien.svg" ] && cp Oalien.svg "dist/$app/" 2>/dev/null || true
     
     # Copy service worker
     [ -f "sw.js" ] && cp sw.js "dist/$app/" 2>/dev/null || true

@@ -620,12 +620,12 @@ h1{font-size:var(--font-size-2xl);line-height:1.2;margin-bottom:var(--spacing-6)
       const cspReportUrl = `${baseUrl}/api/csp-report`;
       const cspPolicy = [
         "default-src 'self'",
-        `script-src 'self' 'nonce-${cspNonce}' https://cdnjs.cloudflare.com https://js.yoco.com https://js.verygoodvault.com https://www.gstatic.com`,
+        `script-src 'self' 'nonce-${cspNonce}' https://cdnjs.cloudflare.com https://js.yoco.com https://js.verygoodvault.com`,
         "style-src 'self' 'unsafe-inline' https://cdn.quilljs.com", // Keep unsafe-inline for styles as nonces are less critical
         "font-src 'self' data:",
         "img-src 'self' data: https: blob:",
-        "connect-src 'self' https://api.airtable.com https://payments.yoco.com https://online.yoco.com https://verygoodvault.com https://api.exchangerate-api.com https://www.googleapis.com https://*.firebaseio.com https://*.firestore.googleapis.com",
-        "frame-src 'self' https://js.yoco.com https://js.verygoodvault.com",
+        "connect-src 'self' https://payments.yoco.com https://online.yoco.com https://verygoodvault.com https://api.exchangerate-api.com",
+        "frame-src 'self' https://js.yoco.com https://js.verygoodvault.com https://www.youtube-nocookie.com",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
