@@ -43,6 +43,7 @@
         document.documentElement.setAttribute('dir', 'rtl');
       }
     })();
+  </script>
   <script type="module" src="./api-config.js"></script>
   <script type="module" src="/lego/components/warmthly-head.js"></script>
   <script type="module" src="/lego/components/warmthly-header.js"></script>
@@ -50,7 +51,6 @@
   <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
   <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
   <script type="module" src="/lego/components/warmthly-media-accessibility.js"></script>
-  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
   <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
   <script type="module" src="/lego/utils/init.js"></script>
   <script type="module" src="./main-app-loader.js"></script>
@@ -287,8 +287,6 @@
         <warmthly-stoplight app="main"></warmthly-stoplight>
     </div>
   </header>
-  <warmthly-breadcrumb></warmthly-breadcrumb>
-  
   <main id="main-content" role="main" aria-label="Main content">
   <div class="container">
     <h1 class="logo" data-reading-level-content>Rehumanize Our World.</h1>
@@ -567,12 +565,6 @@
   </main>
 
   <script type="module" src="/apps/main/payment-handler.js"></script>
-  
-  <script type="module" src="/lego/components/warmthly-last-updated.js"></script>
-  <warmthly-last-updated date="2025-01-15"></warmthly-last-updated>
-  
-  <script type="module" src="/lego/components/warmthly-social-share.js"></script>
-  <warmthly-social-share></warmthly-social-share>
   
   <warmthly-font-loader></warmthly-font-loader>
   <!-- Yoco SDK - Load dynamically when needed (Performance Optimization) -->
