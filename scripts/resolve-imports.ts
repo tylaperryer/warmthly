@@ -35,54 +35,53 @@ function resolveImportsInFile(filePath: string): void {
     // Escape the alias for regex
     const escapedAlias = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     
-    // Match import statements: import ... from '@config/...'
-    // Handles: import { x } from '@config/...', import x from '@config/...', import type x from '@config/...'
-    const importRegex = new RegExp(
-      `(import\\s+(?:type\\s+)?(?:[^'"]*\\s+from\\s+)?['"])${escapedAlias}([^'"]+)(['"])`,
+    // Use a simpler, more permissive approach: match the alias in any import/export context
+    // Pattern 1: import ... from '@config/...' (handles all import variations)
+    // This pattern matches: import { x } from '@config/...', import x from '@config/...', import type x from '@config/...'
+    const importFromPattern = new RegExp(
+      `(import\\s+(?:type\\s+)?.*?\\s+from\\s+['"])${escapedAlias}([^'"]+)(['"])`,
       'g'
     );
-
-    // Match export statements: export ... from '@config/...'
-    // Handles: export { x } from '@config/...', export * from '@config/...', export type x from '@config/...'
-    const exportRegex = new RegExp(
-      `(export\\s+(?:type\\s+)?(?:[^'"]*\\s+from\\s+)?['"])${escapedAlias}([^'"]+)(['"])`,
+    
+    // Pattern 2: export ... from '@config/...'
+    const exportFromPattern = new RegExp(
+      `(export\\s+(?:type\\s+)?.*?\\s+from\\s+['"])${escapedAlias}([^'"]+)(['"])`,
       'g'
     );
-
-    // Match side-effect imports: import '@config/...' (no 'from')
-    const sideEffectImportRegex = new RegExp(
+    
+    // Pattern 3: import '@config/...' (side-effect import)
+    const sideEffectPattern = new RegExp(
       `(import\\s+['"])${escapedAlias}([^'"]+)(['"])`,
       'g'
     );
-
-    // Match dynamic imports: import('@config/...')
-    // Handles: import('@config/...'), await import('@config/...')
-    const dynamicImportRegex = new RegExp(
+    
+    // Pattern 4: import('@config/...') (dynamic import)
+    const dynamicPattern = new RegExp(
       `(import\\s*\\(\\s*['"])${escapedAlias}([^'"]+)(['"]\\s*\\))`,
       'g'
     );
-
+    
     // Apply all replacements
-    const newContent = content
-      .replace(importRegex, (_match, before, path, quote) => {
+    const beforeReplace = content;
+    content = content
+      .replace(importFromPattern, (_match, before, path, quote) => {
         modified = true;
         return `${before}${replacement}${path}${quote}`;
       })
-      .replace(exportRegex, (_match, before, path, quote) => {
+      .replace(exportFromPattern, (_match, before, path, quote) => {
         modified = true;
         return `${before}${replacement}${path}${quote}`;
       })
-      .replace(sideEffectImportRegex, (_match, before, path, quote) => {
+      .replace(sideEffectPattern, (_match, before, path, quote) => {
         modified = true;
         return `${before}${replacement}${path}${quote}`;
       })
-      .replace(dynamicImportRegex, (_match, before, path, quote) => {
+      .replace(dynamicPattern, (_match, before, path, quote) => {
         modified = true;
         return `${before}${replacement}${path}${quote}`;
       });
-
-    if (newContent !== content) {
-      content = newContent;
+    
+    if (content !== beforeReplace) {
       modified = true;
     }
   }
