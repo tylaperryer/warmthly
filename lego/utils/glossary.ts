@@ -213,6 +213,15 @@ export function initGlossary(): void {
         return;
       }
 
+      // Exclude title element and head elements from glossary processing
+      if (
+        parent.tagName === 'TITLE' ||
+        parent.closest('head') ||
+        parent.closest('title')
+      ) {
+        return;
+      }
+
       const text = textNode.textContent || '';
       const marked = markGlossaryTerms(text);
 
