@@ -27,34 +27,42 @@ const pathAliases: Record<string, string> = {
 
 function resolveImportsInFile(filePath: string): void {
   let content = readFileSync(filePath, 'utf-8');
+  const originalContent = content;
   let modified = false;
 
   // Replace all path aliases in import/export statements
   for (const [alias, replacement] of Object.entries(pathAliases)) {
+    // Escape the alias for regex
+    const escapedAlias = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
     // Match import statements: import ... from '@config/...'
+    // Handles: import { x } from '@config/...', import x from '@config/...', import type x from '@config/...'
     const importRegex = new RegExp(
-      `(import\\s+[^'"]*from\\s+['"])${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^'"]+)(['"])`,
+      `(import\\s+(?:type\\s+)?(?:[^'"]*\\s+from\\s+)?['"])${escapedAlias}([^'"]+)(['"])`,
       'g'
     );
 
     // Match export statements: export ... from '@config/...'
+    // Handles: export { x } from '@config/...', export * from '@config/...', export type x from '@config/...'
     const exportRegex = new RegExp(
-      `(export\\s+[^'"]*from\\s+['"])${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^'"]+)(['"])`,
+      `(export\\s+(?:type\\s+)?(?:[^'"]*\\s+from\\s+)?['"])${escapedAlias}([^'"]+)(['"])`,
       'g'
     );
 
     // Match side-effect imports: import '@config/...' (no 'from')
     const sideEffectImportRegex = new RegExp(
-      `(import\\s+['"])${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^'"]+)(['"])`,
+      `(import\\s+['"])${escapedAlias}([^'"]+)(['"])`,
       'g'
     );
 
     // Match dynamic imports: import('@config/...')
+    // Handles: import('@config/...'), await import('@config/...')
     const dynamicImportRegex = new RegExp(
-      `(import\\s*\\(\\s*['"])${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^'"]+)(['"]\\s*\\))`,
+      `(import\\s*\\(\\s*['"])${escapedAlias}([^'"]+)(['"]\\s*\\))`,
       'g'
     );
 
+    // Apply all replacements
     const newContent = content
       .replace(importRegex, (_match, before, path, quote) => {
         modified = true;
@@ -75,10 +83,11 @@ function resolveImportsInFile(filePath: string): void {
 
     if (newContent !== content) {
       content = newContent;
+      modified = true;
     }
   }
 
-  if (modified) {
+  if (modified && content !== originalContent) {
     writeFileSync(filePath, content, 'utf-8');
     console.log(`✅ Resolved imports in: ${filePath.replace(rootDir, '')}`);
   }
@@ -103,10 +112,64 @@ function processDirectory(dir: string): void {
   }
 }
 
+function verifyNoUnresolvedImports(dir: string): { hasErrors: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  if (!existsSync(dir)) {
+    return { hasErrors: false, errors: [] };
+  }
+
+  const entries = readdirSync(dir);
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry);
+    const stat = statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      const subResult = verifyNoUnresolvedImports(fullPath);
+      errors.push(...subResult.errors);
+    } else if (entry.endsWith('.js')) {
+      const content = readFileSync(fullPath, 'utf-8');
+      // Check for any remaining path aliases in actual code (not comments)
+      // Look for patterns like: from '@config/', import('@utils/', etc.
+      for (const alias of Object.keys(pathAliases)) {
+        // Check if alias appears in import/export statements (not just anywhere)
+        const importPattern = new RegExp(
+          `(?:import|export|from|import\\s*\\().*${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
+          'g'
+        );
+        if (importPattern.test(content)) {
+          // Double-check it's not just in a comment
+          const lines = content.split('\n');
+          lines.forEach((line, index) => {
+            if (line.includes(alias) && !line.trim().startsWith('//') && !line.trim().startsWith('*')) {
+              errors.push(`${fullPath.replace(rootDir, '')}:${index + 1} - Found unresolved alias: ${alias}`);
+            }
+          });
+        }
+      }
+    }
+  }
+
+  return { hasErrors: errors.length > 0, errors };
+}
+
 console.log('🔄 Resolving path aliases in compiled JavaScript files...');
 if (existsSync(distLegoDir)) {
   processDirectory(distLegoDir);
-  console.log('✅ All imports resolved');
+  
+  // Verify no unresolved imports remain
+  console.log('🔍 Verifying all imports are resolved...');
+  const verification = verifyNoUnresolvedImports(distLegoDir);
+  
+  if (verification.hasErrors) {
+    console.error('❌ ERROR: Found unresolved path aliases:');
+    verification.errors.forEach(error => console.error(`  ${error}`));
+    console.error('\n❌ Build failed: Some imports were not resolved!');
+    process.exit(1);
+  }
+  
+  console.log('✅ All imports resolved and verified');
 } else {
   console.warn("⚠️  dist/lego directory not found - this is normal if build hasn't run yet");
 }
