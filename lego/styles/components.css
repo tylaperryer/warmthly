@@ -118,9 +118,9 @@ body > nav.header-right .stoplight-container {
 .stoplight {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--spacing-1);
   cursor: pointer;
-  padding: 4px;
+  padding: var(--spacing-2);
   position: relative;
 
   /* Default: No background, border, or glass effect - just dots */
@@ -188,8 +188,8 @@ body > nav.header-right .stoplight-container {
 }
 
 .stoplight-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   position: relative;
   transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -284,6 +284,7 @@ body > nav.header-right .stoplight-container {
   border: 1px solid var(--border-color);
   opacity: 0;
   visibility: hidden;
+  display: none;
   transform: translateY(-12px) scale(0.94);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
@@ -311,6 +312,7 @@ body > nav.header-right .stoplight-container {
 .dropdown-menu.active {
   opacity: 1;
   visibility: visible;
+  display: block;
   transform: translateY(0) scale(1);
 }
 
