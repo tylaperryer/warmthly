@@ -29,8 +29,14 @@ function copyRecursive(src: string, dest: string) {
       copyRecursive(join(src, entry), join(dest, entry));
     }
   } else {
-    // Only copy .js files (compiled output)
-    if (src.endsWith('.js')) {
+    // Copy .js files (compiled output), CSS files, JSON files, and other assets
+    // Exclude TypeScript source files and declaration files
+    if (
+      src.endsWith('.js') ||
+      src.endsWith('.css') ||
+      src.endsWith('.json') ||
+      (!src.endsWith('.ts') && !src.endsWith('.tsx') && !src.endsWith('.d.ts'))
+    ) {
       const destDir = dirname(dest);
       if (!existsSync(destDir)) {
         mkdirSync(destDir, { recursive: true });
