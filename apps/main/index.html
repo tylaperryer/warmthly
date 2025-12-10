@@ -78,6 +78,7 @@
     body {
       background-color: #fff6f1;
       min-height: 100vh;
+      font-family: 'Inter', sans-serif;
     }
     body.fonts-loaded {
       opacity: 1;
@@ -100,6 +101,7 @@
       margin-bottom: var(--spacing-4);
       color: var(--warmthly-orange);
       letter-spacing: var(--letter-spacing-tight);
+      text-align: center;
     }
     .subtitle {
       font-size: var(--font-size-base);
@@ -135,25 +137,20 @@
     }
     
     .sign-language-dot {
-      width: 12px;
-      height: 12px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: var(--warmthly-orange);
+      background: var(--green-dot);
       animation: pulse 2s ease-in-out infinite;
       cursor: pointer;
-      box-shadow: 0 0 0 0 rgba(255, 140, 66, 0.7);
     }
     
     @keyframes pulse {
       0%, 100% {
         opacity: 1;
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 140, 66, 0.7);
       }
       50% {
-        opacity: 0.7;
-        transform: scale(1.1);
-        box-shadow: 0 0 0 8px rgba(255, 140, 66, 0);
+        opacity: 0.5;
       }
     }
     
@@ -201,6 +198,7 @@
       line-height: var(--line-height-base);
       opacity: 0.8;
       margin-bottom: var(--spacing-10);
+      color: var(--text-color);
     }
     .method-section .intro-paragraph strong {
       color: var(--text-color);
@@ -251,6 +249,7 @@
       opacity: 0.8;
       line-height: var(--line-height-base);
       padding-left: var(--spacing-10);
+      color: var(--text-color);
     }
     .footer {
       margin-top: var(--spacing-16);
@@ -294,7 +293,6 @@
   </style>
 </head>
 <body class="fonts-loading">
-  <a href="#main-content" class="skip-link">Skip to main content</a>
   <header class="header">
     <div class="header-left">
         <a href="/" class="brand-logo" id="main-brand-logo">Warmthly</a>
@@ -460,7 +458,7 @@
         </p>
     </div>
     <div id="donationSection" class="donation-section" style="margin: var(--spacing-12) 0;">
-      <button class="donate-button" id="donateButton" aria-label="Donate to support Warmthly's mission to rehumanize our world" type="button"> Support the Mission</button>
+      <button class="donate-button" id="donateButton" aria-label="Donate to support Warmthly's mission to rehumanize our world" type="button">Support the Mission</button>
       <div id="yocoPaymentEmbed" style="display: none; margin-top: var(--spacing-8); max-width: 600px; margin-left: auto; margin-right: auto;">
         <div style="background: white; padding: var(--spacing-8); border-radius: var(--radius-xl); box-shadow: 0 var(--spacing-1) var(--spacing-4) rgba(0,0,0,0.1);">
           <h3 style="font-family: 'Inter', sans-serif; color: var(--warmthly-orange); margin-bottom: var(--spacing-4); text-align: center; font-size: var(--font-size-xl);">Complete Your Donation</h3>
@@ -470,7 +468,7 @@
         </div>
       </div>
     </div>
-    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer" aria-label="View Warmthly source code on GitHub">GitHub</a>. Our work is not ours, it's yours. <a href="/easy-read">Easy Read Version</a></p>
+    <p class="site-footer-inline" style="color: var(--text-color); opacity: 0.7;">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer" aria-label="View Warmthly source code on GitHub">GitHub</a>. Our work is not ours, it's yours. <a href="/easy-read">Easy Read Version</a></p>
   </div>
   
   <div class="donation-modal" id="donationModal" aria-hidden="true" role="dialog" aria-labelledby="donationModalTitle" aria-modal="true">
