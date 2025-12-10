@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    (function() {
+      function detectLanguage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+          }
+        } catch {}
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Research - Mint - Warmthly</title>
+  <meta name="description" content="Research and documentation for Warmthly's transparency tracking system and financial accountability measures.">
+  
+  <warmthly-head 
+    title="Research - Warmthly"
+    description="Research and methodology behind Warmthly's approach to making empathy measurable"
+    app="mint"
+    viewport="0.75"
+    preconnects="https://www.warmthly.org, https://post.warmthly.org">
+  </warmthly-head>
+  
+  <style>
+    /* Hide body until CSS loads to prevent FOUC */
+    body:not(.css-loaded) {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body.css-loaded {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
+  </style>
+  
+  <link rel="dns-prefetch" href="//warmthly.org">
+</head>
+<body class="fonts-loading">
+  <div class="preload-fonts">.</div>
+  
+  <warmthly-header app="mint"></warmthly-header>
+  
+  <div style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1rem; align-items: center;">
+    <warmthly-language-switcher></warmthly-language-switcher>
+    <warmthly-reading-level></warmthly-reading-level>
+    <warmthly-stoplight app="mint"></warmthly-stoplight>
+  </div>
+
+  <main class="container" id="main-content">
+    <h1 class="page-title" data-reading-level-content>Research <span aria-hidden="true">📚</span></h1>
+    <p class="main-text" data-reading-level-content>
+      Our research and methods page is <strong>under construction</strong>.
+      We're working on a clear, transparent walkthrough of how Mint works.
+    </p>
+  </main>
+  <warmthly-font-loader></warmthly-font-loader>
+</body>
+</html>
+

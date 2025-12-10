@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    // This improves SEO and accessibility by setting the correct language immediately
+    (function() {
+      function detectLanguage() {
+        // Check URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        // Check localStorage
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) {
+              return normalized;
+            }
+          }
+        } catch {}
+        // Check browser language
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      // Set dir for RTL languages
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  <script type="module" src="./api-config.js"></script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-media-accessibility.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module" src="./main-app-loader.js"></script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Warmthly - Rehumanize Our World</title>
+  <meta name="description" content="Warmthly is a global movement making empathy measurable in our systems. Join us in rehumanizing mental health and education through our pilot in Tbilisi, Georgia.">
+  
+  <warmthly-head 
+    title="Warmthly - Rehumanize Our World"
+    description="Warmthly is a global movement to make empathy a measurable part of our systems."
+    app="main"
+    viewport="0.75"
+    preconnects="https://mint.warmthly.org, https://post.warmthly.org, https://js.yoco.com, https://open.spotify.com">
+  </warmthly-head>
+
+  <!-- Fallback stylesheet - ensures styles load even if JavaScript fails -->
+  <link rel="stylesheet" href="/lego/styles/common.css">
+  <link rel="stylesheet" href="/lego/styles/main.css">
+
+  <style>
+    :root { color-scheme: light; }
+    html {
+      background-color: #fff6f1;
+      min-height: 100%;
+    }
+    body.fonts-loaded {
+      opacity: 1;
+      visibility: visible;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--spacing-24) var(--spacing-6) var(--spacing-10);
+      text-align: center;
+      color: var(--text-color);
+      position: relative;
+      z-index: 1;
+    }
+    .logo {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--font-size-2xl);
+      font-weight: 600;
+      line-height: var(--line-height-tight);
+      margin-bottom: var(--spacing-4);
+      color: var(--warmthly-orange);
+      letter-spacing: var(--letter-spacing-tight);
+    }
+    .subtitle {
+      font-size: var(--font-size-base);
+      color: var(--text-color);
+      opacity: 0.8;
+      font-weight: 400;
+      line-height: var(--line-height-base);
+      margin-bottom: var(--spacing-12);
+      font-family: 'Inter', sans-serif;
+    }
+    .video-section {
+      margin: var(--spacing-12) 0;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 var(--spacing-2) var(--spacing-8) rgba(0, 0, 0, 0.1);
+    }
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      background: #000;
+      border-radius: var(--radius-xl);
+    }
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: var(--radius-xl);
+    }
+    .method-section {
+      text-align: left;
+      margin: var(--spacing-16) auto;
+      padding: var(--spacing-12);
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255, 140, 66, 0.15);
+      max-width: 700px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1),
+                  transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+      /* Ensure text is readable even before animation */
+      color: var(--text-color);
+      visibility: hidden;
+    }
+    
+    .method-section.visible {
+      visibility: visible;
+    }
+    
+    .method-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .method-section .section-title {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      line-height: var(--line-height-tight);
+      color: var(--warmthly-orange);
+      margin-bottom: var(--spacing-4);
+      text-align: center;
+    }
+    .method-section .section-subtitle {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      line-height: var(--line-height-tight);
+      color: var(--text-color);
+      margin-top: var(--spacing-12);
+      margin-bottom: var(--spacing-6);
+      text-align: center;
+    }
+    .method-section .section-subtitle:first-of-type {
+      margin-top: var(--spacing-8);
+    }
+    .method-section .intro-paragraph {
+      text-align: center;
+      font-size: var(--font-size-lg);
+      line-height: var(--line-height-base);
+      opacity: 0.8;
+      margin-bottom: var(--spacing-10);
+    }
+    .method-section .intro-paragraph strong {
+      color: var(--text-color);
+      font-weight: 600;
+    }
+    .method-step {
+      margin-bottom: var(--spacing-8);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s,
+                  transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s;
+    }
+    
+    .method-section.visible .method-step {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .method-section.visible .method-step:nth-child(2) {
+      transition-delay: 0.3s;
+    }
+    
+    .method-section.visible .method-step:nth-child(3) {
+      transition-delay: 0.4s;
+    }
+    
+    .method-section.visible .method-step:nth-child(4) {
+      transition-delay: 0.5s;
+    }
+    
+    .method-step:last-child {
+      margin-bottom: 0;
+    }
+    .method-step h3 {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      line-height: var(--line-height-tight);
+      color: var(--text-color);
+      margin-bottom: var(--spacing-2);
+    }
+    .method-step h3 span {
+      color: var(--warmthly-orange);
+      margin-right: var(--spacing-2);
+    }
+    .method-step p {
+      font-size: var(--font-size-lg);
+      opacity: 0.8;
+      line-height: var(--line-height-base);
+      padding-left: var(--spacing-10);
+    }
+    .footer {
+      margin-top: var(--spacing-16);
+      opacity: 0.7;
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-base);
+    }
+    
+    .donation-section {
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    .donation-section.expanding {
+      margin-bottom: var(--spacing-24);
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding-top: var(--spacing-20);
+        padding-left: var(--spacing-4);
+        padding-right: var(--spacing-4);
+      }
+      .logo {
+        font-size: var(--font-size-xl);
+        margin-top: var(--spacing-16);
+      }
+      .subtitle {
+        font-size: var(--font-size-base);
+      }
+      .method-section {
+        padding: var(--spacing-6);
+        margin: var(--spacing-12) var(--spacing-4);
+      }
+      .method-section .section-title {
+        font-size: var(--font-size-lg);
+      }
+      .method-step p {
+        padding-left: 0;
+      }
+    }
+  </style>
+</head>
+<body class="fonts-loading">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <header class="header">
+    <div class="header-left">
+        <a href="/" class="brand-logo" id="main-brand-logo">Warmthly</a>
+    </div>
+    <div class="header-right">
+        <warmthly-language-switcher></warmthly-language-switcher>
+        <warmthly-reading-level></warmthly-reading-level>
+        <warmthly-stoplight app="main"></warmthly-stoplight>
+    </div>
+  </header>
+  <warmthly-breadcrumb></warmthly-breadcrumb>
+  
+  <main id="main-content" role="main" aria-label="Main content">
+  <div class="container">
+    <h1 class="logo" data-reading-level-content>Rehumanize Our World.</h1>
+    <p class="subtitle" data-reading-level-content>Warmthly is a global movement to make empathy a measurable part of our systems.</p>
+    <div class="video-section">
+      <div class="video-container" id="video-container"></div>
+      <warmthly-media-accessibility
+        video-id="video-container"
+        sign-language-url="/videos/warmthly-sign-language.mp4"
+        audio-description-url="/audio/warmthly-audio-description.mp3"
+        transcript-url="/transcripts/warmthly-video.txt"
+        captions-url="/captions/warmthly-video.vtt">
+      </warmthly-media-accessibility>
+    </div>
+    <div class="method-section">
+        <p class="intro-paragraph" data-reading-level-content>
+            We are raising $20,000 to legally launch a global movement and demonstrate that empathy is the most powerful force for change.
+        </p>
+        <p class="intro-paragraph" data-reading-level-content>
+            Warmthly is an international movement dedicated to bringing empathy into the concrete of global systems. We rehumanize sectors, starting with mental health and education, to make sure that people are no longer treated like numbers. We aim to make empathy a measurable design principle. With your support, we can go from proof-of-concept to international scale in one winter. Join us in building your future. Learn more in our <a href="/help.html">Help & FAQ</a> or see our <a href="https://mint.warmthly.org">transparency tracking</a>.
+        </p>
+        
+        <h2 class="section-subtitle" data-reading-level-content>Who are we? What's this about?</h2>
+        <p class="method-step" data-reading-level-content>
+            I'm Tyla Perryer, 15 (7/13/2010), from Gauteng, South Africa. I've seen too much indifference to sit around, so I'm starting with Warmthly. While my adults cover the legalities, I am the driving vision.
+        </p>
+        <p class="method-step" data-reading-level-content>
+            My team supports me:
+        </p>
+        <ul class="method-step" style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;" data-reading-level-content>
+            <li>My mother, Janine Perryer, is in administration</li>
+            <li>My stepfather, Darryl Linington, is the internal PR</li>
+        </ul>
+        <p class="method-step" data-reading-level-content>
+            <b>My vow:</b> I am not taking a single cent, clap of applause or like on socials as compensation. These funds cover the operational needs for our mission, and my time is volunteer pro bono. Every transaction is tracked publicly on our <a href="https://mint.warmthly.org">Mint page</a>.
+        </p>
+        
+        <h3 class="section-subtitle" data-reading-level-content>Our Launch: Tbilisi, Georgia, Europe</h3>
+        <p class="method-step" data-reading-level-content>
+            Warmthly will launch with a first focus on mental health through an empathy-first lens. To maximise the impact of your every cent and speed up our timeline, we are following our launch and initial proof-of-concept in Tbilisi, Georgia.
+        </p>
+        <p class="method-step" data-reading-level-content>
+            This allows us to:
+        </p>
+        <div class="method-step" data-reading-level-content>
+            <h3><span>1. Speed up efficiency:</span></h3>
+            <p>Georgia offers visa-free entry for South African citizens for up to 365 days.</p>
+        </div>
+        <div class="method-step" data-reading-level-content>
+            <h3><span>2. Speed up legal status:</span></h3>
+            <p>We are actively seeking a fiscal sponsor, which is an established U.S. 501(c)(3) non-profit, to accept tax-deductible donations and allow us to operate within Georgia legally from day one.</p>
+        </div>
+        
+        <h3 class="section-subtitle" data-reading-level-content>Our flagship pilot: Where Wildflowers Bloom.</h3>
+        <p class="method-step" data-reading-level-content>
+            Our pilot redesigns local mental health facilities with an empathy-first lens, backed by studies in environmental psychology. We will work on light, colour, and personalisation to improve patient experiences.
+        </p>
+        
+        <h3 class="section-subtitle" data-reading-level-content>Where Your $20,000 Goes</h3>
+        <p class="method-step" data-reading-level-content>
+            This "seed" funding covers "startup" costs and develops our pilot. Every cent will be tracked on a public, live transparency archive, showing all our donations, expenses, and receipts. View real-time tracking on our <a href="https://mint.warmthly.org">Mint page</a> and see our complete timeline on our <a href="https://post.warmthly.org">Post page</a>.
+        </p>
+        
+        <div class="method-step">
+            <h3><span>Launch trip (ZA  Tbilisi, Georgia) - 22 Nights</span></h3>
+            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
+                <li>Flights (ZA  Tbilisi, return for two): $1,300.00</li>
+                <li>Accommodation (22 nights for two): $1,000.00</li>
+                <li>Meals (22 days @ $40/day for two): $880.00</li>
+                <li>Local transport: $500.00</li>
+                <li>Professional attire: $150.00</li>
+                <li>Personal items (toiletries, etc.): $100.00</li>
+            </ul>
+        </div>
+        
+        <div class="method-step">
+            <h3><span>Legal & operational setup</span></h3>
+            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
+                <li>Fiscal sponsorship fee (Initial): $500.00</li>
+                <li>Initial operations: $1,000.00</li>
+                <li>Work equipment: $1,698.00</li>
+            </ul>
+        </div>
+        
+        <div class="method-step">
+            <h3><span>The pilot</span></h3>
+            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
+                <li>"Where Wildflowers Bloom" Pilot: $4,500.00</li>
+                <li style="list-style: none; margin-top: 0.5rem; font-size: 0.9em; opacity: 0.8;">Funds for hand-made, DIY upgrades for a mental health facility in Georgia.</li>
+            </ul>
+        </div>
+        
+        <p class="method-step" style="margin-top: 2rem;">
+            <b>Subtotal of Essential Costs:</b> $11,628.00<br>
+            <b>Contingency:</b> $8,372.00<br>
+            <b>Total:</b> $20,000.00
+        </p>
+        
+        <h3 class="section-subtitle" data-reading-level-content>FAQ</h3>
+        
+        <div class="method-step" data-reading-level-content>
+            <h3><span>Why trust a 15 year old?</span></h3>
+            <p>I want to build the future that I want to grow up in. One where we all hear each other, where we can all see eye to eye, where we can all sit down and handle conflict. While I lead with vision, I'm supported by adults with many years of experience. A full board will be built post-pilot.</p>
+        </div>
+        
+        <div class="method-step" data-reading-level-content>
+            <h3><span>Why Georgia, Europe, instead of ZA?</span></h3>
+            <p>We are focusing on global reach. The Georgia launch is designed to secure the legal status and maximise the impact of our first pilot with the seed funding. We will pursue U.S. 501(c)(3) status for long-term funding.</p>
+        </div>
+        
+        <div class="method-step" data-reading-level-content>
+            <h3><span>How will you measure impact?</span></h3>
+            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
+                <li>Patient surveys and incident logs.</li>
+                <li>20% improvement in measured stress levels.</li>
+            </ul>
+            <p style="margin-top: 1rem;">We pre-commit to publishing a detailed, academic-style report on the pilot's findings, which will serve as the proof-of-concept for larger funding. All findings will be shared on our <a href="https://post.warmthly.org">Post page</a> for complete transparency.</p>
+        </div>
+        
+        <div class="method-step" data-reading-level-content>
+            <h3><span>What is the Dissolution Clause?</span></h3>
+            <p>Should Warmthly fail to stand up to its values and/or achieve its initial launch or pilot goals, a formal, transparent dissolution vote is held on our website. Don't like what we're doing? 100,000 votes dissolves us. We ensure your funds will be handled with the right hands, in open-air, even in the worst of circumstances.</p>
+        </div>
+        
+        <div class="method-step" data-reading-level-content>
+            <h3><span>What's after my $20,000?</span></h3>
+            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
+                <li><b>Phase 1 (Winter 25):</b> Legal fiscal sponor setup in the U.S., operating in Georgia, pilot initiation, building partnerships.</li>
+                <li><b>Phase 2 (Early 26):</b> Expand board, secure larger funding and donations on pilot success, begin U.S. 501(c)(3) application, refine applications.</li>
+                <li><b>Phase 3 (26 onwards):</b> Scale programs to schools, hospitals and policies internationally.</li>
+            </ul>
+        </div>
+        
+        <div class="method-step" data-reading-level-content>
+            <h3><span>Sources for our pilot:</span></h3>
+            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
+                <li>The Impact of Color in Healthcare Environments, 2024.</li>
+                <li>Li, W., et al. (2024). The efficacy of personalized psychological interventions in adolescents... Frontiers in Psychology.</li>
+            </ul>
+            <p style="margin-top: 1rem; font-size: 0.9em; opacity: 0.8;">(The full list of our sources will be available at warmthly.org/research)</p>
+        </div>
+        
+        <h3 class="section-subtitle" data-reading-level-content>Lend us a hand</h3>
+        <p class="intro-paragraph" data-reading-level-content>
+            Let's rethink our world with empathy. For just $20,000, you can help us:
+        </p>
+        <ul class="method-step" style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;" data-reading-level-content>
+            <li>Legally launch Warmthly with radical transparency and accountability</li>
+            <li>Prove that empathy works with a pilot</li>
+            <li>And open doors to larger funding with our proven models</li>
+        </ul>
+        <p class="method-step" data-reading-level-content>
+            Follow: <a href="https://warmthly.org" style="color: var(--warmthly-orange); text-decoration: underline;">@bewarmthly / warmthly.org</a>
+        </p>
+        <p class="intro-paragraph" style="margin-top: 2rem; font-size: 1.2em;" data-reading-level-content>
+             Donate today. Let's thaw frozen systems, together.
+        </p>
+    </div>
+    <div id="donationSection" class="donation-section" style="margin: var(--spacing-12) 0;">
+      <button class="donate-button" id="donateButton" aria-label="Donate to support Warmthly's mission to rehumanize our world" type="button"> Support the Mission</button>
+      <div id="yocoPaymentEmbed" style="display: none; margin-top: var(--spacing-8); max-width: 600px; margin-left: auto; margin-right: auto;">
+        <div style="background: white; padding: var(--spacing-8); border-radius: var(--radius-xl); box-shadow: 0 var(--spacing-1) var(--spacing-4) rgba(0,0,0,0.1);">
+          <h3 style="font-family: 'Inter', sans-serif; color: var(--warmthly-orange); margin-bottom: var(--spacing-4); text-align: center; font-size: var(--font-size-xl);">Complete Your Donation</h3>
+          <div id="yocoEmbedContainer" style="width: 100%; min-height: 500px;">
+          </div>
+          <button id="cancelPayment" class="cancel-button" style="margin-top: var(--spacing-4); width: 100%;">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer" aria-label="View Warmthly source code on GitHub">GitHub</a>. Our work is not ours, it's yours. <a href="/privacy.html">Privacy Policy</a> | <a href="/easy-read.html">Easy Read Version</a></p>
+  </div>
+  
+  <div class="donation-modal" id="donationModal" aria-hidden="true" role="dialog" aria-labelledby="donationModalTitle" aria-modal="true">
+    <div class="donation-modal-content">
+      <div id="donationForm">
+        <h2 id="donationModalTitle">Support Warmthly</h2>
+        <p>Choose an amount or enter a custom donation. All amounts will be converted to South African Rand (ZAR) using current exchange rates:</p>
+        <div class="currency-selector-wrapper">
+          <label style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-color); opacity: 0.8; margin-right: 0.5rem;">Currency:</label>
+          <span class="field-help" style="font-size: 0.75rem; color: var(--text-color-light); margin-left: 0.5rem;">
+            Select your preferred currency
+            <a href="/help.html#donations-heading" class="field-help-link" target="_blank" rel="noopener noreferrer" aria-label="Get more help about currency selection">?</a>
+          </span>
+          <div class="custom-currency-dropdown" id="currencyDropdown">
+            <div class="custom-currency-select" id="currencySelect">
+              <span class="currency-display">USD ($)</span>
+              <span class="currency-arrow">
+            </div>
+            <div class="custom-currency-options" id="currencyOptions">
+              <div class="currency-option" data-value="USD">USD ($)</div>
+              <div class="currency-option" data-value="EUR">EUR (
+              <div class="currency-option" data-value="GBP">GBP (
+              <div class="currency-option" data-value="CAD">CAD (C$)</div>
+              <div class="currency-option" data-value="AUD">AUD (A$)</div>
+              <div class="currency-option" data-value="JPY">JPY (
+              <div class="currency-option" data-value="CHF">CHF (Fr)</div>
+              <div class="currency-option" data-value="NZD">NZD (NZ$)</div>
+              <div class="currency-option" data-value="SEK">SEK (kr)</div>
+              <div class="currency-option" data-value="NOK">NOK (kr)</div>
+              <div class="currency-option" data-value="DKK">DKK (kr)</div>
+              <div class="currency-option" data-value="SGD">SGD (S$)</div>
+              <div class="currency-option" data-value="HKD">HKD (HK$)</div>
+              <div class="currency-option" data-value="ZAR">ZAR (R)</div>
+            </div>
+          </div>
+        </div>
+        <div class="donation-amounts">
+          <button class="amount-btn" data-amount="1000">$10</button>
+          <button class="amount-btn" data-amount="2500">$25</button>
+          <button class="amount-btn" data-amount="5000">$50</button>
+          <button class="amount-btn" data-amount="10000">$100</button>
+        </div>
+        <div style="margin-top: var(--spacing-4);">
+          <label for="customAmount" style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-color); opacity: 0.8; display: block; margin-bottom: var(--spacing-2);">
+            Custom Amount:
+          </label>
+          <input type="number" id="customAmount" placeholder="Custom amount" min="1" step="1" aria-describedby="customAmountHelp">
+          <span id="customAmountHelp" class="field-help" style="font-size: 0.75rem; color: var(--text-color-light); margin-top: 0.25rem; display: block;">
+            Enter any amount you'd like to donate
+            <a href="/help.html#donations-heading" class="field-help-link" target="_blank" rel="noopener noreferrer" aria-label="Get more help about donation amounts">?</a>
+          </span>
+        </div>
+        <p id="conversionNotice" style="font-size: 0.85rem; color: var(--text-color); opacity: 0.7; margin-top: 0.5rem; text-align: center; font-family: 'Inter', sans-serif; display: none;">
+           Amounts will be converted to South African Rand (ZAR) at current exchange rates
+        </p>
+        <div class="donation-modal-actions">
+          <button id="proceedDonation" class="donate-button">Proceed to Payment</button>
+          <button id="cancelDonation" class="cancel-button">Cancel</button>
+        </div>
+      </div>
+      
+      <div id="yocoPaymentContainer" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="margin: 0;">Complete Your Donation</h2>
+          <button id="backToAmount" class="cancel-button" style="padding: 0.5rem 1rem; font-size: 0.9rem;"> Back</button>
+        </div>
+        <div id="yocoIframeContainer" style="width: 100%; height: 600px; border: none; border-radius: 10px; overflow: hidden;">
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="success-popup" id="successPopup" role="alert" aria-live="polite" aria-atomic="true" aria-hidden="true">
+    <div class="success-popup-content">
+      <span class="success-icon" aria-hidden="true">
+      <h2>Thank You!</h2>
+      <p>Your donation of <strong id="successAmount">R0.00</strong> was successful!</p>
+      <p style="font-size: 1rem; opacity: 0.9;">Your support helps us rehumanize our world, one space at a time.</p>
+      <button class="success-popup-button" id="successPopupButton">Continue</button>
+    </div>
+  </div>
+  
+  <div class="error-popup" id="errorPopup" role="alert" aria-live="assertive" aria-atomic="true" aria-hidden="true">
+    <div class="error-popup-content">
+      <h2>Payment Not Completed</h2>
+      <p id="errorMessage">Payment was not completed. If you encountered an error, please try again or use a different payment method.</p>
+      <button class="error-popup-button" id="errorPopupButton">Try Again</button>
+    </div>
+  </div>
+  
+  <button class="cookie-button" id="cookieButton" aria-label="View privacy and cookie information" style="display: none;">
+    <span aria-hidden="true"></span>
+    <span class="sr-only">Privacy & Cookie Information</span>
+  </button>
+  <div class="cookie-popup" id="cookiePopup" role="dialog" aria-label="Cookie information">
+    <div style="line-height: 1.6;">
+      <p><strong>Privacy Notice:</strong></p>
+      <p>We don't use tracking cookies or analytics. We only store locally:</p>
+      <ul style="text-align: left; margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.85rem;">
+        <li>Your preference that you've seen this message</li>
+        <li>Vote cooldown data if you vote (30 days)</li>
+      </ul>
+      <p style="font-size: 0.85rem; margin-top: 0.5rem;">No data is sent to third parties.</p>
+    </div>
+  </div>
+  </main>
+
+  <script type="module" src="/apps/main/payment-handler.js"></script>
+  
+  <script type="module" src="/lego/components/warmthly-last-updated.js"></script>
+  <warmthly-last-updated date="2025-01-15"></warmthly-last-updated>
+  
+  <script type="module" src="/lego/components/warmthly-social-share.js"></script>
+  <warmthly-social-share></warmthly-social-share>
+  
+  <warmthly-font-loader></warmthly-font-loader>
+  <!-- Yoco SDK - Load dynamically when needed (Performance Optimization) -->
+  
+  </body>
+</html>
+

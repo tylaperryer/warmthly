@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    (function() {
+      function detectLanguage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+          }
+        } catch {}
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) return normalized;
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Your Data - Post - Warmthly</title>
+  <meta name="description" content="Access and manage your personal data with Warmthly. View what information we have and exercise your data rights.">
+  
+  <warmthly-head 
+    title="Your Data - Warmthly"
+    description="View and manage all data we store about you. Complete transparency on what we know."
+    app="post"
+    viewport="1.0"
+    preconnects="https://www.warmthly.org, https://post.warmthly.org">
+  </warmthly-head>
+  
+  <style>
+    /* Hide body until CSS loads to prevent FOUC */
+    body:not(.css-loaded) {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body.css-loaded {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
+  </style>
+</head>
+<body class="fonts-loading">
+  <warmthly-header app="post"></warmthly-header>
+  
+  <div style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1rem; align-items: center;">
+    <warmthly-language-switcher></warmthly-language-switcher>
+    <warmthly-reading-level></warmthly-reading-level>
+    <warmthly-stoplight app="post"></warmthly-stoplight>
+  </div>
+
+  <main class="container container-narrow" id="main-content" role="main">
+    <h1 class="page-title" data-reading-level-content>Your Data</h1>
+    <p class="main-text" data-reading-level-content>
+      <b>Radical Transparency:</b> This is everything we store about you. If you see something we didn't mention, <a href="/report/">report a concern about your data</a>.
+    </p>
+
+    <div class="section">
+      <h2 class="section-title" data-reading-level-content>What We Know About You</h2>
+      
+      <div class="data-item">
+        <strong>Cookie Popup Seen:</strong>
+        <span id="cookieData">Not stored</span>
+        <button onclick="deleteCookieData()">Delete</button>
+      </div>
+      
+      <div class="data-item">
+        <strong>Vote Data:</strong>
+        <span id="voteData">No vote recorded</span>
+        <button onclick="deleteVoteData()">Delete</button>
+      </div>
+      
+      <div class="data-item">
+        <strong>Report Submissions:</strong>
+        <span id="reportData">None</span>
+        <button onclick="viewReports()">View</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button onclick="exportAllData()">Export All My Data</button>
+      <button onclick="deleteAllData()" class="danger">Delete All My Data</button>
+    </div>
+  </main>
+
+  <!-- Font Loader Component -->
+  <warmthly-font-loader></warmthly-font-loader>
+
+  <script>
+
+    // Placeholder functions
+    function deleteCookieData() { alert('Functionality coming soon'); }
+    function deleteVoteData() { alert('Functionality coming soon'); }
+    function viewReports() { alert('Functionality coming soon'); }
+    
+    /**
+     * Export all user data (GDPR Data Portability)
+     * Collects all user data from localStorage, sessionStorage, and IndexedDB
+     */
+    async function exportAllData() {
+      try {
+        const exportData = {
+          exportDate: new Date().toISOString(),
+          exportVersion: '1.0',
+          data: {}
+        };
+
+        // Collect localStorage data
+        const localStorageData = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key) {
+            try {
+              localStorageData[key] = localStorage.getItem(key);
+            } catch (e) {
+              // Use logger if available, otherwise console (for development)
+              if (typeof window !== 'undefined' && window.logger) {
+                window.logger.warn(`Could not read localStorage key: ${key}`, e);
+              } else if (process.env.NODE_ENV !== 'production') {
+                console.warn(`Could not read localStorage key: ${key}`, e);
+              }
+            }
+          }
+        }
+        exportData.data.localStorage = localStorageData;
+
+        // Collect sessionStorage data
+        const sessionStorageData = {};
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key) {
+            try {
+              sessionStorageData[key] = sessionStorage.getItem(key);
+            } catch (e) {
+              // Use logger if available, otherwise console (for development)
+              if (typeof window !== 'undefined' && window.logger) {
+                window.logger.warn(`Could not read sessionStorage key: ${key}`, e);
+              } else if (process.env.NODE_ENV !== 'production') {
+                console.warn(`Could not read sessionStorage key: ${key}`, e);
+              }
+            }
+          }
+        }
+        exportData.data.sessionStorage = sessionStorageData;
+
+        // Collect IndexedDB data (if available)
+        if ('indexedDB' in window) {
+          try {
+            const dbData = await exportIndexedDBData();
+            exportData.data.indexedDB = dbData;
+          } catch (e) {
+            // Use logger if available, otherwise console (for development)
+            if (typeof window !== 'undefined' && window.logger) {
+              window.logger.warn('Could not export IndexedDB data:', e);
+            } else if (process.env.NODE_ENV !== 'production') {
+              console.warn('Could not export IndexedDB data:', e);
+            }
+            exportData.data.indexedDB = { error: 'Could not export IndexedDB data', message: e.message };
+          }
+        }
+
+        // Format as JSON
+        const jsonData = JSON.stringify(exportData, null, 2);
+        
+        // Create download
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `warmthly-data-export-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Show success message
+        alert('Your data has been exported successfully. The file has been downloaded.');
+      } catch (error) {
+        // Use logger if available, otherwise console (for development)
+        if (typeof window !== 'undefined' && window.logger) {
+          window.logger.error('Error exporting data:', error);
+        } else if (process.env.NODE_ENV !== 'production') {
+          console.error('Error exporting data:', error);
+        }
+        alert('An error occurred while exporting your data. Please try again.');
+      }
+    }
+
+    /**
+     * Export IndexedDB data
+     */
+    async function exportIndexedDBData() {
+      return new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) {
+          resolve({ message: 'IndexedDB not available' });
+          return;
+        }
+
+        const request = indexedDB.open('warmthly', 1);
+        request.onerror = () => reject(new Error('Could not open IndexedDB'));
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          const data: Record<string, any> = {};
+          
+          // Get all object stores
+          const objectStoreNames = Array.from(db.objectStoreNames);
+          
+          if (objectStoreNames.length === 0) {
+            resolve({ message: 'No IndexedDB data found' });
+            return;
+          }
+
+          let completed = 0;
+          const total = objectStoreNames.length;
+
+          objectStoreNames.forEach((storeName) => {
+            const transaction = db.transaction([storeName], 'readonly');
+            const objectStore = transaction.objectStore(storeName);
+            const getAllRequest = objectStore.getAll();
+
+            getAllRequest.onsuccess = () => {
+              data[storeName] = getAllRequest.result;
+              completed++;
+              if (completed === total) {
+                db.close();
+                resolve(data);
+              }
+            };
+
+            getAllRequest.onerror = () => {
+              data[storeName] = { error: 'Could not read data' };
+              completed++;
+              if (completed === total) {
+                db.close();
+                resolve(data);
+              }
+            };
+          });
+        };
+      });
+    }
+    
+    function deleteAllData() { 
+      if (confirm('Are you sure you want to delete all your data? This cannot be undone.')) {
+        alert('Functionality coming soon');
+      }
+    }
+  </script>
+</body>
+</html>
+

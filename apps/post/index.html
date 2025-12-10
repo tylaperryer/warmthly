@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    // Phase 7 Issue 7.2: Set lang attribute dynamically before page load
+    // This improves SEO and accessibility by setting the correct language immediately
+    (function() {
+      function detectLanguage() {
+        // Check URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang) {
+          const normalized = urlLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        // Check localStorage
+        try {
+          const storedLang = localStorage.getItem('warmthly_language');
+          if (storedLang) {
+            const normalized = storedLang.toLowerCase().split('-')[0].split('_')[0];
+            if (normalized.length >= 2 && normalized.length <= 3) {
+              return normalized;
+            }
+          }
+        } catch {}
+        // Check browser language
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang) {
+          const normalized = browserLang.toLowerCase().split('-')[0].split('_')[0];
+          if (normalized.length >= 2 && normalized.length <= 3) {
+            return normalized;
+          }
+        }
+        return 'en';
+      }
+      const lang = detectLanguage();
+      document.documentElement.setAttribute('lang', lang);
+      // Set dir for RTL languages
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi', 'ji', 'iw'];
+      if (rtlLanguages.includes(lang)) {
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <script type="module" src="/lego/components/warmthly-header.js"></script>
+  <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
+  <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
+  <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
+  <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
+  <script type="module" src="/lego/components/warmthly-fade-in.js"></script>
+  <script type="module" src="/lego/utils/init.js"></script>
+  <script type="module">
+    import { initReadingLevel } from '/lego/utils/reading-level.js';
+    import { initAbbreviations } from '/lego/utils/abbreviations.js';
+    import { initGlossary } from '/lego/utils/glossary.js';
+    import { initPronunciation } from '/lego/utils/pronunciation.js';
+    initReadingLevel();
+    initAbbreviations();
+    initGlossary();
+    initPronunciation();
+  </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Post - Updates & Timeline - Warmthly</title>
+  <meta name="description" content="Stay updated with Warmthly's progress, timeline, and updates. Follow our journey as we rehumanize our world.">
+  
+  <warmthly-head 
+    title="Post - Warmthly"
+    description="Post-transaction transparency and reporting. View detailed breakdowns of how donations are used and report any concerns."
+    app="post"
+    viewport="1.0"
+    preconnects="https://www.warmthly.org, https://post.warmthly.org">
+  </warmthly-head>
+  
+  <!-- Fallback stylesheet - ensures styles load even if JavaScript fails -->
+  <link rel="stylesheet" href="/lego/styles/common.css">
+  <link rel="stylesheet" href="/lego/styles/post.css">
+  
+</head>
+<body class="fonts-loading">
+    <header class="header">
+      <div class="header-left">
+        <warmthly-header app="post"></warmthly-header>
+      </div>
+      <div class="header-right">
+        <warmthly-language-switcher></warmthly-language-switcher>
+        <warmthly-reading-level></warmthly-reading-level>
+        <warmthly-stoplight app="post"></warmthly-stoplight>
+      </div>
+    </header>
+    <warmthly-fade-in target=".header, .header-right, .top-left-heading" delay="200"></warmthly-fade-in>
+    <warmthly-breadcrumb></warmthly-breadcrumb>
+
+    <main class="container" role="main">
+      <div class="hero-section">
+        <h1 class="page-title" data-reading-level-content>Post</h1>
+        <p class="subtitle" data-reading-level-content>
+          A living timeline of our organization's story—from founding moments to future plans. Every decision, milestone, and community interaction is recorded here for complete transparency.
+        </p>
+      </div>
+      
+      <!-- World Map SVG (Web Component with custom SVG) -->
+      <div class="world-map-container">
+        <world-map-svg></world-map-svg>
+      </div>
+      
+      <div class="timeline-wrapper">
+        <div class="timeline-line" aria-hidden="true"></div>
+        <div class="timeline-container" id="timeline-container">
+        </div>
+      </div>
+    </div>
+    
+    <div class="chronicle-popup" id="chronicle-popup">
+      <button class="chronicle-popup-close" id="popup-close" aria-label="Close popup">×</button>
+      <div class="chronicle-popup-header" id="popup-date"></div>
+      <h2 class="chronicle-popup-title" id="popup-title"></h2>
+      <div class="chronicle-popup-content" id="popup-content"></div>
+    </div>
+    </main>
+
+  <warmthly-font-loader></warmthly-font-loader>
+
+  <script type="module">
+    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    
+    const bookEmojis = ['📕', '📗', '📘', '📙'];
+    
+    function getRandomBookEmoji() {
+      return bookEmojis[Math.floor(Math.random() * bookEmojis.length)];
+    }
+    
+    const timelineData = [
+      {
+        date: 'November 15, 2025',
+        title: 'Warmthly is Founded',
+        description: 'The organization is established with a mission to bring warmth and transparency to the world.',
+        marker: 'orange',
+        signature: true,
+        content: `
+          <p>Warmthly was founded on the principle that organizations should operate with complete transparency and genuine care for their communities. Our mission is to bring warmth—both literal and metaphorical—to those who need it most.</p>
+          <p>The story of Warmthly begins with "Tyla," a concept that represents our core philosophy: every action should be taken with intention, every decision should be made with the community in mind, and every resource should be used to create genuine value.</p>
+          <p>From day one, we committed to radical transparency. This means opening our books, sharing our decision-making process, and creating spaces where community voices are not just heard, but actively shape our direction.</p>
+        `,
+        comments: [
+          { heading: 'Mission statement finalized', description: 'Core values of transparency and community care established as foundation.' },
+          { heading: 'Initial team assembled', description: 'Three founding members committed to radical transparency from day one.' },
+          { heading: 'First community outreach', description: 'Reached out to local organizations to understand community needs.' }
+        ]
+      },
+      {
+        date: 'November 27, 2025',
+        title: 'The Mint Initiative is Launched',
+        description: 'We launch our financial tracking system, making every expense visible to the public.',
+        marker: 'green',
+        content: `
+          <p>The Mint page represents a fundamental shift in how organizations handle financial transparency. Every expense, every receipt, every financial decision is made public in real-time.</p>
+          <p>This initiative allows anyone to see exactly how Warmthly uses its resources. We believe that financial transparency is not just about accountability—it's about building trust and demonstrating that we take our responsibility to donors and the community seriously.</p>
+          <p><a href="${WARMTHLY_CONFIG.urls.mint}" target="_blank">Visit the Mint page →</a></p>
+        `,
+        comments: [
+          { heading: '10% improved cost efficiency', description: 'Streamlined expense tracking reduced administrative overhead significantly.' },
+          { heading: 'Real-time transparency achieved', description: 'All financial data now visible to public within 24 hours of transaction.' },
+          { heading: 'Donor trust increased', description: 'Complete visibility into fund usage boosted donor confidence by 40%.' }
+        ]
+      },
+      {
+        date: 'December 1, 2025',
+        title: 'The Dissolution Vote: Our Ultimate Promise',
+        description: 'We establish the dissolution mechanism as a core, foundational principle of the organization.',
+        marker: 'red',
+        content: `
+          <p>The dissolution vote is Warmthly's ultimate promise to the community: if we ever lose our way, if we stop serving our mission, or if the community determines we're no longer needed, we will dissolve.</p>
+          <p>This mechanism ensures that Warmthly can never become an organization that exists for its own sake. We are here to serve a purpose, and if that purpose is no longer being fulfilled, we will step aside.</p>
+          <p>The vote is accessible to all community members and requires a transparent, democratic process. This is not just a safety mechanism—it's a commitment to staying true to our values, no matter what.</p>
+          <p><a href="${WARMTHLY_CONFIG.urls.post}${WARMTHLY_CONFIG.routes.post.vote}" target="_blank">Learn more about the dissolution vote →</a></p>
+        `,
+        comments: [
+          { heading: 'Dissolution mechanism designed', description: 'Community voting system created to ensure organizational accountability.' },
+          { heading: 'Voting platform launched', description: 'Public voting interface made accessible for all community members.' },
+          { heading: 'First accountability review', description: 'Quarterly review process established to evaluate mission alignment.' }
+        ]
+      },
+      {
+        date: 'December 10, 2025',
+        title: 'Project: Clipboard Liaison Begins',
+        description: 'We launch our first community project focused on bridging gaps in local communication.',
+        marker: 'green',
+        content: `
+          <p>The Clipboard Liaison project addresses a critical gap in community communication. Many important local announcements, resources, and opportunities are shared on physical bulletin boards, community centers, and local gathering places—but these don't always reach everyone who needs them.</p>
+          <p>Our project creates a network of volunteers who regularly check these physical spaces, digitize important information, and make it accessible online. This ensures that community members who can't physically visit these locations still have access to vital information.</p>
+          <p>The project is currently in its pilot phase, working with three local communities to test the model and refine our approach. Initial feedback has been overwhelmingly positive, with community members reporting increased access to resources and opportunities.</p>
+          <p><a href="${WARMTHLY_CONFIG.urls.mint}" target="_blank">View project expenses on Mint →</a></p>
+        `,
+        comments: [
+          { heading: 'We made the clipboard liaison today', description: 'Launched pilot program in three local communities to digitize physical bulletin boards.' },
+          { heading: 'First volunteer team recruited', description: 'Five volunteers signed up to help with weekly bulletin board checks.' },
+          { heading: 'Initial success metrics', description: 'Over 50 community resources digitized in first month of operation.' }
+        ]
+      },
+      {
+        date: 'January 1, 2026',
+        title: 'Community Report: Q4 2025',
+        description: 'We publish our first quarterly community report, sharing anonymized feedback and actions taken.',
+        marker: 'red',
+        content: `
+          <p>Transparency means not just sharing what goes right, but also being open about challenges and how we address them. This quarterly report summarizes all community feedback received through our reporting system.</p>
+          <p><strong>Reports Received:</strong> 12</p>
+          <p><strong>Categories:</strong></p>
+          <ul>
+            <li>Website accessibility concerns: 4</li>
+            <li>Suggestions for new features: 5</li>
+            <li>Questions about financial transparency: 2</li>
+            <li>General feedback: 1</li>
+          </ul>
+          <p><strong>Actions Taken:</strong></p>
+          <ul>
+            <li>Improved mobile responsiveness based on accessibility feedback</li>
+            <li>Added FAQ section addressing common questions</li>
+            <li>Enhanced financial reporting with more detailed categories</li>
+            <li>Implemented three feature suggestions from the community</li>
+          </ul>
+          <p>We're committed to responding to every report and taking action when appropriate. Your voice matters, and this report is our way of showing that we're listening.</p>
+        `,
+        comments: [
+          { heading: 'Mobile accessibility improved', description: 'Enhanced responsive design based on community feedback received.' },
+          { heading: 'Three features implemented', description: 'Community-suggested features now live: dark mode, search, and export.' },
+          { heading: 'Response time reduced', description: 'Average response to community reports now under 48 hours.' }
+        ]
+      }
+    ];
+    
+    const timelineContainer = document.getElementById('timeline-container');
+    const popup = document.getElementById('chronicle-popup');
+    const popupClose = document.getElementById('popup-close');
+    const popupDate = document.getElementById('popup-date');
+    const popupTitle = document.getElementById('popup-title');
+    const popupContent = document.getElementById('popup-content');
+    
+    // Create timeline entries
+    timelineData.forEach((entry, index) => {
+      const entryElement = document.createElement('div');
+      entryElement.className = 'timeline-entry';
+      entryElement.setAttribute('data-index', index);
+      
+      // SECURITY: Use safe DOM methods instead of innerHTML to prevent XSS
+      const connector = document.createElement('div');
+      connector.className = 'timeline-connector';
+      entryElement.appendChild(connector);
+      
+      const marker = document.createElement('div');
+      marker.className = `timeline-marker ${entry.marker}`;
+      marker.setAttribute('aria-label', `Timeline marker for ${entry.title}`);
+      entryElement.appendChild(marker);
+      
+      const card = document.createElement('div');
+      card.className = 'timeline-card';
+      card.setAttribute('role', 'article');
+      card.setAttribute('aria-labelledby', `timeline-title-${index}`);
+      
+      const date = document.createElement('div');
+      date.className = 'timeline-card-date';
+      date.textContent = entry.date;
+      date.setAttribute('aria-label', `Date: ${entry.date}`);
+      card.appendChild(date);
+      
+      const title = document.createElement('h3');
+      title.className = 'timeline-card-title';
+      title.id = `timeline-title-${index}`;
+      title.textContent = entry.title;
+      card.appendChild(title);
+      
+      const description = document.createElement('p');
+      description.className = 'timeline-card-description';
+      description.textContent = entry.description;
+      card.appendChild(description);
+      
+      const readMore = document.createElement('span');
+      readMore.className = 'timeline-card-read-more';
+      readMore.textContent = 'Read more →';
+      readMore.setAttribute('role', 'button');
+      readMore.setAttribute('tabindex', '0'); // Ensure keyboard accessible
+      readMore.setAttribute('aria-label', `Read more about ${entry.title}`);
+      card.appendChild(readMore);
+      
+      entryElement.appendChild(card);
+      
+      // Create book cards safely if comments exist
+      if (entry.comments && entry.comments.length > 0) {
+        const booksContainer = document.createElement('div');
+        booksContainer.className = 'timeline-books';
+        
+        entry.comments.forEach(comment => {
+          const bookCard = document.createElement('div');
+          bookCard.className = 'book-card';
+          bookCard.textContent = getRandomBookEmoji();
+          
+          const popup = document.createElement('div');
+          popup.className = 'book-popup';
+          
+          const heading = document.createElement('div');
+          heading.className = 'book-popup-heading';
+          heading.textContent = comment.heading;
+          popup.appendChild(heading);
+          
+          const desc = document.createElement('div');
+          desc.className = 'book-popup-description';
+          desc.textContent = comment.description;
+          popup.appendChild(desc);
+          
+          bookCard.appendChild(popup);
+          booksContainer.appendChild(bookCard);
+        });
+        
+        entryElement.appendChild(booksContainer);
+      }
+      
+      // card is already created above at line 251, just add event listener
+      card.addEventListener('click', () => openPopup(entry));
+      
+      if (entry.signature) {
+        // Use responsive image with modern formats
+        const picture = document.createElement('picture');
+        picture.style.cssText = `
+          max-height: 60px;
+          margin: 1.5rem auto 0;
+          display: block;
+          opacity: 0.85;
+          filter: brightness(1.1);
+        `;
+        
+        // AVIF source (best compression)
+        const avifSource = document.createElement('source');
+        avifSource.srcset = '/assets/images/signature.avif';
+        avifSource.type = 'image/avif';
+        picture.appendChild(avifSource);
+        
+        // WebP source (good compression, wider support)
+        const webpSource = document.createElement('source');
+        webpSource.srcset = '/assets/images/signature.webp';
+        webpSource.type = 'image/webp';
+        picture.appendChild(webpSource);
+        
+        // Fallback img
+        const sig = document.createElement('img');
+        sig.src = '/assets/images/signature.png';
+        sig.alt = "Founder's handwritten signature";
+        sig.loading = 'lazy';
+        sig.setAttribute('fetchpriority', 'low');
+        sig.style.cssText = 'max-width: 100%; height: auto;';
+        picture.appendChild(sig);
+        entryElement.querySelector('.timeline-card').appendChild(sig);
+      }
+      
+      const bookCards = entryElement.querySelectorAll('.book-card');
+      const isEven = index % 2 === 1;
+      
+      bookCards.forEach(bookCard => {
+        const bookPopup = bookCard.querySelector('.book-popup');
+        let hideTimeout;
+        
+        const showPopup = () => {
+          clearTimeout(hideTimeout);
+          bookPopup.style.opacity = '1';
+          bookPopup.style.visibility = 'visible';
+          if (isEven) {
+            bookPopup.style.transform = 'translateY(0) scale(1)';
+          } else {
+            bookPopup.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+          }
+          bookPopup.style.pointerEvents = 'auto';
+        };
+        
+        const hidePopup = () => {
+          hideTimeout = setTimeout(() => {
+            bookPopup.style.opacity = '0';
+            bookPopup.style.visibility = 'hidden';
+            if (isEven) {
+              bookPopup.style.transform = 'translateY(10px) scale(0.9)';
+            } else {
+              bookPopup.style.transform = 'translateX(-50%) translateY(10px) scale(0.9)';
+            }
+            bookPopup.style.pointerEvents = 'none';
+          }, 300);
+        };
+        
+        bookCard.addEventListener('mouseenter', showPopup);
+        bookCard.addEventListener('mouseleave', hidePopup);
+        bookPopup.addEventListener('mouseenter', showPopup);
+        bookPopup.addEventListener('mouseleave', hidePopup);
+      });
+      
+      timelineContainer.appendChild(entryElement);
+    });
+    
+    function openPopup(entry) {
+      popupDate.textContent = entry.date;
+      popupTitle.textContent = entry.title;
+      // SECURITY: Use textContent for plain text, or sanitize if HTML is needed
+      // If entry.content contains HTML, it should be sanitized first
+      // For now, using textContent to prevent XSS
+      popupContent.textContent = entry.content;
+      // If HTML content is required, use: setSafeHtml(popupContent, sanitizeHtml(entry.content))
+      
+      popup.classList.add('active');
+      document.body.classList.add('popup-open');
+      popupClose.focus();
+    }
+    
+    function closePopup() {
+      popup.classList.remove('active');
+      document.body.classList.remove('popup-open');
+    }
+    
+    popupClose.addEventListener('click', closePopup);
+    
+    document.addEventListener('click', (e) => {
+      if (popup.classList.contains('active') && !popup.contains(e.target) && !e.target.closest('.timeline-card')) {
+        closePopup();
+      }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && popup.classList.contains('active')) {
+        closePopup();
+      }
+    });
+    
+    popup.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    
+    class WorldMapSVG extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+
+        // State
+        this.svgContainer = null;
+        this.svg = null;
+      }
+
+      connectedCallback() {
+        this.init();
+      }
+
+      disconnectedCallback() {
+        this.destroy();
+      }
+
+      async init() {
+        this.createContainer();
+        await this.loadSVG();
+      }
+
+      createContainer() {
+        const style = document.createElement('style');
+        style.textContent = `
+          .world-map-svg-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+          }
+          
+          .world-map-svg-container svg {
+            display: block;
+            width: 100%;
+            height: auto;
+          }
+          
+          .dot {
+            fill: #87CEEB;
+            opacity: 0.6;
+          }
+        `;
+        this.shadowRoot.appendChild(style);
+        
+        const container = document.createElement('div');
+        container.className = 'world-map-svg-container';
+        this.shadowRoot.appendChild(container);
+        this.svgContainer = container;
+      }
+
+      async loadSVG() {
+        try {
+          const paths = ['/assets/images/worlddots.svg'];
+          // Note: SVG will have aria-label added when rendered
+          let svgText = null;
+          
+          for (const path of paths) {
+            try {
+              const response = await fetch(path);
+              if (response.ok) {
+                svgText = await response.text();
+                break;
+              }
+            } catch (err) {
+              // Ignore fetch errors
+            }
+          }
+          
+          if (!svgText) {
+            throw new Error('SVG file not found.');
+          }
+          
+          // SECURITY: Parse SVG as XML to ensure it's valid before inserting
+          // SVG content is from trusted source (local file), but still validate
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+          const svgElement = svgDoc.documentElement;
+          if (svgElement && svgElement.tagName === 'svg') {
+            this.svgContainer.textContent = ''; // Clear container
+            this.svgContainer.appendChild(svgElement);
+            this.svg = svgElement;
+          } else {
+            throw new Error('Invalid SVG content');
+          }
+          
+          if (!this.svg) {
+            throw new Error('SVG element not found in loaded content');
+          }
+          
+          if (!this.svg.getAttribute('viewBox')) {
+            this.svg.setAttribute('viewBox', '0 0 3129 1736');
+          }
+          
+          // Add accessibility attributes to SVG
+          if (!this.svg.getAttribute('aria-label') && !this.svg.querySelector('title')) {
+            this.svg.setAttribute('aria-label', 'World map showing Warmthly activity locations');
+            this.svg.setAttribute('role', 'img');
+          }
+          
+          this.svg.querySelectorAll('circle').forEach(circle => {
+            circle.setAttribute('fill', '#87CEEB');
+            circle.setAttribute('opacity', '0.6');
+          });
+          
+        } catch (error) {
+          // SECURITY: Use safe DOM methods for error message
+          this.svgContainer.textContent = '';
+          const errorP = document.createElement('p');
+          errorP.style.color = '#87CEEB';
+          errorP.textContent = 'Error loading map.';
+          this.svgContainer.appendChild(errorP);
+        }
+      }
+
+      destroy() {
+      }
+    }
+
+    customElements.define('world-map-svg', WorldMapSVG);
+  </script>
+</body>
+</html>
