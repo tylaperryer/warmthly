@@ -87,9 +87,10 @@ ${robotsMeta}  <meta property="og:type" content="${type}" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="${siteName}" />
   <meta name="mobile-web-app-capable" content="yes" />
-${preconnectLinks ? `  ${preconnectLinks}\n` : ''}  <link rel="icon" type="image/svg+xml" href="${WARMTHLY_CONFIG.favicon}">
-  <link rel="icon" type="image/svg+xml" sizes="any" href="${WARMTHLY_CONFIG.favicon}">
-  <link rel="apple-touch-icon" href="${WARMTHLY_CONFIG.favicon}">
+${preconnectLinks ? `  ${preconnectLinks}\n` : ''}  <link rel="icon" type="image/svg+xml" href="${WARMTHLY_CONFIG.favicon}?v=2">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="${WARMTHLY_CONFIG.favicon}?v=2">
+  <link rel="apple-touch-icon" href="${WARMTHLY_CONFIG.favicon}?v=2">
+  <link rel="shortcut icon" href="${WARMTHLY_CONFIG.favicon}?v=2">
   <link rel="manifest" href="/manifest.json">
   <link rel="preload" href="${WARMTHLY_CONFIG.fonts.inter}" as="font" type="font/ttf" crossorigin="anonymous">
   <link rel="preload" href="${WARMTHLY_CONFIG.fonts.cormorant}" as="font" type="font/ttf" crossorigin="anonymous">
