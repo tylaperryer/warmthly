@@ -95,7 +95,7 @@ export const WARMTHLY_CONFIG: WarmthlyConfig = {
     inter: '/fonts/Inter-VariableFont_opsz,wght.ttf',
     cormorant: '/fonts/CormorantGaramond-VariableFont_wght.ttf',
   },
-  favicon: '/favicon.svg',
+  favicon: '/Oalien.svg',
   constants: {
     yocoStyleCheckInterval: 500,
     yocoStyleCheckTimeout: 30000,

@@ -2,28 +2,24 @@
  * Application Initialization
  * Sets up error handling, service worker, and other global utilities
  */
-
-import { setupErrorHandling } from '@utils/error-handler.js';
-import { initImageOptimization } from '@utils/image-optimization.js';
-import { initRUM } from '@utils/rum.js';
-import { initServiceWorker } from '@utils/service-worker.js';
+import { setupErrorHandling } from '/lego/utils/error-handler.js';
+import { initImageOptimization } from '/lego/utils/image-optimization.js';
+import { initRUM } from '/lego/utils/rum.js';
+import { initServiceWorker } from '/lego/utils/service-worker.js';
 // Activate tracker blocker for privacy protection
-import '@utils/tracker-blocker.js';
-
+import '/lego/utils/tracker-blocker.js';
 /**
  * Initialize the application
  */
-export function initApp(): void {
-  setupErrorHandling();
-  initServiceWorker();
-  initRUM();
-  initImageOptimization();
-
-  if (import.meta.env?.DEV) {
-    console.debug('Warmthly app initialized');
-  }
+export function initApp() {
+    setupErrorHandling();
+    initServiceWorker();
+    initRUM();
+    initImageOptimization();
+    if (import.meta.env?.DEV) {
+        console.debug('Warmthly app initialized');
+    }
 }
-
 if (typeof window !== 'undefined') {
-  initApp();
+    initApp();
 }

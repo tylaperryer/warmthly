@@ -48,7 +48,7 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   color: var(--text-color);
-  background: var(--warmthly-background);
+  background: #fff6f1;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -78,20 +78,9 @@ body.fonts-loaded {
   }
 }
 
-/* Background gradient - Visible above fold */
+/* Background - Pure white, no overlay */
 body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background:
-    radial-gradient(circle at 20% 30%, rgb(255 140 66 / 15%) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgb(255 182 193 / 12%) 0%, transparent 50%),
-    linear-gradient(135deg, var(--warmthly-background) 0%, var(--warmthly-background-alt) 100%);
-  z-index: -1;
-  pointer-events: none;
+  display: none;
 }
 
 /* Header - Always visible above fold */
