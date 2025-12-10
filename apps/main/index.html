@@ -500,6 +500,24 @@
     window.ariaAnnouncer = ariaAnnouncer;
   </script>
   <script>
+    // #region agent log
+    (function() {
+      try {
+        const bodyBefore = window.getComputedStyle(document.body, '::before');
+        const htmlBg = window.getComputedStyle(document.documentElement).backgroundColor;
+        const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+        const viewportHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const bodyBeforeHeight = bodyBefore.height;
+        const bodyBeforePosition = bodyBefore.position;
+        const bodyBeforeBackground = bodyBefore.background;
+        
+        fetch('http://127.0.0.1:7242/ingest/d5b70cef-0776-4ac0-864b-289eb71a6fa1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:500',message:'Gradient analysis - body::before styles',data:{bodyBeforeHeight,bodyBeforePosition,hasGradient:bodyBeforeBackground.includes('gradient'),viewportHeight,documentHeight,htmlBg,bodyBg},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A'})}).catch(()=>{});
+      } catch(e) {}
+    })();
+    // #endregion
+  </script>
+  <script>
     let savedScrollPosition = 0;
     
     window.lockBodyScroll = function() {
@@ -1508,6 +1526,26 @@
         }
       }, 1000);
     })();
+    
+    // #region agent log
+    (function() {
+      setTimeout(() => {
+        try {
+          const viewportHeight = window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight;
+          const bodyStyles = window.getComputedStyle(document.body);
+          const htmlStyles = window.getComputedStyle(document.documentElement);
+          const bodyBefore = window.getComputedStyle(document.body, '::before');
+          const hasGradient = bodyBefore.backgroundImage && bodyBefore.backgroundImage !== 'none';
+          const gradientHeight = bodyBefore.height;
+          const isFixed = bodyBefore.position === 'fixed';
+          const contentExceedsViewport = documentHeight > viewportHeight;
+          
+          fetch('http://127.0.0.1:7242/ingest/d5b70cef-0776-4ac0-864b-289eb71a6fa1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:1510',message:'Page load - gradient visibility check',data:{viewportHeight,documentHeight,contentExceedsViewport,hasGradient,gradientHeight,isFixed,htmlBg:htmlStyles.backgroundColor,bodyBg:bodyStyles.backgroundColor},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'B'})}).catch(()=>{});
+        } catch(e) {}
+      }, 500);
+    })();
+    // #endregion
 
     import('/lego/config/warmthly-config.js').then(module => {
       const brandLogo = document.getElementById('main-brand-logo');
