@@ -7,8 +7,10 @@ This document explains the organization and purpose of all configuration files i
 Configuration files are split between two locations for organizational reasons:
 
 ### Root Directory (`warmthly/`)
+
 **Purpose:** Project-level configuration that tools expect at root  
 **Files:**
+
 - `package.json` - NPM package configuration, dependencies, scripts
 - `tsconfig.json` - Main TypeScript configuration (extends to other configs)
 - `README.md` - Project documentation
@@ -16,13 +18,16 @@ Configuration files are split between two locations for organizational reasons:
 - `DEPLOYMENT-GUIDE.md` - Deployment instructions
 
 **Why root?**
+
 - Standard location expected by tools (npm, TypeScript, GitHub)
 - Easier to find for new developers
 - Follows common project structure conventions
 
 ### `.config/` Directory (`warmthly/.config/`)
+
 **Purpose:** Build and tool-specific configuration  
 **Files:**
+
 - `vite.config.ts` - Vite build configuration
 - `vitest.config.ts` - Vitest test configuration
 - `playwright.config.ts` - Playwright E2E test configuration
@@ -34,6 +39,7 @@ Configuration files are split between two locations for organizational reasons:
 - `wrangler.toml` - Cloudflare Pages configuration (reference only)
 
 **Why `.config/`?**
+
 - Keeps build configs organized in one place
 - Separates tool configs from project configs
 - Makes it clear these are build-time configurations
@@ -46,6 +52,7 @@ Configuration files are split between two locations for organizational reasons:
 See `docs/TYPESCRIPT-CONFIG.md` for detailed TypeScript configuration guide.
 
 **Files:**
+
 - `tsconfig.json` - Root config (main project)
 - `.config/tsconfig.json` - Config directory config
 - `tests/tsconfig.json` - Test config
@@ -54,6 +61,7 @@ See `docs/TYPESCRIPT-CONFIG.md` for detailed TypeScript configuration guide.
 ### Build Configuration
 
 **`vite.config.ts`**
+
 - Vite bundler configuration
 - Entry points for all apps
 - Code splitting strategy
@@ -61,6 +69,7 @@ See `docs/TYPESCRIPT-CONFIG.md` for detailed TypeScript configuration guide.
 - Asset handling
 
 **`postcss.config.js`**
+
 - CSS processing (Autoprefixer, Nesting, Container Queries)
 - CSS minification
 - Browser compatibility
@@ -68,11 +77,13 @@ See `docs/TYPESCRIPT-CONFIG.md` for detailed TypeScript configuration guide.
 ### Testing Configuration
 
 **`vitest.config.ts`**
+
 - Unit test configuration
 - Coverage thresholds
 - Test environment setup
 
 **`playwright.config.ts`**
+
 - E2E test configuration
 - Browser projects (Chromium, Firefox, WebKit)
 - Test reporting
@@ -81,18 +92,21 @@ See `docs/TYPESCRIPT-CONFIG.md` for detailed TypeScript configuration guide.
 ### Code Quality Configuration
 
 **`.eslintrc.json`**
+
 - ESLint rules for code quality
 - TypeScript-aware linting
 - Import ordering rules
 - Extends: ESLint recommended, TypeScript ESLint, Prettier
 
 **`.prettierrc.json`**
+
 - Code formatting rules
 - Consistent style across codebase
 - Line ending normalization (LF)
 - Markdown prose wrapping
 
 **`.stylelintrc.json`**
+
 - CSS linting rules
 - Prevents CSS injection vulnerabilities
 - Enforces CSS best practices
@@ -131,24 +145,28 @@ Configs in root use relative paths from root:
 ## When to Modify Configs
 
 ### TypeScript Config (`tsconfig.json`)
+
 - Adding new path aliases
 - Changing strict mode settings
 - Adding new include/exclude patterns
 - Changing target or module settings
 
 ### Build Config (`vite.config.ts`)
+
 - Adding new entry points
 - Changing code splitting strategy
 - Adjusting performance budgets
 - Adding new plugins
 
 ### Test Configs
+
 - Changing coverage thresholds
 - Adding new test environments
 - Configuring test timeouts
 - Adding test utilities
 
 ### Linting Configs
+
 - Adding new rules
 - Adjusting rule severity
 - Adding new plugins
@@ -157,6 +175,7 @@ Configs in root use relative paths from root:
 ### Internationalization (i18n) Configuration
 
 **Files:**
+
 - `lego/i18n/` - Translation files and schema
 - `lego/i18n/schema.json` - Translation file schema
 - `lego/i18n/*.json` - Language translation files (en.json, es.json, fr.json, etc.)
@@ -166,24 +185,28 @@ Configs in root use relative paths from root:
 - `scripts/validate-i18n.ts` - i18n validation script
 
 **Configuration:**
+
 - Translation files follow JSON schema defined in `schema.json`
 - Language codes follow ISO 639-1 standard (e.g., `en`, `es`, `fr`)
 - RTL languages automatically detected and styled
 - API endpoints configured in backend (`warmthly-api/functions/api/i18n/`)
 
 **Environment Variables:**
+
 - `LIBRETRANSLATE_URL` - LibreTranslate instance URL (optional)
 - `LIBRETRANSLATE_API_KEY` - LibreTranslate API key (optional)
 - `HUGGINGFACE_API_KEY` - Hugging Face API key for NLLB translations (optional)
 - `TRANSLATION_CACHE` - Cloudflare KV namespace for caching (optional)
 
 **When to modify:**
+
 - Adding new language translations
 - Updating translation keys
 - Changing translation providers
 - Adjusting RTL language support
 
 **Related Documentation:**
+
 - `docs/LANGUAGE-SUPPORT.md` - Complete language support guide
 - `lego/i18n/README.md` - i18n component usage
 - `docs/ADRs/004-i18n-architecture.md` - i18n architecture decision
@@ -199,15 +222,19 @@ Configs in root use relative paths from root:
 ## Troubleshooting
 
 ### Issue: Config not found
+
 **Solution:** Check path references - configs in `.config/` need `../` prefix
 
 ### Issue: TypeScript errors after config change
+
 **Solution:** Restart TypeScript server in IDE, clear cache
 
 ### Issue: Build fails after config change
+
 **Solution:** Check path aliases, verify all references are correct
 
 ### Issue: Tests don't run
+
 **Solution:** Check test config extends root config correctly
 
 ## Related Documentation
@@ -215,4 +242,3 @@ Configs in root use relative paths from root:
 - `docs/TYPESCRIPT-CONFIG.md` - Detailed TypeScript configuration guide
 - `warmthly/README.md` - Project overview
 - `warmthly/CONTRIBUTING.md` - Contribution guidelines
-

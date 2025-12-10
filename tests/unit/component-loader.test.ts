@@ -26,7 +26,7 @@ describe('Component Loader', () => {
     document.body.appendChild(stoplightElement);
 
     // Mock stoplight-utils
-    vi.mock('@utils/stoplight-utils.js', () => ({
+    (vi as any).mock('@utils/stoplight-utils.js', () => ({
       initStoplight: vi.fn(),
     }));
 
@@ -42,7 +42,7 @@ describe('Component Loader', () => {
 
   it('should not load stoplight component when element does not exist', async () => {
     // Mock stoplight-utils
-    vi.mock('@utils/stoplight-utils.js', () => ({
+    (vi as any).mock('@utils/stoplight-utils.js', () => ({
       initStoplight: vi.fn(),
     }));
 
@@ -53,6 +53,6 @@ describe('Component Loader', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const { initStoplight } = await import('@utils/stoplight-utils.js');
-    expect(initStoplight).not.toHaveBeenCalled();
+    (expect(initStoplight) as any).not.toHaveBeenCalled();
   });
 });

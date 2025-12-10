@@ -64,6 +64,7 @@ After creating images, test them with:
 ✅ **Dynamic OG Images Available:** The Warmthly platform uses a dynamic OG image generator (`/og-image`) that automatically creates branded Open Graph images based on page content. This eliminates the need for manual image creation and ensures images are always up-to-date.
 
 ⚠️ **Optional Static Images:** While dynamic images work well, you can optionally create static images for:
+
 - Better performance (pre-rendered images load faster)
 - Custom designs for specific pages
 - Fallback if dynamic generator is unavailable

@@ -62,14 +62,14 @@ Both implementations provide similar endpoints, but with different implementatio
 
 ### Implementation Differences
 
-| Feature | TypeScript API | Express.js API | Cloudflare Functions |
-|---------|---------------|----------------|---------------------|
-| Rate Limiting | ✅ Comprehensive | ✅ Comprehensive | ❌ Not implemented |
-| Input Validation | ✅ Comprehensive | ✅ Comprehensive | ⚠️ Basic (now fixed) |
-| Error Sanitization | ✅ Yes | ✅ Yes | ✅ Yes (now fixed) |
-| CORS Validation | ✅ Exact match | ✅ Exact match | ✅ Exact match (now fixed) |
-| Timeout Protection | ✅ Yes | ✅ Yes | ⚠️ Limited |
-| Request Signing | ✅ Yes | ✅ Yes | ❌ Not implemented |
+| Feature            | TypeScript API   | Express.js API   | Cloudflare Functions       |
+| ------------------ | ---------------- | ---------------- | -------------------------- |
+| Rate Limiting      | ✅ Comprehensive | ✅ Comprehensive | ❌ Not implemented         |
+| Input Validation   | ✅ Comprehensive | ✅ Comprehensive | ⚠️ Basic (now fixed)       |
+| Error Sanitization | ✅ Yes           | ✅ Yes           | ✅ Yes (now fixed)         |
+| CORS Validation    | ✅ Exact match   | ✅ Exact match   | ✅ Exact match (now fixed) |
+| Timeout Protection | ✅ Yes           | ✅ Yes           | ⚠️ Limited                 |
+| Request Signing    | ✅ Yes           | ✅ Yes           | ❌ Not implemented         |
 
 ## Security Considerations
 
@@ -186,6 +186,7 @@ A: Different deployment targets (OCI, Cloudflare Pages) require different runtim
 **Q: Which implementation should I use for new features?**
 
 A: For new features:
+
 - If it requires full backend infrastructure → Express.js API
 - If it's a simple edge operation → Cloudflare Functions
 - For local development → TypeScript API
@@ -193,6 +194,7 @@ A: For new features:
 **Q: How do I ensure consistency across implementations?**
 
 A: Use shared utilities for:
+
 - Input validation
 - Error handling
 - Security measures

@@ -1,7 +1,7 @@
 /**
  * API Endpoints
  * Centralized exports for all API endpoints
- * 
+ *
  * Usage:
  *   import { airtable } from '@api/endpoints/index.js';
  *   // or
@@ -17,4 +17,3 @@ export { default as getYocoPublicKey } from './get-yoco-public-key.js';
 export { default as inboundEmail } from './inbound-email.js';
 export { default as reports } from './reports.js';
 export { default as sendEmail } from './send-email.js';
-

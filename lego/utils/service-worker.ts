@@ -109,10 +109,10 @@ export function initServiceWorker(): void {
   // Register on page load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      registerServiceWorker();
+      void registerServiceWorker();
     });
   } else {
-    registerServiceWorker();
+    void registerServiceWorker();
   }
 
   // Handle service worker updates

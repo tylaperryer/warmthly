@@ -44,15 +44,15 @@ const REQUIRED_HEADERS = {
 
 describe('Security Headers', () => {
   it('should validate Content-Security-Policy header', () => {
-    const expectedCSP = expect.stringContaining("default-src 'self'");
+    const expectedCSP = (expect as any).stringContaining("default-src 'self'");
     expect(typeof expectedCSP).toBe('object');
 
     // Check for nonce-based CSP (not unsafe-inline)
-    const hasNonce = expect.stringContaining("'nonce-");
-    const hasUnsafeInline = expect.stringContaining("'unsafe-inline'");
+    const hasNonce = (expect as any).stringContaining("'nonce-");
+    const _hasUnsafeInline = (expect as any).stringContaining("'unsafe-inline'");
 
     // CSP should use nonces, not unsafe-inline for scripts
-    expect(hasNonce).toBeDefined();
+    (expect(hasNonce) as any).toBeDefined();
   });
 
   it('should validate X-Frame-Options header', () => {
@@ -66,15 +66,15 @@ describe('Security Headers', () => {
   });
 
   it('should validate Strict-Transport-Security header', () => {
-    const expectedValue = expect.stringContaining('max-age=');
+    const expectedValue = (expect as any).stringContaining('max-age=');
     expect(typeof expectedValue).toBe('object');
 
     // Should include subdomains and preload
-    const hasSubdomains = expect.stringContaining('includeSubDomains');
-    const hasPreload = expect.stringContaining('preload');
+    const hasSubdomains = (expect as any).stringContaining('includeSubDomains');
+    const hasPreload = (expect as any).stringContaining('preload');
 
-    expect(hasSubdomains).toBeDefined();
-    expect(hasPreload).toBeDefined();
+    (expect(hasSubdomains) as any).toBeDefined();
+    (expect(hasPreload) as any).toBeDefined();
   });
 
   it('should validate Referrer-Policy header', () => {
@@ -83,39 +83,39 @@ describe('Security Headers', () => {
   });
 
   it('should validate Permissions-Policy header', () => {
-    const expectedValue = expect.stringContaining('geolocation=()');
+    const expectedValue = (expect as any).stringContaining('geolocation=()');
     expect(typeof expectedValue).toBe('object');
 
     // Should disable unnecessary features
-    const hasGeolocation = expect.stringContaining('geolocation=()');
-    const hasMicrophone = expect.stringContaining('microphone=()');
-    const hasCamera = expect.stringContaining('camera=()');
+    const hasGeolocation = (expect as any).stringContaining('geolocation=()');
+    const hasMicrophone = (expect as any).stringContaining('microphone=()');
+    const hasCamera = (expect as any).stringContaining('camera=()');
 
-    expect(hasGeolocation).toBeDefined();
-    expect(hasMicrophone).toBeDefined();
-    expect(hasCamera).toBeDefined();
+    (expect(hasGeolocation) as any).toBeDefined();
+    (expect(hasMicrophone) as any).toBeDefined();
+    (expect(hasCamera) as any).toBeDefined();
   });
 
   it('should have all recommended headers', () => {
     const headers = Object.keys(REQUIRED_HEADERS);
-    expect(headers.length).toBeGreaterThan(0);
+    (expect(headers.length) as any).toBeGreaterThan(0);
 
     // All required headers should be present
     const requiredCount = Object.values(REQUIRED_HEADERS).filter(h => h.required).length;
-    expect(requiredCount).toBeGreaterThan(0);
+    (expect(requiredCount) as any).toBeGreaterThan(0);
   });
 
   it('should validate CSP does not use unsafe-inline for scripts', () => {
     // CSP should use nonces, not 'unsafe-inline' for script-src
     const cspPolicy = "script-src 'self' 'nonce-abc123'";
-    expect(cspPolicy).not.toContain("'unsafe-inline'");
-    expect(cspPolicy).toContain("'nonce-");
+    (expect(cspPolicy) as any).not.toContain("'unsafe-inline'");
+    (expect(cspPolicy) as any).toContain("'nonce-");
   });
 
   it('should validate HSTS includes subdomains and preload', () => {
     const hsts = 'max-age=31536000; includeSubDomains; preload';
-    expect(hsts).toContain('includeSubDomains');
-    expect(hsts).toContain('preload');
-    expect(hsts).toContain('max-age=');
+    (expect(hsts) as any).toContain('includeSubDomains');
+    (expect(hsts) as any).toContain('preload');
+    (expect(hsts) as any).toContain('max-age=');
   });
 });

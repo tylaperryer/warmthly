@@ -48,63 +48,68 @@ const MAX_HORIZONTAL_SCROLL = 0;
 /**
  * Test that page works at 400% zoom
  */
-test.describe('400% Zoom Testing', () => {
-  test.describe('Page Layout at 400% Zoom', () => {
+describe('400% Zoom Testing', () => {
+  describe('Page Layout at 400% Zoom', () => {
     for (const page of TEST_PAGES) {
-      test(`${page.name} - No horizontal scrolling`, async ({
-        page: browserPage,
-        baseURL,
-      }: {
-        page: Page;
-        baseURL: string | undefined;
-      }) => {
-        // Set viewport to simulate 400% zoom
-        // At 400% zoom, a 1920px wide screen becomes effectively 480px
-        await browserPage.setViewportSize({ width: 1920 / ZOOM_LEVEL, height: 800 });
+      (test as any)(
+        `${page.name} - No horizontal scrolling`,
+        async (
+          {
+            page: browserPage,
+            baseURL,
+          }: {
+            page: Page;
+            baseURL?: string | undefined;
+          } = {} as any
+        ) => {
+          // Set viewport to simulate 400% zoom
+          // At 400% zoom, a 1920px wide screen becomes effectively 480px
+          await (browserPage as any).setViewportSize({ width: 1920 / ZOOM_LEVEL, height: 800 });
 
-        // Navigate to page
-        const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
-        await browserPage.goto(`${appUrl}${page.url}`);
+          // Navigate to page
+          const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
+          await browserPage.goto(`${appUrl}${page.url}`);
 
-        // Wait for page to load
-        await browserPage.waitForLoadState('networkidle');
+          // Wait for page to load
+          await (browserPage as any).waitForLoadState('networkidle');
 
-        // Check for horizontal scrolling
-        const horizontalScroll = await browserPage.evaluate(() => {
-          return {
-            scrollWidth: document.documentElement.scrollWidth,
-            clientWidth: document.documentElement.clientWidth,
-            hasHorizontalScroll:
-              document.documentElement.scrollWidth > document.documentElement.clientWidth,
-          };
-        });
+          // Check for horizontal scrolling
+          const horizontalScroll = await (browserPage as any).evaluate(() => {
+            return {
+              scrollWidth: document.documentElement.scrollWidth,
+              clientWidth: document.documentElement.clientWidth,
+              hasHorizontalScroll:
+                document.documentElement.scrollWidth > document.documentElement.clientWidth,
+            };
+          });
 
-        // Assert no horizontal scrolling
-        expect(horizontalScroll.hasHorizontalScroll).toBe(false);
-        expect(horizontalScroll.scrollWidth).toBeLessThanOrEqual(
-          horizontalScroll.clientWidth + MAX_HORIZONTAL_SCROLL
-        );
-      });
+          // Assert no horizontal scrolling
+          expect(horizontalScroll.hasHorizontalScroll).toBe(false);
+          (expect(horizontalScroll.scrollWidth) as any).toBeLessThanOrEqual(
+            horizontalScroll.clientWidth + MAX_HORIZONTAL_SCROLL
+          );
+        }
+      );
 
       test(`${page.name} - Content reflows properly`, async ({
         page: browserPage,
         baseURL,
       }: {
         page: Page;
-        baseURL: string | undefined;
-      }) => {
+        baseURL?: string | undefined;
+      } = {} as any) => {
         // Set viewport to simulate 400% zoom
-        await browserPage.setViewportSize({ width: 1920 / ZOOM_LEVEL, height: 800 });
+        await (browserPage as any).setViewportSize({ width: 1920 / ZOOM_LEVEL, height: 800 });
 
         // Navigate to page
         const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
         await browserPage.goto(`${appUrl}${page.url}`);
 
         // Wait for page to load
-        await browserPage.waitForLoadState('networkidle');
+        await (browserPage as any).waitForLoadState('networkidle');
 
         // Check that main content is visible and not clipped
-        const contentCheck = await browserPage.evaluate(() => {
+        const contentCheck = await (browserPage as any).evaluate(() => {
           const main =
             document.querySelector('main') || document.querySelector('.container') || document.body;
           if (!main) return { visible: false, reason: 'No main content found' };
@@ -123,8 +128,8 @@ test.describe('400% Zoom Testing', () => {
         });
 
         expect(contentCheck.visible).toBe(true);
-        expect(contentCheck.width).toBeGreaterThan(0);
-        expect(contentCheck.height).toBeGreaterThan(0);
+        (expect(contentCheck.width) as any).toBeGreaterThan(0);
+        (expect(contentCheck.height) as any).toBeGreaterThan(0);
       });
 
       test(`${page.name} - Interactive elements accessible`, async ({
@@ -132,20 +137,20 @@ test.describe('400% Zoom Testing', () => {
         baseURL,
       }: {
         page: Page;
-        baseURL: string | undefined;
-      }) => {
+        baseURL?: string | undefined;
+      } = {} as any) => {
         // Set viewport to simulate 400% zoom
-        await browserPage.setViewportSize({ width: 1920 / ZOOM_LEVEL, height: 800 });
+        await (browserPage as any).setViewportSize({ width: 1920 / ZOOM_LEVEL, height: 800 });
 
         // Navigate to page
         const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
         await browserPage.goto(`${appUrl}${page.url}`);
 
         // Wait for page to load
-        await browserPage.waitForLoadState('networkidle');
+        await (browserPage as any).waitForLoadState('networkidle');
 
         // Check that interactive elements are accessible
-        const interactiveCheck = await browserPage.evaluate(() => {
+        const interactiveCheck = await (browserPage as any).evaluate(() => {
           const buttons = Array.from(
             document.querySelectorAll('button, a[href], input, select, textarea')
           );
@@ -170,20 +175,20 @@ test.describe('400% Zoom Testing', () => {
         baseURL,
       }: {
         page: Page;
-        baseURL: string | undefined;
-      }) => {
+        baseURL?: string | undefined;
+      } = {} as any) => {
         // Set viewport to simulate 400% zoom
-        await browserPage.setViewportSize({ width: 1920 / ZOOM_LEVEL, height: 800 });
+        await (browserPage as any).setViewportSize({ width: 1920 / ZOOM_LEVEL, height: 800 });
 
         // Navigate to page
         const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
         await browserPage.goto(`${appUrl}${page.url}`);
 
         // Wait for page to load
-        await browserPage.waitForLoadState('networkidle');
+        await (browserPage as any).waitForLoadState('networkidle');
 
         // Check that text is readable (not too small, not clipped)
-        const textCheck = await browserPage.evaluate(() => {
+        const textCheck = await (browserPage as any).evaluate(() => {
           const textElements = Array.from(
             document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, span, div')
           );
@@ -205,7 +210,7 @@ test.describe('400% Zoom Testing', () => {
         });
 
         // Most text should be readable (allow some margin for edge cases)
-        expect(textCheck.readable).toBeGreaterThan(textCheck.total * 0.9);
+        (expect(textCheck.readable) as any).toBeGreaterThan(textCheck.total * 0.9);
       });
     }
   });

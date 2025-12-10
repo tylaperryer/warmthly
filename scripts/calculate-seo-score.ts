@@ -194,9 +194,14 @@ function calculateSEOScore(): SEOScore {
         // Validate URL properly to prevent bypasses
         try {
           const urlObj = new URL(href, 'https://www.warmthly.org');
-          // Only count internal links (warmthly.org domains) or relative links
-          const isInternal = urlObj.hostname.toLowerCase().endsWith('warmthly.org') || 
-                            (!urlObj.hostname || urlObj.hostname === 'www.warmthly.org');
+          // SECURITY: Validate hostname properly instead of substring matching
+          const hostname = urlObj.hostname.toLowerCase();
+          const isWarmthlyDomain =
+            hostname === 'warmthly.org' ||
+            hostname === 'www.warmthly.org' ||
+            (hostname.endsWith('.warmthly.org') && hostname.split('.').length === 3);
+          const isInternal =
+            isWarmthlyDomain || !urlObj.hostname || urlObj.hostname === 'www.warmthly.org';
           if (isInternal || (!href.startsWith('http://') && !href.startsWith('https://'))) {
             internalLinks++;
           }

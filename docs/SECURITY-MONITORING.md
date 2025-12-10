@@ -410,19 +410,16 @@ docker run -t owasp/zap2docker-stable zap-full-scan.py -t http://localhost:4173
 ### Key Metrics to Track
 
 1. **Security Events:**
-
    - Total events per type
    - Events per severity
    - Events over time
 
 2. **Authentication:**
-
    - Failed login attempts
    - Successful logins
    - MFA usage
 
 3. **Anomalies:**
-
    - Anomalies detected
    - Anomaly types
    - Anomaly scores
@@ -437,19 +434,16 @@ docker run -t owasp/zap2docker-stable zap-full-scan.py -t http://localhost:4173
 ## Best Practices
 
 1. **Log Retention:**
-
    - Keep logs for at least 90 days
    - Archive older logs to cold storage
    - Comply with data retention policies
 
 2. **Alert Tuning:**
-
    - Start with conservative thresholds
    - Tune based on false positive rate
    - Review and adjust weekly
 
 3. **Dashboard Maintenance:**
-
    - Review dashboards monthly
    - Update queries based on new threats
    - Share insights with team

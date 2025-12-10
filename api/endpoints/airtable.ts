@@ -4,7 +4,12 @@
  * Provides rate limiting and timeout protection
  */
 
-import { withRateLimit, apiRateLimitOptions, type Request, type Response } from '../middleware/rate-limit.js';
+import {
+  withRateLimit,
+  apiRateLimitOptions,
+  type Request,
+  type Response,
+} from '../middleware/rate-limit.js';
 import logger from '../utils/logger.js';
 import { getRedisClient } from '../utils/redis-client.js';
 
@@ -22,7 +27,6 @@ const MAX_RECORDS = 1000;
  * API timeout in milliseconds
  */
 const API_TIMEOUT = 10000;
-
 
 /**
  * Airtable API error response
@@ -56,7 +60,13 @@ async function airtableHandler(req: Request, res: Response): Promise<unknown> {
     }
 
     // Get query parameters
-    const query = (req.query || {}) as { baseId?: string; tableName?: string; viewId?: string; page?: string; [key: string]: string | string[] | undefined };
+    const query = (req.query || {}) as {
+      baseId?: string;
+      tableName?: string;
+      viewId?: string;
+      page?: string;
+      [key: string]: string | string[] | undefined;
+    };
     const { baseId, tableName, viewId, page } = query;
 
     // Validate required parameters

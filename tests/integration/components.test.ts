@@ -20,7 +20,7 @@ describe('Component Integration', () => {
     document.body.appendChild(container);
 
     const button = container.querySelector('button');
-    expect(button).toBeTruthy();
+    (expect(button) as any).toBeTruthy();
     expect(button?.getAttribute('data-action')).toBe('test');
   });
 

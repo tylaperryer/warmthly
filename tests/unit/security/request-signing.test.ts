@@ -5,7 +5,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { signRequest, verifyRequest, extractSignature } from '../../../api/security/request-signing.js';
+
+import {
+  signRequest,
+  verifyRequest,
+  extractSignature,
+} from '../../../api/security/request-signing.js';
 
 describe('Request Signing', () => {
   const secret = 'test-secret-key-12345';
@@ -14,7 +19,7 @@ describe('Request Signing', () => {
   describe('signRequest', () => {
     it('should sign a JSON payload', () => {
       const signature = signRequest(payload, secret);
-      expect(signature).toBeDefined();
+      (expect(signature) as any).toBeDefined();
       expect(typeof signature).toBe('string');
       expect(signature.length).toBe(64); // SHA256 hex = 64 characters
     });
@@ -22,7 +27,7 @@ describe('Request Signing', () => {
     it('should sign a string payload', () => {
       const stringPayload = JSON.stringify(payload);
       const signature = signRequest(stringPayload, secret);
-      expect(signature).toBeDefined();
+      (expect(signature) as any).toBeDefined();
       expect(typeof signature).toBe('string');
     });
 
@@ -35,14 +40,14 @@ describe('Request Signing', () => {
     it('should produce different signatures for different secrets', () => {
       const sig1 = signRequest(payload, secret);
       const sig2 = signRequest(payload, 'different-secret');
-      expect(sig1).not.toBe(sig2);
+      (expect(sig1) as any).not.toBe(sig2);
     });
 
     it('should produce different signatures for different payloads', () => {
       const payload2 = { amount: 20000, currency: 'ZAR' };
       const sig1 = signRequest(payload, secret);
       const sig2 = signRequest(payload2, secret);
-      expect(sig1).not.toBe(sig2);
+      (expect(sig1) as any).not.toBe(sig2);
     });
   });
 
@@ -54,7 +59,6 @@ describe('Request Signing', () => {
     });
 
     it('should reject an invalid signature', () => {
-      const signature = signRequest(payload, secret);
       const isValid = verifyRequest(payload, 'invalid-signature', secret);
       expect(isValid).toBe(false);
     });
@@ -96,7 +100,7 @@ describe('Request Signing', () => {
 
       // Times should be similar (within 10ms) for constant-time comparison
       const timeDiff = Math.abs(timeValid - timeInvalid);
-      expect(timeDiff).toBeLessThan(10);
+      (expect(timeDiff) as any).toBeLessThan(10);
     });
 
     it('should handle string payloads', () => {
@@ -119,7 +123,7 @@ describe('Request Signing', () => {
     it('should return null if signature header is missing', () => {
       const headers = {};
       const signature = extractSignature(headers);
-      expect(signature).toBeNull();
+      (expect(signature) as any).toBeNull();
     });
 
     it('should handle case-insensitive header names', () => {
@@ -131,4 +135,3 @@ describe('Request Signing', () => {
     });
   });
 });
-

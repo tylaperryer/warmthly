@@ -146,14 +146,25 @@ async function checkRateLimit(
     }
 
     // Results are in format: [error, value] or just value
+    // Type the results properly to avoid any type issues
     const countResult = results[0];
     const ttlResult = results[1];
-    
-    // Handle both tuple format [error, value] and direct value format
-    const count = Array.isArray(countResult) ? countResult[1] : countResult;
-    const ttl = Array.isArray(ttlResult) ? ttlResult[1] : ttlResult;
 
-    if (typeof count !== 'number' || typeof ttl !== 'number') {
+    // Handle both tuple format [error, value] and direct value format
+    // Extract numeric values from Redis responses
+    const extractNumber = (result: unknown): number | null => {
+      if (Array.isArray(result)) {
+        // Tuple format: [error, value]
+        const value = result[1];
+        return typeof value === 'number' ? value : null;
+      }
+      return typeof result === 'number' ? result : null;
+    };
+
+    const count = extractNumber(countResult);
+    const ttl = extractNumber(ttlResult);
+
+    if (count === null || ttl === null) {
       throw new Error('Invalid Redis response');
     }
 
@@ -206,18 +217,14 @@ async function checkRateLimit(
 
       // Simple in-memory rate limiting (per-process, not distributed)
       // In production, consider using a shared in-memory store or stricter limits
+      type MemoryStoreEntry = { count: number; resetTime: number };
+      type MemoryStore = Map<string, MemoryStoreEntry>;
       const memoryKey = `memory:ratelimit:${identifier}:${req.url}`;
-      const memoryStore =
-        (globalThis as { rateLimitStore?: Map<string, { count: number; resetTime: number }> })
-          .rateLimitStore ?? new Map();
+      const globalStore = globalThis as { rateLimitStore?: MemoryStore };
+      const memoryStore: MemoryStore = globalStore.rateLimitStore ?? new Map();
 
-      if (
-        !(globalThis as { rateLimitStore?: Map<string, { count: number; resetTime: number }> })
-          .rateLimitStore
-      ) {
-        (
-          globalThis as { rateLimitStore?: Map<string, { count: number; resetTime: number }> }
-        ).rateLimitStore = memoryStore;
+      if (!globalStore.rateLimitStore) {
+        globalStore.rateLimitStore = memoryStore;
       }
 
       const memoryEntry = memoryStore.get(memoryKey);

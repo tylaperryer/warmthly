@@ -25,89 +25,93 @@ const isDev = (import.meta as { env?: { DEV?: boolean } }).env?.DEV ?? false;
 export function setupErrorHandling(): void {
   const errorBoundary = getErrorBoundary();
 
-  window.addEventListener('unhandledrejection', async event => {
-    const error =
-      event.reason instanceof Error
-        ? event.reason
-        : new Error(String(event.reason || 'Unhandled promise rejection'));
-
-    // Track error locally (no server analytics)
-    trackUnhandledRejection(event.reason);
-
-    // Handle with error boundary
-    const context: ErrorContext = {
-      severity: ErrorSeverity.MEDIUM,
-      component: 'GlobalErrorHandler',
-      operation: 'unhandledrejection',
-      userMessage: 'An unexpected error occurred. Please try again.',
-      recoverable: true,
-    };
-
-    await errorBoundary.handleError(error, context);
-
-    if (isDev) {
-      console.error('Unhandled promise rejection:', event.reason);
-    }
-  });
-
-  // Handle both JavaScript errors and resource loading errors
-  window.addEventListener(
-    'error',
-    async event => {
-      // Check if this is a resource loading error
-      if (event.target && (event.target as HTMLElement).tagName) {
-        const target = event.target as HTMLElement;
-        const tagName = target.tagName.toLowerCase();
-
-        if (['img', 'script', 'link', 'style'].includes(tagName)) {
-          const src =
-            (target as HTMLImageElement).src || (target as HTMLLinkElement).href || 'unknown';
-
-          const error = new Error(`Failed to load ${tagName}: ${src}`);
-          const context: ErrorContext = {
-            severity: ErrorSeverity.LOW,
-            component: 'ResourceLoader',
-            operation: `load_${tagName}`,
-            userMessage: `Failed to load resource: ${tagName}`,
-            recoverable: true,
-            metadata: { src, tagName },
-          };
-
-          await errorBoundary.handleError(error, context);
-
-          if (isDev) {
-            console.warn(`Failed to load ${tagName}: ${src}`);
-          }
-          return; // Resource loading error handled
-        }
-      }
-
-      // Handle JavaScript errors (not resource loading)
+  window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
+    void (async () => {
       const error =
-        event.error instanceof Error ? event.error : new Error(event.message || 'Unknown error');
+        event.reason instanceof Error
+          ? event.reason
+          : new Error(String(event.reason || 'Unhandled promise rejection'));
 
       // Track error locally (no server analytics)
-      trackError(error, event);
+      trackUnhandledRejection(event.reason);
 
       // Handle with error boundary
       const context: ErrorContext = {
-        severity: ErrorSeverity.HIGH,
+        severity: ErrorSeverity.MEDIUM,
         component: 'GlobalErrorHandler',
-        operation: 'error',
-        userMessage: 'A JavaScript error occurred. Please refresh the page.',
-        recoverable: false,
-        metadata: {
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno,
-        },
+        operation: 'unhandledrejection',
+        userMessage: 'An unexpected error occurred. Please try again.',
+        recoverable: true,
       };
 
       await errorBoundary.handleError(error, context);
 
       if (isDev) {
-        console.error('JavaScript error:', error);
+        console.error('Unhandled promise rejection:', event.reason);
       }
+    })();
+  });
+
+  // Handle both JavaScript errors and resource loading errors
+  window.addEventListener(
+    'error',
+    (event: ErrorEvent) => {
+      void (async () => {
+        // Check if this is a resource loading error
+        if (event.target && (event.target as HTMLElement).tagName) {
+          const target = event.target as HTMLElement;
+          const tagName = target.tagName.toLowerCase();
+
+          if (['img', 'script', 'link', 'style'].includes(tagName)) {
+            const src =
+              (target as HTMLImageElement).src || (target as HTMLLinkElement).href || 'unknown';
+
+            const error = new Error(`Failed to load ${tagName}: ${src}`);
+            const context: ErrorContext = {
+              severity: ErrorSeverity.LOW,
+              component: 'ResourceLoader',
+              operation: `load_${tagName}`,
+              userMessage: `Failed to load resource: ${tagName}`,
+              recoverable: true,
+              metadata: { src, tagName },
+            };
+
+            await errorBoundary.handleError(error, context);
+
+            if (isDev) {
+              console.warn(`Failed to load ${tagName}: ${src}`);
+            }
+            return; // Resource loading error handled
+          }
+        }
+
+        // Handle JavaScript errors (not resource loading)
+        const error =
+          event.error instanceof Error ? event.error : new Error(event.message || 'Unknown error');
+
+        // Track error locally (no server analytics)
+        trackError(error, event);
+
+        // Handle with error boundary
+        const context: ErrorContext = {
+          severity: ErrorSeverity.HIGH,
+          component: 'GlobalErrorHandler',
+          operation: 'error',
+          userMessage: 'A JavaScript error occurred. Please refresh the page.',
+          recoverable: false,
+          metadata: {
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+          },
+        };
+
+        await errorBoundary.handleError(error, context);
+
+        if (isDev) {
+          console.error('JavaScript error:', error);
+        }
+      })();
     },
     true
   ); // Use capture phase to catch resource loading errors

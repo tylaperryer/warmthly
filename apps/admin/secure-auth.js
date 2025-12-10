@@ -18,7 +18,6 @@ const IV_LENGTH = 12;
 
 // In-memory encryption keys (never persisted)
 let encryptionKey = null;
-let refreshEncryptionKey = null;
 
 /**
  * Initialize IndexedDB
@@ -156,21 +155,23 @@ async function getAccessToken() {
 
     return new Promise((resolve, reject) => {
       const request = store.get('access_token');
-      request.onsuccess = async () => {
-        const encrypted = request.result;
-        if (!encrypted) {
-          resolve(null);
-          return;
-        }
+      request.onsuccess = () => {
+        void (async () => {
+          const encrypted = request.result;
+          if (!encrypted) {
+            resolve(null);
+            return;
+          }
 
-        try {
-          const key = await getAccessEncryptionKey();
-          const decrypted = await decryptToken(encrypted, key);
-          resolve(decrypted);
-        } catch (error) {
-          await clearAccessToken();
-          reject(new Error('Failed to decrypt access token'));
-        }
+          try {
+            const key = await getAccessEncryptionKey();
+            const decrypted = await decryptToken(encrypted, key);
+            resolve(decrypted);
+          } catch {
+            await clearAccessToken();
+            reject(new Error('Failed to decrypt access token'));
+          }
+        })();
       };
       request.onerror = () => reject(new Error('Failed to retrieve access token'));
     });
@@ -200,7 +201,7 @@ async function clearAccessToken() {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(new Error('Failed to clear access token'));
     });
-  } catch (error) {
+  } catch {
     // Best effort - also clear sessionStorage fallback
     sessionStorage.removeItem('warmthly-admin-token');
   }

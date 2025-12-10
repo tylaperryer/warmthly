@@ -34,6 +34,10 @@
     })();
   </script>
   <script type="module" src="/lego/components/warmthly-head.js"></script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>404 - Page Not Found - Warmthly</title>
+  <meta name="description" content="The page you're looking for doesn't exist. Return to the Warmthly homepage or navigate to another page.">
+  
   <warmthly-head 
     title="404 - Page Not Found - Warmthly"
     description="The page you're looking for doesn't exist"
@@ -259,7 +263,7 @@
     <warmthly-stoplight app="main"></warmthly-stoplight>
   </div>
 
-  <div class="container">
+  <main class="container" role="main">
     <div class="big-404">404</div>
     <h1 class="page-title" data-reading-level-content>This page went on a little adventure.</h1>
     <p class="subtitle" data-reading-level-content>
@@ -267,7 +271,7 @@
     </p>
     
     <div class="music-section">
-      <h3 class="music-title" data-reading-level-content>An Unexpected Interlude</h3>
+      <h2 class="music-title" data-reading-level-content>An Unexpected Interlude</h2>
       <p class="music-description" data-reading-level-content>
         Sometimes getting lost leads to exactly what we need to hear. Here's a song for this quiet moment.
       </p>
@@ -282,14 +286,14 @@
     </div>
     
     <div class="navigation-help">
-      <h3 class="nav-title">Let's find your way.</h3>
+      <h2 class="nav-title">Let's find your way.</h2>
       <div class="nav-buttons">
         <a href="/" class="nav-button" id="home-link">Return Home</a>
         <button class="nav-button" type="button" onclick="window.history.back()" aria-label="Go back to previous page">Go Back</button>
       </div>
     </div>
     
-  </div>
+  </main>
   
   <!-- Font Loader Component -->
   <warmthly-font-loader></warmthly-font-loader>

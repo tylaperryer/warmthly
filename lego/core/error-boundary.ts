@@ -69,9 +69,10 @@ class DefaultRecoveryStrategies {
     return {
       canHandle: (_error, context) =>
         context.recoverable === true && context.severity !== ErrorSeverity.CRITICAL,
-      recover: async (error, _context) => {
+      recover: (error, _context) => {
         const logger = getContainer().resolve<ILoggerService>(ServiceIdentifiers.Logger);
         logger.warn(`[ErrorBoundary] Retry strategy triggered for: ${error.message}`);
+        return Promise.resolve();
       },
     };
   }
@@ -82,9 +83,10 @@ class DefaultRecoveryStrategies {
   static fallback<T>(_fallbackValue: T): ErrorRecoveryStrategy {
     return {
       canHandle: () => true,
-      recover: async (error, _context) => {
+      recover: (error, _context) => {
         const logger = getContainer().resolve<ILoggerService>(ServiceIdentifiers.Logger);
         logger.warn(`[ErrorBoundary] Fallback strategy triggered for: ${error.message}`);
+        return Promise.resolve();
       },
     };
   }
@@ -95,9 +97,10 @@ class DefaultRecoveryStrategies {
   static logAndContinue(): ErrorRecoveryStrategy {
     return {
       canHandle: () => true,
-      recover: async (error, context) => {
+      recover: (error, context) => {
         const logger = getContainer().resolve<ILoggerService>(ServiceIdentifiers.Logger);
         logger.error(`[ErrorBoundary] Error logged: ${error.message}`, context);
+        return Promise.resolve();
       },
     };
   }

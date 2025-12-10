@@ -6,9 +6,9 @@
  * Usage: npm run extract-critical-css
  */
 
+import { existsSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
-import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -81,7 +81,7 @@ const OUTPUT_FILE = join(projectRoot, 'lego/styles/critical.css');
 /**
  * Extract critical CSS from a CSS file
  */
-async function extractCriticalCSS(cssContent: string): Promise<string> {
+function extractCriticalCSS(cssContent: string): string {
   // Simple extraction: get CSS rules that match critical selectors
   // In a production setup, you'd use a tool like critical or penthouse
   const lines = cssContent.split('\n');
@@ -141,7 +141,7 @@ async function extractCriticalCSS(cssContent: string): Promise<string> {
       } else if (trimmed.includes('@keyframes') || trimmed.includes('@font-face')) {
         // Include animations and fonts
         criticalLines.push(line);
-        let atRuleContent = [line];
+        const atRuleContent = [line];
         let braceCount = (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
 
         // Continue reading until rule closes
@@ -179,11 +179,11 @@ async function generateCriticalCSS(): Promise<void> {
 
     try {
       const content = await readFile(cssFile, 'utf-8');
-      const critical = await extractCriticalCSS(content);
+      const critical = extractCriticalCSS(content);
       allCriticalCSS += `/* Critical CSS from ${cssFile} */\n${critical}\n\n`;
       console.log(`✓ Processed: ${cssFile}`);
-    } catch (error) {
-      console.error(`✗ Error processing ${cssFile}:`, error);
+    } catch (_error) {
+      console.error(`✗ Error processing ${cssFile}:`, _error);
     }
   }
 
@@ -219,7 +219,7 @@ async function generateCriticalCSS(): Promise<void> {
 
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  generateCriticalCSS().catch(error => {
+  void generateCriticalCSS().catch(error => {
     console.error('Fatal error:', error);
     process.exit(1);
   });

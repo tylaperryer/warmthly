@@ -5,6 +5,7 @@ Complete guide for writing, running, and maintaining tests in the Warmthly proje
 ## Overview
 
 The Warmthly project uses a comprehensive testing strategy:
+
 - **Unit Tests** - Test individual functions and components
 - **Integration Tests** - Test API endpoints and component interactions
 - **E2E Tests** - Test complete user workflows
@@ -127,16 +128,16 @@ import { test, expect } from '@playwright/test';
 
 test('payment flow', async ({ page }) => {
   await page.goto('/apps/main/');
-  
+
   // Navigate to donation page
   await page.click('text=Donate');
-  
+
   // Enter amount
   await page.fill('input[name="amount"]', '100');
-  
+
   // Submit
   await page.click('button[type="submit"]');
-  
+
   // Verify success
   await expect(page.locator('.success-message')).toBeVisible();
 });
@@ -260,7 +261,9 @@ describe('warmthly-button', () => {
   it('should handle click events', async () => {
     const button = document.createElement('warmthly-button');
     let clicked = false;
-    button.addEventListener('click', () => { clicked = true; });
+    button.addEventListener('click', () => {
+      clicked = true;
+    });
     document.body.appendChild(button);
 
     button.click();
@@ -352,6 +355,7 @@ describe('User Service', () => {
 ## Coverage Goals
 
 The project aims for:
+
 - **Lines**: 80% coverage
 - **Functions**: 85% coverage
 - **Branches**: 75% coverage
@@ -377,10 +381,10 @@ These are realistic, maintainable thresholds that balance quality with developme
 
 ```typescript
 // ✅ Good
-it('should return 400 when email is invalid', () => { });
+it('should return 400 when email is invalid', () => {});
 
 // ❌ Bad
-it('test email', () => { });
+it('test email', () => {});
 ```
 
 ### 4. Keep Tests Simple
@@ -440,4 +444,3 @@ Tests run automatically in GitHub Actions:
 
 **Last Updated:** 2024-12-19  
 **Maintained By:** Warmthly Development Team
-

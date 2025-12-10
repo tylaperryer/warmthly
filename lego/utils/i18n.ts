@@ -702,7 +702,9 @@ class I18n {
         }
         // Phase 7 Issue 7.8: Return user-friendly message instead of key
         if (import.meta.env?.DEV) {
-          console.warn(`[i18n] Missing translation key: ${key} (language: ${this.currentLanguage})`);
+          console.warn(
+            `[i18n] Missing translation key: ${key} (language: ${this.currentLanguage})`
+          );
         }
         return `[${key}]`; // User-friendly fallback instead of raw key
       }
@@ -727,7 +729,10 @@ class I18n {
    * Get fallback translation from English or fallback language
    * Phase 7 Issue 7.8: Improved fallback strategy
    */
-  private getFallbackTranslation(key: string, params?: Record<string, string | number>): string | null {
+  private getFallbackTranslation(
+    key: string,
+    params?: Record<string, string | number>
+  ): string | null {
     // Try fallback language first
     const fallbackTranslations = this.translations.get(this.config.fallbackLanguage);
     if (fallbackTranslations) {
@@ -833,7 +838,7 @@ class I18n {
    * Preload common languages on page load
    * Loads top languages in background for better UX
    */
-  async preloadCommonLanguages(): Promise<void> {
+  preloadCommonLanguages(): void {
     if (!this.online) {
       return;
     }
@@ -863,7 +868,7 @@ class I18n {
     ];
 
     // Preload in background (don't block)
-    Promise.all(
+    void Promise.all(
       commonLanguages
         .filter(lang => lang !== this.currentLanguage)
         .map(lang => this.preloadLanguage(lang, false))

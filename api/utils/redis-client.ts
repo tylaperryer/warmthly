@@ -173,31 +173,33 @@ function startHealthCheck(): void {
     return; // Already running
   }
 
-  healthCheckTimer = setInterval(async () => {
-    if (!redisClient) {
-      stopHealthCheck();
-      return;
-    }
+  healthCheckTimer = setInterval(() => {
+    void (async () => {
+      if (!redisClient) {
+        stopHealthCheck();
+        return;
+      }
 
-    try {
-      // Simple ping to check connection health
-      if (redisClient.isOpen) {
-        await redisClient.ping();
-        logger.log('[redis-client] Health check: OK');
-      } else {
-        logger.warn('[redis-client] Health check: Connection not open');
-        // Reset connection
+      try {
+        // Simple ping to check connection health
+        if (redisClient.isOpen) {
+          await redisClient.ping();
+          logger.log('[redis-client] Health check: OK');
+        } else {
+          logger.warn('[redis-client] Health check: Connection not open');
+          // Reset connection
+          connectionPromise = null;
+          redisClient = null;
+          stopHealthCheck();
+        }
+      } catch (error) {
+        logger.error('[redis-client] Health check failed:', error);
+        // Reset connection on health check failure
         connectionPromise = null;
         redisClient = null;
         stopHealthCheck();
       }
-    } catch (error) {
-      logger.error('[redis-client] Health check failed:', error);
-      // Reset connection on health check failure
-      connectionPromise = null;
-      redisClient = null;
-      stopHealthCheck();
-    }
+    })();
   }, HEALTH_CHECK_INTERVAL);
 }
 

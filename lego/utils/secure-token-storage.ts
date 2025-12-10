@@ -250,7 +250,7 @@ export async function getAccessToken(): Promise<string | null> {
           const key = await getAccessEncryptionKey();
           const decrypted = await decryptToken(encrypted, key);
           resolve(decrypted);
-        } catch (error) {
+        } catch {
           // If decryption fails, token is invalid - clear it
           await clearAccessToken();
           reject(new Error('Failed to decrypt access token'));
@@ -258,7 +258,7 @@ export async function getAccessToken(): Promise<string | null> {
       };
       request.onerror = () => reject(new Error('Failed to retrieve access token'));
     });
-  } catch (error) {
+  } catch {
     // IndexedDB not available (e.g., private browsing)
     return null;
   }
@@ -315,7 +315,7 @@ export async function getRefreshToken(): Promise<string | null> {
           const key = await getRefreshEncryptionKey();
           const decrypted = await decryptToken(encrypted, key);
           resolve(decrypted);
-        } catch (error) {
+        } catch {
           // If decryption fails, token is invalid - clear it
           await clearRefreshToken();
           reject(new Error('Failed to decrypt refresh token'));
@@ -323,7 +323,7 @@ export async function getRefreshToken(): Promise<string | null> {
       };
       request.onerror = () => reject(new Error('Failed to retrieve refresh token'));
     });
-  } catch (error) {
+  } catch {
     // IndexedDB not available (e.g., private browsing)
     return null;
   }
@@ -343,7 +343,7 @@ export async function clearAccessToken(): Promise<void> {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(new Error('Failed to clear access token'));
     });
-  } catch (error) {
+  } catch {
     // Ignore errors when clearing (best effort)
   }
 }
@@ -362,7 +362,7 @@ export async function clearRefreshToken(): Promise<void> {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(new Error('Failed to clear refresh token'));
     });
-  } catch (error) {
+  } catch {
     // Ignore errors when clearing (best effort)
   }
 }

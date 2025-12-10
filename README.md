@@ -340,40 +340,48 @@ The project follows WCAG 2.1 AA standards. Accessibility is verified through:
 Comprehensive documentation is available in the `docs/` directory:
 
 ### Core Documentation
+
 - **[API Documentation](./docs/API.md)** - Complete API reference for all endpoints
 - **[Component System](./docs/COMPONENT-SYSTEM.md)** - Guide to using Warmthly components
 - **[Testing Guide](./docs/TESTING-GUIDE.md)** - How to write and run tests
 - **[Asset Optimization](./docs/ASSET-OPTIMIZATION.md)** - Image and font optimization guide
 
 ### Deployment & Configuration
+
 - **[Deployment Guide](./docs/DEPLOYMENT-GUIDE.md)** - Step-by-step deployment instructions
 - **[Environment Variables](./docs/ENVIRONMENT-VARIABLES.md)** - All environment variables explained
 - **[Configuration](./docs/CONFIGURATION.md)** - Project configuration guide
 
 ### Architecture & Design
+
 - **[API Architecture](./docs/API-ARCHITECTURE.md)** - Dual API architecture explained
 - **[Code Organization](./docs/CODE-ORGANIZATION.md)** - Project structure and organization
 - **[Design System](../lego/design-system/)** - Design tokens and component patterns
 
 ### Security & Compliance
+
 - **[Security Hardening](./docs/SECURITY-HARDENING.md)** - Security features and best practices
 - **[Security Monitoring](./docs/SECURITY-MONITORING.md)** - Security monitoring and alerting
 - **[Standards Compliance](./docs/STANDARDS-COMPLIANCE.md)** - Compliance with standards
 
 ### Internationalization
+
 - **[Language Support](./docs/LANGUAGE-SUPPORT.md)** - i18n implementation (7,019 languages)
 - **[I18n Architecture](./docs/ADRs/004-i18n-architecture.md)** - Internationalization architecture
 
 ### SEO & Performance
+
 - **[SEO Complete](./docs/SEO-COMPLETE.md)** - All SEO optimizations
 - **[Accessibility Features](./docs/ACCESSIBILITY-FEATURES.md)** - WCAG 2.1 AA compliance
 
 ### Other Documentation
+
 - **[Architecture Decision Records (ADRs)](./docs/ADRs/)** - Key architectural decisions
 - **[TypeScript Configuration](./docs/TYPESCRIPT-CONFIG.md)** - TypeScript setup
 - **[Dependency Versioning](./docs/DEPENDENCY-VERSIONING.md)** - Dependency management
 
 ### Quick Links
+
 - [Test Documentation](./tests/README.md) - Test suite documentation
 - [CHANGELOG](./CHANGELOG.md) - Project changelog
 

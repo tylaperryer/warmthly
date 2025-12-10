@@ -19,27 +19,27 @@ async function main(): Promise<void> {
     const validation = validateRequiredSecrets();
     const status = getSecretsStatus();
 
-  console.log(`📊 Secrets Status:`);
-  console.log(`   Configured: ${status.configured}/${status.total}`);
-  console.log(`   Missing: ${status.missing}`);
+    console.log(`📊 Secrets Status:`);
+    console.log(`   Configured: ${status.configured}/${status.total}`);
+    console.log(`   Missing: ${status.missing}`);
 
-  if (status.missing > 0) {
-    console.log(`\n❌ Missing required secrets:`);
-    validation.missing.forEach((name: string) => {
-      console.log(`   - ${name}`);
-    });
-  }
+    if (status.missing > 0) {
+      console.log(`\n❌ Missing required secrets:`);
+      validation.missing.forEach((name: string) => {
+        console.log(`   - ${name}`);
+      });
+    }
 
-  if (status.warnings.length > 0) {
-    console.log(`\n⚠️  Warnings:`);
-    status.warnings.forEach((warning: string) => {
-      console.log(`   - ${warning}`);
-    });
-  }
+    if (status.warnings.length > 0) {
+      console.log(`\n⚠️  Warnings:`);
+      status.warnings.forEach((warning: string) => {
+        console.log(`   - ${warning}`);
+      });
+    }
 
-  if (validation.valid && status.warnings.length === 0) {
-    console.log(`\n✅ All secrets are properly configured!`);
-  }
+    if (validation.valid && status.warnings.length === 0) {
+      console.log(`\n✅ All secrets are properly configured!`);
+    }
 
     // Check for secrets in code (basic check)
     console.log(`\n🔍 Checking for potential secrets in code...`);

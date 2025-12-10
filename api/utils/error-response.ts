@@ -122,4 +122,3 @@ export function createErrorResponseFromStatus(
   const errorCode = HTTP_STATUS_TO_ERROR_CODE[statusCode] || ErrorCode.INTERNAL_ERROR;
   return createErrorResponse(errorCode, customMessage, details);
 }
-

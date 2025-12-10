@@ -162,22 +162,19 @@ WCAG 2.1 AA compliant:
 ```html
 <warmthly-form action="/api/reports" method="post">
   <warmthly-field-group label="Name" required>
-    <warmthly-input 
-      name="name" 
-      type="text" 
+    <warmthly-input
+      name="name"
+      type="text"
       placeholder="Your name"
       minlength="2"
       maxlength="200"
-      required>
+      required
+    >
     </warmthly-input>
   </warmthly-field-group>
 
   <warmthly-field-group label="Email" required>
-    <warmthly-input 
-      name="email" 
-      type="email" 
-      placeholder="your@email.com"
-      required>
+    <warmthly-input name="email" type="email" placeholder="your@email.com" required>
     </warmthly-input>
   </warmthly-field-group>
 
@@ -192,13 +189,14 @@ WCAG 2.1 AA compliant:
   </warmthly-field-group>
 
   <warmthly-field-group label="Message" required>
-    <warmthly-textarea 
-      name="message" 
+    <warmthly-textarea
+      name="message"
       placeholder="Your message..."
       minlength="10"
       maxlength="5000"
       rows="5"
-      required>
+      required
+    >
     </warmthly-textarea>
   </warmthly-field-group>
 
@@ -219,7 +217,13 @@ WCAG 2.1 AA compliant:
 <warmthly-input name="password" type="password" placeholder="Password"></warmthly-input>
 
 <!-- Number input -->
-<warmthly-input name="amount" type="number" min="0" step="0.01" placeholder="Amount"></warmthly-input>
+<warmthly-input
+  name="amount"
+  type="number"
+  min="0"
+  step="0.01"
+  placeholder="Amount"
+></warmthly-input>
 
 <!-- Date input -->
 <warmthly-input name="date" type="date"></warmthly-input>
@@ -299,15 +303,15 @@ WCAG 2.1 AA compliant:
 </warmthly-modal>
 
 <script>
-function openModal(id) {
-  const modal = document.getElementById(id);
-  if (modal) modal.setAttribute('open', '');
-}
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.setAttribute('open', '');
+  }
 
-function closeModal(id) {
-  const modal = document.getElementById(id);
-  if (modal) modal.removeAttribute('open');
-}
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.removeAttribute('open');
+  }
 </script>
 ```
 
@@ -353,25 +357,18 @@ function closeModal(id) {
 
 ```html
 <!-- Form with proper labels and help text -->
-<warmthly-field-group 
-  label="Email Address" 
+<warmthly-field-group
+  label="Email Address"
   required
   help="We'll never share your email with anyone."
-  error="Please enter a valid email address">
-  <warmthly-input 
-    name="email" 
-    type="email" 
-    aria-describedby="email-help email-error"
-    required>
+  error="Please enter a valid email address"
+>
+  <warmthly-input name="email" type="email" aria-describedby="email-help email-error" required>
   </warmthly-input>
 </warmthly-field-group>
 
 <!-- Button with proper ARIA -->
-<warmthly-button 
-  variant="primary" 
-  aria-label="Submit form"
-  aria-busy="true"
-  loading>
+<warmthly-button variant="primary" aria-label="Submit form" aria-busy="true" loading>
   Submit
 </warmthly-button>
 ```

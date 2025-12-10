@@ -161,7 +161,8 @@ html[lang='he'] body::before,
 html[lang='fa'] body::before,
 html[lang='ur'] body::before {
   /* Gradient positions may need adjustment for RTL */
-  background: radial-gradient(circle at 80% 30%, rgb(255 140 66 / 15%) 0%, transparent 50%),
+  background:
+    radial-gradient(circle at 80% 30%, rgb(255 140 66 / 15%) 0%, transparent 50%),
     radial-gradient(circle at 20% 20%, rgb(255 182 193 / 12%) 0%, transparent 50%),
     linear-gradient(225deg, var(--warmthly-background) 0%, var(--warmthly-background-alt) 100%);
 }

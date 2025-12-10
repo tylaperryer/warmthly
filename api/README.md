@@ -7,7 +7,7 @@ This directory uses **barrel exports** (index.ts files) to provide a centralized
 ✅ **Single Source of Truth** - If a file moves, update only the barrel export  
 ✅ **Backward Compatible** - All existing imports continue to work  
 ✅ **Cleaner Imports** - Shorter, more organized import paths  
-✅ **Easy Refactoring** - Move files without breaking imports  
+✅ **Easy Refactoring** - Move files without breaking imports
 
 ## Usage
 
@@ -101,11 +101,13 @@ api/
 ## When to Update Barrel Exports
 
 Only update barrel exports when:
+
 - ✅ Adding a new file to a category
 - ✅ Moving a file to a different location
 - ✅ Renaming a file
 
 **You don't need to update barrel exports when:**
+
 - ❌ Changing file contents
 - ❌ Adding new exports to existing files (they're automatically included)
 - ❌ Updating implementation details
@@ -113,18 +115,21 @@ Only update barrel exports when:
 ## Example: Moving a File
 
 **Before:**
+
 ```typescript
 // File: api/endpoints/old-name.ts
 export default handler;
 ```
 
 **After moving to new location:**
+
 ```typescript
 // File: api/endpoints/new-name.ts
 export default handler;
 ```
 
 **Update barrel export:**
+
 ```typescript
 // api/endpoints/index.ts
 export { default as newName } from './new-name.js';
@@ -132,4 +137,3 @@ export { default as newName } from './new-name.js';
 ```
 
 **All imports automatically work!** No need to update every file that imports it.
-

@@ -372,6 +372,12 @@ export abstract class BaseComponent extends HTMLElement implements ComponentLife
 
   /**
    * Render content to shadow root or element
+   *
+   * SECURITY WARNING: Only pass trusted HTML to this method.
+   * This method uses innerHTML which can lead to XSS if untrusted content is passed.
+   * For user-controlled or external content, use sanitizeHtml() from @utils/sanitize.js first.
+   *
+   * @param html - HTML string to render (must be trusted or pre-sanitized)
    */
   protected render(html: string): void {
     if (this.shadowRootInternal) {
@@ -386,10 +392,6 @@ export abstract class BaseComponent extends HTMLElement implements ComponentLife
    */
   public onConnect?(): void | Promise<void>;
   public onDisconnect?(): void;
-  public onAttributeChange?(
-    name: string,
-    oldValue: string | null,
-    newValue: string | null
-  ): void;
+  public onAttributeChange?(name: string, oldValue: string | null, newValue: string | null): void;
   public onAdopted?(): void;
 }

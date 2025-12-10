@@ -8,7 +8,6 @@
  * Usage: npm run test:pagespeed
  */
 
-
 interface PageSpeedResult {
   url: string;
   mobile?: {
@@ -52,7 +51,7 @@ async function testPageSpeed(
     const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
       url
     )}&strategy=${strategy}&key=${apiKey}`;
-    
+
     const response = await fetch(apiUrl, {
       signal: AbortSignal.timeout(30000), // 30 second timeout
     });

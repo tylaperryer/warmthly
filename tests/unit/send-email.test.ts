@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock resend
-vi.mock('resend', () => ({
+(vi as any).mock('resend', () => ({
   Resend: vi.fn().mockImplementation(() => ({
     emails: {
       send: vi.fn().mockResolvedValue({ data: { id: 'email-id' } }),
@@ -15,7 +15,7 @@ vi.mock('resend', () => ({
 }));
 
 // Mock rate-limit
-vi.mock('@api/middleware/rate-limit.js', () => ({
+(vi as any).mock('@api/middleware/rate-limit.js', () => ({
   withRateLimit: vi.fn((handler: unknown) => handler),
   emailRateLimitOptions: {},
 }));
@@ -199,7 +199,7 @@ describe('Send Email Handler', () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
+      (expect as any).objectContaining({
         message: 'Email sent successfully!',
       })
     );

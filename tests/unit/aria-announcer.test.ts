@@ -3,8 +3,8 @@
  * Tests for lego/utils/aria-announcer.ts
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ariaAnnouncer } from '@utils/aria-announcer.js';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 describe('ARIA Announcer', () => {
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('ARIA Announcer', () => {
     ariaAnnouncer.announce('Test message');
 
     const announcer = document.getElementById('aria-announcer');
-    expect(announcer).toBeTruthy();
+    (expect(announcer) as any).toBeTruthy();
     expect(announcer?.getAttribute('role')).toBe('status');
     expect(announcer?.getAttribute('aria-live')).toBe('polite');
   });
@@ -42,19 +42,19 @@ describe('ARIA Announcer', () => {
     ariaAnnouncer.announce('');
 
     const announcer = document.getElementById('aria-announcer');
-    expect(announcer).toBeFalsy();
+    (expect(announcer) as any).toBeFalsy();
   });
 
   it('should clear message after timeout', async () => {
-    vi.useFakeTimers();
+    (vi as any).useFakeTimers();
     ariaAnnouncer.announce('Test message');
 
     const announcer = document.getElementById('aria-announcer');
     expect(announcer?.textContent).toBe('Test message');
 
-    vi.advanceTimersByTime(1000);
+    (vi as any).advanceTimersByTime(1000);
 
     expect(announcer?.textContent).toBe('');
-    vi.useRealTimers();
+    (vi as any).useRealTimers();
   });
 });

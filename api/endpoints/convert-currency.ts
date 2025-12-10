@@ -93,32 +93,47 @@ interface ConversionResponse {
  * @param res - Response object
  * @returns Response with conversion result or error
  */
-async function convertCurrencyHandler(req: Request, res: Response): Promise<unknown> {
+async function convertCurrencyHandler(req: Request, res: Response): Promise<Response | void> {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const query = ((req as { query?: Record<string, string | string[] | undefined> }).query || {}) as { amount?: string; from?: string; to?: string; [key: string]: string | string[] | undefined };
+    const query = ((req as { query?: Record<string, string | string[] | undefined> }).query ||
+      {}) as {
+      amount?: string;
+      from?: string;
+      to?: string;
+      [key: string]: string | string[] | undefined;
+    };
     const { amount, from = 'USD', to = 'ZAR' } = query;
 
     // Validate currency codes against whitelist (security)
     const fromCurrency = String(from);
     const toCurrency = String(to);
     if (!ALLOWED_CURRENCIES.includes(fromCurrency)) {
-      return res.status(400).json(
-        createErrorResponse(ErrorCode.VALIDATION_ERROR, `Invalid source currency: ${fromCurrency}`)
-      );
+      return res
+        .status(400)
+        .json(
+          createErrorResponse(
+            ErrorCode.VALIDATION_ERROR,
+            `Invalid source currency: ${fromCurrency}`
+          )
+        );
     }
     if (!ALLOWED_CURRENCIES.includes(toCurrency)) {
-      return res.status(400).json(
-        createErrorResponse(ErrorCode.VALIDATION_ERROR, `Invalid target currency: ${toCurrency}`)
-      );
+      return res
+        .status(400)
+        .json(
+          createErrorResponse(ErrorCode.VALIDATION_ERROR, `Invalid target currency: ${toCurrency}`)
+        );
     }
 
     // Validate amount
     if (!amount || isNaN(Number(amount)) || parseFloat(amount) <= 0) {
-      return res.status(400).json(createErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid amount'));
+      return res
+        .status(400)
+        .json(createErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid amount'));
     }
 
     // Same currency - no conversion needed
@@ -133,7 +148,13 @@ async function convertCurrencyHandler(req: Request, res: Response): Promise<unkn
       };
 
       // Phase 3 Issue 3.12: Add cache headers for currency conversion
-      setCacheHeaders(res as { setHeader: (name: string, value: string | number) => void; [key: string]: unknown }, CacheConfigs.currencyRates());
+      setCacheHeaders(
+        res as {
+          setHeader: (name: string, value: string | number) => void;
+          [key: string]: unknown;
+        },
+        CacheConfigs.currencyRates()
+      );
 
       return res.status(200).json(responseData);
     }
@@ -161,9 +182,14 @@ async function convertCurrencyHandler(req: Request, res: Response): Promise<unkn
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
         logger.error('[convert-currency] Request timeout');
-        return res.status(504).json(
-          createErrorResponse(ErrorCode.SERVICE_UNAVAILABLE, 'Exchange rate API request timed out. Please try again.')
-        );
+        return res
+          .status(504)
+          .json(
+            createErrorResponse(
+              ErrorCode.SERVICE_UNAVAILABLE,
+              'Exchange rate API request timed out. Please try again.'
+            )
+          );
       }
       throw fetchError;
     }
@@ -218,16 +244,19 @@ async function convertCurrencyHandler(req: Request, res: Response): Promise<unkn
     };
 
     // Phase 3 Issue 3.12: Add cache headers for currency conversion
-    setCacheHeaders(res as { setHeader: (name: string, value: string | number) => void; [key: string]: unknown }, CacheConfigs.currencyRates());
+    setCacheHeaders(
+      res as { setHeader: (name: string, value: string | number) => void; [key: string]: unknown },
+      CacheConfigs.currencyRates()
+    );
 
     return res.status(200).json(responseData);
   } catch (error: unknown) {
     // Log and return error
     logger.error('[convert-currency] Error converting currency:', error);
 
-    return res.status(500).json(
-      createErrorResponse(ErrorCode.EXTERNAL_API_ERROR, 'Failed to convert currency')
-    );
+    return res
+      .status(500)
+      .json(createErrorResponse(ErrorCode.EXTERNAL_API_ERROR, 'Failed to convert currency'));
   }
 }
 

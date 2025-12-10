@@ -71,13 +71,18 @@ function log(level: LogLevel, method: keyof Console, ...args: unknown[]): void {
     return;
   }
 
-  if (config.enableConsole && typeof console !== 'undefined' && console[method] && typeof console[method] === 'function') {
+  if (
+    config.enableConsole &&
+    typeof console !== 'undefined' &&
+    console[method] &&
+    typeof console[method] === 'function'
+  ) {
     (console[method] as (...args: unknown[]) => void)(...args);
   }
 
   // Track errors
   if (level >= LogLevel.ERROR) {
-    getErrorTracker().then((trackError) => {
+    void getErrorTracker().then(trackError => {
       if (trackError) {
         const error = args[0] instanceof Error ? args[0] : new Error(String(args[0]));
         trackError(error);
@@ -124,4 +129,3 @@ export const logger = {
   error,
   init: initLogger,
 };
-

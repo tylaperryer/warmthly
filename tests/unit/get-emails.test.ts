@@ -3,18 +3,18 @@
  * Tests for api/get-emails.ts
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import jwt from 'jsonwebtoken';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock jsonwebtoken
-vi.mock('jsonwebtoken', () => ({
+(vi as any).mock('jsonwebtoken', () => ({
   default: {
     verify: vi.fn(),
   },
 }));
 
 // Mock redis-client
-vi.mock('@api/redis-client.js', () => ({
+(vi as any).mock('@api/redis-client.js', () => ({
   getRedisClient: vi.fn().mockResolvedValue({
     lRange: vi
       .fn()
@@ -26,7 +26,7 @@ vi.mock('@api/redis-client.js', () => ({
 }));
 
 // Mock rate-limit
-vi.mock('@api/rate-limit.js', () => ({
+(vi as any).mock('@api/rate-limit.js', () => ({
   withRateLimit: vi.fn((handler: unknown) => handler),
   apiRateLimitOptions: {},
 }));
@@ -79,7 +79,7 @@ describe('Get Emails Handler', () => {
     if (typeof process !== 'undefined' && process.env) {
       (process.env as any).JWT_SECRET = 'test-secret';
     }
-    (jwt.verify as ReturnType<typeof vi.fn>).mockImplementation(() => {
+    (jwt.verify as ReturnType<typeof vi.fn> as any).mockImplementation(() => {
       throw new jwt.JsonWebTokenError('Invalid token');
     });
 

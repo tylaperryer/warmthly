@@ -179,17 +179,30 @@ class WarmthlyMediaAccessibility extends HTMLElement {
     transcriptContainer.setAttribute('hidden', '');
 
     if (this.options.transcriptText) {
-      transcriptContainer.innerHTML = `<div class="transcript-text">${this.options.transcriptText}</div>`;
+      // SECURITY: Use textContent instead of innerHTML to prevent XSS
+      const textDiv = document.createElement('div');
+      textDiv.className = 'transcript-text';
+      textDiv.textContent = this.options.transcriptText;
+      transcriptContainer.appendChild(textDiv);
     } else if (this.options.transcriptUrl) {
       // Load transcript from URL
       fetch(this.options.transcriptUrl)
         .then(response => response.text())
         .then(text => {
-          transcriptContainer.innerHTML = `<div class="transcript-text">${text}</div>`;
+          // SECURITY: Use textContent instead of innerHTML to prevent XSS
+          const textDiv = document.createElement('div');
+          textDiv.className = 'transcript-text';
+          textDiv.textContent = text;
+          transcriptContainer.textContent = ''; // Clear any existing content
+          transcriptContainer.appendChild(textDiv);
         })
         .catch(error => {
           console.error('Failed to load transcript:', error);
-          transcriptContainer.innerHTML = '<p>Transcript could not be loaded.</p>';
+          // SECURITY: Use textContent instead of innerHTML
+          const errorP = document.createElement('p');
+          errorP.textContent = 'Transcript could not be loaded.';
+          transcriptContainer.textContent = ''; // Clear any existing content
+          transcriptContainer.appendChild(errorP);
         });
     }
 

@@ -73,8 +73,8 @@ async function convertToWebP(inputPath: string, outputPath: string): Promise<voi
   try {
     // @ts-expect-error - sharp is an optional dependency, may not be installed
     const sharp = await import('sharp');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-    const sharpInstance = (sharp as any).default || sharp;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const sharpInstance = sharp.default || sharp;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await sharpInstance(inputPath).webp({ quality: 85, effort: 6 }).toFile(outputPath);
   } catch (error) {
@@ -92,8 +92,8 @@ async function convertToAVIF(inputPath: string, outputPath: string): Promise<voi
   try {
     // @ts-expect-error - sharp is an optional dependency, may not be installed
     const sharp = await import('sharp');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-    const sharpInstance = (sharp as any).default || sharp;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const sharpInstance = sharp.default || sharp;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await sharpInstance(inputPath).avif({ quality: 80, effort: 4 }).toFile(outputPath);
   } catch (error) {

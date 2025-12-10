@@ -6,7 +6,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock fetch
-(globalThis as any).fetch = vi.fn();
+const mockFetch = vi.fn();
+globalThis.fetch = mockFetch as typeof fetch;
 
 describe('WorldMapSVG Component', () => {
   beforeEach(() => {
@@ -19,16 +20,16 @@ describe('WorldMapSVG Component', () => {
 
   it('should create component with shadow DOM', () => {
     const element = document.createElement('world-map-svg');
-    expect(element.shadowRoot).toBeNull(); // Shadow DOM created in connectedCallback
+    (expect(element.shadowRoot) as any).toBeNull(); // Shadow DOM created in connectedCallback
 
     document.body.appendChild(element);
-    expect(element.shadowRoot).toBeTruthy();
+    (expect(element.shadowRoot) as any).toBeTruthy();
   });
 
   it('should load SVG on connection', async () => {
-    ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockFetch.mockResolvedValue({
       ok: true,
-      text: async () => '<svg></svg>',
+      text: () => Promise.resolve('<svg></svg>'),
     });
 
     const element = document.createElement('world-map-svg');
@@ -36,6 +37,6 @@ describe('WorldMapSVG Component', () => {
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    expect((globalThis as any).fetch).toHaveBeenCalled();
+    expect(mockFetch).toHaveBeenCalled();
   });
 });

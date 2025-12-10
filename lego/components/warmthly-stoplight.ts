@@ -28,7 +28,7 @@ class WarmthlyStoplight extends HTMLElement {
    * Called when element is inserted into the DOM
    * Creates stoplight button and menu structure
    */
-  async connectedCallback(): Promise<void> {
+  connectedCallback(): void {
     // Safety check for browser environment
     if (typeof document === 'undefined') {
       return;
@@ -122,16 +122,19 @@ class WarmthlyStoplight extends HTMLElement {
         });
         menu.appendChild(spacingToggle);
       } else if (customItems) {
-        // Parse custom items safely
-        const temp = document.createElement('div');
-        temp.innerHTML = customItems;
+        // SECURITY: Sanitize HTML before using innerHTML to prevent XSS
+        import('@utils/sanitize.js').then(({ sanitizeHtml }) => {
+          const sanitized = sanitizeHtml(customItems);
+          const temp = document.createElement('div');
+          temp.innerHTML = sanitized;
 
-        while (temp.firstChild) {
-          const child = temp.firstChild;
-          if (child instanceof Node) {
-            menu.appendChild(child);
+          while (temp.firstChild) {
+            const child = temp.firstChild;
+            if (child instanceof Node) {
+              menu.appendChild(child);
+            }
           }
-        }
+        });
       }
 
       // Assemble container
@@ -143,22 +146,24 @@ class WarmthlyStoplight extends HTMLElement {
       this.appendChild(container);
 
       // Initialize stoplight functionality
-      try {
-        const { initStoplight } = await import('@utils/stoplight-utils.js');
-        initStoplight(stoplightId, menuId);
-      } catch (error: unknown) {
-        // Fallback: show menu if initialization fails
-        if (import.meta.env.DEV) {
-          console.warn('Failed to initialize stoplight:', error);
-        }
+      void (async () => {
+        try {
+          const { initStoplight } = await import('@utils/stoplight-utils.js');
+          initStoplight(stoplightId, menuId);
+        } catch (error: unknown) {
+          // Fallback: show menu if initialization fails
+          if (import.meta.env.DEV) {
+            console.warn('Failed to initialize stoplight:', error);
+          }
 
-        const menuElement = document.getElementById(menuId);
-        if (menuElement instanceof HTMLElement) {
-          menuElement.style.display = 'block';
-          menuElement.style.opacity = '1';
-          menuElement.style.visibility = 'visible';
+          const menuElement = document.getElementById(menuId);
+          if (menuElement instanceof HTMLElement) {
+            menuElement.style.display = 'block';
+            menuElement.style.opacity = '1';
+            menuElement.style.visibility = 'visible';
+          }
         }
-      }
+      })();
     } catch (error: unknown) {
       // Log error in development
       if (import.meta.env.DEV) {

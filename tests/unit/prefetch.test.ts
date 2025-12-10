@@ -9,12 +9,12 @@ describe('Link Prefetch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     document.head.innerHTML = '';
-    vi.useFakeTimers();
+    (vi as any).useFakeTimers();
   });
 
   afterEach(() => {
     document.head.innerHTML = '';
-    vi.useRealTimers();
+    (vi as any).useRealTimers();
   });
 
   it('should prefetch a page', async () => {
@@ -31,10 +31,10 @@ describe('Link Prefetch', () => {
     initLinkPrefetch();
 
     // Fast-forward time
-    vi.advanceTimersByTime(2000);
+    (vi as any).advanceTimersByTime(2000);
 
     const links = document.head.querySelectorAll('link[rel="prefetch"]');
-    expect(links.length).toBeGreaterThan(0);
+    (expect(links.length) as any).toBeGreaterThan(0);
   });
 
   it('should handle missing document', async () => {
@@ -42,7 +42,7 @@ describe('Link Prefetch', () => {
     (globalThis as any).document = undefined;
 
     const { initLinkPrefetch } = await import('@utils/prefetch.js');
-    expect(() => initLinkPrefetch()).not.toThrow();
+    (expect(() => initLinkPrefetch()) as any).not.toThrow();
 
     (globalThis as any).document = originalDocument;
   });
@@ -69,6 +69,6 @@ describe('Link Prefetch', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const prefetchLinks = document.head.querySelectorAll('link[rel="prefetch"][href="/test.html"]');
-    expect(prefetchLinks.length).toBeGreaterThan(0);
+    (expect(prefetchLinks.length) as any).toBeGreaterThan(0);
   });
 });

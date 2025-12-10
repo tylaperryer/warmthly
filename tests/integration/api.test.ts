@@ -5,6 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { createMockFetchResponse, expectErrorCode, expectStatus } from '../utils/test-helpers.js';
 
 // Mock fetch
@@ -17,29 +18,25 @@ describe('API Integration', () => {
 
   describe('Error Handling', () => {
     it('should handle API errors gracefully', async () => {
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error('Network error')
-      );
+      (globalThis as any).fetch.mockRejectedValue(new Error('Network error'));
 
       try {
         await fetch('/api/test');
-        expect.fail('Should have thrown an error');
+        (expect as any).fail('Should have thrown an error');
       } catch (error) {
-        expect(error).toBeInstanceOf(Error);
+        (expect(error) as any).toBeInstanceOf(Error);
         expect((error as Error).message).toBe('Network error');
       }
     });
 
     it('should handle timeout errors', async () => {
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error('Request timeout')
-      );
+      (globalThis as any).fetch.mockRejectedValue(new Error('Request timeout'));
 
       try {
         await fetch('/api/test');
-        expect.fail('Should have thrown an error');
+        (expect as any).fail('Should have thrown an error');
       } catch (error) {
-        expect(error).toBeInstanceOf(Error);
+        (expect(error) as any).toBeInstanceOf(Error);
         expect((error as Error).message).toBe('Request timeout');
       }
     });
@@ -49,11 +46,11 @@ describe('API Integration', () => {
         { error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } },
         { status: 500 }
       );
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue(response);
+      (globalThis as any).fetch.mockResolvedValue(response);
 
       const res = await fetch('/api/test');
       expectStatus({ status: res.status }, 500);
-      
+
       const data = await res.json();
       expectErrorCode(data, 'INTERNAL_ERROR');
     });
@@ -73,12 +70,12 @@ describe('API Integration', () => {
           },
         }
       );
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue(response);
+      (globalThis as any).fetch.mockResolvedValue(response);
 
       const res = await fetch('/api/test');
       expectStatus({ status: res.status }, 429);
       expect(res.headers.get('Retry-After')).toBe('60');
-      
+
       const data = await res.json();
       expectErrorCode(data, 'RATE_LIMIT_EXCEEDED');
     });
@@ -95,12 +92,12 @@ describe('API Integration', () => {
           },
         }
       );
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue(response);
+      (globalThis as any).fetch.mockResolvedValue(response);
 
       const res = await fetch('/api/test');
       expect(res.headers.get('X-RateLimit-Limit')).toBe('100');
       expect(res.headers.get('X-RateLimit-Remaining')).toBe('99');
-      expect(res.headers.get('X-RateLimit-Reset')).toBeDefined();
+      (expect(res.headers.get('X-RateLimit-Reset')) as any).toBeDefined();
     });
   });
 
@@ -110,11 +107,11 @@ describe('API Integration', () => {
         { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue(response);
+      (globalThis as any).fetch.mockResolvedValue(response);
 
       const res = await fetch('/api/test');
       expectStatus({ status: res.status }, 401);
-      
+
       const data = await res.json();
       expectErrorCode(data, 'UNAUTHORIZED');
     });
@@ -124,11 +121,11 @@ describe('API Integration', () => {
         { error: { code: 'FORBIDDEN', message: 'Access denied' } },
         { status: 403 }
       );
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue(response);
+      (globalThis as any).fetch.mockResolvedValue(response);
 
       const res = await fetch('/api/test');
       expectStatus({ status: res.status }, 403);
-      
+
       const data = await res.json();
       expectErrorCode(data, 'FORBIDDEN');
     });
@@ -140,15 +137,15 @@ describe('API Integration', () => {
         { data: { id: '123', status: 'success' } },
         { status: 200 }
       );
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue(response);
+      (globalThis as any).fetch.mockResolvedValue(response);
 
       const res = await fetch('/api/test');
       expectStatus({ status: res.status }, 200);
-      
+
       const data = await res.json();
-      expect(data).toHaveProperty('data');
-      expect(data.data).toHaveProperty('id');
-      expect(data.data).toHaveProperty('status');
+      (expect(data) as any).toHaveProperty('data');
+      (expect(data.data) as any).toHaveProperty('id');
+      (expect(data.data) as any).toHaveProperty('status');
     });
 
     it('should handle validation errors (400)', async () => {
@@ -156,11 +153,11 @@ describe('API Integration', () => {
         { error: { code: 'VALIDATION_ERROR', message: 'Invalid input' } },
         { status: 400 }
       );
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue(response);
+      (globalThis as any).fetch.mockResolvedValue(response);
 
       const res = await fetch('/api/test');
       expectStatus({ status: res.status }, 400);
-      
+
       const data = await res.json();
       expectErrorCode(data, 'VALIDATION_ERROR');
     });
@@ -170,11 +167,11 @@ describe('API Integration', () => {
         { error: { code: 'NOT_FOUND', message: 'Resource not found' } },
         { status: 404 }
       );
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue(response);
+      (globalThis as any).fetch.mockResolvedValue(response);
 
       const res = await fetch('/api/test');
       expectStatus({ status: res.status }, 404);
-      
+
       const data = await res.json();
       expectErrorCode(data, 'NOT_FOUND');
     });
@@ -183,12 +180,10 @@ describe('API Integration', () => {
   describe('Request Headers', () => {
     it('should send Content-Type header', async () => {
       let capturedHeaders: HeadersInit = {};
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockImplementation(
-        async (url: string, options?: RequestInit) => {
-          capturedHeaders = options?.headers as HeadersInit;
-          return createMockFetchResponse({ data: 'success' });
-        }
-      );
+      (globalThis as any).fetch.mockImplementation(async (url: string, options?: RequestInit) => {
+        capturedHeaders = options?.headers as HeadersInit;
+        return createMockFetchResponse({ data: 'success' });
+      });
 
       await fetch('/api/test', {
         method: 'POST',
@@ -196,25 +191,23 @@ describe('API Integration', () => {
         body: JSON.stringify({ test: 'data' }),
       });
 
-      expect(capturedHeaders).toHaveProperty('Content-Type');
-      expect((capturedHeaders as Record<string, string>)['Content-Type']).toBe('application/json');
+      (expect(capturedHeaders) as any).toHaveProperty('Content-Type');
+      expect(capturedHeaders['Content-Type']).toBe('application/json');
     });
 
     it('should send Authorization header when provided', async () => {
       let capturedHeaders: HeadersInit = {};
-      ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockImplementation(
-        async (url: string, options?: RequestInit) => {
-          capturedHeaders = options?.headers as HeadersInit;
-          return createMockFetchResponse({ data: 'success' });
-        }
-      );
+      (globalThis as any).fetch.mockImplementation(async (url: string, options?: RequestInit) => {
+        capturedHeaders = options?.headers as HeadersInit;
+        return createMockFetchResponse({ data: 'success' });
+      });
 
       await fetch('/api/test', {
         headers: { Authorization: 'Bearer test-token' },
       });
 
-      expect(capturedHeaders).toHaveProperty('Authorization');
-      expect((capturedHeaders as Record<string, string>)['Authorization']).toBe('Bearer test-token');
+      (expect(capturedHeaders) as any).toHaveProperty('Authorization');
+      expect(capturedHeaders['Authorization']).toBe('Bearer test-token');
     });
   });
 });

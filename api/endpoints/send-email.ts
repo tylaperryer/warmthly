@@ -6,7 +6,12 @@
 
 import { Resend } from 'resend';
 
-import { withRateLimit, emailRateLimitOptions, type Request as RateLimitRequest, type Response as RateLimitResponse } from '../middleware/rate-limit.js';
+import {
+  withRateLimit,
+  emailRateLimitOptions,
+  type Request as RateLimitRequest,
+  type Response as RateLimitResponse,
+} from '../middleware/rate-limit.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -99,7 +104,12 @@ async function sendEmailHandler(req: RateLimitRequest, res: RateLimitResponse): 
     }
 
     // Get request body
-    const body = (req.body || {}) as { to?: string; subject?: string; html?: string; [key: string]: unknown };
+    const body = (req.body || {}) as {
+      to?: string;
+      subject?: string;
+      html?: string;
+      [key: string]: unknown;
+    };
     const { to, subject, html } = body;
 
     // Validate recipient email

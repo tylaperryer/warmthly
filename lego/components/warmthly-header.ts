@@ -43,7 +43,7 @@ class WarmthlyHeader extends HTMLElement {
    * Called when element is inserted into the DOM
    * Creates header with main link and optional subdomain link
    */
-  async connectedCallback(): Promise<void> {
+  connectedCallback(): void {
     // Safety check for browser environment
     if (typeof document === 'undefined' || typeof window === 'undefined') {
       return;

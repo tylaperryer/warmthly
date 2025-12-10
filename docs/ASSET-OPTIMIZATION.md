@@ -5,6 +5,7 @@ Complete guide for optimizing images, fonts, and other assets in the Warmthly pr
 ## Overview
 
 Optimizing assets is crucial for performance. This guide covers:
+
 - Image optimization (formats, sizes, responsive images)
 - Font optimization (subsetting, loading strategies)
 - Asset organization and naming conventions
@@ -35,12 +36,14 @@ npm run optimize:images
 ```
 
 This script:
+
 - Finds all PNG/JPEG images in `assets/images/`
 - Converts to WebP and AVIF formats
 - Preserves original files
 - Skips already-converted images
 
 **Requirements:**
+
 - `sharp` package installed: `npm install --save-dev sharp`
 
 #### 3. Use Responsive Images in HTML
@@ -57,13 +60,13 @@ Use `<picture>` elements with format and size fallbacks:
 
 ### Image Size Guidelines
 
-| Use Case | Recommended Size | Max File Size |
-|----------|-----------------|---------------|
-| Hero images | 1920×1080px | 200KB |
-| Thumbnails | 400×300px | 50KB |
-| Icons | 64×64px | 10KB |
-| OG images | 1200×630px | 300KB |
-| Favicons | 32×32px | 5KB |
+| Use Case    | Recommended Size | Max File Size |
+| ----------- | ---------------- | ------------- |
+| Hero images | 1920×1080px      | 200KB         |
+| Thumbnails  | 400×300px        | 50KB          |
+| Icons       | 64×64px          | 10KB          |
+| OG images   | 1200×630px       | 300KB         |
+| Favicons    | 32×32px          | 5KB           |
 
 ### Responsive Image Breakpoints
 
@@ -72,8 +75,8 @@ Use `srcset` for responsive images:
 ```html
 <img
   srcset="
-    image-320w.webp 320w,
-    image-640w.webp 640w,
+    image-320w.webp   320w,
+    image-640w.webp   640w,
     image-1024w.webp 1024w,
     image-1920w.webp 1920w
   "
@@ -127,6 +130,7 @@ npm run subset:fonts
 ```
 
 This script:
+
 - Subsets fonts to include only required characters
 - Creates optimized WOFF2 files
 - Requires `pyftsubset` or `glyphhanger` (see script for details)
@@ -140,17 +144,18 @@ Use `<warmthly-font-loader>` component for optimal font loading:
 ```
 
 This component:
+
 - Preloads critical fonts
 - Uses `font-display: swap` for better perceived performance
 - Loads fonts asynchronously
 
 ### Font File Guidelines
 
-| Font Type | Format | Max Size |
-|-----------|--------|----------|
-| Variable fonts | WOFF2 | 200KB |
-| Static fonts | WOFF2 | 100KB |
-| Icon fonts | WOFF2 | 50KB |
+| Font Type      | Format | Max Size |
+| -------------- | ------ | -------- |
+| Variable fonts | WOFF2  | 200KB    |
+| Static fonts   | WOFF2  | 100KB    |
+| Icon fonts     | WOFF2  | 50KB     |
 
 ### Font Preloading
 
@@ -191,11 +196,11 @@ warmthly/assets/
 
 ### File Size Limits
 
-| Asset Type | Max Size | Action if Exceeded |
-|------------|----------|-------------------|
-| Images | 500KB | Optimize or compress |
-| Fonts | 200KB | Subset fonts |
-| Icons | 50KB | Optimize SVG |
+| Asset Type | Max Size | Action if Exceeded   |
+| ---------- | -------- | -------------------- |
+| Images     | 500KB    | Optimize or compress |
+| Fonts      | 200KB    | Subset fonts         |
+| Icons      | 50KB     | Optimize SVG         |
 
 ## Tools and Scripts
 
@@ -295,4 +300,3 @@ Builds will warn if these budgets are exceeded.
 
 **Last Updated:** 2024-12-19  
 **Maintained By:** Warmthly Development Team
-

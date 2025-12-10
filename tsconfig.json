@@ -38,20 +38,19 @@
   },
   "include": [
     "lego/**/*",
+    "lego/**/*.js",
     "apps/**/*.ts",
     "apps/**/*.tsx",
+    "apps/**/*.js",
     "api/**/*.ts",
     "scripts/**/*.ts",
+    "scripts/**/*.js",
+    ".config/**/*.ts",
+    ".config/**/*.js",
+    ".config/**/*.mjs",
     "*.ts",
-    "*.tsx"
+    "*.tsx",
+    "*.js"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "coverage",
-    "scripts/**/*",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ]
+  "exclude": ["node_modules", "dist", "build", "coverage", "**/*.test.ts", "**/*.spec.ts"]
 }

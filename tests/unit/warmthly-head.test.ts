@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { cleanup } from '@testing-library/dom';
+// cleanup not needed in this test
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('WarmthlyHead Component', () => {
   beforeEach(() => {
-    cleanup();
+    // cleanup not needed
     document.head.innerHTML = '';
     document.body.innerHTML = '';
   });
@@ -21,7 +21,7 @@ describe('WarmthlyHead Component', () => {
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    expect(element).toBeDefined();
+    (expect(element) as any).toBeDefined();
     expect(document.head.querySelector('title')?.textContent).toBe('Test Title');
   });
 
@@ -35,6 +35,6 @@ describe('WarmthlyHead Component', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const title = document.head.querySelector('title');
-    expect(title?.textContent).not.toContain('<script>');
+    (expect(title?.textContent) as any).not.toContain('<script>');
   });
 });

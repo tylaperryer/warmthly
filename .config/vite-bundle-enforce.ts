@@ -4,22 +4,8 @@
  */
 
 import type { Plugin } from 'vite';
-import { checkBundleSizes, BUDGETS } from '../../scripts/check-bundle-size.js';
 
-/**
- * Performance budgets (matching check-bundle-size.js)
- */
-const PERFORMANCE_BUDGETS = {
-  js: {
-    maxInitial: 500, // 500KB max initial JS bundle
-    maxTotal: 2000, // 2MB max total JS across all chunks
-    maxChunk: 1000, // 1MB max individual chunk size
-  },
-  css: {
-    maxTotal: 100, // 100KB max total CSS
-    maxFile: 50, // 50KB max individual CSS file
-  },
-};
+import { checkBundleSizes } from '../scripts/check-bundle-size.js';
 
 export function bundleSizeEnforce(): Plugin {
   return {
@@ -37,13 +23,12 @@ export function bundleSizeEnforce(): Plugin {
  * Check if bundle sizes are within budgets
  * Called by build script after vite build
  */
-export async function enforceBundleBudgets(buildDir: string = 'dist'): Promise<boolean> {
+export function enforceBundleBudgets(buildDir: string = 'dist'): boolean {
   try {
-    const exitCode = await checkBundleSizes(buildDir);
+    const exitCode = checkBundleSizes(buildDir);
     return exitCode === 0;
   } catch (error) {
     console.error('Bundle size check failed:', error);
     return false;
   }
 }
-

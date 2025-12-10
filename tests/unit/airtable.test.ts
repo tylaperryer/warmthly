@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 (globalThis as any).fetch = vi.fn();
 
 // Mock redis-client
-vi.mock('@api/utils/redis-client.js', () => ({
+(vi as any).mock('@api/utils/redis-client.js', () => ({
   getRedisClient: vi.fn().mockResolvedValue({
     get: vi.fn().mockResolvedValue(null),
     setex: vi.fn().mockResolvedValue(1),
@@ -17,7 +17,7 @@ vi.mock('@api/utils/redis-client.js', () => ({
 }));
 
 // Mock rate-limit
-vi.mock('@api/middleware/rate-limit.js', () => ({
+(vi as any).mock('@api/middleware/rate-limit.js', () => ({
   withRateLimit: vi.fn((handler: unknown) => handler),
   apiRateLimitOptions: {},
 }));
@@ -100,7 +100,7 @@ describe('Airtable Handler', () => {
       (process.env as any).AIRTABLE_API_KEY = 'test-key';
     }
 
-    ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    (globalThis as any).fetch.mockResolvedValue({
       ok: true,
       json: async () => ({ records: [] }),
     });

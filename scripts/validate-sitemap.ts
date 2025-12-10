@@ -176,7 +176,7 @@ function validateSitemap(filePath: string): { issues: SitemapIssue[]; stats: Sit
 
   // Check for valid URLs
   const locMatches = content.match(/<loc>([^<]+)<\/loc>/gi) || [];
-  locMatches.forEach((match) => {
+  locMatches.forEach(match => {
     const url = match.replace(/<\/?loc>/g, '');
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       issues.push({

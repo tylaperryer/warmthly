@@ -56,7 +56,6 @@ function getSecretFromEnv(name: string): string | null {
   return process.env[name] ?? null;
 }
 
-
 /**
  * Get secret from HashiCorp Vault
  * Requires: node-vault or direct HTTP client
@@ -116,7 +115,7 @@ async function getSecretFromVault(secretPath: string): Promise<string | null> {
  * For now, we support reading from environment variables prefixed with OCI_VAULT_
  * or direct environment variable access (Oracle Vault secrets are often injected as env vars)
  */
-async function getSecretFromOracle(secretName: string): Promise<string | null> {
+function getSecretFromOracle(secretName: string): string | null {
   try {
     // Try OCI_VAULT_ prefix first (common pattern for OCI Vault secrets)
     const ociKey = `OCI_VAULT_${secretName}`;
@@ -131,10 +130,15 @@ async function getSecretFromOracle(secretName: string): Promise<string | null> {
 
     // If OCI SDK is available, could use it here
     // For now, Oracle Vault secrets are typically injected as environment variables
-    logger.warn(`[secrets] Oracle Vault secret not found: ${secretName} (check OCI_VAULT_${secretName} or ${secretName} env var)`);
+    logger.warn(
+      `[secrets] Oracle Vault secret not found: ${secretName} (check OCI_VAULT_${secretName} or ${secretName} env var)`
+    );
     return null;
   } catch (error) {
-    logger.error(`[secrets] Failed to fetch secret from Oracle Cloud Vault (${secretName}):`, error);
+    logger.error(
+      `[secrets] Failed to fetch secret from Oracle Cloud Vault (${secretName}):`,
+      error
+    );
     return null;
   }
 }
@@ -163,7 +167,7 @@ export async function getSecret(config: SecretConfig): Promise<string | null> {
   // Fetch from provider
   switch (provider) {
     case SecretProvider.ENV:
-      value = await getSecretFromEnv(secretKey);
+      value = getSecretFromEnv(secretKey);
       break;
 
     case SecretProvider.HASHICORP_VAULT:
@@ -171,12 +175,17 @@ export async function getSecret(config: SecretConfig): Promise<string | null> {
       break;
 
     case SecretProvider.ORACLE_VAULT:
-      value = await getSecretFromOracle(secretKey);
+      value = getSecretFromOracle(secretKey);
       break;
 
-    default:
-      logger.error(`[secrets] Unknown provider: ${provider}`);
+    default: {
+      // TypeScript knows all enum values are handled, but we need to handle the case
+      // where provider might be a string that's not in the enum
+      const providerStr = provider as SecretProvider;
+      logger.error(`[secrets] Unknown provider: ${String(providerStr)}`);
       value = null;
+      break;
+    }
   }
 
   // Cache the result

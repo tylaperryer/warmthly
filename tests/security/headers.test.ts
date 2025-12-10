@@ -29,8 +29,8 @@ describe('Security Headers', () => {
     const response = await fetch(baseUrl);
     const csp = response.headers.get('content-security-policy');
 
-    expect(csp).toBeDefined();
-    expect(csp).toContain("default-src 'self'");
+    (expect(csp) as any).toBeDefined();
+    (expect(csp) as any).toContain("default-src 'self'");
   });
 
   it('should validate X-Frame-Options header', async () => {
@@ -75,8 +75,8 @@ describe('Security Headers', () => {
     const response = await fetch(baseUrl);
     const hsts = response.headers.get('strict-transport-security');
 
-    expect(hsts).toBeDefined();
-    expect(hsts).toContain('max-age=');
+    (expect(hsts) as any).toBeDefined();
+    (expect(hsts) as any).toContain('max-age=');
   });
 
   it('should validate Referrer-Policy header', async () => {
@@ -106,8 +106,8 @@ describe('Security Headers', () => {
     const response = await fetch(baseUrl);
     const permissionsPolicy = response.headers.get('permissions-policy');
 
-    expect(permissionsPolicy).toBeDefined();
-    expect(permissionsPolicy).toContain('geolocation=()');
+    (expect(permissionsPolicy) as any).toBeDefined();
+    (expect(permissionsPolicy) as any).toContain('geolocation=()');
   });
 
   it('should have all required security headers', async () => {
@@ -135,8 +135,8 @@ describe('Security Headers', () => {
 
     for (const header of requiredHeaders) {
       const value = response.headers.get(header);
-      expect(value).toBeDefined();
-      expect(value).not.toBe('');
+      (expect(value) as any).toBeDefined();
+      (expect(value) as any).not.toBe('');
     }
   });
 });

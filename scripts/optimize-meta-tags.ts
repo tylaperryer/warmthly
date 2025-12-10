@@ -52,39 +52,45 @@ function extractMetaTag(
   type: 'title' | 'description' | 'og:title' | 'og:description' | 'og:image' | 'canonical'
 ): string | null {
   switch (type) {
-    case 'title':
+    case 'title': {
       const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
       return titleMatch && titleMatch[1] ? titleMatch[1].trim() : null;
+    }
 
-    case 'description':
+    case 'description': {
       const descMatch = html.match(
         /<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i
       );
       return descMatch && descMatch[1] ? descMatch[1].trim() : null;
+    }
 
-    case 'og:title':
+    case 'og:title': {
       const ogTitleMatch = html.match(
         /<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i
       );
       return ogTitleMatch && ogTitleMatch[1] ? ogTitleMatch[1].trim() : null;
+    }
 
-    case 'og:description':
+    case 'og:description': {
       const ogDescMatch = html.match(
         /<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i
       );
       return ogDescMatch && ogDescMatch[1] ? ogDescMatch[1].trim() : null;
+    }
 
-    case 'og:image':
+    case 'og:image': {
       const ogImageMatch = html.match(
         /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i
       );
       return ogImageMatch && ogImageMatch[1] ? ogImageMatch[1].trim() : null;
+    }
 
-    case 'canonical':
+    case 'canonical': {
       const canonicalMatch = html.match(
         /<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["']/i
       );
       return canonicalMatch && canonicalMatch[1] ? canonicalMatch[1].trim() : null;
+    }
 
     default:
       return null;

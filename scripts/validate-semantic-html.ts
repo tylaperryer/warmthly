@@ -71,7 +71,7 @@ function validateSemanticHTML(filePath: string): SemanticIssue[] {
 
   lines.forEach((line, index) => {
     const hMatch = line.match(/<h([1-6])[^>]*>/i);
-    if (hMatch) {
+    if (hMatch && hMatch[1]) {
       headings.push({ level: parseInt(hMatch[1], 10), line: index + 1 });
     }
   });
@@ -92,12 +92,14 @@ function validateSemanticHTML(filePath: string): SemanticIssue[] {
 
     // Check for skipped levels
     for (let i = 0; i < headings.length - 1; i++) {
-      if (headings[i + 1].level - headings[i].level > 1) {
+      const currentHeading = headings[i];
+      const nextHeading = headings[i + 1];
+      if (currentHeading && nextHeading && nextHeading.level - currentHeading.level > 1) {
         issues.push({
           file: relativePath,
-          line: headings[i + 1].line,
+          line: nextHeading.line,
           type: 'warning',
-          issue: `Skipped heading level: h${headings[i].level} to h${headings[i + 1].level}`,
+          issue: `Skipped heading level: h${currentHeading.level} to h${nextHeading.level}`,
           recommendation: 'Maintain proper heading hierarchy (h1 -> h2 -> h3, etc.)',
         });
       }

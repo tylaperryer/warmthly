@@ -24,7 +24,9 @@ function getSessionId(): string {
       // Use crypto.getRandomValues for secure randomness
       const array = new Uint8Array(9);
       crypto.getRandomValues(array);
-      const randomPart = Array.from(array, byte => byte.toString(36)).join('').substring(0, 9);
+      const randomPart = Array.from(array, byte => byte.toString(36))
+        .join('')
+        .substring(0, 9);
       sessionId = `session_${Date.now()}_${randomPart}`;
       sessionStorage.setItem('warmthly_session_id', sessionId);
     }
@@ -33,7 +35,9 @@ function getSessionId(): string {
   // Use crypto.getRandomValues for secure randomness
   const array = new Uint8Array(9);
   crypto.getRandomValues(array);
-  const randomPart = Array.from(array, byte => byte.toString(36)).join('').substring(0, 9);
+  const randomPart = Array.from(array, byte => byte.toString(36))
+    .join('')
+    .substring(0, 9);
   return `session_${Date.now()}_${randomPart}`;
 }
 
@@ -56,10 +60,8 @@ export async function logPaymentEvent(
       },
       body: JSON.stringify(auditEvent),
       keepalive: true,
-    }).catch(() => {
-    });
-  } catch {
-  }
+    }).catch(() => {});
+  } catch {}
 }
 
 export async function verifyPaymentSuccess(paymentId: string, amount: number): Promise<boolean> {

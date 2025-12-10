@@ -21,19 +21,19 @@ None - Frontend can run without environment variables, but API features require 
 
 #### Translation Services
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `LIBRETRANSLATE_URL` | No | - | Self-hosted LibreTranslate instance URL (e.g., `https://translate.yourdomain.com`) |
-| `LIBRETRANSLATE_API_KEY` | No | - | LibreTranslate API key (if required by your instance) |
-| `HUGGINGFACE_API_KEY` | No | - | Hugging Face API key for NLLB translations (free tier available) |
-| `TRANSLATION_CACHE` | No | - | Cloudflare KV namespace for translation caching (optional) |
+| Variable                 | Required | Default | Description                                                                        |
+| ------------------------ | -------- | ------- | ---------------------------------------------------------------------------------- |
+| `LIBRETRANSLATE_URL`     | No       | -       | Self-hosted LibreTranslate instance URL (e.g., `https://translate.yourdomain.com`) |
+| `LIBRETRANSLATE_API_KEY` | No       | -       | LibreTranslate API key (if required by your instance)                              |
+| `HUGGINGFACE_API_KEY`    | No       | -       | Hugging Face API key for NLLB translations (free tier available)                   |
+| `TRANSLATION_CACHE`      | No       | -       | Cloudflare KV namespace for translation caching (optional)                         |
 
 #### Payment Processing
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `YOCO_SECRET_KEY` | No | - | Yoco payment secret key (for payment API endpoints) |
-| `YOCO_PUBLIC_KEY` | No | - | Yoco payment public key (for payment API endpoints) |
+| Variable          | Required | Default | Description                                         |
+| ----------------- | -------- | ------- | --------------------------------------------------- |
+| `YOCO_SECRET_KEY` | No       | -       | Yoco payment secret key (for payment API endpoints) |
+| `YOCO_PUBLIC_KEY` | No       | -       | Yoco payment public key (for payment API endpoints) |
 
 **Note:** API functions are deployed with each site, so environment variables should be set in each Cloudflare Pages project (main, mint, post, admin).
 
@@ -52,63 +52,63 @@ These variables are set via GitHub Secrets and automatically injected during dep
 
 #### Server Configuration
 
-| Variable | Required | Default | Description | Where to Set |
-|----------|----------|---------|-------------|--------------|
-| `PORT` | No | `80` | Server port (Greenlock handles both 80 and 443) | GitHub Secrets |
-| `LE_EMAIL` | Yes | - | Let's Encrypt email for certificate notifications | GitHub Secrets |
-| `LE_STAGING` | No | `false` | Set to `true` for testing Let's Encrypt, `false` for production | GitHub Secrets |
+| Variable     | Required | Default | Description                                                     | Where to Set   |
+| ------------ | -------- | ------- | --------------------------------------------------------------- | -------------- |
+| `PORT`       | No       | `80`    | Server port (Greenlock handles both 80 and 443)                 | GitHub Secrets |
+| `LE_EMAIL`   | Yes      | -       | Let's Encrypt email for certificate notifications               | GitHub Secrets |
+| `LE_STAGING` | No       | `false` | Set to `true` for testing Let's Encrypt, `false` for production | GitHub Secrets |
 
 #### Authentication & Security
 
-| Variable | Required | Min Length | Description | Rotation | Where to Set |
-|----------|----------|------------|-------------|----------|--------------|
-| `JWT_SECRET` | Yes | 32 chars | JWT signing secret for admin authentication | 180 days | GitHub Secrets |
-| `ADMIN_PASSWORD` | Yes | 16 chars | Admin login password (hashed) | 90 days | GitHub Secrets |
-| `REQUEST_SIGNING_SECRET` | No | 32 chars | HMAC secret for request signing (optional) | 180 days | GitHub Secrets |
+| Variable                 | Required | Min Length | Description                                 | Rotation | Where to Set   |
+| ------------------------ | -------- | ---------- | ------------------------------------------- | -------- | -------------- |
+| `JWT_SECRET`             | Yes      | 32 chars   | JWT signing secret for admin authentication | 180 days | GitHub Secrets |
+| `ADMIN_PASSWORD`         | Yes      | 16 chars   | Admin login password (hashed)               | 90 days  | GitHub Secrets |
+| `REQUEST_SIGNING_SECRET` | No       | 32 chars   | HMAC secret for request signing (optional)  | 180 days | GitHub Secrets |
 
 #### Payment Processing
 
-| Variable | Required | Min Length | Description | Rotation | Where to Set |
-|----------|----------|------------|-------------|----------|--------------|
-| `YOCO_SECRET_KEY` | Yes | 32 chars | Yoco payment gateway secret key | 90 days | GitHub Secrets |
-| `YOCO_PUBLIC_KEY` | No | - | Yoco payment gateway public key | 90 days | GitHub Secrets |
+| Variable          | Required | Min Length | Description                     | Rotation | Where to Set   |
+| ----------------- | -------- | ---------- | ------------------------------- | -------- | -------------- |
+| `YOCO_SECRET_KEY` | Yes      | 32 chars   | Yoco payment gateway secret key | 90 days  | GitHub Secrets |
+| `YOCO_PUBLIC_KEY` | No       | -          | Yoco payment gateway public key | 90 days  | GitHub Secrets |
 
 #### External APIs
 
-| Variable | Required | Min Length | Description | Rotation | Where to Set |
-|----------|----------|------------|-------------|----------|--------------|
-| `AIRTABLE_API_KEY` | Yes | 17 chars | Airtable API key for data access | 180 days | GitHub Secrets |
-| `RESEND_API_KEY` | Yes | 32 chars | Resend email API key | 180 days | GitHub Secrets |
-| `HUGGINGFACE_API_KEY` | No | - | Hugging Face API key for NLLB translations | - | GitHub Secrets |
-| `LIBRETRANSLATE_URL` | No | - | LibreTranslate instance URL | - | GitHub Secrets |
-| `LIBRETRANSLATE_API_KEY` | No | - | LibreTranslate API key | - | GitHub Secrets |
-| `EXCHANGE_RATE_API_KEY` | No | - | Exchange rate API key (if using paid service) | - | GitHub Secrets |
+| Variable                 | Required | Min Length | Description                                   | Rotation | Where to Set   |
+| ------------------------ | -------- | ---------- | --------------------------------------------- | -------- | -------------- |
+| `AIRTABLE_API_KEY`       | Yes      | 17 chars   | Airtable API key for data access              | 180 days | GitHub Secrets |
+| `RESEND_API_KEY`         | Yes      | 32 chars   | Resend email API key                          | 180 days | GitHub Secrets |
+| `HUGGINGFACE_API_KEY`    | No       | -          | Hugging Face API key for NLLB translations    | -        | GitHub Secrets |
+| `LIBRETRANSLATE_URL`     | No       | -          | LibreTranslate instance URL                   | -        | GitHub Secrets |
+| `LIBRETRANSLATE_API_KEY` | No       | -          | LibreTranslate API key                        | -        | GitHub Secrets |
+| `EXCHANGE_RATE_API_KEY`  | No       | -          | Exchange rate API key (if using paid service) | -        | GitHub Secrets |
 
 #### Data Storage
 
-| Variable | Required | Min Length | Description | Rotation | Where to Set |
-|----------|----------|------------|-------------|----------|--------------|
-| `REDIS_URL` | Yes | 10 chars | Redis connection string (e.g., `redis://localhost:6379`) | 365 days | GitHub Secrets |
+| Variable    | Required | Min Length | Description                                              | Rotation | Where to Set   |
+| ----------- | -------- | ---------- | -------------------------------------------------------- | -------- | -------------- |
+| `REDIS_URL` | Yes      | 10 chars   | Redis connection string (e.g., `redis://localhost:6379`) | 365 days | GitHub Secrets |
 
 #### Email Configuration
 
-| Variable | Required | Default | Description | Where to Set |
-|----------|----------|---------|-------------|--------------|
-| `ADMIN_EMAIL` | No | `desk@warmthly.org` | Admin email for notifications and reports | GitHub Secrets |
-| `RESEND_WEBHOOK_SECRET` | No | - | Resend webhook secret for email verification | GitHub Secrets |
+| Variable                | Required | Default             | Description                                  | Where to Set   |
+| ----------------------- | -------- | ------------------- | -------------------------------------------- | -------------- |
+| `ADMIN_EMAIL`           | No       | `desk@warmthly.org` | Admin email for notifications and reports    | GitHub Secrets |
+| `RESEND_WEBHOOK_SECRET` | No       | -                   | Resend webhook secret for email verification | GitHub Secrets |
 
 #### CORS Configuration
 
-| Variable | Required | Default | Description | Where to Set |
-|----------|----------|---------|-------------|--------------|
-| `ALLOWED_ORIGINS` | No | `https://www.warmthly.org,https://mint.warmthly.org,https://post.warmthly.org,https://admin.warmthly.org` | Comma-separated list of allowed CORS origins | GitHub Secrets |
+| Variable          | Required | Default                                                                                                   | Description                                  | Where to Set   |
+| ----------------- | -------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------- | -------------- |
+| `ALLOWED_ORIGINS` | No       | `https://www.warmthly.org,https://mint.warmthly.org,https://post.warmthly.org,https://admin.warmthly.org` | Comma-separated list of allowed CORS origins | GitHub Secrets |
 
 #### Compression Configuration
 
-| Variable | Required | Default | Description | Where to Set |
-|----------|----------|---------|-------------|--------------|
-| `COMPRESSION_LEVEL` | No | `6` | Compression level (1-9, 6 is optimal) | GitHub Secrets |
-| `COMPRESSION_THRESHOLD` | No | `1024` | Minimum response size to compress (bytes) | GitHub Secrets |
+| Variable                | Required | Default | Description                               | Where to Set   |
+| ----------------------- | -------- | ------- | ----------------------------------------- | -------------- |
+| `COMPRESSION_LEVEL`     | No       | `6`     | Compression level (1-9, 6 is optimal)     | GitHub Secrets |
+| `COMPRESSION_THRESHOLD` | No       | `1024`  | Minimum response size to compress (bytes) | GitHub Secrets |
 
 ### Where to Set (Backend)
 
@@ -181,17 +181,22 @@ REDIS_URL=redis://localhost:6379
 ## Troubleshooting
 
 ### Issue: Server won't start
+
 **Solution:** Check that all required secrets are set. Server logs will show missing secrets.
 
 ### Issue: API endpoints return 500 errors
+
 **Solution:** Verify environment variables are set correctly in Cloudflare Pages (frontend) or GitHub Secrets (backend).
 
 ### Issue: Secrets not updating after deployment
-**Solution:** 
+
+**Solution:**
+
 - Backend: Verify secrets are set in GitHub Secrets, not just environment variables
 - Frontend: Clear Cloudflare Pages cache and redeploy
 
 ### Issue: CORS errors
+
 **Solution:** Verify `ALLOWED_ORIGINS` includes your domain, or check default origins in `warmthly-api/server.js`.
 
 ## Related Documentation
@@ -200,4 +205,3 @@ REDIS_URL=redis://localhost:6379
 - `warmthly-api/utils/validate-secrets.js` - Secret validation logic
 - `warmthly/api/utils/secrets-management.ts` - Frontend secrets management
 - `warmthly/docs/DEPLOYMENT-GUIDE.md` - Deployment instructions
-

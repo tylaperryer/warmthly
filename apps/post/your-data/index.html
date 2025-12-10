@@ -51,6 +51,10 @@
     initGlossary();
     initPronunciation();
   </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Your Data - Post - Warmthly</title>
+  <meta name="description" content="Access and manage your personal data with Warmthly. View what information we have and exercise your data rights.">
+  
   <warmthly-head 
     title="Your Data - Warmthly"
     description="View and manage all data we store about you. Complete transparency on what we know."
@@ -81,7 +85,7 @@
     <warmthly-stoplight app="post"></warmthly-stoplight>
   </div>
 
-  <div class="container container-narrow" id="main-content" role="main">
+  <main class="container container-narrow" id="main-content" role="main">
     <h1 class="page-title" data-reading-level-content>Your Data</h1>
     <p class="main-text" data-reading-level-content>
       <b>Radical Transparency:</b> This is everything we store about you. If you see something we didn't mention, <a href="/report/">report a concern about your data</a>.
@@ -113,7 +117,7 @@
       <button onclick="exportAllData()">Export All My Data</button>
       <button onclick="deleteAllData()" class="danger">Delete All My Data</button>
     </div>
-  </div>
+  </main>
 
   <!-- Font Loader Component -->
   <warmthly-font-loader></warmthly-font-loader>

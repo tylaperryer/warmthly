@@ -29,7 +29,11 @@ class WarmthlySocialShare extends HTMLElement {
     container.setAttribute('aria-label', 'Share this page');
 
     // Native Web Share API (mobile/desktop)
-    if (typeof navigator !== 'undefined' && 'share' in navigator && typeof navigator.share === 'function') {
+    if (
+      typeof navigator !== 'undefined' &&
+      'share' in navigator &&
+      typeof navigator.share === 'function'
+    ) {
       const nativeButton = this.createButton(
         'Share',
         '🌐',
@@ -191,7 +195,7 @@ class WarmthlySocialShare extends HTMLElement {
           button.textContent = originalText;
         }, 2000);
       }
-    } catch (error) {
+    } catch {
       // Fallback for older browsers
       const textarea = document.createElement('textarea');
       textarea.value = url;

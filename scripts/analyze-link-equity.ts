@@ -90,12 +90,26 @@ function getUrlFromPath(filePath: string): string {
 
 /**
  * Determine page priority
+ * SECURITY: Uses URL constructor to validate URLs instead of substring matching
  */
 function getPagePriority(filePath: string, url: string): 'high' | 'medium' | 'low' {
   const filename = basename(filePath);
 
   // High priority pages
-  if (filename === 'index.html' || url.includes('warmthly.org/')) {
+  // SECURITY: Validate URL properly instead of substring matching
+  let isWarmthlyDomain = false;
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname.toLowerCase();
+    isWarmthlyDomain =
+      hostname === 'warmthly.org' ||
+      hostname === 'www.warmthly.org' ||
+      hostname.endsWith('.warmthly.org');
+  } catch {
+    // Invalid URL, skip domain check
+  }
+
+  if (filename === 'index.html' || isWarmthlyDomain) {
     return 'high';
   }
 
@@ -131,8 +145,13 @@ function extractInternalLinks(content: string, baseUrl: string): string[] {
       const urlObj = new URL(href, 'https://www.warmthly.org');
       // Only allow http and https schemes
       if (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') {
-        // Check if it's internal warmthly.org domain
-        if (urlObj.hostname.toLowerCase().endsWith('warmthly.org')) {
+        // SECURITY: Validate hostname properly instead of substring matching
+        const hostname = urlObj.hostname.toLowerCase();
+        const isWarmthlyDomain =
+          hostname === 'warmthly.org' ||
+          hostname === 'www.warmthly.org' ||
+          (hostname.endsWith('.warmthly.org') && hostname.split('.').length === 3);
+        if (isWarmthlyDomain) {
           links.push(href); // Use original href for output
         }
         continue;
@@ -144,7 +163,11 @@ function extractInternalLinks(content: string, baseUrl: string): string[] {
     // Handle relative URLs and special protocols
     const normalizedHref = href.trim().toLowerCase();
 
-    if (normalizedHref.startsWith('#') || normalizedHref.startsWith('mailto:') || normalizedHref.startsWith('tel:')) {
+    if (
+      normalizedHref.startsWith('#') ||
+      normalizedHref.startsWith('mailto:') ||
+      normalizedHref.startsWith('tel:')
+    ) {
       continue;
     }
 
@@ -242,7 +265,8 @@ function analyzeLinkEquity(): void {
       const hostname = urlObj.hostname.toLowerCase();
       const pathname = urlObj.pathname;
       return (
-        ((hostname === 'www.warmthly.org' || hostname === 'warmthly.org') && (pathname === '/' || pathname === '')) ||
+        ((hostname === 'www.warmthly.org' || hostname === 'warmthly.org') &&
+          (pathname === '/' || pathname === '')) ||
         (hostname === 'mint.warmthly.org' && (pathname === '/' || pathname === '')) ||
         (hostname === 'post.warmthly.org' && (pathname === '/' || pathname === '')) ||
         (hostname === 'admin.warmthly.org' && (pathname === '/' || pathname === ''))

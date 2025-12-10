@@ -12,6 +12,7 @@ Warmthly supports **7,019 languages** using **100% open-source, privacy-first tr
 ## Translation Status
 
 Warmthly supports **7,019 languages** through a combination of:
+
 - **Manual translations** (5 languages) - High-quality, human-reviewed translations
 - **Machine translations** (7,014 languages) - Automatic translations via open-source providers
 
@@ -26,6 +27,7 @@ The following languages have **manual, human-reviewed translations**:
 5. **Afrikaans (af)** - Complete, native translations
 
 These translations are:
+
 - ✅ Human-reviewed for accuracy
 - ✅ Culturally appropriate
 - ✅ Context-aware
@@ -41,6 +43,7 @@ The remaining **7,014 languages** are supported via **automatic machine translat
 #### Machine Translation Quality
 
 Machine translations provide:
+
 - ✅ Basic functionality in all supported languages
 - ✅ Automatic translation of all content
 - ⚠️ May have lower quality than manual translations
@@ -83,12 +86,14 @@ Machine translations provide:
 #### Complete Coverage
 
 All translation keys are available in:
+
 - ✅ All 5 manual languages
 - ✅ All 7,014 machine-translated languages
 
 #### Translation Keys
 
 Current translation keys cover:
+
 - Common UI elements (buttons, labels, messages)
 - Page content
 - Error messages

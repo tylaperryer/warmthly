@@ -1,7 +1,7 @@
 /**
  * Set HTML lang attribute dynamically
  * Phase 7 Issue 7.2: Make lang attribute dynamic based on user preference
- * 
+ *
  * This script runs synchronously before page load to set the lang attribute
  * for better SEO and accessibility.
  */
@@ -98,4 +98,3 @@ export function setLangAttribute(): void {
 if (typeof document !== 'undefined' && document.readyState === 'loading') {
   setLangAttribute();
 }
-

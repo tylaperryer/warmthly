@@ -86,7 +86,8 @@ body::before {
   left: 0;
   width: 100%;
   height: 100vh;
-  background: radial-gradient(circle at 20% 30%, rgb(255 140 66 / 15%) 0%, transparent 50%),
+  background:
+    radial-gradient(circle at 20% 30%, rgb(255 140 66 / 15%) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgb(255 182 193 / 12%) 0%, transparent 50%),
     linear-gradient(135deg, var(--warmthly-background) 0%, var(--warmthly-background-alt) 100%);
   z-index: -1;

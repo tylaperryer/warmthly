@@ -1,11 +1,15 @@
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
 import { defineConfig } from 'vitest/config';
-import { resolve } from 'path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['../tests/setup.ts'],
+    setupFiles: [resolve(__dirname, '../tests/setup.ts')],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
@@ -23,14 +27,15 @@ export default defineConfig({
         // Realistic coverage thresholds for maintainable test suite
         // 99% is too high and discourages legitimate test writing
         // These thresholds balance quality with practicality
-        lines: 80,        // 80% line coverage - catches most bugs
-        functions: 85,    // 85% function coverage - ensures most functions tested
-        branches: 75,     // 75% branch coverage - tests critical decision points
-        statements: 80,   // 80% statement coverage - matches line coverage
+        lines: 80, // 80% line coverage - catches most bugs
+        functions: 85, // 85% function coverage - ensures most functions tested
+        branches: 75, // 75% branch coverage - tests critical decision points
+        statements: 80, // 80% statement coverage - matches line coverage
       },
     },
     include: ['**/*.{test,spec}.{ts,tsx,js,jsx}'],
-    exclude: ['node_modules', 'dist', 'build'],
+    exclude: ['node_modules', 'dist', 'build', '.config'],
+    testTimeout: 10000,
   },
   resolve: {
     alias: {

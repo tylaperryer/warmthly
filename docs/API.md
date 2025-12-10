@@ -541,12 +541,14 @@ Submits a user report (concerns, complaints, media inquiries, etc.).
 **Rate Limiting:** 100 requests per 15 minutes
 
 **Security Features:**
+
 - Comprehensive input validation with attack detection
 - XSS, SQL injection, path traversal, command injection, and LDAP injection detection
 - HTML sanitization for email content
 - Attack attempts are logged for security monitoring
 
 **Request Body:**
+
 ```json
 {
   "name": "John Doe",
@@ -557,12 +559,14 @@ Submits a user report (concerns, complaints, media inquiries, etc.).
 ```
 
 **Request Fields:**
+
 - `name` (required, string, max 200 chars) - Reporter's name
 - `email` (required, string, valid email format) - Reporter's email
 - `type` (required, string) - Report type: `"media"`, `"concern"`, `"admin"`, or `"other"`
 - `message` (required, string, max 5000 chars) - Report message
 
 **Success Response (200):**
+
 ```json
 {
   "message": "Report submitted successfully. We will review it promptly."
@@ -570,12 +574,14 @@ Submits a user report (concerns, complaints, media inquiries, etc.).
 ```
 
 **Error Responses:**
+
 - `400` - Validation error (invalid input, missing fields, attack detected)
 - `405` - Method not allowed
 - `429` - Too many requests (rate limited)
 - `500` - Internal server error
 
 **Error Response Format:**
+
 ```json
 {
   "error": {
@@ -586,11 +592,13 @@ Submits a user report (concerns, complaints, media inquiries, etc.).
 ```
 
 **Error Codes:**
+
 - `VALIDATION_ERROR` - Input validation failed
 - `RATE_LIMIT_EXCEEDED` - Too many requests
 - `INTERNAL_ERROR` - Server error
 
 **Example - cURL:**
+
 ```bash
 curl -X POST https://warmthly.org/api/reports \
   -H "Content-Type: application/json" \
@@ -603,6 +611,7 @@ curl -X POST https://warmthly.org/api/reports \
 ```
 
 **Example - JavaScript:**
+
 ```javascript
 async function submitReport(reportData) {
   try {
@@ -627,6 +636,7 @@ async function submitReport(reportData) {
 ```
 
 **Environment Variables:**
+
 - `RESEND_API_KEY` - Resend API key for email notifications (optional)
 - `ADMIN_EMAIL` - Admin email address (default: desk@warmthly.org)
 
@@ -645,6 +655,7 @@ Converts currency amounts using ExchangeRate-API.
 **Caching:** 5 minutes (with 1 hour stale-while-revalidate)
 
 **Query Parameters:**
+
 - `amount` (required, number) - Amount to convert (in cents for most currencies)
 - `from` (required, string) - Source currency code (ISO 4217)
 - `to` (optional, string, default: "ZAR") - Target currency code (ISO 4217)
@@ -653,6 +664,7 @@ Converts currency amounts using ExchangeRate-API.
 USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY, SEK, NZD, MXN, SGD, HKD, NOK, TRY, RUB, INR, BRL, ZAR, DKK, PLN, TWD, THB, MYR, IDR, CZK, HUF, ILS, CLP, PHP, AED, SAR, BGN, RON, HRK, ISK, KRW, VND, PKR, BDT
 
 **Success Response (200):**
+
 ```json
 {
   "originalAmount": 10000,
@@ -666,12 +678,14 @@ USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY, SEK, NZD, MXN, SGD, HKD, NOK, TRY, RUB, 
 ```
 
 **Response Headers:**
+
 - `Cache-Control: public, max-age=300, stale-while-revalidate=3600, must-revalidate`
 - `X-RateLimit-Limit: 100`
 - `X-RateLimit-Remaining: 99`
 - `X-RateLimit-Reset: 2024-12-19T12:00:00.000Z`
 
 **Error Responses:**
+
 - `400` - Invalid parameters (invalid currency code, invalid amount)
 - `405` - Method not allowed
 - `429` - Too many requests (rate limited)
@@ -679,6 +693,7 @@ USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY, SEK, NZD, MXN, SGD, HKD, NOK, TRY, RUB, 
 - `504` - Request timeout
 
 **Error Response Format:**
+
 ```json
 {
   "error": {
@@ -689,17 +704,17 @@ USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY, SEK, NZD, MXN, SGD, HKD, NOK, TRY, RUB, 
 ```
 
 **Example - cURL:**
+
 ```bash
 curl "https://warmthly.org/api/convert-currency?amount=10000&from=USD&to=ZAR"
 ```
 
 **Example - JavaScript:**
+
 ```javascript
 async function convertCurrency(amount, from, to = 'ZAR') {
   try {
-    const response = await fetch(
-      `/api/convert-currency?amount=${amount}&from=${from}&to=${to}`
-    );
+    const response = await fetch(`/api/convert-currency?amount=${amount}&from=${from}&to=${to}`);
 
     if (!response.ok) {
       const error = await response.json();
@@ -716,9 +731,11 @@ async function convertCurrency(amount, from, to = 'ZAR') {
 ```
 
 **Environment Variables:**
+
 - `EXCHANGE_RATE_API_KEY` - ExchangeRate-API key (optional, defaults to free tier)
 
 **Notes:**
+
 - Amounts are in cents for most currencies (e.g., 10000 = $100.00)
 - JPY amounts are in whole units (no cents)
 - Rates are cached for 5 minutes to reduce API calls
@@ -739,6 +756,7 @@ Processes webhook events from Resend for incoming emails.
 **Authentication:** Webhook signature verification required
 
 **Request Headers:**
+
 - `svix-signature` (required) - Webhook signature
 - `svix-id` (required) - Webhook ID
 - `svix-timestamp` (required) - Webhook timestamp
@@ -747,6 +765,7 @@ Processes webhook events from Resend for incoming emails.
 Webhook event from Resend (automatically sent by Resend service)
 
 **Success Response (200):**
+
 ```json
 {
   "message": "Webhook processed successfully."
@@ -754,6 +773,7 @@ Webhook event from Resend (automatically sent by Resend service)
 ```
 
 **Error Responses:**
+
 - `400` - Invalid request (missing email data)
 - `401` - Webhook verification failed
 - `405` - Method not allowed
@@ -761,6 +781,7 @@ Webhook event from Resend (automatically sent by Resend service)
 - `500` - Internal server error
 
 **Error Response Format:**
+
 ```json
 {
   "error": {
@@ -771,9 +792,11 @@ Webhook event from Resend (automatically sent by Resend service)
 ```
 
 **Environment Variables:**
+
 - `RESEND_WEBHOOK_SECRET` - Resend webhook secret (required for production)
 
 **Notes:**
+
 - Emails are stored in Redis for retrieval via `/api/get-emails`
 - Only `email.received` events are processed
 - Webhook signature is verified using Svix library
@@ -796,6 +819,7 @@ CSP violation report (automatically sent by browser)
 No content (report logged server-side)
 
 **Notes:**
+
 - Reports are logged for security monitoring
 - No response body required
 - Used for CSP policy tuning and security monitoring
@@ -803,15 +827,18 @@ No content (report logged server-side)
 - Reports help identify and fix CSP policy issues
 
 **Error Responses:**
+
 - `400` - Invalid request format
 - `405` - Method not allowed
 - `429` - Too many requests (rate limited)
 - `500` - Internal server error
 
 **Environment Variables:**
+
 - None required (CSP reports are logged only)
 
 **Example - Browser automatically sends:**
+
 ```json
 {
   "csp-report": {

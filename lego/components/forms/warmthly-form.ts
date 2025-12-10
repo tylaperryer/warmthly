@@ -10,10 +10,7 @@
  * </warmthly-form>
  */
 
-import {
-  validateEmail,
-  type ValidationResult,
-} from '@api/middleware/index.js';
+import { validateEmail, type ValidationResult } from '@api/middleware/index.js';
 import { BaseComponent } from '@core/base-component.js';
 import { ErrorSeverity } from '@core/error-boundary.js';
 
@@ -287,7 +284,7 @@ class WarmthlyForm extends BaseComponent {
         success: false,
         message: errorMessage,
       });
-      this.handleError(error, {
+      void this.handleError(error, {
         severity: ErrorSeverity.MEDIUM,
         component: 'WarmthlyForm',
         operation: 'submitForm',

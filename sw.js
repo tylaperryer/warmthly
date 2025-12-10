@@ -50,12 +50,15 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          // Delete old caches that don't match current version
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
+        cacheNames
+          .map(cacheName => {
+            // Delete old caches that don't match current version
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+            return null;
+          })
+          .filter(promise => promise !== null)
       );
     })
   );

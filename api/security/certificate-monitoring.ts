@@ -85,9 +85,7 @@ function fetchCurrentCertificate(_domain: string): Promise<CertificateInfo | nul
   // For now, this is a placeholder that would need to be implemented
   // based on your infrastructure and monitoring needs
 
-  logger.warn(
-    `[certificate-monitoring] Certificate fetching not fully implemented`
-  );
+  logger.warn(`[certificate-monitoring] Certificate fetching not fully implemented`);
   return Promise.resolve(null);
 }
 

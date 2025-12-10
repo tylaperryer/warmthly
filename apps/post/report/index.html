@@ -55,6 +55,10 @@
     initGlossary();
     initPronunciation();
   </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Report Submission - Post - Warmthly</title>
+  <meta name="description" content="Submit reports and share your experiences with Warmthly. Help us document impact and improve our systems.">
+  
   <warmthly-head 
     title="Report - Warmthly"
     description="Report concerns or issues with Warmthly's operations or transparency"
@@ -88,7 +92,7 @@
   </div>
   <warmthly-breadcrumb></warmthly-breadcrumb>
 
-  <div class="container container-narrow" id="main-content" role="main">
+  <main class="container container-narrow" id="main-content" role="main">
     <h1 class="page-title" data-reading-level-content>Report an Issue</h1>
     <p class="main-text" data-reading-level-content>
       If you have concerns, questions, or need to report something related to Warmthly, please use the form below. We take all reports seriously and will review them promptly.
@@ -137,7 +141,7 @@
           <button type="submit" class="submit-button" id="submitButton">Submit Report</button>
         </form>
     </div>
-  </div>
+  </main>
   
   <!-- Font Loader Component -->
   <warmthly-font-loader></warmthly-font-loader>

@@ -145,8 +145,8 @@ function getLocationFromIP(ip: string): Promise<{
       latitude: result.location?.latitude,
       longitude: result.location?.longitude,
     });
-  } catch (error) {
-    logger.error('[anomaly-detection] Failed to get location from IP:', error);
+  } catch {
+    logger.error('[anomaly-detection] Failed to get location from IP');
     return Promise.resolve(null);
   }
 }

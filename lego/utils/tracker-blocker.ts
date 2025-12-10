@@ -15,6 +15,18 @@
  * - Shadow DOM piercing
  * - SRI validation for whitelisted scripts
  * - Granular user consent controls
+ *
+ * MAINTENANCE REQUIRED:
+ * - Review bi-monthly for browser API changes
+ * - Update blocklist monthly
+ * - Test after browser updates
+ * - Monitor for CVE issues in dependencies
+ * - Verify DNS-over-HTTPS API compatibility
+ *
+ * API COMPATIBILITY:
+ * - All APIs include safe fallbacks
+ * - Graceful degradation if APIs change
+ * - Error handling prevents breaking functionality
  */
 
 /**
@@ -181,15 +193,24 @@ function getBlocklistApiUrl(): string {
 /**
  * Fetch and update blocklist from remote source
  * Falls back to default list if fetch fails
+ * SAFE FALLBACK: Uses default blocklist if API fails
  */
 async function updateBlocklist(): Promise<void> {
   try {
     const apiUrl = getBlocklistApiUrl();
+
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     const response = await fetch(`${apiUrl}/api/tracker-blocklist`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-cache',
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       if (import.meta.env.DEV) {
@@ -200,31 +221,58 @@ async function updateBlocklist(): Promise<void> {
 
     const config: BlocklistConfig = await response.json();
 
+    // Validate config structure before applying
     if (config.blockedDomains && Array.isArray(config.blockedDomains)) {
-      BLOCKED_DOMAINS = [...new Set([...BLOCKED_DOMAINS, ...config.blockedDomains])];
+      // Filter out invalid entries
+      const validDomains = config.blockedDomains.filter(
+        (domain): domain is string => typeof domain === 'string' && domain.length > 0
+      );
+      BLOCKED_DOMAINS = [...new Set([...BLOCKED_DOMAINS, ...validDomains])];
     }
 
     if (config.trackingKeyPatterns && Array.isArray(config.trackingKeyPatterns)) {
-      TRACKING_KEY_PATTERNS = [
-        ...TRACKING_KEY_PATTERNS,
-        ...config.trackingKeyPatterns.map(pattern => new RegExp(pattern)),
-      ];
+      // Validate regex patterns
+      const validPatterns = config.trackingKeyPatterns
+        .filter((pattern): pattern is string => typeof pattern === 'string')
+        .map(pattern => {
+          try {
+            return new RegExp(pattern);
+          } catch {
+            // Invalid regex, skip
+            return null;
+          }
+        })
+        .filter((pattern): pattern is RegExp => pattern !== null);
+
+      TRACKING_KEY_PATTERNS = [...TRACKING_KEY_PATTERNS, ...validPatterns];
     }
 
     if (config.inlineTrackingPatterns && Array.isArray(config.inlineTrackingPatterns)) {
-      INLINE_TRACKING_PATTERNS = [
-        ...INLINE_TRACKING_PATTERNS,
-        ...config.inlineTrackingPatterns.map(pattern => new RegExp(pattern, 'i')),
-      ];
+      // Validate regex patterns
+      const validPatterns = config.inlineTrackingPatterns
+        .filter((pattern): pattern is string => typeof pattern === 'string')
+        .map(pattern => {
+          try {
+            return new RegExp(pattern, 'i');
+          } catch {
+            // Invalid regex, skip
+            return null;
+          }
+        })
+        .filter((pattern): pattern is RegExp => pattern !== null);
+
+      INLINE_TRACKING_PATTERNS = [...INLINE_TRACKING_PATTERNS, ...validPatterns];
     }
 
     if (import.meta.env.DEV && config.version) {
       console.log(`[Tracker Blocker] Blocklist updated to version ${config.version}`);
     }
   } catch (error) {
+    // FALLBACK: Use default blocklist if API fails
     if (import.meta.env.DEV) {
-      console.warn('[Tracker Blocker] Error updating blocklist:', error);
+      console.warn('[Tracker Blocker] Error updating blocklist, using defaults:', error);
     }
+    // Continue with default blocklist - no action needed
   }
 }
 
@@ -232,6 +280,8 @@ async function updateBlocklist(): Promise<void> {
  * Resolve CNAME record using DNS-over-HTTPS (DoH)
  * @param hostname - Hostname to resolve
  * @returns Resolved hostname or null if resolution fails
+ *
+ * SAFE FALLBACK: If DNS-over-HTTPS API changes, falls back to domain matching only
  */
 async function resolveCNAME(hostname: string): Promise<string | null> {
   // Check cache first
@@ -241,33 +291,63 @@ async function resolveCNAME(hostname: string): Promise<string | null> {
   }
 
   try {
-    // Use Cloudflare's DoH service
-    const dohUrl = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(
-      hostname
-    )}&type=CNAME`;
-    const response = await fetch(dohUrl, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/dns-json',
-      },
-    });
+    // Use Cloudflare's DoH service (RFC 8484 compliant)
+    // FALLBACK: If API changes, try alternative DoH providers
+    const dohProviders = [
+      'https://cloudflare-dns.com/dns-query',
+      'https://dns.google/resolve', // Fallback provider
+    ];
 
-    if (!response.ok) {
-      cnameCache.set(hostname, { resolved: null, timestamp: Date.now() });
-      return null;
+    for (const dohBase of dohProviders) {
+      try {
+        const dohUrl = `${dohBase}?name=${encodeURIComponent(hostname)}&type=CNAME`;
+        const response = await fetch(dohUrl, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/dns-json',
+          },
+          // Add timeout to prevent hanging
+          signal: AbortSignal.timeout?.(5000) || undefined,
+        });
+
+        if (!response.ok) {
+          continue; // Try next provider
+        }
+
+        const data = await response.json();
+
+        // Handle both Cloudflare and Google DoH response formats
+        const answers = data.Answer || data.answer || [];
+        if (answers.length > 0) {
+          // Extract the target from CNAME record (format: "target.domain.com." or just "target.domain.com")
+          const answerData = answers[0].data || answers[0].rdata || '';
+          const target = answerData.replace(/\.$/, '') || null;
+
+          if (target) {
+            cnameCache.set(hostname, { resolved: target, timestamp: Date.now() });
+            return target;
+          }
+        }
+      } catch (error) {
+        // Try next provider if this one fails
+        if (import.meta.env.DEV && dohProviders.indexOf(dohBase) === dohProviders.length - 1) {
+          console.warn(
+            '[Tracker Blocker] All DoH providers failed, using domain matching only:',
+            error
+          );
+        }
+        continue;
+      }
     }
 
-    const data = await response.json();
-    if (data.Answer && data.Answer.length > 0) {
-      // Extract the target from CNAME record (format: "target.domain.com.")
-      const target = data.Answer[0].data?.replace(/\.$/, '') || null;
-      cnameCache.set(hostname, { resolved: target, timestamp: Date.now() });
-      return target;
-    }
-
+    // All providers failed - cache null result
     cnameCache.set(hostname, { resolved: null, timestamp: Date.now() });
     return null;
-  } catch {
+  } catch (error) {
+    // Complete failure - safe fallback: return null (will use domain matching only)
+    if (import.meta.env.DEV) {
+      console.warn('[Tracker Blocker] CNAME resolution failed, using domain matching only:', error);
+    }
     cnameCache.set(hostname, { resolved: null, timestamp: Date.now() });
     return null;
   }
@@ -588,113 +668,197 @@ function initPrivacyControls(): PrivacyControls {
 
   /**
    * Block fetch requests to tracking domains
+   * SAFE FALLBACK: If fetch API changes, wraps with try-catch
    */
   const originalFetch = window.fetch;
   // Type assertion needed due to type incompatibility between DOM and undici types
-  window.fetch = function (
-    input: RequestInfo | URL,
-    init?: RequestInit
-  ): Promise<Response> {
-    // Extract URL from different input types
-    let url: string;
-    if (typeof input === 'string') {
-      url = input;
-    } else if (input instanceof URL) {
-      url = input.href;
-    } else if (input instanceof Request) {
-      url = input.url;
-    } else {
-      // Fallback for other types
-      url = String(input);
-    }
-
-    if (shouldBlock(url)) {
-      if (import.meta.env.DEV) {
-        console.warn('[Tracker Blocker] Blocked fetch to:', url);
+  window.fetch = function (input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    try {
+      // Extract URL from different input types
+      let url: string;
+      if (typeof input === 'string') {
+        url = input;
+      } else if (input instanceof URL) {
+        url = input.href;
+      } else if (input instanceof Request) {
+        url = input.url;
+      } else {
+        // Fallback for other types
+        url = String(input);
       }
-      return Promise.reject(new Error('Tracker blocked'));
+
+      if (shouldBlock(url)) {
+        if (import.meta.env.DEV) {
+          console.warn('[Tracker Blocker] Blocked fetch to:', url);
+        }
+        return Promise.reject(new Error('Tracker blocked'));
+      }
+      // Use spread with any to bypass type incompatibility between DOM and undici Request types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (originalFetch as any).call(window, input, init);
+    } catch (error) {
+      // FALLBACK: If fetch API changed, log and allow (better than breaking)
+      if (import.meta.env.DEV) {
+        console.warn('[Tracker Blocker] Fetch API error, allowing request:', error);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (originalFetch as any).call(window, input, init);
     }
-    // Use spread with any to bypass type incompatibility between DOM and undici Request types
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (originalFetch as any).call(window, input, init);
   } as typeof window.fetch;
 
   /**
    * Block XMLHttpRequest to tracking domains
+   * SAFE FALLBACK: Wraps with try-catch to handle API changes
    */
   const originalOpen = XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open = function (
-    method: string,
-    url: string | URL,
-    ...rest: unknown[]
-  ): void {
-    const urlString = typeof url === 'string' ? url : url.toString();
-    if (shouldBlock(urlString)) {
-      if (import.meta.env.DEV) {
-        console.warn('[Tracker Blocker] Blocked XHR to:', urlString);
+  try {
+    XMLHttpRequest.prototype.open = function (
+      method: string,
+      url: string | URL,
+      ...rest: unknown[]
+    ): void {
+      try {
+        const urlString = typeof url === 'string' ? url : url.toString();
+        if (shouldBlock(urlString)) {
+          if (import.meta.env.DEV) {
+            console.warn('[Tracker Blocker] Blocked XHR to:', urlString);
+          }
+          throw new Error('Tracker blocked');
+        }
+        return originalOpen.apply(this, [method, url, ...rest] as Parameters<typeof originalOpen>);
+      } catch (error) {
+        // FALLBACK: If blocking fails, allow request (better than breaking)
+        if (
+          import.meta.env.DEV &&
+          !(error instanceof Error && error.message === 'Tracker blocked')
+        ) {
+          console.warn('[Tracker Blocker] XHR open error, allowing request:', error);
+        }
+        if (error instanceof Error && error.message === 'Tracker blocked') {
+          throw error;
+        }
+        return originalOpen.apply(this, [method, url, ...rest] as Parameters<typeof originalOpen>);
       }
-      throw new Error('Tracker blocked');
+    };
+  } catch (error) {
+    // FALLBACK: If XMLHttpRequest API changed, restore original
+    if (import.meta.env.DEV) {
+      console.warn('[Tracker Blocker] XMLHttpRequest API changed, using original:', error);
     }
-    return originalOpen.apply(this, [method, url, ...rest] as Parameters<typeof originalOpen>);
-  };
+    XMLHttpRequest.prototype.open = originalOpen;
+  }
 
   /**
    * Block WebSocket connections to tracking domains
+   * SAFE FALLBACK: Wraps with try-catch to handle API changes
    */
   if (typeof WebSocket !== 'undefined') {
-    const OriginalWebSocket = window.WebSocket;
-    const WebSocketProxy = function (
-      this: WebSocket,
-      url: string | URL,
-      protocols?: string | string[]
-    ): WebSocket {
-      const urlString = typeof url === 'string' ? url : url.toString();
-      if (shouldBlock(urlString)) {
-        if (import.meta.env.DEV) {
-          console.warn('[Tracker Blocker] Blocked WebSocket to:', urlString);
+    try {
+      const OriginalWebSocket = window.WebSocket;
+      const WebSocketProxy = function (
+        this: WebSocket,
+        url: string | URL,
+        protocols?: string | string[]
+      ): WebSocket {
+        try {
+          const urlString = typeof url === 'string' ? url : url.toString();
+          if (shouldBlock(urlString)) {
+            if (import.meta.env.DEV) {
+              console.warn('[Tracker Blocker] Blocked WebSocket to:', urlString);
+            }
+            throw new Error('Tracker blocked');
+          }
+          return new OriginalWebSocket(url, protocols);
+        } catch (error) {
+          // FALLBACK: If blocking fails, allow connection (better than breaking)
+          if (
+            import.meta.env.DEV &&
+            !(error instanceof Error && error.message === 'Tracker blocked')
+          ) {
+            console.warn('[Tracker Blocker] WebSocket error, allowing connection:', error);
+          }
+          if (error instanceof Error && error.message === 'Tracker blocked') {
+            throw error;
+          }
+          return new OriginalWebSocket(url, protocols);
         }
-        throw new Error('Tracker blocked');
+      } as unknown as typeof WebSocket;
+      WebSocketProxy.prototype = OriginalWebSocket.prototype;
+
+      // Safely copy static properties with fallbacks
+      try {
+        Object.defineProperty(WebSocketProxy, 'CONNECTING', {
+          value: OriginalWebSocket.CONNECTING,
+          writable: false,
+        });
+        Object.defineProperty(WebSocketProxy, 'OPEN', {
+          value: OriginalWebSocket.OPEN,
+          writable: false,
+        });
+        Object.defineProperty(WebSocketProxy, 'CLOSING', {
+          value: OriginalWebSocket.CLOSING,
+          writable: false,
+        });
+        Object.defineProperty(WebSocketProxy, 'CLOSED', {
+          value: OriginalWebSocket.CLOSED,
+          writable: false,
+        });
+      } catch (error) {
+        // FALLBACK: If static properties changed, continue without them
+        if (import.meta.env.DEV) {
+          console.warn('[Tracker Blocker] WebSocket static properties changed:', error);
+        }
       }
-      return new OriginalWebSocket(url, protocols);
-    } as unknown as typeof WebSocket;
-    WebSocketProxy.prototype = OriginalWebSocket.prototype;
-    Object.defineProperty(WebSocketProxy, 'CONNECTING', {
-      value: OriginalWebSocket.CONNECTING,
-      writable: false,
-    });
-    Object.defineProperty(WebSocketProxy, 'OPEN', {
-      value: OriginalWebSocket.OPEN,
-      writable: false,
-    });
-    Object.defineProperty(WebSocketProxy, 'CLOSING', {
-      value: OriginalWebSocket.CLOSING,
-      writable: false,
-    });
-    Object.defineProperty(WebSocketProxy, 'CLOSED', {
-      value: OriginalWebSocket.CLOSED,
-      writable: false,
-    });
-    (window as unknown as { WebSocket: typeof WebSocket }).WebSocket = WebSocketProxy;
+
+      (window as unknown as { WebSocket: typeof WebSocket }).WebSocket = WebSocketProxy;
+    } catch (error) {
+      // FALLBACK: If WebSocket API changed, don't override
+      if (import.meta.env.DEV) {
+        console.warn('[Tracker Blocker] WebSocket API changed, using original:', error);
+      }
+    }
   }
 
   /**
    * Block Service Worker registration for tracking domains
+   * SAFE FALLBACK: Wraps with try-catch to handle API changes
    */
   if ('serviceWorker' in navigator) {
-    const originalRegister = navigator.serviceWorker.register;
-    navigator.serviceWorker.register = function (
-      scriptURL: string | URL,
-      options?: RegistrationOptions
-    ): Promise<ServiceWorkerRegistration> {
-      const urlString = typeof scriptURL === 'string' ? scriptURL : scriptURL.toString();
-      if (shouldBlock(urlString)) {
-        if (import.meta.env.DEV) {
-          console.warn('[Tracker Blocker] Blocked Service Worker registration:', urlString);
+    try {
+      const originalRegister = navigator.serviceWorker.register;
+      navigator.serviceWorker.register = function (
+        scriptURL: string | URL,
+        options?: RegistrationOptions
+      ): Promise<ServiceWorkerRegistration> {
+        try {
+          const urlString = typeof scriptURL === 'string' ? scriptURL : scriptURL.toString();
+          if (shouldBlock(urlString)) {
+            if (import.meta.env.DEV) {
+              console.warn('[Tracker Blocker] Blocked Service Worker registration:', urlString);
+            }
+            return Promise.reject(new Error('Tracker blocked'));
+          }
+          return originalRegister.call(this, scriptURL, options);
+        } catch (error) {
+          // FALLBACK: If blocking fails, allow registration (better than breaking)
+          if (
+            import.meta.env.DEV &&
+            !(error instanceof Error && error.message === 'Tracker blocked')
+          ) {
+            console.warn('[Tracker Blocker] Service Worker register error, allowing:', error);
+          }
+          if (error instanceof Error && error.message === 'Tracker blocked') {
+            return Promise.reject(error);
+          }
+          return originalRegister.call(this, scriptURL, options);
         }
-        return Promise.reject(new Error('Tracker blocked'));
+      };
+    } catch (error) {
+      // FALLBACK: If Service Worker API changed, restore original
+      if (import.meta.env.DEV) {
+        console.warn('[Tracker Blocker] Service Worker API changed, using original:', error);
       }
-      return originalRegister.call(this, scriptURL, options);
-    };
+    }
   }
 
   /**
@@ -803,9 +967,9 @@ function initPrivacyControls(): PrivacyControls {
     typeof (window as unknown as { webkitAudioContext?: typeof AudioContext })
       .webkitAudioContext !== 'undefined'
   ) {
-    const AudioContextClass = (window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext);
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (AudioContextClass) {
       const OriginalAudioContext = AudioContextClass;
       const AudioContextProxy = function (
@@ -913,7 +1077,7 @@ function initPrivacyControls(): PrivacyControls {
       importObject?: WebAssembly.Imports
     ): Promise<WebAssembly.WebAssemblyInstantiatedSource> {
       // Check the source URL
-      const checkSource = async (response: Response): Promise<boolean> => {
+      const checkSource = (response: Response): boolean => {
         const url = response.url;
         if (url && shouldBlock(url)) {
           if (import.meta.env.DEV) {
@@ -924,8 +1088,8 @@ function initPrivacyControls(): PrivacyControls {
         return false;
       };
 
-      return Promise.resolve(source).then(async response => {
-        if (await checkSource(response)) {
+      return Promise.resolve(source).then(response => {
+        if (checkSource(response)) {
           throw new Error('Tracker blocked');
         }
         return originalInstantiateStreaming.call(this, response, importObject);
@@ -1063,123 +1227,134 @@ function initPrivacyControls(): PrivacyControls {
 
   /**
    * Block script tags with tracking domains or inline tracking code
+   * SAFE FALLBACK: Wraps with try-catch to handle API changes
    */
-  const originalCreateElement = document.createElement.bind(document);
-  document.createElement = function <K extends keyof HTMLElementTagNameMap>(
-    tagName: K,
-    options?: ElementCreationOptions
-  ): HTMLElementTagNameMap[K] {
-    const element = originalCreateElement(tagName, options);
+  try {
+    const originalCreateElement = document.createElement.bind(document);
+    document.createElement = function <K extends keyof HTMLElementTagNameMap>(
+      tagName: K,
+      options?: ElementCreationOptions
+    ): HTMLElementTagNameMap[K] {
+      const element = originalCreateElement(tagName, options);
 
-    if (tagName.toLowerCase() === 'script') {
-      const scriptElement = element as HTMLScriptElement;
-      const originalSetAttribute = scriptElement.setAttribute.bind(scriptElement);
+      if (tagName.toLowerCase() === 'script') {
+        const scriptElement = element as HTMLScriptElement;
+        const originalSetAttribute = scriptElement.setAttribute.bind(scriptElement);
 
-      scriptElement.setAttribute = function (name: string, value: string): void {
-        if (name === 'src' && shouldBlock(value)) {
-          if (import.meta.env.DEV) {
-            console.warn('[Tracker Blocker] Blocked script src:', value);
-          }
-          return;
-        }
-        // Check SRI for whitelisted scripts
-        if (name === 'src' && !shouldBlock(value)) {
-          // SRI check will happen when script is actually loaded
-          setTimeout(() => {
-            hasValidSRI(scriptElement);
-          }, 0);
-        }
-        return originalSetAttribute(name, value);
-      };
-
-      // Block inline tracking scripts
-      const originalAppendChild = scriptElement.appendChild.bind(scriptElement);
-      scriptElement.appendChild = function <T extends Node>(node: T): T {
-        if (node.nodeType === Node.TEXT_NODE && containsTrackingCode(node.textContent || '')) {
-          if (import.meta.env.DEV) {
-            console.warn('[Tracker Blocker] Blocked inline tracking script');
-          }
-          return node; // Don't append
-        }
-        return originalAppendChild(node);
-      };
-
-      // Also block if src is set directly
-      Object.defineProperty(scriptElement, 'src', {
-        set: function (value: string): void {
-          if (shouldBlock(value)) {
+        scriptElement.setAttribute = function (name: string, value: string): void {
+          if (name === 'src' && shouldBlock(value)) {
             if (import.meta.env.DEV) {
               console.warn('[Tracker Blocker] Blocked script src:', value);
             }
             return;
           }
-          originalSetAttribute('src', value);
-        },
-        get: function (): string {
-          return scriptElement.getAttribute('src') || '';
-        },
-        configurable: true,
-      });
+          // Check SRI for whitelisted scripts
+          if (name === 'src' && !shouldBlock(value)) {
+            // SRI check will happen when script is actually loaded
+            setTimeout(() => {
+              hasValidSRI(scriptElement);
+            }, 0);
+          }
+          return originalSetAttribute(name, value);
+        };
 
-      // Block innerHTML with tracking code
-      Object.defineProperty(scriptElement, 'innerHTML', {
-        set: function (value: string): void {
-          if (containsTrackingCode(value)) {
+        // Block inline tracking scripts
+        const originalAppendChild = scriptElement.appendChild.bind(scriptElement);
+        scriptElement.appendChild = function <T extends Node>(node: T): T {
+          if (node.nodeType === Node.TEXT_NODE && containsTrackingCode(node.textContent || '')) {
             if (import.meta.env.DEV) {
-              console.warn('[Tracker Blocker] Blocked inline tracking script content');
+              console.warn('[Tracker Blocker] Blocked inline tracking script');
+            }
+            return node; // Don't append
+          }
+          return originalAppendChild(node);
+        };
+
+        // Also block if src is set directly
+        Object.defineProperty(scriptElement, 'src', {
+          set: function (value: string): void {
+            if (shouldBlock(value)) {
+              if (import.meta.env.DEV) {
+                console.warn('[Tracker Blocker] Blocked script src:', value);
+              }
+              return;
+            }
+            originalSetAttribute('src', value);
+          },
+          get: function (): string {
+            return scriptElement.getAttribute('src') || '';
+          },
+          configurable: true,
+        });
+
+        // Block innerHTML with tracking code
+        Object.defineProperty(scriptElement, 'innerHTML', {
+          set: function (value: string): void {
+            if (containsTrackingCode(value)) {
+              if (import.meta.env.DEV) {
+                console.warn('[Tracker Blocker] Blocked inline tracking script content');
+              }
+              return;
+            }
+            // SECURITY: Use textContent instead of innerHTML to prevent HTML interpretation
+            // textContent treats the value as plain text, not HTML, preventing XSS
+            scriptElement.textContent = value;
+          },
+          get: function (): string {
+            // SECURITY: textContent returns plain text, not HTML, so it's safe
+            return scriptElement.textContent || '';
+          },
+          configurable: true,
+        });
+      }
+
+      // Block img tags with tracking pixels
+      if (tagName.toLowerCase() === 'img') {
+        const imgElement = element as HTMLImageElement;
+        const originalSetAttribute = imgElement.setAttribute.bind(imgElement);
+
+        imgElement.setAttribute = function (name: string, value: string): void {
+          if (name === 'src' && shouldBlock(value)) {
+            if (import.meta.env.DEV) {
+              console.warn('[Tracker Blocker] Blocked tracking pixel:', value);
             }
             return;
           }
-          scriptElement.textContent = value;
-        },
-        get: function (): string {
-          return scriptElement.textContent || '';
-        },
-        configurable: true,
-      });
-    }
+          return originalSetAttribute(name, value);
+        };
+      }
 
-    // Block img tags with tracking pixels
-    if (tagName.toLowerCase() === 'img') {
-      const imgElement = element as HTMLImageElement;
-      const originalSetAttribute = imgElement.setAttribute.bind(imgElement);
+      // Block link tags with prefetch/preload to tracking domains
+      if (tagName.toLowerCase() === 'link') {
+        const linkElement = element as HTMLLinkElement;
+        const originalSetAttribute = linkElement.setAttribute.bind(linkElement);
 
-      imgElement.setAttribute = function (name: string, value: string): void {
-        if (name === 'src' && shouldBlock(value)) {
-          if (import.meta.env.DEV) {
-            console.warn('[Tracker Blocker] Blocked tracking pixel:', value);
+        linkElement.setAttribute = function (name: string, value: string): void {
+          if (
+            (name === 'href' || name === 'src') &&
+            (linkElement.rel === 'prefetch' ||
+              linkElement.rel === 'preload' ||
+              linkElement.rel === 'dns-prefetch' ||
+              linkElement.rel === 'preconnect') &&
+            shouldBlock(value)
+          ) {
+            if (import.meta.env.DEV) {
+              console.warn('[Tracker Blocker] Blocked link prefetch/preload:', value);
+            }
+            return;
           }
-          return;
-        }
-        return originalSetAttribute(name, value);
-      };
+          return originalSetAttribute(name, value);
+        };
+      }
+
+      return element;
+    } as typeof document.createElement;
+  } catch (error) {
+    // FALLBACK: If createElement API changed, restore original
+    if (import.meta.env.DEV) {
+      console.warn('[Tracker Blocker] createElement API changed, using original:', error);
     }
-
-    // Block link tags with prefetch/preload to tracking domains
-    if (tagName.toLowerCase() === 'link') {
-      const linkElement = element as HTMLLinkElement;
-      const originalSetAttribute = linkElement.setAttribute.bind(linkElement);
-
-      linkElement.setAttribute = function (name: string, value: string): void {
-        if (
-          (name === 'href' || name === 'src') &&
-          (linkElement.rel === 'prefetch' ||
-            linkElement.rel === 'preload' ||
-            linkElement.rel === 'dns-prefetch' ||
-            linkElement.rel === 'preconnect') &&
-          shouldBlock(value)
-        ) {
-          if (import.meta.env.DEV) {
-            console.warn('[Tracker Blocker] Blocked link prefetch/preload:', value);
-          }
-          return;
-        }
-        return originalSetAttribute(name, value);
-      };
-    }
-
-    return element;
-  };
+  }
 
   /**
    * Mutation observer to block dynamically added tracking elements
@@ -1206,7 +1381,8 @@ function initPrivacyControls(): PrivacyControls {
           if (element.tagName === 'SCRIPT') {
             const script = element as HTMLScriptElement;
             const src = script.src || script.getAttribute('src') || '';
-            const content = script.innerHTML || script.textContent || '';
+            // SECURITY: Use textContent instead of innerHTML to prevent XSS
+            const content = script.textContent || '';
 
             if (shouldBlock(src) || containsTrackingCode(content)) {
               if (import.meta.env.DEV) {
@@ -1276,7 +1452,8 @@ function initPrivacyControls(): PrivacyControls {
               if (element.tagName === 'SCRIPT') {
                 const script = element as HTMLScriptElement;
                 const src = script.src || script.getAttribute('src') || '';
-                const content = script.innerHTML || script.textContent || '';
+                // SECURITY: Use textContent instead of innerHTML to prevent XSS
+                const content = script.textContent || '';
 
                 if (shouldBlock(src) || containsTrackingCode(content)) {
                   if (import.meta.env.DEV) {
@@ -1530,12 +1707,14 @@ function initPrivacyControls(): PrivacyControls {
           if (element.tagName === 'SCRIPT') {
             const script = element as HTMLScriptElement;
             const src = script.src || script.getAttribute('src') || '';
-            const innerHTML = script.innerHTML || '';
+            // SECURITY: Use textContent instead of innerHTML to prevent XSS
+            // textContent is safe and doesn't interpret HTML
+            const textContent = script.textContent || '';
             if (
               src.includes('cloudflareinsights') ||
-              innerHTML.includes('cloudflareinsights') ||
+              textContent.includes('cloudflareinsights') ||
               src.includes('static.cloudflareinsights') ||
-              innerHTML.includes('static.cloudflareinsights')
+              textContent.includes('static.cloudflareinsights')
             ) {
               if (import.meta.env.DEV) {
                 console.warn(

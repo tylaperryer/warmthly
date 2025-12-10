@@ -11,7 +11,12 @@ import {
   validateEmail,
   validateInputWithAttackDetection,
 } from '../middleware/input-validation.js';
-import { withRateLimit, apiRateLimitOptions, type Request, type Response } from '../middleware/rate-limit.js';
+import {
+  withRateLimit,
+  apiRateLimitOptions,
+  type Request,
+  type Response,
+} from '../middleware/rate-limit.js';
 import { createErrorResponse, ErrorCode } from '../utils/error-response.js';
 import logger from '../utils/logger.js';
 import { getRedisClient } from '../utils/redis-client.js';
@@ -46,7 +51,6 @@ interface ResendResponse {
     [key: string]: unknown;
   };
 }
-
 
 /**
  * Get client identifier for logging
@@ -88,7 +92,13 @@ async function reportsHandler(req: Request, res: Response): Promise<unknown> {
 
   try {
     // Get request body and validate type
-    const body = (req.body || {}) as { name?: string; email?: string; type?: string; message?: string; [key: string]: unknown };
+    const body = (req.body || {}) as {
+      name?: string;
+      email?: string;
+      type?: string;
+      message?: string;
+      [key: string]: unknown;
+    };
     const { name, email, type, message } = body;
 
     // Phase 3 Issue 3.10: Comprehensive input validation with attack detection
@@ -101,7 +111,9 @@ async function reportsHandler(req: Request, res: Response): Promise<unknown> {
     });
 
     if (!nameValidation.valid) {
-      return res.status(400).json(createErrorResponse(ErrorCode.VALIDATION_ERROR, nameValidation.error));
+      return res
+        .status(400)
+        .json(createErrorResponse(ErrorCode.VALIDATION_ERROR, nameValidation.error));
     }
 
     const nameAttackCheck = validateInputWithAttackDetection(nameValidation.sanitized || '', {
@@ -115,9 +127,11 @@ async function reportsHandler(req: Request, res: Response): Promise<unknown> {
         attackType: nameAttackCheck.attackType,
         identifier: getClientIdentifier(req),
       });
-      return res.status(400).json(
-        createErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input detected in name field')
-      );
+      return res
+        .status(400)
+        .json(
+          createErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input detected in name field')
+        );
     }
 
     const sanitizedName = String(nameValidation.sanitized || '');
@@ -129,7 +143,9 @@ async function reportsHandler(req: Request, res: Response): Promise<unknown> {
     });
 
     if (!emailValidation.valid) {
-      return res.status(400).json(createErrorResponse(ErrorCode.VALIDATION_ERROR, emailValidation.error));
+      return res
+        .status(400)
+        .json(createErrorResponse(ErrorCode.VALIDATION_ERROR, emailValidation.error));
     }
 
     const emailAttackCheck = validateInputWithAttackDetection(emailValidation.sanitized || '', {
@@ -143,9 +159,11 @@ async function reportsHandler(req: Request, res: Response): Promise<unknown> {
         attackType: emailAttackCheck.attackType,
         identifier: getClientIdentifier(req),
       });
-      return res.status(400).json(
-        createErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input detected in email field')
-      );
+      return res
+        .status(400)
+        .json(
+          createErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input detected in email field')
+        );
     }
 
     const sanitizedEmail = emailValidation.sanitized || '';
@@ -156,12 +174,14 @@ async function reportsHandler(req: Request, res: Response): Promise<unknown> {
       typeof type !== 'string' ||
       !VALID_REPORT_TYPES.includes(type as (typeof VALID_REPORT_TYPES)[number])
     ) {
-      return res.status(400).json(
-        createErrorResponse(
-          ErrorCode.VALIDATION_ERROR,
-          `Invalid report type. Must be one of: ${VALID_REPORT_TYPES.join(', ')}.`
-        )
-      );
+      return res
+        .status(400)
+        .json(
+          createErrorResponse(
+            ErrorCode.VALIDATION_ERROR,
+            `Invalid report type. Must be one of: ${VALID_REPORT_TYPES.join(', ')}.`
+          )
+        );
     }
 
     // Validate message with attack detection
@@ -173,7 +193,9 @@ async function reportsHandler(req: Request, res: Response): Promise<unknown> {
     });
 
     if (!messageValidation.valid) {
-      return res.status(400).json(createErrorResponse(ErrorCode.VALIDATION_ERROR, messageValidation.error));
+      return res
+        .status(400)
+        .json(createErrorResponse(ErrorCode.VALIDATION_ERROR, messageValidation.error));
     }
 
     const messageAttackCheck = validateInputWithAttackDetection(messageValidation.sanitized || '', {
@@ -187,15 +209,18 @@ async function reportsHandler(req: Request, res: Response): Promise<unknown> {
         attackType: messageAttackCheck.attackType,
         identifier: getClientIdentifier(req),
       });
-      return res.status(400).json(
-        createErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input detected in message field')
-      );
+      return res
+        .status(400)
+        .json(
+          createErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input detected in message field')
+        );
     }
 
     // Ensure sanitizedMessage is always a string
-    const sanitizedMessage: string = typeof messageValidation.sanitized === 'string' 
-      ? messageValidation.sanitized 
-      : String(messageValidation.sanitized || '');
+    const sanitizedMessage: string =
+      typeof messageValidation.sanitized === 'string'
+        ? messageValidation.sanitized
+        : String(messageValidation.sanitized || '');
 
     // Get client identifier for logging
     const identifier = getClientIdentifier(req);
@@ -294,9 +319,14 @@ async function reportsHandler(req: Request, res: Response): Promise<unknown> {
       logger.error('[reports] Unexpected error in reports handler:', error);
     }
 
-    return res.status(500).json(
-      createErrorResponse(ErrorCode.INTERNAL_ERROR, 'Internal Server Error. Please try again later.')
-    );
+    return res
+      .status(500)
+      .json(
+        createErrorResponse(
+          ErrorCode.INTERNAL_ERROR,
+          'Internal Server Error. Please try again later.'
+        )
+      );
   }
 }
 

@@ -5,6 +5,8 @@
  * WCAG 2.1 AAA Success Criterion 3.1.3 - Unusual Words
  */
 
+import { sanitizeHtml } from '@utils/sanitize.js';
+
 export interface GlossaryTerm {
   term: string;
   definition: string;
@@ -215,9 +217,11 @@ export function initGlossary(): void {
       const marked = markGlossaryTerms(text);
 
       if (marked !== text) {
+        // SECURITY: Sanitize HTML before using innerHTML to prevent XSS
+        const sanitized = sanitizeHtml(marked);
         // Create temporary container to parse HTML
         const temp = document.createElement('div');
-        temp.innerHTML = marked;
+        temp.innerHTML = sanitized;
 
         // Replace text node with new content
         const fragment = document.createDocumentFragment();
@@ -274,16 +278,33 @@ function showGlossaryTooltip(element: HTMLElement, term: GlossaryTerm): void {
   tooltip.className = 'glossary-tooltip';
   tooltip.setAttribute('role', 'dialog');
   tooltip.setAttribute('aria-label', `Definition of ${term.term}`);
-  tooltip.innerHTML = `
-    <button class="glossary-tooltip-close" aria-label="Close definition">×</button>
-    <h3>${term.term}</h3>
-    <p>${term.definition}</p>
-    ${
-      term.simplified
-        ? `<p class="glossary-simplified"><strong>Simple:</strong> ${term.simplified}</p>`
-        : ''
-    }
-  `;
+  // SECURITY: Use DOM methods instead of innerHTML to prevent XSS
+  tooltip.textContent = ''; // Clear existing content
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'glossary-tooltip-close';
+  closeBtn.setAttribute('aria-label', 'Close definition');
+  closeBtn.textContent = '×';
+
+  const heading = document.createElement('h3');
+  heading.textContent = term.term;
+
+  const definition = document.createElement('p');
+  definition.textContent = term.definition;
+
+  tooltip.appendChild(closeBtn);
+  tooltip.appendChild(heading);
+  tooltip.appendChild(definition);
+
+  if (term.simplified) {
+    const simplified = document.createElement('p');
+    simplified.className = 'glossary-simplified';
+    const strong = document.createElement('strong');
+    strong.textContent = 'Simple: ';
+    simplified.appendChild(strong);
+    simplified.appendChild(document.createTextNode(term.simplified));
+    tooltip.appendChild(simplified);
+  }
 
   // Position tooltip
   const rect = element.getBoundingClientRect();
@@ -294,11 +315,8 @@ function showGlossaryTooltip(element: HTMLElement, term: GlossaryTerm): void {
 
   document.body.appendChild(tooltip);
 
-  // Close button handler
-  const closeBtn = tooltip.querySelector('.glossary-tooltip-close');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => tooltip.remove());
-  }
+  // Close button handler (use the closeBtn we already created)
+  closeBtn.addEventListener('click', () => tooltip.remove());
 
   // Close on outside click
   setTimeout(() => {

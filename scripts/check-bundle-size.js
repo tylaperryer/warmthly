@@ -5,7 +5,7 @@
  * Used in CI to prevent bundle size regressions
  */
 
-import { readFileSync, statSync, readdirSync } from 'fs';
+import { statSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -65,7 +65,7 @@ function getFileSize(filePath) {
   try {
     const stats = statSync(filePath);
     return stats.size;
-  } catch (error) {
+  } catch (_error) {
     return 0;
   }
 }
@@ -85,7 +85,7 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
         arrayOfFiles.push(filePath);
       }
     });
-  } catch (error) {
+  } catch (_error) {
     // Directory doesn't exist or can't be read
   }
 
@@ -278,31 +278,32 @@ function checkBundleSizes(buildDir = 'dist') {
 
 // Run if called directly
 // Check if this file is being run directly (not imported)
-const isMainModule = import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}` ||
+const isMainModule =
+  import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}` ||
   process.argv[1]?.endsWith('check-bundle-size.js');
 
 if (isMainModule) {
   // Phase 4 Issue 4.2: Add input validation for script arguments
   (async () => {
     const buildDir = process.argv[2] || 'dist';
-    
+
     // Validate build directory path to prevent path traversal
     const path = await import('path');
     const resolvedPath = path.resolve(buildDir);
     const projectRoot = path.resolve(process.cwd());
-    
+
     // Ensure build directory is within project root
     if (!resolvedPath.startsWith(projectRoot)) {
       console.error(`❌ Error: Build directory must be within project root: ${projectRoot}`);
       process.exit(1);
     }
-    
+
     // Additional validation: ensure it's a valid directory name
     if (buildDir.includes('..') || buildDir.includes('/') || buildDir.includes('\\')) {
       console.error(`❌ Error: Invalid build directory name: ${buildDir}`);
       process.exit(1);
     }
-    
+
     const exitCode = checkBundleSizes(buildDir);
     process.exit(exitCode);
   })();

@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 (globalThis as any).fetch = vi.fn();
 
 // Mock rate-limit
-vi.mock('@api/rate-limit.js', () => ({
+(vi as any).mock('@api/rate-limit.js', () => ({
   withRateLimit: vi.fn((handler: unknown) => handler),
   apiRateLimitOptions: {},
 }));
@@ -96,7 +96,7 @@ describe('Create Checkout Handler', () => {
       (process.env as any).YOCO_SECRET_KEY = 'test-key';
     }
 
-    ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    (globalThis as any).fetch.mockResolvedValue({
       ok: true,
       json: async () => ({
         id: 'checkout-id',
@@ -125,9 +125,9 @@ describe('Create Checkout Handler', () => {
     expect((globalThis as any).fetch).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        redirectUrl: expect.any(String),
-        checkoutId: expect.any(String),
+      (expect as any).objectContaining({
+        redirectUrl: (expect as any).any(String),
+        checkoutId: (expect as any).any(String),
       })
     );
   });

@@ -544,3 +544,106 @@
     height: 100px;
   }
 }
+
+/* Search filtering classes */
+.search-no-match {
+  opacity: 0.3 !important;
+  filter: grayscale(80%) brightness(0.7);
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease;
+}
+
+.search-match {
+  opacity: 1 !important;
+  filter: none;
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease;
+}
+
+.desaturated {
+  opacity: 0.4 !important;
+  filter: grayscale(100%);
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease;
+}
+
+.highlighted {
+  filter: drop-shadow(0 0 8px #ff8c42);
+  transform: scale(1.1);
+  z-index: 100;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* Coin type color filters */
+.coin-type-red {
+  filter: hue-rotate(0deg) brightness(1.2);
+}
+
+.coin-type-purple {
+  filter: hue-rotate(270deg) brightness(1.1);
+}
+
+.coin-type-blue {
+  filter: hue-rotate(200deg) brightness(1.1);
+}
+
+.coin-type-green {
+  filter: hue-rotate(100deg) brightness(1.1);
+}
+
+/* Scrooge duck styles */
+.scrooge-duck {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  user-select: none;
+}
+
+.scrooge-duck:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.scrooge-popup {
+  position: absolute;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1000;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  font-family: Inter, sans-serif;
+}
+
+.scrooge-popup.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Expense popup */
+.expense-popup {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  max-width: 250px;
+  font-size: 0.875rem;
+  font-family: Inter, sans-serif;
+}
+
+.expense-popup-content {
+  margin: 0;
+  line-height: 1.4;
+  color: var(--text-color);
+}

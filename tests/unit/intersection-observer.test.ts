@@ -3,8 +3,8 @@
  * Tests for lego/utils/intersection-observer.ts
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { initIntersectionObserver } from '@utils/intersection-observer.js';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 describe('Intersection Observer', () => {
   beforeEach(() => {
@@ -27,11 +27,11 @@ describe('Intersection Observer', () => {
   });
 
   it('should handle missing element', () => {
-    expect(() => initIntersectionObserver('.non-existent')).not.toThrow();
+    (expect(() => initIntersectionObserver('.non-existent')) as any).not.toThrow();
   });
 
   it('should handle invalid selector', () => {
-    expect(() => initIntersectionObserver('')).not.toThrow();
+    (expect(() => initIntersectionObserver('')) as any).not.toThrow();
   });
 
   it('should use custom className', () => {

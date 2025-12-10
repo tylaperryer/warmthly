@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const BUILD_DIR = resolve(__dirname, '../dist');
+const BUILD_DIR = resolve(__dirname, '../dist/apps');
 const APPS = ['main', 'mint', 'post', 'admin'];
 
 interface VerificationResult {
@@ -93,13 +93,8 @@ async function verifyApp(app: string): Promise<VerificationResult> {
     }
   }
 
-  // Check for assets directory
-  const assetsDir = join(appDir, 'assets');
-  if (!(await exists(assetsDir))) {
-    result.warnings.push(`Assets directory missing: ${app}/assets`);
-  } else if (!(await isNotEmpty(assetsDir))) {
-    result.warnings.push(`Assets directory is empty: ${app}/assets`);
-  }
+  // Note: Assets are in shared dist/assets/ directory, not per-app
+  // This is the expected Vite build structure
 
   // Check for large files (potential issues)
   const maxFileSize = 5 * 1024 * 1024; // 5MB
@@ -115,7 +110,9 @@ async function verifyApp(app: string): Promise<VerificationResult> {
       }
     }
   } catch (error) {
-    result.warnings.push(`Could not check file sizes for ${app}: ${error}`);
+    result.warnings.push(
+      `Could not check file sizes for ${app}: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 
   return result;
@@ -136,6 +133,14 @@ async function verifyAllApps(): Promise<VerificationResult> {
     result.success = false;
     result.errors.push(`Build directory missing: ${BUILD_DIR}`);
     return result;
+  }
+
+  // Check for shared assets directory (Vite build structure)
+  const sharedAssetsDir = resolve(__dirname, '../dist/assets');
+  if (!(await exists(sharedAssetsDir))) {
+    result.warnings.push('Shared assets directory missing: dist/assets');
+  } else if (!(await isNotEmpty(sharedAssetsDir))) {
+    result.warnings.push('Shared assets directory is empty: dist/assets');
   }
 
   // Verify each app
@@ -162,14 +167,14 @@ async function verifyBuild(): Promise<number> {
   // Print results
   if (result.errors.length > 0) {
     console.error('❌ Build verification failed:\n');
-    result.errors.forEach((error) => {
+    result.errors.forEach(error => {
       console.error(`  - ${error}`);
     });
   }
 
   if (result.warnings.length > 0) {
     console.warn('\n⚠️  Warnings:\n');
-    result.warnings.forEach((warning) => {
+    result.warnings.forEach(warning => {
       console.warn(`  - ${warning}`);
     });
   }
@@ -184,10 +189,13 @@ async function verifyBuild(): Promise<number> {
 }
 
 // Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+const scriptPath = process.argv[1];
+if (
+  import.meta.url === `file://${scriptPath}` ||
+  (scriptPath && import.meta.url.endsWith(scriptPath.replace(/\\/g, '/')))
+) {
   const exitCode = await verifyBuild();
   process.exit(exitCode);
 }
 
 export { verifyBuild };
-

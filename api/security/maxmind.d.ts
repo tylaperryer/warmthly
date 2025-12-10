@@ -25,4 +25,3 @@ declare module 'maxmind' {
 
   export function open(dbPath: string): Promise<Reader>;
 }
-

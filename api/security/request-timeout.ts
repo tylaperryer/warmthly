@@ -12,11 +12,6 @@ import logger from '../utils/logger.js';
 const DEFAULT_TIMEOUT = 30000;
 
 /**
- * Request handler type
- */
-type RequestHandler = (req: Request, res: Response) => Promise<Response | void | unknown> | Response | void | unknown;
-
-/**
  * Request object interface (Cloudflare Workers compatible)
  */
 export interface Request {
@@ -38,6 +33,11 @@ export interface Response {
 }
 
 /**
+ * Request handler type
+ */
+type RequestHandler = (req: Request, res: Response) => Promise<Response | void> | Response | void;
+
+/**
  * Wrap a request handler with timeout protection
  *
  * @param handler - Request handler function
@@ -55,7 +55,7 @@ export function withTimeout(
   handler: RequestHandler,
   timeoutMs: number = DEFAULT_TIMEOUT
 ): RequestHandler {
-  return async (req: Request, res: Response): Promise<unknown> => {
+  return async (req: Request, res: Response): Promise<Response | void> => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     // Set up timeout

@@ -105,7 +105,7 @@ function containsSensitiveInfo(message: string): boolean {
     /connection string/i,
   ];
 
-  return sensitivePatterns.some((pattern) => pattern.test(message));
+  return sensitivePatterns.some(pattern => pattern.test(message));
 }
 
 /**
@@ -129,4 +129,3 @@ export function sanitizeErrorMessage(message: string): string {
     .replace(/:\d+:\d+/g, '') // Remove line numbers
     .trim();
 }
-

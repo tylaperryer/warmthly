@@ -1,7 +1,7 @@
 /**
  * API Middleware
  * Centralized exports for all middleware
- * 
+ *
  * Usage:
  *   import { withRateLimit, validateEmail } from '@api/middleware/index.js';
  *   // or
@@ -24,7 +24,12 @@ export {
 } from './api-versioning.js';
 
 // Input Validation
-export type { ValidationResult, StringValidationOptions, NumberValidationOptions, EmailValidationOptions } from './input-validation.js';
+export type {
+  ValidationResult,
+  StringValidationOptions,
+  NumberValidationOptions,
+  EmailValidationOptions,
+} from './input-validation.js';
 export {
   validateString,
   validateNumber,
@@ -39,10 +44,7 @@ export {
 
 // Rate Limiting Enhanced
 export type { EnhancedRateLimitResult, EnhancedRateLimitOptions } from './rate-limit-enhanced.js';
-export {
-  checkRateLimitWithBackoff,
-  checkEnhancedRateLimit,
-} from './rate-limit-enhanced.js';
+export { checkRateLimitWithBackoff, checkEnhancedRateLimit } from './rate-limit-enhanced.js';
 
 // Rate Limiting
 export { RateLimitFailureMode } from './rate-limit.js';
@@ -54,4 +56,3 @@ export {
   apiRateLimitOptions,
   voteRateLimitOptions,
 } from './rate-limit.js';
-

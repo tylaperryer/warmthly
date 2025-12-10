@@ -3,12 +3,12 @@
  * Tests for lego/utils/service-worker.ts
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   isServiceWorkerActive,
   registerServiceWorker,
   initServiceWorker,
 } from '@utils/service-worker.js';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Service Worker', () => {
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('Service Worker', () => {
     const result = await registerServiceWorker();
 
     expect(mockRegister).toHaveBeenCalledWith('/sw.js', { scope: '/' });
-    expect(result).toBeTruthy();
+    (expect(result) as any).toBeTruthy();
   });
 
   it('should return null if service workers not supported', async () => {
@@ -47,7 +47,7 @@ describe('Service Worker', () => {
 
     const result = await registerServiceWorker();
 
-    expect(result).toBeNull();
+    (expect(result) as any).toBeNull();
   });
 
   it('should handle registration errors', async () => {
@@ -62,7 +62,7 @@ describe('Service Worker', () => {
 
     const result = await registerServiceWorker();
 
-    expect(result).toBeNull();
+    (expect(result) as any).toBeNull();
   });
 
   it('should initialize service worker', () => {
@@ -85,6 +85,6 @@ describe('Service Worker', () => {
       writable: true,
     });
 
-    expect(() => initServiceWorker()).not.toThrow();
+    (expect(() => initServiceWorker()) as any).not.toThrow();
   });
 });

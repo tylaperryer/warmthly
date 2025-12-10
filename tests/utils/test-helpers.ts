@@ -102,10 +102,10 @@ export function createMockFetchResponse(
     status,
     statusText,
     headers: new Headers(headers),
-    json: async () => data,
-    text: async () => (typeof data === 'string' ? data : JSON.stringify(data)),
-    blob: async () => new Blob([JSON.stringify(data)]),
-    arrayBuffer: async () => new TextEncoder().encode(JSON.stringify(data)).buffer,
+    json: () => Promise.resolve(data),
+    text: () => Promise.resolve(typeof data === 'string' ? data : JSON.stringify(data)),
+    blob: () => Promise.resolve(new Blob([JSON.stringify(data)])),
+    arrayBuffer: () => Promise.resolve(new TextEncoder().encode(JSON.stringify(data)).buffer),
     clone: function () {
       return this;
     },
@@ -124,7 +124,7 @@ export function createMockFetchResponse(
  * @returns Promise that resolves after the delay
  */
 export function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
@@ -144,9 +144,7 @@ export const TestDataFactory = {
   /**
    * Create a test payment object
    */
-  createPayment: (
-    overrides: Partial<{ amount: number; currency: string; id: string }> = {}
-  ) => ({
+  createPayment: (overrides: Partial<{ amount: number; currency: string; id: string }> = {}) => ({
     id: 'test-payment-1',
     amount: 10000,
     currency: 'ZAR',
@@ -201,7 +199,10 @@ export function expectError(value: unknown, message?: string): asserts value is 
  * @param response - Response object
  * @param expectedStatus - Expected status code
  */
-export function expectStatus(response: { statusCode?: number; status?: number }, expectedStatus: number): void {
+export function expectStatus(
+  response: { statusCode?: number; status?: number },
+  expectedStatus: number
+): void {
   const status = response.statusCode || response.status;
   if (status !== expectedStatus) {
     throw new Error(`Expected status ${expectedStatus}, got ${status}`);
@@ -214,9 +215,13 @@ export function expectStatus(response: { statusCode?: number; status?: number },
  * @param response - Response body
  * @param expectedCode - Expected error code
  */
-export function expectErrorCode(response: { error?: { code?: string } }, expectedCode: string): void {
+export function expectErrorCode(
+  response: { error?: { code?: string } },
+  expectedCode: string
+): void {
   if (!response.error || response.error.code !== expectedCode) {
-    throw new Error(`Expected error code "${expectedCode}", got "${response.error?.code || 'none'}"`);
+    throw new Error(
+      `Expected error code "${expectedCode}", got "${response.error?.code || 'none'}"`
+    );
   }
 }
-

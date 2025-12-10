@@ -19,7 +19,6 @@ import { getRedisClient } from '../utils/redis-client.js';
  */
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-
 /**
  * Email data from webhook
  */
@@ -61,7 +60,9 @@ interface StoredEmail {
 function getRawBody(req: Request): Promise<Buffer> {
   return new Promise<Buffer>((resolve, reject) => {
     const chunks: Buffer[] = [];
-    const reqWithOn = req as Request & { on?: (event: string, callback: (...args: unknown[]) => void) => void };
+    const reqWithOn = req as Request & {
+      on?: (event: string, callback: (...args: unknown[]) => void) => void;
+    };
     if (reqWithOn.on) {
       reqWithOn.on('data', (...args: unknown[]) => {
         const chunk = args[0] as Buffer | undefined;
@@ -87,7 +88,7 @@ function getRawBody(req: Request): Promise<Buffer> {
  * @param res - Response object
  * @returns Response with success or error
  */
-async function inboundEmailHandler(req: Request, res: Response): Promise<unknown> {
+async function inboundEmailHandler(req: Request, res: Response): Promise<Response | void> {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: { message: 'Method Not Allowed' } });
   }
@@ -129,17 +130,17 @@ async function inboundEmailHandler(req: Request, res: Response): Promise<unknown
       if (id) headers['svix-id'] = id;
       if (timestamp) headers['svix-timestamp'] = timestamp;
       if (signature) headers['svix-signature'] = signature;
-      
+
       // Type assertion needed because resend types may not be complete
       // Cast through unknown first to avoid type overlap issues
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      const verifyResult = (resend.webhooks.verify as unknown as (
-        options: {
+
+      const verifyResult = (
+        resend.webhooks.verify as unknown as (options: {
           payload: string;
           headers: Record<string, string>;
           secret: string;
-        }
-      ) => WebhookEvent)({
+        }) => WebhookEvent
+      )({
         payload: rawBody.toString('utf-8'),
         headers,
         secret: webhookSecret,
@@ -203,9 +204,9 @@ async function inboundEmailHandler(req: Request, res: Response): Promise<unknown
       });
     }
 
-    return res.status(500).json(
-      createErrorResponse(ErrorCode.INTERNAL_ERROR, 'Error processing webhook.')
-    );
+    return res
+      .status(500)
+      .json(createErrorResponse(ErrorCode.INTERNAL_ERROR, 'Error processing webhook.'));
   }
 }
 

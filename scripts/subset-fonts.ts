@@ -11,10 +11,11 @@
  * 4. Updates CSS to use subset fonts
  */
 
-import { readFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
-import { join, dirname, basename } from 'path';
-import { fileURLToPath } from 'url';
 import { execFileSync, execSync } from 'child_process';
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
+import { basename, dirname, join, resolve, normalize } from 'path';
+import { fileURLToPath } from 'url';
+
 import { extractTextContent } from './utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -73,7 +74,7 @@ function findHTMLFiles(dir: string): string[] {
         htmlFiles.push(fullPath);
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // Skip directories we can't read
   }
 
@@ -94,12 +95,30 @@ function extractTextFromHTML(): string {
 
   for (const file of htmlFiles) {
     try {
-      const content = readFileSync(file, 'utf-8');
+      // SECURITY: Validate and normalize file path to prevent path traversal
+      const normalizedFile = normalize(resolve(appsDir, file));
+      const normalizedAppsDir = normalize(resolve(appsDir));
+
+      // Ensure the resolved path is within the apps directory
+      if (!normalizedFile.startsWith(normalizedAppsDir)) {
+        console.warn(`[extractTextFromHTML] Skipping file outside apps directory: ${file}`);
+        continue;
+      }
+
+      // Verify file exists and is readable
+      if (!existsSync(normalizedFile)) {
+        console.warn(`[extractTextFromHTML] File does not exist: ${normalizedFile}`);
+        continue;
+      }
+
+      const content = readFileSync(normalizedFile, 'utf-8');
       // Use centralized extractTextContent function for CodeQL compliance
       const textOnly = extractTextContent(content);
       allText += textOnly + ' ';
     } catch (error) {
-      console.warn(`Warning: Could not read ${file}`);
+      console.warn(
+        `Warning: Could not read ${file}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -141,7 +160,7 @@ function charsToUnicodeRanges(chars: string): string {
   for (let i = 1; i < codes.length; i++) {
     const current = codes[i];
     if (current === undefined) continue;
-    
+
     if (current === end + 1) {
       end = current;
     } else {
@@ -213,14 +232,17 @@ function subsetFontPyftsubset(sourcePath: string, outputPath: string, unicodeRan
 
     console.log(`  Subsetting ${basename(sourcePath)}...`);
     // Validate unicode ranges to prevent injection
-    const validRangePattern = /^U\+[0-9A-Fa-f]{4}(-[0-9A-Fa-f]{4})?(,U\+[0-9A-Fa-f]{4}(-[0-9A-Fa-f]{4})?)*$/;
+    const validRangePattern =
+      /^U\+[0-9A-Fa-f]{4}(-[0-9A-Fa-f]{4})?(,U\+[0-9A-Fa-f]{4}(-[0-9A-Fa-f]{4})?)*$/;
     if (!validRangePattern.test(ranges)) {
       throw new Error(`Invalid unicode range format: ${ranges}`);
     }
     execFileSync('pyftsubset', commandArgs.slice(1), { stdio: 'inherit', cwd: projectRoot });
     console.log(`  ✓ Created ${basename(outputPath)}`);
   } catch (error) {
-    console.error(`  ✗ Error subsetting font: ${error}`);
+    console.error(
+      `  ✗ Error subsetting font: ${error instanceof Error ? error.message : String(error)}`
+    );
     throw error;
   }
 }
@@ -262,7 +284,9 @@ function subsetFontGlyphhanger(sourcePath: string, outputPath: string, text: str
     execFileSync('glyphhanger', commandArgs.slice(1), { stdio: 'inherit', cwd: projectRoot });
     console.log(`  ✓ Created subset font`);
   } catch (error) {
-    console.error(`  ✗ Error subsetting font: ${error}`);
+    console.error(
+      `  ✗ Error subsetting font: ${error instanceof Error ? error.message : String(error)}`
+    );
     throw error;
   }
 }

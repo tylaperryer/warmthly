@@ -8,6 +8,7 @@
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+
 import { findHTMLFiles } from './utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -44,7 +45,7 @@ function extractStructuredData(html: string): Array<{ json: object; line: number
     try {
       const json = JSON.parse(jsonContent.trim());
       scripts.push({ json, line: lineNumber });
-    } catch (error) {
+    } catch {
       // Invalid JSON - will be caught in validation
       // Add an issue for invalid JSON
       scripts.push({
@@ -104,8 +105,18 @@ function validateSchema(schema: object, line: number, file: string): ValidationI
         schema: JSON.stringify(schema).substring(0, 100),
       });
     } else {
-      const normalizedContext = context.trim().toLowerCase();
-      if (!normalizedContext.startsWith('https://schema.org')) {
+      // SECURITY: Validate URL properly instead of substring matching
+      let isValidSchemaUrl = false;
+      try {
+        const urlObj = new URL(context);
+        const hostname = urlObj.hostname.toLowerCase();
+        const protocol = urlObj.protocol.toLowerCase();
+        isValidSchemaUrl =
+          protocol === 'https:' && (hostname === 'schema.org' || hostname.endsWith('.schema.org'));
+      } catch {
+        // Invalid URL
+      }
+      if (!isValidSchemaUrl) {
         issues.push({
           file,
           line,
@@ -249,7 +260,7 @@ function validateSchema(schema: object, line: number, file: string): ValidationI
  */
 function auditFile(filePath: string): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
-  
+
   try {
     const content = readFileSync(filePath, 'utf-8');
     const structuredData = extractStructuredData(content);
@@ -295,7 +306,9 @@ function validateStructuredData(): void {
       const schemas = extractStructuredData(content);
       totalSchemas += schemas.length;
     } catch (error) {
-      console.warn(`Warning: Could not process ${file}: ${error}`);
+      console.warn(
+        `Warning: Could not process ${file}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   });
 

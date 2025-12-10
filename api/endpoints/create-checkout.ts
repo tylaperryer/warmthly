@@ -4,7 +4,12 @@
  * Includes rate limiting and timeout protection
  */
 
-import { withRateLimit, apiRateLimitOptions, type Request, type Response } from '../middleware/rate-limit.js';
+import {
+  withRateLimit,
+  apiRateLimitOptions,
+  type Request,
+  type Response,
+} from '../middleware/rate-limit.js';
 import { verifyRequest, extractSignature } from '../security/request-signing.js';
 import logger from '../utils/logger.js';
 
@@ -17,7 +22,6 @@ const API_TIMEOUT = 15000;
  * Minimum donation amount in cents
  */
 const MIN_AMOUNT = 100; // R1.00
-
 
 /**
  * Yoco checkout request body

@@ -142,7 +142,7 @@ async function translateText(key: string, fallback: string, lang?: string): Prom
         return translations[key];
       }
     }
-  } catch (error) {
+  } catch {
     // Silently fail and return fallback
   }
 
@@ -638,10 +638,21 @@ h1{font-size:var(--font-size-2xl);line-height:1.2;margin-bottom:var(--spacing-6)
       ].join('; ');
 
       // Use DOMParser instead of innerHTML for safer parsing (prevents XSS)
+      // SECURITY: All variables are escaped before insertion to prevent XSS
       const escapedCspPolicy = this.escapeHtmlAttribute(cspPolicy);
       const escapedCspReportUrl = this.escapeHtmlAttribute(cspReportUrl);
+      const escapedViewport = this.escapeHtmlAttribute(viewport.toString());
+      const escapedTitle = this.escapeHtml(title);
+      const escapedDescription = this.escapeHtml(description);
+      const escapedCanonical = this.escapeHtmlAttribute(canonical);
+
+      // SECURITY: Build HTML string with all values properly escaped
+      // Using DOMParser is safe because all user-controlled values are escaped
+      const escapedType = this.escapeHtmlAttribute(type);
+      const escapedCurrentUrl = this.escapeHtmlAttribute(currentUrl);
+      const escapedImage = this.escapeHtmlAttribute(image);
       const parser = new DOMParser();
-      const doc = parser.parseFromString(`
+      const htmlString = `
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="${escapedCspPolicy}" />
   <meta http-equiv="Report-To" content='{"group":"csp-endpoint","max_age":10886400,"endpoints":[{"url":"${escapedCspReportUrl}"}]}' />
@@ -654,32 +665,32 @@ h1{font-size:var(--font-size-2xl);line-height:1.2;margin-bottom:var(--spacing-6)
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(self 'https://js.yoco.com' 'https://js.verygoodvault.com'), interest-cohort=()" />
   <meta name="theme-color" content="#fff6f1" />
   <meta name="color-scheme" content="light" />
-  <meta name="viewport" content="width=device-width, initial-scale=${viewport}, maximum-scale=5.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=${escapedViewport}, maximum-scale=5.0, user-scalable=yes" />
   <meta name="format-detection" content="telephone=no" />
-  <title>${this.escapeHtml(title)}</title>
-  <meta name="title" content="${this.escapeHtml(title)}" />
-  <meta name="description" content="${this.escapeHtml(description)}" />
+  <title>${escapedTitle}</title>
+  <meta name="title" content="${escapedTitle}" />
+  <meta name="description" content="${escapedDescription}" />
   <meta name="author" content="${SITE_NAME}" />
   <meta name="language" content="en" />
-  <link rel="canonical" href="${canonical}" />
-${robotsMeta}${lastModifiedMeta}  <meta property="og:type" content="${type}" />
-  <meta property="og:url" content="${currentUrl}" />
-  <meta property="og:title" content="${this.escapeHtml(title)}" />
-  <meta property="og:description" content="${this.escapeHtml(description)}" />
-  <meta property="og:image" content="${image}" />
+  <link rel="canonical" href="${escapedCanonical}" />
+${robotsMeta}${lastModifiedMeta}  <meta property="og:type" content="${escapedType}" />
+  <meta property="og:url" content="${escapedCurrentUrl}" />
+  <meta property="og:title" content="${escapedTitle}" />
+  <meta property="og:description" content="${escapedDescription}" />
+  <meta property="og:image" content="${escapedImage}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="${this.escapeHtml(title)}" />
+  <meta property="og:image:alt" content="${escapedTitle}" />
   <meta property="og:site_name" content="${SITE_NAME}" />
   <meta property="og:locale" content="en_US" />
 ${generateOGLocaleAlternates()}
 ${hreflangTags}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:url" content="${currentUrl}" />
-  <meta name="twitter:title" content="${this.escapeHtml(title)}" />
-  <meta name="twitter:description" content="${this.escapeHtml(description)}" />
-  <meta name="twitter:image" content="${image}" />
-  <meta name="twitter:image:alt" content="${this.escapeHtml(title)}" />
+  <meta name="twitter:url" content="${escapedCurrentUrl}" />
+  <meta name="twitter:title" content="${escapedTitle}" />
+  <meta name="twitter:description" content="${escapedDescription}" />
+  <meta name="twitter:image" content="${escapedImage}" />
+  <meta name="twitter:image:alt" content="${escapedTitle}" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="${SITE_NAME}" />
@@ -724,9 +735,11 @@ ${JSON.stringify(data, null, 2)}
   </script>`
   )
   .join('\n')}
-`, 'text/html');
+`;
+      // SECURITY: Parse HTML string with DOMParser - all user-controlled values are already escaped
+      const doc = parser.parseFromString(htmlString, 'text/html');
       const temp = doc.body;
-      
+
       // Inject elements into head
       while (temp.firstChild) {
         const child = temp.firstChild;

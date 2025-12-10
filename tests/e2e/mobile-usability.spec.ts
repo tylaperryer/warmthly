@@ -13,31 +13,31 @@ const PAGES = [
   { name: 'Privacy', url: '/apps/main/privacy.html' },
 ];
 
-test.describe('Mobile Usability', () => {
+describe('Mobile Usability', () => {
   // Test on mobile viewport
-  test.use({ viewport: { width: 375, height: 667 } }); // iPhone SE size
+  (test as any).use({ viewport: { width: 375, height: 667 } }); // iPhone SE size
 
   for (const page of PAGES) {
-    test(`${page.name} page - mobile viewport`, async ({ page: browserPage }) => {
+    test(`${page.name} page - mobile viewport`, async ({ page: browserPage }: { page: any }) => {
       await browserPage.goto(page.url);
 
       // Check viewport meta tag
-      const viewport = await browserPage.$eval('meta[name="viewport"]', el =>
+      const viewport = await browserPage.$eval('meta[name="viewport"]', (el: Element) =>
         el.getAttribute('content')
       );
-      expect(viewport).toContain('width=device-width');
-      expect(viewport).toContain('user-scalable=yes'); // Allow zoom for accessibility
+      (expect(viewport) as any).toContain('width=device-width');
+      (expect(viewport) as any).toContain('user-scalable=yes'); // Allow zoom for accessibility
 
       // Check no horizontal scroll
       const bodyWidth = await browserPage.evaluate(() => document.body.scrollWidth);
       const viewportWidth = await browserPage.evaluate(() => window.innerWidth);
-      expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 5); // Allow 5px tolerance
+      (expect(bodyWidth) as any).toBeLessThanOrEqual(viewportWidth + 5); // Allow 5px tolerance
 
       // Check touch targets are at least 24x24px (WCAG 2.2 AA)
       const interactiveElements = await browserPage.$$eval(
         'button, a, input, select, textarea, [role="button"], [role="link"]',
-        elements =>
-          elements.map(el => {
+        (elements: Element[]) =>
+          elements.map((el: Element) => {
             const rect = el.getBoundingClientRect();
             return {
               tag: el.tagName,
@@ -48,37 +48,35 @@ test.describe('Mobile Usability', () => {
           })
       );
 
-      interactiveElements.forEach(element => {
-        expect(element.minSize, `${element.tag} should be at least 24px`).toBeGreaterThanOrEqual(
-          24
-        );
+      interactiveElements.forEach((element: any) => {
+        (expect(element.minSize) as any).toBeGreaterThanOrEqual(24);
       });
 
       // Check text is readable (not too small)
-      const textElements = await browserPage.$$eval('p, span, div', elements =>
-        elements
-          .filter(el => {
-            const text = el.textContent?.trim() || '';
+      const _textElements = await browserPage.$$eval('p, span, div', (elements: Element[]) => {
+        return elements
+          .filter((el: Element) => {
+            const text = el.textContent || '';
             return text.length > 0 && window.getComputedStyle(el).fontSize !== '0px';
           })
-          .map(el => {
+          .map((el: Element) => {
             const style = window.getComputedStyle(el);
             return {
               fontSize: parseFloat(style.fontSize),
               text: el.textContent?.substring(0, 50) || '',
             };
-          })
-      );
+          });
+      });
 
       // Base font size should be at least 16px (prevents zoom on iOS)
       const baseFontSize = await browserPage.evaluate(() => {
         const style = window.getComputedStyle(document.body);
         return parseFloat(style.fontSize);
       });
-      expect(baseFontSize, 'Base font size should be at least 16px').toBeGreaterThanOrEqual(16);
+      (expect(baseFontSize) as any).toBeGreaterThanOrEqual(16);
     });
 
-    test(`${page.name} page - responsive design`, async ({ page: browserPage }) => {
+    test(`${page.name} page - responsive design`, async ({ page: browserPage }: { page: any }) => {
       // Test multiple viewport sizes
       const viewports = [
         { width: 320, height: 568, name: 'Small mobile' },
@@ -96,60 +94,57 @@ test.describe('Mobile Usability', () => {
           return document.documentElement.scrollWidth > window.innerWidth;
         });
 
-        expect(
-          hasHorizontalScroll,
-          `${viewport.name} (${viewport.width}x${viewport.height}) should not have horizontal scroll`
-        ).toBe(false);
+        expect(hasHorizontalScroll).toBe(false);
 
         // Check content is visible
         const mainContent = await browserPage.$('main, [role="main"]');
         if (mainContent) {
           const isVisible = await mainContent.isVisible();
-          expect(isVisible, `Main content should be visible on ${viewport.name}`).toBe(true);
+          expect(isVisible).toBe(true);
         }
       }
     });
 
-    test(`${page.name} page - touch interaction`, async ({ page: browserPage }) => {
+    test(`${page.name} page - touch interaction`, async ({ page: browserPage }: { page: any }) => {
       await browserPage.goto(page.url);
 
       // Check all buttons are tappable
       const buttons = await browserPage.$$('button, [role="button"]');
       for (const button of buttons) {
         const isVisible = await button.isVisible();
-        expect(isVisible, 'Button should be visible').toBe(true);
+        expect(isVisible).toBe(true);
 
         // Check button has adequate spacing (at least 8px between touch targets)
         const box = await button.boundingBox();
         if (box) {
           // This is a basic check - in real testing, you'd check spacing to adjacent elements
-          expect(box.width, 'Button width should be adequate').toBeGreaterThanOrEqual(24);
-          expect(box.height, 'Button height should be adequate').toBeGreaterThanOrEqual(24);
+          (expect(box.width) as any).toBeGreaterThanOrEqual(24);
+          (expect(box.height) as any).toBeGreaterThanOrEqual(24);
         }
       }
     });
 
-    test(`${page.name} page - mobile navigation`, async ({ page: browserPage }) => {
+    test(`${page.name} page - mobile navigation`, async ({ page: browserPage }: { page: any }) => {
       await browserPage.goto(page.url);
 
       // Check navigation is accessible
       const nav = await browserPage.$('nav, [role="navigation"], header');
       if (nav) {
         const isVisible = await nav.isVisible();
-        expect(isVisible, 'Navigation should be visible').toBe(true);
+        expect(isVisible).toBe(true);
       }
 
       // Check skip links work
       const skipLink = await browserPage.$('.skip-link, [href^="#main"]');
       if (skipLink) {
-        const isVisible = await skipLink.isVisible();
+        const _isVisible = await skipLink.isVisible();
         // Skip link should be visible on focus
-        expect(skipLink, 'Skip link should exist').toBeTruthy();
+        (expect(skipLink) as any).toBeTruthy();
       }
     });
   }
 
-  test('Mobile performance - page load time', async ({ page }) => {
+  test('Mobile performance - page load time', async ({ page }: { page: any }) => {
     await page.goto('/apps/main/');
 
     // Measure load time
@@ -161,10 +156,10 @@ test.describe('Mobile Usability', () => {
     });
 
     // Should load in under 3 seconds on mobile
-    expect(loadTime, 'Page should load in under 3 seconds').toBeLessThan(3000);
+    (expect(loadTime) as any).toBeLessThan(3000);
   });
 
-  test('Mobile performance - LCP', async ({ page }) => {
+  test('Mobile performance - LCP', async ({ page }: { page: any }) => {
     await page.goto('/apps/main/');
 
     // Wait for LCP
@@ -186,6 +181,6 @@ test.describe('Mobile Usability', () => {
     });
 
     // LCP should be under 2.5s (Good threshold)
-    expect(lcp, 'LCP should be under 2.5s on mobile').toBeLessThan(2500);
+    (expect(lcp) as any).toBeLessThan(2500);
   });
 });

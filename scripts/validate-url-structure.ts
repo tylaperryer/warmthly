@@ -124,7 +124,7 @@ function validateURLStructure(): void {
     }
 
     // Check for special characters
-    if (/[^a-z0-9\-_\/\.]/.test(url.toLowerCase())) {
+    if (/[^a-z0-9\-_/.]/.test(url.toLowerCase())) {
       issues.push({
         file: relativePath,
         url,

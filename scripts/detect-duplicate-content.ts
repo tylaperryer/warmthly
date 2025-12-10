@@ -8,6 +8,9 @@
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath } from 'url';
+
+import { load } from 'cheerio';
+
 import { extractTextContent } from './utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -53,13 +56,26 @@ function findHTMLFiles(dir: string, fileList: string[] = []): string[] {
   return fileList;
 }
 
-
 /**
  * Extract title from HTML
+ * SECURITY: Uses Cheerio HTML parser instead of regex to safely extract title
  */
 function extractTitle(html: string): string {
-  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  return titleMatch && titleMatch[1] ? titleMatch[1].trim() : '';
+  try {
+    const $ = load(html);
+    const titleElement = $('title').first();
+    if (titleElement.length > 0) {
+      return titleElement.text().trim();
+    }
+    return '';
+  } catch (error) {
+    // Fallback: if parsing fails, return empty string
+    console.warn(
+      '[extractTitle] Failed to parse HTML:',
+      error instanceof Error ? error.message : String(error)
+    );
+    return '';
+  }
 }
 
 /**

@@ -77,6 +77,10 @@
     initGlossary();
     initPronunciation();
   </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Admin Dashboard - Warmthly</title>
+  <meta name="description" content="Administrative dashboard for managing Warmthly operations, settings, and administrative tools.">
+  
   <warmthly-head 
     title="Admin Dashboard - Warmthly"
     description="Administrative dashboard for managing Warmthly operations"
@@ -84,6 +88,10 @@
     viewport="1.0"
     robots="noindex, nofollow">
   </warmthly-head>
+
+  <!-- Fallback stylesheet - ensures styles load even if JavaScript fails -->
+  <link rel="stylesheet" href="/lego/styles/common.css">
+  <link rel="stylesheet" href="/lego/styles/admin.css">
 
   <style>
     /* Hide body until CSS loads to prevent FOUC */
@@ -144,7 +152,7 @@
     </div>
   </div>
 
-  <div id="admin-content" class="admin-content">
+  <main id="admin-content" class="admin-content" role="main">
     <div class="container">
       <h1 data-reading-level-content>Welcome, Admin</h1>
       <p class="welcome-text" data-reading-level-content>Manage your Warmthly administration tools and settings.</p>
@@ -155,12 +163,12 @@
 
       <button class="logout-button" id="logout-button">Logout</button>
     </div>
-  </div>
+  </main>
 
   <warmthly-font-loader></warmthly-font-loader>
 
   <!-- Secure token storage (Web Crypto API + IndexedDB) -->
-  <script src="/apps/admin/secure-auth.js"></script>
+  <script type="module" src="/apps/admin/secure-auth.js"></script>
 
   <script type="module">
     const loginForm = document.getElementById('login-form');

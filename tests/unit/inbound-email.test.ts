@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock resend
-vi.mock('resend', () => ({
+(vi as any).mock('resend', () => ({
   Resend: vi.fn().mockImplementation(() => ({
     webhooks: {
       verify: vi.fn().mockReturnValue({
@@ -24,7 +24,7 @@ vi.mock('resend', () => ({
 }));
 
 // Mock redis-client
-vi.mock('@api/redis-client.js', () => ({
+(vi as any).mock('@api/redis-client.js', () => ({
   getRedisClient: vi.fn().mockResolvedValue({
     lPush: vi.fn().mockResolvedValue(1),
   }),
@@ -44,14 +44,15 @@ describe('Inbound Email Handler', () => {
       method: 'GET',
       headers: {},
       body: {},
+      url: '',
       on: vi.fn(),
-    };
+    } as any;
     const res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
-    await inboundEmail(req, res);
+    await inboundEmail(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(405);
   });
@@ -66,18 +67,19 @@ describe('Inbound Email Handler', () => {
       method: 'POST',
       headers: {},
       body: {},
-      on: vi.fn((event: string, callback: () => void) => {
+      url: '',
+      on: vi.fn(((event: string, callback: () => void) => {
         if (event === 'end') {
           callback();
         }
-      }),
+      }) as any),
     };
     const res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
-    await inboundEmail(req, res);
+    await inboundEmail(req as any, res as any);
 
     expect(res.status).toHaveBeenCalledWith(500);
   });
@@ -89,7 +91,7 @@ describe('Inbound Email Handler', () => {
 
     const { Resend } = await import('resend');
     const mockResend = new Resend('');
-    (mockResend.webhooks.verify as ReturnType<typeof vi.fn>).mockImplementation(() => {
+    (mockResend.webhooks.verify as ReturnType<typeof vi.fn> as any).mockImplementation(() => {
       throw new Error('Invalid signature');
     });
 
@@ -102,18 +104,19 @@ describe('Inbound Email Handler', () => {
         'svix-timestamp': 'timestamp',
       },
       body: {},
-      on: vi.fn((event: string, callback: () => void) => {
+      url: '',
+      on: vi.fn(((event: string, callback: () => void) => {
         if (event === 'end') {
           callback();
         }
-      }),
-    };
+      }) as any),
+    } as any;
     const res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
-    await inboundEmail(req, res);
+    await inboundEmail(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(401);
   });
@@ -133,21 +136,22 @@ describe('Inbound Email Handler', () => {
         'svix-timestamp': 'timestamp',
       },
       body: {},
-      on: vi.fn((event: string, callback: (data?: Buffer) => void) => {
+      url: '',
+      on: vi.fn(((event: string, callback: (data?: Buffer) => void) => {
         if (event === 'data') {
           callback(chunks[0]);
         }
         if (event === 'end') {
           callback();
         }
-      }),
-    };
+      }) as any),
+    } as any;
     const res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
-    await inboundEmail(req, res);
+    await inboundEmail(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(200);
   });

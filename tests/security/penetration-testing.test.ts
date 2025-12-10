@@ -3,7 +3,8 @@
  * Security Enhancement 15: Penetration Testing Checklist
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
 import { detectAttackPatterns } from '../../api/middleware/input-validation.js';
 import { validateRequiredSecrets } from '../../api/utils/secrets-management.js';
 
@@ -47,7 +48,7 @@ describe('Penetration Testing Checklist', () => {
         status: 401,
         json: async () => ({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }),
       } as Response);
-      globalThis.fetch = mockFetch;
+      (globalThis as any).fetch = mockFetch as typeof fetch;
 
       const response = await fetch('/api/get-emails');
       expect(response.status).toBe(401);
@@ -56,15 +57,41 @@ describe('Penetration Testing Checklist', () => {
     it('should validate CORS origins', () => {
       // Phase 5 Issue 5.2: Replace placeholder with actual test
       const allowedOrigins = ['https://www.warmthly.org', 'https://mint.warmthly.org'];
-      
-      // Test exact origin matching (not substring matching)
+
+      // SECURITY: Test exact origin matching using URL constructor (not substring matching)
       const testOrigin = 'https://www.warmthly.org';
-      const isValid = allowedOrigins.includes(testOrigin);
+      let isValid = false;
+      try {
+        const testUrl = new URL(testOrigin);
+        isValid = allowedOrigins.some(origin => {
+          try {
+            const originUrl = new URL(origin);
+            return testUrl.origin === originUrl.origin;
+          } catch {
+            return false;
+          }
+        });
+      } catch {
+        isValid = false;
+      }
       expect(isValid).toBe(true);
-      
+
       // Test that subdomain attacks are prevented
       const maliciousOrigin = 'https://evil-warmthly.org';
-      const isMaliciousValid = allowedOrigins.includes(maliciousOrigin);
+      let isMaliciousValid = false;
+      try {
+        const maliciousUrl = new URL(maliciousOrigin);
+        isMaliciousValid = allowedOrigins.some(origin => {
+          try {
+            const originUrl = new URL(origin);
+            return maliciousUrl.origin === originUrl.origin;
+          } catch {
+            return false;
+          }
+        });
+      } catch {
+        isMaliciousValid = false;
+      }
       expect(isMaliciousValid).toBe(false);
     });
   });
@@ -93,9 +120,9 @@ describe('Penetration Testing Checklist', () => {
     it('should not expose sensitive information in errors', () => {
       // Error messages should not leak system information
       const errorMessage = 'Internal server error';
-      expect(errorMessage).not.toContain('password');
-      expect(errorMessage).not.toContain('secret');
-      expect(errorMessage).not.toContain('key');
+      (expect(errorMessage) as any).not.toContain('password');
+      (expect(errorMessage) as any).not.toContain('secret');
+      (expect(errorMessage) as any).not.toContain('key');
     });
   });
 
@@ -104,45 +131,51 @@ describe('Penetration Testing Checklist', () => {
       // Phase 5 Issue 5.2: Replace placeholder with actual test
       // Import constant-time comparison utility
       const { constantTimeCompare } = await import('../../api/utils/crypto-utils.js');
-      
+
       const str1 = 'test-password';
       const str2 = 'test-password';
       const str3 = 'different-password';
-      
+
       // Same strings should match
       expect(constantTimeCompare(str1, str2)).toBe(true);
-      
+
       // Different strings should not match
       expect(constantTimeCompare(str1, str3)).toBe(false);
     });
 
     it('should implement rate limiting on login', async () => {
       // Phase 5 Issue 5.2: Replace placeholder with actual test
-      const mockFetch = vi.fn()
+      const mockFetch = vi
+        .fn()
+        .mockResolvedValue({
+          ok: false,
+          status: 401,
+          json: async () => ({ error: { message: 'Incorrect password' } }),
+        } as Response)(vi.fn())
         .mockResolvedValueOnce({
           ok: false,
           status: 401,
           json: async () => ({ error: { message: 'Incorrect password' } }),
-        } as Response)
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 401,
-          json: async () => ({ error: { message: 'Incorrect password' } }),
-        } as Response)
+        } as Response)(vi.fn())
         .mockResolvedValueOnce({
           ok: false,
           status: 429,
           headers: new Headers({ 'Retry-After': '60' }),
-          json: async () => ({ error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many attempts' } }),
+          json: async () => ({
+            error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many attempts' },
+          }),
         } as Response);
-      
-      globalThis.fetch = mockFetch;
-      
+
+      (globalThis as any).fetch = mockFetch as typeof fetch;
+
       // Simulate multiple failed login attempts
       await fetch('/api/login', { method: 'POST', body: JSON.stringify({ password: 'wrong1' }) });
       await fetch('/api/login', { method: 'POST', body: JSON.stringify({ password: 'wrong2' }) });
-      const rateLimitedResponse = await fetch('/api/login', { method: 'POST', body: JSON.stringify({ password: 'wrong3' }) });
-      
+      const rateLimitedResponse = await fetch('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({ password: 'wrong3' }),
+      });
+
       expect(rateLimitedResponse.status).toBe(429);
     });
   });
@@ -157,30 +190,30 @@ describe('Penetration Testing Checklist', () => {
         }),
         text: async () => '<html></html>',
       } as Response);
-      globalThis.fetch = mockFetch;
+      (globalThis as any).fetch = mockFetch as typeof fetch;
 
       const response = await fetch('https://www.warmthly.org');
       const csp = response.headers.get('content-security-policy');
-      
-      expect(csp).toBeDefined();
-      expect(csp).toContain("default-src 'self'");
+
+      (expect(csp) as any).toBeDefined();
+      (expect(csp) as any).toContain("default-src 'self'");
     });
 
     it('should validate request signatures for sensitive operations', async () => {
       // Phase 5 Issue 5.2: Replace placeholder with actual test
       const { signRequest, verifyRequest } = await import('../../api/security/request-signing.js');
-      
+
       const secret = 'test-secret';
       const payload = { amount: 10000, currency: 'ZAR' };
-      
+
       // Sign request
       const signature = signRequest(payload, secret);
-      expect(signature).toBeDefined();
-      
+      (expect(signature) as any).toBeDefined();
+
       // Verify signature
       const isValid = verifyRequest(payload, signature, secret);
       expect(isValid).toBe(true);
-      
+
       // Verify invalid signature is rejected
       const invalidSignature = 'invalid-signature';
       const isInvalid = verifyRequest(payload, invalidSignature, secret);
@@ -191,31 +224,32 @@ describe('Penetration Testing Checklist', () => {
   describe('A09:2021 – Logging and Monitoring Failures', () => {
     it('should log security events', async () => {
       // Phase 5 Issue 5.2: Replace placeholder with actual test
-      const { logSecurityEvent, SecurityEventSeverity } = await import('../../api/security/security-monitor.js');
-      
+      const { logSecurityEvent, SecurityEventSeverity } =
+        await import('../../api/security/security-monitor.js');
+
       // Log a test security event
       logSecurityEvent({
         type: 'xss_attempt',
-        severity: SecurityEventSeverity.WARNING,
+        severity: SecurityEventSeverity.MEDIUM,
         timestamp: Date.now(),
         identifier: 'test-identifier',
         details: { pattern: '<script>', field: 'message' },
       });
-      
+
       // Verify function exists and can be called
-      expect(logSecurityEvent).toBeDefined();
+      (expect(logSecurityEvent) as any).toBeDefined();
       expect(typeof logSecurityEvent).toBe('function');
     });
 
     it('should detect suspicious patterns', () => {
       // Phase 5 Issue 5.2: Replace placeholder with actual test
-      const { detectAttackPatterns } = require('../../api/middleware/input-validation.js');
-      
+      // detectAttackPatterns is already imported at the top of the file
+
       // Test XSS detection
       const xssResult = detectAttackPatterns('<script>alert("xss")</script>');
       expect(xssResult.detected).toBe(true);
       expect(xssResult.attackType).toBe('xss');
-      
+
       // Test SQL injection detection
       const sqlResult = detectAttackPatterns("admin' OR '1'='1");
       expect(sqlResult.detected).toBe(true);
@@ -232,7 +266,7 @@ describe('Penetration Testing Checklist', () => {
         'https://api.exchangerate-api.com',
         'https://api.resend.com',
       ];
-      
+
       // Test that user input is not used directly in fetch URLs
       const userInput = 'http://evil.com';
       const isAllowed = allowedExternalUrls.some(url => userInput.includes(url));
@@ -243,16 +277,16 @@ describe('Penetration Testing Checklist', () => {
       // Phase 5 Issue 5.2: Replace placeholder with actual test
       const allowedCurrencies = ['USD', 'EUR', 'GBP', 'ZAR'];
       const allowedOrigins = ['https://www.warmthly.org', 'https://mint.warmthly.org'];
-      
+
       // Verify whitelist approach
-      expect(allowedCurrencies.length).toBeGreaterThan(0);
-      expect(allowedOrigins.length).toBeGreaterThan(0);
-      
+      (expect(allowedCurrencies.length) as any).toBeGreaterThan(0);
+      (expect(allowedOrigins.length) as any).toBeGreaterThan(0);
+
       // Test whitelist validation
       const testCurrency = 'USD';
       const isValidCurrency = allowedCurrencies.includes(testCurrency);
       expect(isValidCurrency).toBe(true);
-      
+
       const maliciousCurrency = 'XXX';
       const isMaliciousValid = allowedCurrencies.includes(maliciousCurrency);
       expect(isMaliciousValid).toBe(false);

@@ -3,8 +3,8 @@
  * Tests for lego/core/di-container.ts
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import { getContainer, createContainer, resetContainer, DIContainer } from '@core/di-container.js';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('DI Container', () => {
   beforeEach(() => {
@@ -13,7 +13,7 @@ describe('DI Container', () => {
 
   it('should create container instance', () => {
     const container = createContainer();
-    expect(container).toBeInstanceOf(DIContainer);
+    (expect(container) as any).toBeInstanceOf(DIContainer);
   });
 
   it('should register and resolve service', () => {
@@ -23,7 +23,7 @@ describe('DI Container', () => {
     container.register(serviceId, () => ({ value: 'test' }), false);
 
     const service = container.resolve(serviceId);
-    expect(service).toEqual({ value: 'test' });
+    (expect(service) as any).toEqual({ value: 'test' });
   });
 
   it('should create singleton service', () => {
@@ -64,7 +64,7 @@ describe('DI Container', () => {
     const service1 = container.resolve(serviceId);
     const service2 = container.resolve(serviceId);
 
-    expect(service1).not.toBe(service2);
+    (expect(service1) as any).not.toBe(service2);
     expect(callCount).toBe(2);
   });
 
@@ -108,7 +108,7 @@ describe('DI Container', () => {
     resetContainer();
     const container2 = getContainer();
 
-    expect(container1).not.toBe(container2);
+    (expect(container1) as any).not.toBe(container2);
   });
 
   it('should pass container to factory', () => {
@@ -127,7 +127,7 @@ describe('DI Container', () => {
     );
 
     const service = container.resolve(serviceId);
-    expect(service).toEqual({
+    (expect(service) as any).toEqual({
       service: 'value',
       dependency: { dep: 'value' },
     });
@@ -140,6 +140,6 @@ describe('DI Container', () => {
     container.register(serviceId, () => ({ value: 'test' }), false);
 
     const service = container.resolve(serviceId);
-    expect(service).toEqual({ value: 'test' });
+    (expect(service) as any).toEqual({ value: 'test' });
   });
 });

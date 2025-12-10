@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import {
   escapeHtml,
   escapeHtmlAttribute,
@@ -7,6 +6,7 @@ import {
   createElementWithAttributes,
   setSafeHtml,
 } from '@utils/sanitize.js';
+import { describe, it, expect } from 'vitest';
 
 describe('Sanitize', () => {
   describe('escapeHtml', () => {
@@ -72,7 +72,7 @@ describe('Sanitize', () => {
     it('should escape HTML in text content', () => {
       const element = createTextElement('p', '<script>alert("xss")</script>');
       expect(element.textContent).toBe('<script>alert("xss")</script>');
-      expect(element.innerHTML).not.toContain('<script>');
+      (expect(element.innerHTML) as any).not.toContain('<script>');
     });
   });
 

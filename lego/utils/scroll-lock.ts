@@ -217,7 +217,8 @@ export function cleanupYocoState(): void {
     }
 
     if (yocoEmbedContainer instanceof HTMLElement) {
-      yocoEmbedContainer.innerHTML = '';
+      // SECURITY: Use textContent instead of innerHTML
+      yocoEmbedContainer.textContent = '';
     }
   } catch (error: unknown) {
     // Fallback: just unlock scroll

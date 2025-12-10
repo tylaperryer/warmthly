@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { initApp } from '@utils/init.js';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Init', () => {
   beforeEach(() => {
@@ -7,7 +7,7 @@ describe('Init', () => {
   });
 
   it('should initialize app and set up error handling', async () => {
-    const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+    const consoleSpy: any = vi.spyOn(console, 'debug').mockImplementation(() => {});
 
     // Re-import to trigger initialization
     await import('@utils/init.js');
@@ -22,6 +22,6 @@ describe('Init', () => {
   });
 
   it('should call initApp when executed', () => {
-    expect(() => initApp()).not.toThrow();
+    (expect(() => initApp()) as any).not.toThrow();
   });
 });

@@ -1,11 +1,11 @@
+import { WARMTHLY_CONFIG, getAppUrl, getPath, getNavigation } from '@config/warmthly-config.js';
 import { describe, it, expect } from 'vitest';
 // Note: Import from .js even though source is .ts - this is how TypeScript/ES modules work
-import { WARMTHLY_CONFIG, getAppUrl, getPath, getNavigation } from '@config/warmthly-config.js';
 
 describe('Warmthly Config', () => {
   it('should export WARMTHLY_CONFIG', () => {
-    expect(WARMTHLY_CONFIG).toBeDefined();
-    expect(WARMTHLY_CONFIG.urls).toBeDefined();
+    (expect(WARMTHLY_CONFIG) as any).toBeDefined();
+    (expect(WARMTHLY_CONFIG.urls) as any).toBeDefined();
     expect(WARMTHLY_CONFIG.urls.main).toBe('https://www.warmthly.org');
   });
 
@@ -25,11 +25,11 @@ describe('Warmthly Config', () => {
 
   it('should get navigation for app', () => {
     const mainNav = getNavigation('main');
-    expect(mainNav).toBeDefined();
+    (expect(mainNav) as any).toBeDefined();
     expect(Array.isArray(mainNav)).toBe(true);
 
     const mintNav = getNavigation('mint');
-    expect(mintNav).toBeDefined();
-    expect(mintNav.length).toBeGreaterThan(0);
+    (expect(mintNav) as any).toBeDefined();
+    (expect(mintNav.length) as any).toBeGreaterThan(0);
   });
 });

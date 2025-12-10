@@ -58,6 +58,10 @@
     initGlossary();
     initPronunciation();
   </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Admin Email Sender - Warmthly</title>
+  <meta name="description" content="Administrative email management interface for sending and viewing received emails in the Warmthly system.">
+  
   <warmthly-head 
     title="Admin Email Sender - Warmthly"
     description="Administrative email management interface"
@@ -139,7 +143,7 @@
     </div>
   </div>
 
-  <div id="admin-content" class="admin-content">
+  <main id="admin-content" class="admin-content" role="main">
   <div class="container">
       <a href="/" class="back-link" id="back-link">← Back to Admin Dashboard</a>
       <form id="email-form" novalidate>
@@ -209,6 +213,7 @@
       </div>
     </div>
   </div>
+  </main>
 
   <!-- Security Enhancement 2: Subresource Integrity (SRI) -->
   <!-- Note: SRI hash not included as Quill.js CDN version may update. For production, pin version and generate hash. -->
@@ -601,11 +606,16 @@
           }
           
           // Show specific error messages
+          // SECURITY: Use DOM methods instead of innerHTML to prevent XSS
+          emailsContainer.textContent = ''; // Clear existing content
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'empty-state error';
           if (response.status === 500) {
-            emailsContainer.innerHTML = `<div class="empty-state error">Server error: ${escapeHtml(errorMessage)}. Please check your Vercel environment variables (JWT_SECRET and REDIS_URL).</div>`;
+            errorDiv.textContent = `Server error: ${errorMessage}. Please check your Vercel environment variables (JWT_SECRET and REDIS_URL).`;
           } else {
-            emailsContainer.innerHTML = `<div class="empty-state error">Error: ${escapeHtml(errorMessage)}</div>`;
+            errorDiv.textContent = `Error: ${errorMessage}`;
           }
+          emailsContainer.appendChild(errorDiv);
           return;
         }
 

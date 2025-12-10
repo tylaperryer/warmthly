@@ -1,7 +1,7 @@
 /**
  * API Utilities
  * Centralized exports for all API utilities
- * 
+ *
  * Usage:
  *   import { logger, getRedisClient } from '@api/utils/index.js';
  *   // or
@@ -12,11 +12,7 @@
 export { default as logger } from './logger.js';
 
 // Crypto Utils
-export {
-  constantTimeCompare,
-  generateRandomString,
-  generateRandomBase64,
-} from './crypto-utils.js';
+export { constantTimeCompare, generateRandomString, generateRandomBase64 } from './crypto-utils.js';
 
 // Redis Client
 export { getRedisClient } from './redis-client.js';
@@ -43,8 +39,7 @@ export {
   clearSecretCache,
   getSecrets,
   getSecretByName,
-  } from './advanced-secrets.js';
+} from './advanced-secrets.js';
 
 // String Utilities
 export { safeStringify, safeToString } from './string-utils.js';
- 

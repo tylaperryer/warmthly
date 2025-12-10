@@ -32,11 +32,15 @@ export function findHTMLFiles(dir: string, fileList: string[] = []): string[] {
         }
       } catch (error) {
         // Skip files/directories we can't access
-        console.warn(`Warning: Could not access ${filePath}: ${error}`);
+        console.warn(
+          `Warning: Could not access ${filePath}: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     });
   } catch (error) {
-    console.warn(`Warning: Could not read directory ${dir}: ${error}`);
+    console.warn(
+      `Warning: Could not read directory ${dir}: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 
   return fileList;
@@ -68,21 +72,28 @@ export function extractTextContent(html: string): string {
     $('*').each(function () {
       const element = $(this);
       // Remove all attributes that start with 'on' (event handlers)
-      element.attr() &&
-        Object.keys(element.attr() || {}).forEach(attr => {
+      const attrs = element.attr();
+      if (attrs) {
+        Object.keys(attrs).forEach(attr => {
           if (attr.toLowerCase().startsWith('on')) {
             element.removeAttr(attr);
           }
         });
+      }
     });
 
     // Get the clean text from the body and normalize whitespace
     // This automatically handles all Unicode characters, nested tags, and malformed HTML
     const text = $('body').text() || $.text();
-    return text.replace(/[\s\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]+/gu, ' ').trim();
+    return text
+      .replace(/[\s\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]+/gu, ' ')
+      .trim();
   } catch (error) {
     // Fallback: if parsing fails, return empty string rather than potentially unsafe content
-    console.warn('[extractTextContent] Failed to parse HTML:', error instanceof Error ? error.message : String(error));
+    console.warn(
+      '[extractTextContent] Failed to parse HTML:',
+      error instanceof Error ? error.message : String(error)
+    );
     return '';
   }
 }
@@ -91,10 +102,7 @@ export function extractTextContent(html: string): string {
  * Get URL from file path
  * Shared utility for URL generation
  */
-export function getUrlFromPath(
-  filePath: string,
-  projectRoot: string
-): string {
+export function getUrlFromPath(filePath: string, projectRoot: string): string {
   const relative = filePath.replace(projectRoot, '').replace(/\\/g, '/');
 
   if (relative.includes('/apps/main/')) {
@@ -131,4 +139,3 @@ export function getUrlFromPath(
 
   return relative;
 }
-

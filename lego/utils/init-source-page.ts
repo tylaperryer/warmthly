@@ -3,8 +3,8 @@
  * Sets up page-specific functionality for the source/development page
  */
 
-import { initLinkPrefetch } from './prefetch.js';
 import { initIntersectionObserver } from './intersection-observer.js';
+import { initLinkPrefetch } from './prefetch.js';
 
 /**
  * Initialize the source page

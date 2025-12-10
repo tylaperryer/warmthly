@@ -11,6 +11,7 @@ The Warmthly application includes security monitoring and certificate monitoring
 ### Security Monitor (`warmthly/api/security/security-monitor.ts`)
 
 The security monitor detects and logs various security events:
+
 - XSS attempts
 - SQL injection attempts
 - Rate limit violations
@@ -18,6 +19,7 @@ The security monitor detects and logs various security events:
 - Suspicious activity
 
 **Current Implementation:**
+
 - Events are logged to Redis with 7-day retention
 - Events are stored with severity levels (INFO, WARNING, CRITICAL)
 - TODO comment at line 228 indicates alerting integration needed
@@ -25,11 +27,13 @@ The security monitor detects and logs various security events:
 ### Certificate Monitor (`warmthly/api/security/certificate-monitoring.ts`)
 
 The certificate monitor tracks SSL/TLS certificate changes:
+
 - Certificate expiration warnings
 - Certificate changes
 - Certificate validation failures
 
 **Current Implementation:**
+
 - Certificate events are logged
 - TODO comment at line 207 indicates alerting integration needed
 
@@ -38,15 +42,20 @@ The certificate monitor tracks SSL/TLS certificate changes:
 ### 1. Email Notifications
 
 **Implementation:**
+
 ```typescript
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendSecurityAlert(event: SecurityEvent): Promise<void> {
-  const severity = event.severity === SecurityEventSeverity.CRITICAL ? '🚨 CRITICAL' : 
-                   event.severity === SecurityEventSeverity.WARNING ? '⚠️ WARNING' : 'ℹ️ INFO';
-  
+  const severity =
+    event.severity === SecurityEventSeverity.CRITICAL
+      ? '🚨 CRITICAL'
+      : event.severity === SecurityEventSeverity.WARNING
+        ? '⚠️ WARNING'
+        : 'ℹ️ INFO';
+
   await resend.emails.send({
     from: 'Security Monitor <security@warmthly.org>',
     to: [process.env.ADMIN_EMAIL || 'desk@warmthly.org'],
@@ -64,6 +73,7 @@ async function sendSecurityAlert(event: SecurityEvent): Promise<void> {
 ```
 
 **Configuration:**
+
 - Set `RESEND_API_KEY` environment variable
 - Set `ADMIN_EMAIL` environment variable
 - Configure alert thresholds (e.g., only send CRITICAL alerts, or batch WARNING alerts)
@@ -71,34 +81,42 @@ async function sendSecurityAlert(event: SecurityEvent): Promise<void> {
 ### 2. Slack/Discord Webhooks
 
 **Implementation:**
+
 ```typescript
 async function sendSlackAlert(event: SecurityEvent): Promise<void> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) return;
 
-  const color = event.severity === SecurityEventSeverity.CRITICAL ? 'danger' :
-                event.severity === SecurityEventSeverity.WARNING ? 'warning' : 'good';
+  const color =
+    event.severity === SecurityEventSeverity.CRITICAL
+      ? 'danger'
+      : event.severity === SecurityEventSeverity.WARNING
+        ? 'warning'
+        : 'good';
 
   await fetch(webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      attachments: [{
-        color,
-        title: `Security Alert: ${event.type}`,
-        fields: [
-          { title: 'Severity', value: event.severity, short: true },
-          { title: 'Identifier', value: event.identifier, short: true },
-          { title: 'Timestamp', value: new Date(event.timestamp).toISOString(), short: true },
-          { title: 'Details', value: JSON.stringify(event.details, null, 2), short: false },
-        ],
-      }],
+      attachments: [
+        {
+          color,
+          title: `Security Alert: ${event.type}`,
+          fields: [
+            { title: 'Severity', value: event.severity, short: true },
+            { title: 'Identifier', value: event.identifier, short: true },
+            { title: 'Timestamp', value: new Date(event.timestamp).toISOString(), short: true },
+            { title: 'Details', value: JSON.stringify(event.details, null, 2), short: false },
+          ],
+        },
+      ],
     }),
   });
 }
 ```
 
 **Configuration:**
+
 - Set `SLACK_WEBHOOK_URL` environment variable
 - Create Slack webhook in Slack workspace settings
 - Configure alert channels (e.g., #security-alerts)
@@ -106,6 +124,7 @@ async function sendSlackAlert(event: SecurityEvent): Promise<void> {
 ### 3. PagerDuty Integration
 
 **Implementation:**
+
 ```typescript
 async function sendPagerDutyAlert(event: SecurityEvent): Promise<void> {
   // Only send CRITICAL events to PagerDuty
@@ -118,7 +137,7 @@ async function sendPagerDutyAlert(event: SecurityEvent): Promise<void> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Token token=${pagerDutyKey}`,
+      Authorization: `Token token=${pagerDutyKey}`,
     },
     body: JSON.stringify({
       routing_key: pagerDutyKey,
@@ -135,6 +154,7 @@ async function sendPagerDutyAlert(event: SecurityEvent): Promise<void> {
 ```
 
 **Configuration:**
+
 - Set `PAGERDUTY_INTEGRATION_KEY` environment variable
 - Create PagerDuty service and integration
 - Configure escalation policies
@@ -142,6 +162,7 @@ async function sendPagerDutyAlert(event: SecurityEvent): Promise<void> {
 ### 4. SIEM Integration
 
 For enterprise deployments, integrate with SIEM systems:
+
 - Splunk
 - Datadog
 - New Relic
@@ -156,6 +177,7 @@ Send structured logs to SIEM endpoints or use log forwarding services.
 ### Recommended Thresholds
 
 **CRITICAL (Immediate Alert):**
+
 - XSS attempts
 - SQL injection attempts
 - Certificate expiration < 7 days
@@ -163,12 +185,14 @@ Send structured logs to SIEM endpoints or use log forwarding services.
 - Rate limit violations > 1000/hour
 
 **WARNING (Batch Alerts):**
+
 - Suspicious request patterns
 - Certificate expiration < 30 days
 - Rate limit violations > 100/hour
 - Anomalous traffic patterns
 
 **INFO (Log Only):**
+
 - Normal security events
 - Certificate renewals
 - Rate limit violations < 100/hour
@@ -236,4 +260,3 @@ ALERT_BATCH_INTERVAL=300000  # 5 minutes
 4. Test alert delivery
 5. Document response procedures
 6. Set up alert monitoring
-

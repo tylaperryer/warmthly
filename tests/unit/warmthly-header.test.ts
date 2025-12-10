@@ -10,7 +10,7 @@ describe('WarmthlyHeader Component', () => {
     await import('@components/warmthly-header.js');
 
     const element = document.createElement('warmthly-header');
-    expect(element).toBeDefined();
+    (expect(element) as any).toBeDefined();
   });
 
   it('should render header with app attribute', async () => {
@@ -23,7 +23,7 @@ describe('WarmthlyHeader Component', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const link = element.querySelector('a.warmthly-link');
-    expect(link).toBeDefined();
+    (expect(link) as any).toBeDefined();
     expect(link?.textContent).toBe('Warmthly');
   });
 
@@ -41,7 +41,7 @@ describe('WarmthlyHeader Component', () => {
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    expect(element.querySelector('a.mint-text')).toBeDefined();
+    (expect(element.querySelector('a.mint-text')) as any).toBeDefined();
   });
 
   it('should use custom subdomain attributes', async () => {
@@ -56,7 +56,7 @@ describe('WarmthlyHeader Component', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const customLink = element.querySelector('a.custom-class');
-    expect(customLink).toBeDefined();
+    (expect(customLink) as any).toBeDefined();
     expect(customLink?.textContent).toBe('Custom');
     expect(customLink?.getAttribute('href')).toBe('https://custom.example.com');
   });
@@ -69,7 +69,6 @@ describe('WarmthlyHeader Component', () => {
     const element = document.createElement('warmthly-header');
     // Force error by removing document temporarily
     const originalDocument = (globalThis as any).document;
-    // @ts-expect-error - Testing error handling
     (globalThis as any).document = undefined;
 
     try {

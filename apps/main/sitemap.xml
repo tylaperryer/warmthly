@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <url>
+    <loc>https://www.warmthly.org</loc>
+    <lastmod>2025-12-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1</priority>
+
+    <image:image>
+      <image:loc>https://www.warmthly.org/assets/images/signature.png</image:loc>
+      <image:title>Warmthly Founder&apos;s Signature</image:title>
+      <image:caption>Handwritten signature of the Warmthly founder</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.warmthly.org/favicon.svg</image:loc>
+      <image:title>Warmthly Logo</image:title>
+      <image:caption>Warmthly brand logo</image:caption>
+    </image:image>
+
+    <video:video>
+      <video:thumbnail_loc>https://www.warmthly.org/assets/images/video-thumbnail.jpg</video:thumbnail_loc>
+      <video:title>Warmthly - Rehumanize Our World</video:title>
+      <video:description>Warmthly is a global movement to make empathy a measurable part of our systems.</video:description>
+      <video:player_loc>https://www.youtube-nocookie.com/embed/kVausES-mjk</video:player_loc>
+      <video:duration>210</video:duration>
+      <video:publication_date>2024-01-01T00:00:00+00:00</video:publicationDate>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:requires_subscription>no</video:requires_subscription>
+      <video:live>no</video:live>
+      <video:tag>empathy</video:tag>
+      <video:tag>transparency</video:tag>
+      <video:tag>social impact</video:tag>
+      <video:tag>donation</video:tag>
+      <video:category>Nonprofit</video:category>
+    </video:video>
+  </url>
+  <url>
+    <loc>https://www.warmthly.org/privacy.html</loc>
+    <lastmod>2025-12-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+
+    <image:image>
+      <image:loc>https://www.warmthly.org/favicon.svg</image:loc>
+      <image:title>Warmthly Privacy Policy</image:title>
+      <image:caption>Privacy policy page</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.warmthly.org/easy-read.html</loc>
+    <lastmod>2025-12-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+
+    <image:image>
+      <image:loc>https://www.warmthly.org/favicon.svg</image:loc>
+      <image:title>Warmthly Easy Read</image:title>
+      <image:caption>Easy Read version of Warmthly content</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.warmthly.org/help.html</loc>
+    <lastmod>2025-12-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+
+    <image:image>
+      <image:loc>https://www.warmthly.org/favicon.svg</image:loc>
+      <image:title>Warmthly Help</image:title>
+      <image:caption>Help and FAQ page for Warmthly</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.warmthly.org/404.html</loc>
+    <lastmod>2025-12-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.1</priority>
+  </url>
+</urlset>

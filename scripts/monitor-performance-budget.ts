@@ -91,7 +91,7 @@ function loadPerformanceData(): Partial<PerformanceBudget> {
 
   // Try to read from environment variables or config file
   const performanceData: Partial<PerformanceBudget> = {};
-  
+
   // Check for environment variables (for CI/CD integration)
   if (process.env.LCP) {
     performanceData.lcp = parseFloat(process.env.LCP);

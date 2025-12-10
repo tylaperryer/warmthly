@@ -63,6 +63,10 @@
     initGlossary();
     initPronunciation();
   </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Post - Updates & Timeline - Warmthly</title>
+  <meta name="description" content="Stay updated with Warmthly's progress, timeline, and updates. Follow our journey as we rehumanize our world.">
+  
   <warmthly-head 
     title="Post - Warmthly"
     description="Post-transaction transparency and reporting. View detailed breakdowns of how donations are used and report any concerns."
@@ -71,6 +75,9 @@
     preconnects="https://www.warmthly.org, https://post.warmthly.org">
   </warmthly-head>
   
+  <!-- Fallback stylesheet - ensures styles load even if JavaScript fails -->
+  <link rel="stylesheet" href="/lego/styles/common.css">
+  <link rel="stylesheet" href="/lego/styles/post.css">
   
 </head>
 <body class="fonts-loading">
@@ -87,7 +94,7 @@
     <warmthly-fade-in target=".header, .header-right, .top-left-heading" delay="200"></warmthly-fade-in>
     <warmthly-breadcrumb></warmthly-breadcrumb>
 
-    <div class="container">
+    <main class="container" role="main">
       <div class="hero-section">
         <h1 class="page-title" data-reading-level-content>Post</h1>
         <p class="subtitle" data-reading-level-content>
@@ -113,6 +120,7 @@
       <h2 class="chronicle-popup-title" id="popup-title"></h2>
       <div class="chronicle-popup-content" id="popup-content"></div>
     </div>
+    </main>
 
   <warmthly-font-loader></warmthly-font-loader>
 

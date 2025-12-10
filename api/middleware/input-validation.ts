@@ -398,7 +398,8 @@ export function sanitizeHtml(html: string): string {
     $('script, style, iframe, object, embed, noscript, form').remove();
 
     // Remove event handler attributes (onclick, onerror, etc.)
-    $('*').each((_index: number, element) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    $('*').each((_index: number, element: any) => {
       const $element = $(element);
       const attrs = $element.attr();
       if (attrs) {
@@ -428,7 +429,10 @@ export function sanitizeHtml(html: string): string {
     return $.html() || '';
   } catch (error) {
     // Fallback: if parsing fails, return empty string
-    console.warn('[sanitizeHtml] Failed to parse HTML:', error instanceof Error ? error.message : String(error));
+    console.warn(
+      '[sanitizeHtml] Failed to parse HTML:',
+      error instanceof Error ? error.message : String(error)
+    );
     return '';
   }
 }
@@ -463,32 +467,35 @@ export function validateInputWithAttackDetection(
     if (options.logAttack !== false) {
       // Import security monitor dynamically to avoid circular dependencies
       // Fire-and-forget logging - explicitly mark as void to acknowledge Promise
-      void import('../security/security-monitor.js').then(({ SecurityLogger }) => {
-        if (attack.attackType === 'xss') {
-          void SecurityLogger.xssAttempt('unknown', undefined, {
-            field: options.fieldName,
-            pattern: attack.pattern,
-            input: value.substring(0, 100), // Log first 100 chars only
-          });
-        } else if (attack.attackType === 'sql_injection') {
-          // Use generic suspicious activity for SQL injection
-          void import('../security/security-monitor.js').then(
-            ({ logSecurityEvent, SecurityEventSeverity }) => {
-              void logSecurityEvent({
-                type: 'sql_injection_attempt',
-                severity: SecurityEventSeverity.CRITICAL,
-                timestamp: Date.now(),
-                identifier: 'unknown',
-                details: {
-                  field: options.fieldName,
-                  pattern: attack.pattern,
-                  input: value.substring(0, 100),
-                },
-              });
-            }
-          );
+      void (async () => {
+        try {
+          const { SecurityLogger } = await import('../security/security-monitor.js');
+          if (attack.attackType === 'xss') {
+            void SecurityLogger.xssAttempt('unknown', undefined, {
+              field: options.fieldName,
+              pattern: attack.pattern,
+              input: value.substring(0, 100), // Log first 100 chars only
+            });
+          } else if (attack.attackType === 'sql_injection') {
+            // Use generic suspicious activity for SQL injection
+            const { logSecurityEvent, SecurityEventSeverity } =
+              await import('../security/security-monitor.js');
+            void logSecurityEvent({
+              type: 'sql_injection_attempt',
+              severity: SecurityEventSeverity.CRITICAL,
+              timestamp: Date.now(),
+              identifier: 'unknown',
+              details: {
+                field: options.fieldName,
+                pattern: attack.pattern,
+                input: value.substring(0, 100),
+              },
+            });
+          }
+        } catch {
+          // Silently fail - logging is non-critical
         }
-      });
+      })();
     }
 
     // Reject if configured

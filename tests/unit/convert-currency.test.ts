@@ -18,13 +18,15 @@ describe('Convert Currency Handler', () => {
     const req = {
       method: 'POST',
       query: {},
-    };
+      url: '',
+      headers: {},
+    } as any;
     const res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
-    await convertCurrency(req, res);
+    await convertCurrency(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(405);
   });
@@ -38,13 +40,15 @@ describe('Convert Currency Handler', () => {
         from: 'INVALID',
         to: 'ZAR',
       },
-    };
+      url: '',
+      headers: {},
+    } as any;
     const res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
-    await convertCurrency(req, res);
+    await convertCurrency(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(400);
   });
@@ -58,13 +62,15 @@ describe('Convert Currency Handler', () => {
         from: 'USD',
         to: 'ZAR',
       },
-    };
+      url: '',
+      headers: {},
+    } as any;
     const res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
-    await convertCurrency(req, res);
+    await convertCurrency(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(400);
   });
@@ -78,24 +84,26 @@ describe('Convert Currency Handler', () => {
         from: 'USD',
         to: 'USD',
       },
-    };
+      url: '',
+      headers: {},
+    } as any;
     const res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
-    await convertCurrency(req, res);
+    await convertCurrency(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
+      (expect as any).objectContaining({
         rate: 1,
       })
     );
   });
 
   it('should convert currency successfully', async () => {
-    ((globalThis as any).fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    (globalThis as any).fetch.mockResolvedValue({
       ok: true,
       json: async () => ({
         rates: {
@@ -112,18 +120,20 @@ describe('Convert Currency Handler', () => {
         from: 'USD',
         to: 'ZAR',
       },
-    };
+      url: '',
+      headers: {},
+    } as any;
     const res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
-    await convertCurrency(req, res);
+    await convertCurrency(req, res as any);
 
     expect((globalThis as any).fetch).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
+      (expect as any).objectContaining({
         from: 'USD',
         to: 'ZAR',
         rate: 18.5,

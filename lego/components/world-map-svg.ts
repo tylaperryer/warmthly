@@ -138,8 +138,34 @@ class WorldMapSVG extends HTMLElement {
         throw new Error('SVG file not found in any configured path');
       }
 
-      // Inject SVG into container
-      this.svgContainer.innerHTML = svgText;
+      // SECURITY: Validate SVG content before injecting to prevent XSS
+      // Check that it's actually SVG content (starts with <svg or <?xml)
+      const trimmedSvg = svgText.trim();
+      if (!trimmedSvg.startsWith('<svg') && !trimmedSvg.startsWith('<?xml')) {
+        throw new Error('Invalid SVG content: does not start with <svg or <?xml');
+      }
+
+      // Use DOMParser to safely parse SVG
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+
+      // Check for parser errors
+      const parserError = svgDoc.querySelector('parsererror');
+      if (parserError) {
+        throw new Error('Invalid SVG: parsing failed');
+      }
+
+      // Get the SVG element
+      const svgElement = svgDoc.querySelector('svg');
+      if (!svgElement) {
+        throw new Error('Invalid SVG: no <svg> element found');
+      }
+
+      // SECURITY: Clear container and append validated SVG element
+      this.svgContainer.textContent = '';
+      const clonedSvg = svgElement.cloneNode(true) as SVGElement;
+      this.svgContainer.appendChild(clonedSvg);
+      this.svg = clonedSvg as SVGSVGElement;
       this.svg = this.svgContainer.querySelector('svg');
 
       if (!this.svg) {
@@ -159,8 +185,13 @@ class WorldMapSVG extends HTMLElement {
       });
     } catch (error: unknown) {
       // Error loading SVG - display fallback message
+      // SECURITY: Use textContent instead of innerHTML
       if (this.svgContainer) {
-        this.svgContainer.innerHTML = '<p style="color: red;">Error loading map.</p>';
+        this.svgContainer.textContent = '';
+        const errorP = document.createElement('p');
+        errorP.style.color = 'red';
+        errorP.textContent = 'Error loading map.';
+        this.svgContainer.appendChild(errorP);
       }
 
       if (import.meta.env.DEV) {

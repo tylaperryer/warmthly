@@ -15,21 +15,24 @@ Warmthly uses a **hybrid versioning strategy** that balances stability with flex
 ### Exact Versions (Pinned)
 
 **When to use:**
+
 - Critical build tools (Vite, TypeScript compiler)
 - Core runtime dependencies that affect production behavior
 - Dependencies with breaking changes in minor versions
 - Dependencies where version consistency is critical
 
 **Examples:**
+
 ```json
 {
-  "vite": "5.0.0",           // Build tool - exact version ensures consistency
-  "@playwright/test": "1.40.0",  // Testing framework - exact version for CI stability
-  "terser": "5.24.0"         // Minification - exact version for reproducible builds
+  "vite": "5.0.0", // Build tool - exact version ensures consistency
+  "@playwright/test": "1.40.0", // Testing framework - exact version for CI stability
+  "terser": "5.24.0" // Minification - exact version for reproducible builds
 }
 ```
 
 **Rationale:**
+
 - Build tools need to be consistent across all environments
 - Testing frameworks should be identical in CI and local development
 - Production dependencies should be predictable
@@ -37,21 +40,24 @@ Warmthly uses a **hybrid versioning strategy** that balances stability with flex
 ### Caret Ranges (^)
 
 **When to use:**
+
 - Type definitions (`@types/*`)
 - Development dependencies that don't affect production
 - Dependencies with stable APIs
 - Dependencies where minor updates are safe
 
 **Examples:**
+
 ```json
 {
-  "typescript": "^5.3.3",              // Type definitions - safe to update minor versions
-  "@types/node": "20.10.0",            // Type definitions - exact for Node version
-  "eslint-config-prettier": "9.0.0"    // Config - stable API
+  "typescript": "^5.3.3", // Type definitions - safe to update minor versions
+  "@types/node": "20.10.0", // Type definitions - exact for Node version
+  "eslint-config-prettier": "9.0.0" // Config - stable API
 }
 ```
 
 **Rationale:**
+
 - Type definitions are additive and safe to update
 - Development tools can benefit from minor updates
 - Caret allows automatic patch and minor updates
@@ -97,11 +103,13 @@ These dependencies use caret ranges:
 ### Regular Updates
 
 1. **Check for updates:**
+
    ```bash
    npm outdated
    ```
 
 2. **Security updates:**
+
    ```bash
    npm audit
    npm audit fix
@@ -116,11 +124,13 @@ These dependencies use caret ranges:
 ### Update Process
 
 1. **Create a branch:**
+
    ```bash
    git checkout -b update-dependencies
    ```
 
 2. **Update dependencies:**
+
    ```bash
    # For exact versions, manually update package.json
    # For caret ranges, npm update will handle it
@@ -128,6 +138,7 @@ These dependencies use caret ranges:
    ```
 
 3. **Test thoroughly:**
+
    ```bash
    npm run build
    npm run test
@@ -143,12 +154,14 @@ These dependencies use caret ranges:
 ### When to Pin vs. Use Ranges
 
 **Pin (exact version) when:**
+
 - Dependency is critical to build process
 - Breaking changes are common in minor versions
 - Version consistency is required across environments
 - Dependency affects production behavior
 
 **Use range (^) when:**
+
 - Dependency is a development tool
 - Minor updates are safe and beneficial
 - Dependency has stable API
@@ -157,6 +170,7 @@ These dependencies use caret ranges:
 ## Security Considerations
 
 1. **Regular audits:**
+
    ```bash
    npm audit
    npm audit fix
@@ -193,4 +207,3 @@ These dependencies use caret ranges:
 - `warmthly/package.json` - Dependency definitions
 - `.github/dependabot.yml` - Automated dependency updates
 - `warmthly/CONTRIBUTING.md` - Contribution guidelines
-

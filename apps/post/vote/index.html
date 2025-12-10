@@ -51,6 +51,10 @@
     initGlossary();
     initPronunciation();
   </script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Vote - Post - Warmthly</title>
+  <meta name="description" content="Participate in Warmthly's democratic processes. Vote on important decisions and help shape the movement's direction.">
+  
   <warmthly-head 
     title="Vote - Warmthly"
     description="Participate in organizational decisions and dissolution votes"
@@ -83,7 +87,7 @@
     <warmthly-stoplight app="post"></warmthly-stoplight>
   </div>
 
-  <div class="container container-narrow" id="main-content" role="main">
+  <main class="container container-narrow" id="main-content" role="main">
     <h1 class="page-title" data-reading-level-content>The Dissolution Vote</h1>
     <p class="main-text" data-reading-level-content>
       Our commitment is to our mission and values: Transparency, Honesty, Humility, and Empathy. If we fail to uphold them, we believe we should cease to exist. This page is our community-held kill switch.
@@ -161,7 +165,7 @@
       <p class="vote-note" id="voteStatus">Please cast your vote.</p>
       <div id="errorMessage" class="error-message" role="alert" aria-live="polite"></div>
     </div>
-  </div>
+  </main>
   
   <!-- Firebase SDK - Load dynamically when needed (Performance Optimization) -->
   <script>

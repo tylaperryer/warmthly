@@ -5,6 +5,8 @@
  * WCAG 2.1 AAA Success Criterion 3.1.4 - Abbreviations
  */
 
+import { sanitizeHtml } from '@utils/sanitize.js';
+
 export interface Abbreviation {
   abbr: string;
   expansion: string;
@@ -290,9 +292,11 @@ export function initAbbreviations(): void {
       const marked = markAbbreviations(text);
 
       if (marked !== text) {
+        // SECURITY: Sanitize HTML before using innerHTML to prevent XSS
+        const sanitized = sanitizeHtml(marked);
         // Create temporary container to parse HTML
         const temp = document.createElement('div');
-        temp.innerHTML = marked;
+        temp.innerHTML = sanitized;
 
         // Replace text node with new content
         const fragment = document.createDocumentFragment();

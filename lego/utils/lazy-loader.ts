@@ -43,10 +43,7 @@ export async function lazyLoadComponent(path: string): Promise<unknown> {
  * @param componentPath - Path to component module
  * @returns Promise that resolves when component is loaded
  */
-export function lazyLoadOnVisible(
-  element: HTMLElement,
-  componentPath: string
-): Promise<unknown> {
+export function lazyLoadOnVisible(element: HTMLElement, componentPath: string): Promise<unknown> {
   return new Promise((resolve, reject) => {
     if (!('IntersectionObserver' in window)) {
       // Fallback: load immediately if IntersectionObserver not supported
@@ -55,8 +52,8 @@ export function lazyLoadOnVisible(
     }
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             observer.disconnect();
             lazyLoadComponent(componentPath).then(resolve).catch(reject);
@@ -78,10 +75,7 @@ export function lazyLoadOnVisible(
  * @param delay - Delay in milliseconds
  * @returns Promise that resolves when component is loaded
  */
-export function lazyLoadAfterDelay(
-  componentPath: string,
-  delay: number
-): Promise<unknown> {
+export function lazyLoadAfterDelay(componentPath: string, delay: number): Promise<unknown> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       lazyLoadComponent(componentPath).then(resolve).catch(reject);
@@ -120,10 +114,10 @@ export function lazyLoadOnEvent(
  * @param configs - Array of component configurations
  */
 export function configureLazyLoading(configs: ComponentConfig[]): void {
-  configs.forEach((config) => {
+  configs.forEach(config => {
     if (config.critical) {
       // Load critical components immediately
-      lazyLoadComponent(config.path).catch((error) => {
+      lazyLoadComponent(config.path).catch(error => {
         console.error(`Failed to load critical component ${config.name}:`, error);
       });
       return;
@@ -132,22 +126,21 @@ export function configureLazyLoading(configs: ComponentConfig[]): void {
     if (config.loadOnVisible) {
       const element = document.querySelector(`[data-lazy-load="${config.name}"]`);
       if (element instanceof HTMLElement) {
-        lazyLoadOnVisible(element, config.path).catch((error) => {
+        lazyLoadOnVisible(element, config.path).catch(error => {
           console.error(`Failed to lazy load ${config.name}:`, error);
         });
       }
     } else if (config.loadOnEvent) {
       const element = document.querySelector(`[data-lazy-load="${config.name}"]`);
       if (element instanceof HTMLElement) {
-        lazyLoadOnEvent(element, config.loadOnEvent, config.path).catch((error) => {
+        lazyLoadOnEvent(element, config.loadOnEvent, config.path).catch(error => {
           console.error(`Failed to lazy load ${config.name} on event:`, error);
         });
       }
     } else if (config.loadAfterDelay) {
-      lazyLoadAfterDelay(config.path, config.loadAfterDelay).catch((error) => {
+      lazyLoadAfterDelay(config.path, config.loadAfterDelay).catch(error => {
         console.error(`Failed to lazy load ${config.name} after delay:`, error);
       });
     }
   });
 }
-

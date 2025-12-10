@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setupErrorHandling, safeAsync, safeSync } from '@utils/error-handler.js';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Type augmentation for import.meta.env
 declare global {
@@ -7,7 +7,7 @@ declare global {
     env: {
       DEV?: boolean;
       MODE?: string;
-      [key: string]: any;
+      [key: string]: string | boolean | undefined;
     };
   }
 }
@@ -21,7 +21,7 @@ describe('Error Handler', () => {
 
   describe('setupErrorHandling', () => {
     it('should set up unhandled rejection handler', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy: any = vi.spyOn(console, 'error').mockImplementation(() => {});
       setupErrorHandling();
 
       const rejection = new Promise((_, reject) => reject(new Error('Test error')));
@@ -39,7 +39,7 @@ describe('Error Handler', () => {
     });
 
     it('should set up error handler', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy: any = vi.spyOn(console, 'error').mockImplementation(() => {});
       setupErrorHandling();
 
       const errorEvent = new ErrorEvent('error', {
@@ -57,7 +57,7 @@ describe('Error Handler', () => {
     });
 
     it('should handle resource loading errors', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy: any = vi.spyOn(console, 'warn').mockImplementation(() => {});
       setupErrorHandling();
 
       const img = document.createElement('img');
@@ -85,7 +85,7 @@ describe('Error Handler', () => {
     });
 
     it('should catch and rethrow errors in dev mode', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy: any = vi.spyOn(console, 'error').mockImplementation(() => {});
       const fn = async () => {
         throw new Error('Test error');
       };
@@ -119,7 +119,7 @@ describe('Error Handler', () => {
     });
 
     it('should catch and rethrow errors in dev mode', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy: any = vi.spyOn(console, 'error').mockImplementation(() => {});
       const fn = () => {
         throw new Error('Test error');
       };

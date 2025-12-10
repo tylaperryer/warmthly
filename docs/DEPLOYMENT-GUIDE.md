@@ -33,6 +33,7 @@ All frontend applications are configured to use the OCI API through the centrali
    - Defaults to OCI Container Instance URL
 
 2. **HTML Files**: All HTML files include API config initialization:
+
    ```html
    <script>
      window.API_BASE_URL = 'https://backend.warmthly.org';
@@ -52,6 +53,7 @@ All frontend applications are configured to use the OCI API through the centrali
 To change the API URL, update one of these:
 
 1. **In HTML files** (quick change):
+
    ```html
    <script>
      window.API_BASE_URL = 'YOUR_NEW_API_URL';
@@ -78,12 +80,14 @@ To change the API URL, update one of these:
 **You don't need to do anything locally.** Just push your code!
 
 The frontend deployment workflow:
+
 1. Runs CI checks (tests, linting, type checking)
 2. Builds all applications in parallel
 3. Copies API functions to each site
 4. Deploys pre-built static files to Cloudflare Pages
 
 **Deployment Architecture:**
+
 - Each site deploys to its own Cloudflare Pages project:
   - `build/main` → `warmthly` project → `www.warmthly.org`
   - `build/mint` → `warmthly-mint` project → `mint.warmthly.org`
@@ -91,6 +95,7 @@ The frontend deployment workflow:
   - `build/admin` → `warmthly-admin` project → `admin.warmthly.org`
 
 **Important:** Ensure Cloudflare Pages build settings are disabled for all projects:
+
 - Go to each Cloudflare Pages project (warmthly, warmthly-mint, warmthly-post, warmthly-admin)
 - Settings → Builds & deployments
 - Set "Build command" to empty/blank
@@ -120,6 +125,7 @@ Automatic deployment is set up via GitHub Actions:
    - `OCI_CONFIG_FILE` - Base64 encoded OCI config file
 
 2. **Get OCI Config File**:
+
    ```bash
    # In Cloud Shell
    cat ~/.oci/config | base64 -w 0
@@ -157,11 +163,13 @@ docker push us-ashburn-1.ocir.io/id1oqczh26jb/warmthly-api:latest
 ### Testing
 
 #### Health Check
+
 ```bash
 curl https://backend.warmthly.org/health
 ```
 
 #### i18n Endpoints
+
 ```bash
 # Get languages
 curl https://backend.warmthly.org/api/i18n/languages
@@ -171,6 +179,7 @@ curl https://backend.warmthly.org/api/i18n/en
 ```
 
 #### Checkout Endpoint
+
 ```bash
 curl -X POST https://backend.warmthly.org/api/create-checkout \
   -H "Content-Type: application/json" \
@@ -343,7 +352,6 @@ docker push <region>.ocir.io/<tenancy-namespace>/warmthly-api:latest
 3. Configure:
 
    **Basic Information:**
-
    - Name: `warmthly-api`
    - Compartment: `warmthly-api`
    - Availability Domain: Select one
@@ -352,19 +360,16 @@ docker push <region>.ocir.io/<tenancy-namespace>/warmthly-api:latest
    - Memory: `6 GB`
 
    **Networking:**
-
    - VCN: `warmthly-vcn`
    - Subnet: Select public subnet
    - Assign Public IP: `Yes`
 
    **Container Configuration:**
-
    - Image: `<region>.ocir.io/<tenancy-namespace>/warmthly-api:latest`
    - Container Name: `api`
    - Port: `80`
 
    **Environment Variables:**
-
    - Add all required environment variables (see [Environment Variables](#environment-variables))
 
 4. Click **Create**
@@ -500,7 +505,6 @@ oci container-instances container-instance update \
 The repository includes GitHub Actions workflows for automatic deployment:
 
 1. **Configure GitHub Secrets:**
-
    - `OCI_USER_OCID`
    - `OCI_TENANCY_OCID`
    - `OCI_REGION`
@@ -591,13 +595,11 @@ oci logging log-content get \
 ### Container Won't Start
 
 1. **Check logs:**
-
    - View container logs in OCI Console
    - Look for error messages
    - Common errors: missing environment variables, port conflicts
 
 2. **Verify environment variables:**
-
    - Ensure all required variables are set
    - Check for typos in variable names
    - Verify values are correct (no extra spaces, correct format)
@@ -615,22 +617,21 @@ oci logging log-content get \
 ### API Not Accessible
 
 1. **Check security list:**
-
    - Verify ingress rules allow ports 80/443
    - Source should be `0.0.0.0/0` for public access
    - Check egress rules allow outbound connections
 
 2. **Verify public IP:**
-
    - Ensure Container Instance has public IP assigned
    - Check if IP is correct
    - Verify IP is not blocked by firewall
 
 3. **Test connectivity:**
+
    ```bash
    # Test health endpoint
    curl -v http://<public-ip>/health
-   
+
    # Test API endpoint
    curl -v http://<public-ip>/api/get-yoco-public-key
    ```
@@ -642,7 +643,6 @@ oci logging log-content get \
 ### Redis Connection Issues
 
 1. **Check REDIS_URL:**
-
    - Verify Redis URL is correct format: `redis://host:port` or `rediss://host:port`
    - Test connection from local machine
    - Check if Redis requires authentication
@@ -661,7 +661,6 @@ oci logging log-content get \
 ### SSL/HTTPS Issues
 
 1. **If using Greenlock:**
-
    - Verify `LE_EMAIL` is set
    - Check `USE_GREENLOCK=true`
    - Review Let's Encrypt logs
@@ -693,6 +692,7 @@ oci logging log-content get \
 ### Rollback to Previous Container Image
 
 1. **Identify previous image tag:**
+
    ```bash
    # List available images
    oci artifacts container image list \
@@ -701,6 +701,7 @@ oci logging log-content get \
    ```
 
 2. **Update Container Instance:**
+
    ```bash
    # Update to previous image
    oci compute-container-instance update \
@@ -721,6 +722,7 @@ oci logging log-content get \
 If deployment is automated via GitHub Actions:
 
 1. **Revert code:**
+
    ```bash
    git revert <commit-hash>
    git push origin main

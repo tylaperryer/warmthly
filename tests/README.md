@@ -26,31 +26,37 @@ tests/
 ## Running Tests
 
 ### All Tests
+
 ```bash
 npm test
 ```
 
 ### Unit Tests Only
+
 ```bash
 npm run test:unit
 ```
 
 ### Integration Tests
+
 ```bash
 npm run test:integration
 ```
 
 ### E2E Tests
+
 ```bash
 npm run test:e2e
 ```
 
 ### Watch Mode
+
 ```bash
 npm run test:watch
 ```
 
 ### Coverage
+
 ```bash
 npm run test:coverage
 ```
@@ -141,7 +147,7 @@ describe('API Integration', () => {
   it('should handle request/response flow', async () => {
     const req = createMockRequest({ method: 'POST' });
     const res = createMockResponse();
-    
+
     // Test integration
   });
 });
@@ -166,6 +172,7 @@ test.describe('Feature Name', () => {
 ## Coverage Thresholds
 
 Current coverage thresholds (realistic and maintainable):
+
 - **Lines:** 80%
 - **Functions:** 85%
 - **Branches:** 75%
@@ -211,6 +218,7 @@ Security tests are located in `tests/unit/security/` and `tests/security/`:
 ## Performance Testing
 
 Performance tests verify:
+
 - Bundle sizes meet budgets
 - Load times are acceptable
 - Memory usage is reasonable
@@ -219,6 +227,7 @@ Performance tests verify:
 ## Accessibility Testing
 
 Accessibility tests verify:
+
 - ARIA labels and roles
 - Keyboard navigation
 - Screen reader compatibility
@@ -228,16 +237,19 @@ Accessibility tests verify:
 ## Troubleshooting
 
 ### Tests Failing Intermittently
+
 - Check for race conditions
 - Add appropriate waits/timeouts
 - Verify mocks are properly reset
 
 ### Coverage Not Meeting Thresholds
+
 - Focus on critical path coverage
 - Add tests for uncovered branches
 - Consider if threshold is appropriate
 
 ### E2E Tests Flaky
+
 - Increase timeouts for slow operations
 - Use more specific selectors
 - Wait for elements to be ready before interacting
@@ -249,4 +261,3 @@ Accessibility tests verify:
 - [ ] Add visual regression tests
 - [ ] Set up test data management
 - [ ] Add performance benchmarking
-

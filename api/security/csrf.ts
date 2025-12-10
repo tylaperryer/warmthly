@@ -99,17 +99,18 @@ export function withCSRFProtection<
   handler: (
     req: T,
     res: { status: (code: number) => { json: (data: unknown) => unknown } }
-  ) => Promise<Response | void> | Response | void,
+  ) => Promise<unknown>,
   getSessionToken: (req: T) => string | null | undefined
 ) {
   return async (
     req: T,
     res: { status: (code: number) => { json: (data: unknown) => unknown } }
-  ): Promise<Response | void | unknown> => {
+  ): Promise<unknown> => {
     // Only protect state-changing methods
     const stateChangingMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
     if (!stateChangingMethods.includes(req.method)) {
-      return handler(req, res);
+      const result = handler(req, res);
+      return result instanceof Promise ? await result : result;
     }
 
     // Extract and validate CSRF token
@@ -117,12 +118,14 @@ export function withCSRFProtection<
     const sessionToken = getSessionToken(req);
 
     if (!validateCSRFToken(token, sessionToken)) {
-      return res.status(403).json({
+      res.status(403).json({
         error: { message: 'Invalid or missing CSRF token' },
       });
+      return;
     }
 
     // Token valid, proceed with handler
-    return handler(req, res);
+    const result = handler(req, res);
+    return result instanceof Promise ? await result : result;
   };
 }

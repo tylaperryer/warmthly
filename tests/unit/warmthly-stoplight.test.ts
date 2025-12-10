@@ -9,7 +9,7 @@ describe('WarmthlyStoplight Component', () => {
     await import('@components/warmthly-stoplight.js');
 
     const element = document.createElement('warmthly-stoplight');
-    expect(element).toBeDefined();
+    (expect(element) as any).toBeDefined();
   });
 
   it('should render stoplight with app attribute', async () => {
@@ -22,8 +22,8 @@ describe('WarmthlyStoplight Component', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const button = element.querySelector('button');
-    expect(button).toBeDefined();
-    expect(button?.getAttribute('aria-label')).toContain('menu');
+    (expect(button) as any).toBeDefined();
+    (expect(button?.getAttribute('aria-label')) as any).toContain('menu');
   });
 
   it('should use custom menu items', async () => {
@@ -36,11 +36,11 @@ describe('WarmthlyStoplight Component', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const links = element.querySelectorAll('a');
-    expect(links.length).toBeGreaterThan(0);
+    (expect(links.length) as any).toBeGreaterThan(0);
   });
 
   it('should handle errors gracefully', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy: any = vi.spyOn(console, 'error').mockImplementation(() => {});
     await import('@components/warmthly-stoplight.js');
 
     const element = document.createElement('warmthly-stoplight');

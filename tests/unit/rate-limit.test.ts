@@ -3,7 +3,6 @@
  * Tests for api/rate-limit.ts
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import {
   withRateLimit,
   loginRateLimitOptions,
@@ -11,9 +10,10 @@ import {
   apiRateLimitOptions,
   voteRateLimitOptions,
 } from '@api/middleware/index.js';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Mock redis-client
-vi.mock('@api/utils/redis-client.js', () => {
+(vi as any).mock('@api/utils/redis-client.js', () => {
   const mockPipeline = {
     incr: vi.fn().mockReturnThis(),
     pttl: vi.fn().mockReturnThis(),
@@ -78,9 +78,12 @@ describe('Rate Limiting', () => {
 
   describe('withRateLimit', () => {
     it('should wrap handler with rate limiting', async () => {
-      const handler = vi.fn(async (_req: unknown, res: { status: (code: number) => { json: (data: unknown) => unknown } }) => {
+      const handler = vi.fn((async (
+        _req: unknown,
+        res: { status: (code: number) => { json: (data: unknown) => unknown } }
+      ) => {
         return res.status(200).json({ success: true });
-      });
+      }) as any);
 
       const wrapped = withRateLimit(handler, { max: 100, windowMs: 15000 });
 
@@ -99,7 +102,7 @@ describe('Rate Limiting', () => {
         setHeader: vi.fn(),
       };
 
-      await wrapped(req, res);
+      await wrapped(req, res as any);
 
       expect(res.setHeader).toHaveBeenCalledWith('X-RateLimit-Limit', 100);
       expect(handler).toHaveBeenCalled();
@@ -108,9 +111,9 @@ describe('Rate Limiting', () => {
     it('should return 429 when rate limit exceeded', async () => {
       const { getRedisClient } = await import('@api/utils/index.js');
       const mockClient = await getRedisClient();
-      const mockPipeline = (mockClient.pipeline as ReturnType<typeof vi.fn>)();
+      const mockPipeline: any = ((mockClient as any).pipeline as ReturnType<typeof vi.fn>)();
 
-      (mockPipeline.exec as ReturnType<typeof vi.fn>).mockResolvedValue([
+      mockPipeline.exec.mockResolvedValue([
         [null, 101], // count exceeds max
         [null, 1000],
       ]);
@@ -137,13 +140,13 @@ describe('Rate Limiting', () => {
         setHeader: vi.fn(),
       };
 
-      await wrapped(req, res);
+      await wrapped(req, res as any);
 
       expect(res.status).toHaveBeenCalledWith(429);
       expect(res.json).toHaveBeenCalledWith({
         error: { message: 'Too many requests' },
       });
-      expect(handler).not.toHaveBeenCalled();
+      (expect(handler) as any).not.toHaveBeenCalled();
     });
   });
 

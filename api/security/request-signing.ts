@@ -120,13 +120,24 @@ export function verifySignedRequest(
 
 /**
  * Extract signature from request headers
+ * Handles case-insensitive header names
  *
  * @param headers - Request headers
  * @returns Signature or null
  */
 export function extractSignature(headers: {
   readonly 'x-request-signature'?: string;
+  readonly 'X-Request-Signature'?: string;
   readonly [key: string]: string | undefined;
 }): string | null {
-  return headers['x-request-signature'] || null;
+  // Check both lowercase and original case
+  const lowerKey = 'x-request-signature';
+  const headerKeys = Object.keys(headers);
+  const signatureKey = headerKeys.find(key => key.toLowerCase() === lowerKey);
+
+  if (signatureKey) {
+    return headers[signatureKey] || null;
+  }
+
+  return null;
 }

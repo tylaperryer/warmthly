@@ -52,15 +52,15 @@ export function createLabelValuePair(
   value: string | HTMLElement,
   className?: string
 ): HTMLDivElement {
-  const container = document.createElement('div') as HTMLDivElement;
+  const container = document.createElement('div');
   if (className) {
     container.className = className;
   }
   container.align = '';
-  
+
   const labelEl = createSafeElement('div', 'expense-popup-item-label', label);
   container.appendChild(labelEl);
-  
+
   const valueEl = createSafeElement('div', 'expense-popup-item-value');
   if (typeof value === 'string') {
     valueEl.textContent = value;
@@ -68,7 +68,7 @@ export function createLabelValuePair(
     valueEl.appendChild(value);
   }
   container.appendChild(valueEl);
-  
+
   return container;
 }
 
@@ -86,17 +86,16 @@ export function setSafeStructuredContent(
 ): void {
   // Clear container
   container.textContent = '';
-  
+
   if (structure.label && structure.value) {
     const pair = createLabelValuePair(structure.label, structure.value);
     container.appendChild(pair);
   }
-  
+
   if (structure.children) {
-    structure.children.forEach((child) => {
+    structure.children.forEach(child => {
       const pair = createLabelValuePair(child.label, child.value);
       container.appendChild(pair);
     });
   }
 }
-

@@ -27,7 +27,7 @@ export function constantTimeCompare(
 
   try {
     return crypto.timingSafeEqual(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'));
-  } catch (error: unknown) {
+  } catch {
     // If timingSafeEqual fails, return false
     return false;
   }

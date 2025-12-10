@@ -1,3 +1,5 @@
+import { sanitizeHtml } from '@utils/sanitize.js';
+
 export interface Pronunciation {
   word: string;
   phonetic: string;
@@ -138,8 +140,10 @@ export function initPronunciation(): void {
       const marked = markPronunciations(text);
 
       if (marked !== text) {
+        // SECURITY: Sanitize HTML before using innerHTML to prevent XSS
+        const sanitized = sanitizeHtml(marked);
         const temp = document.createElement('div');
-        temp.innerHTML = marked;
+        temp.innerHTML = sanitized;
 
         const fragment = document.createDocumentFragment();
         while (temp.firstChild) {
@@ -203,7 +207,7 @@ function showPronunciationTooltip(element: HTMLElement, word: string, phonetic: 
   tooltip.className = 'pronunciation-tooltip';
   tooltip.setAttribute('role', 'dialog');
   tooltip.setAttribute('aria-label', `Pronunciation of ${escapeHtml(word)}`);
-  
+
   // Use DOM methods instead of innerHTML for better security
   const closeButton = document.createElement('button');
   closeButton.className = 'pronunciation-tooltip-close';

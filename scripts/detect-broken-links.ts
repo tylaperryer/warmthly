@@ -47,7 +47,6 @@ interface BrokenLink {
   context: string;
 }
 
-
 /**
  * Find all HTML files recursively
  * Phase 4 Issue 4.2: Add path validation
@@ -57,7 +56,7 @@ function findHTMLFiles(dir: string, fileList: string[] = []): string[] {
   if (!validatePath(dir)) {
     throw new Error(`Invalid directory path: ${dir}`);
   }
-  
+
   const files = readdirSync(dir);
 
   files.forEach((file: string) => {
@@ -79,9 +78,7 @@ function findHTMLFiles(dir: string, fileList: string[] = []): string[] {
 /**
  * Extract all links from HTML content
  */
-function extractLinks(
-  content: string
-): Array<{ url: string; line: number; context: string }> {
+function extractLinks(content: string): Array<{ url: string; line: number; context: string }> {
   const links: Array<{ url: string; line: number; context: string }> = [];
   const lines = content.split('\n');
 
@@ -141,7 +138,13 @@ function checkInternalFile(url: string, basePath: string): boolean {
       if (!isValidUrlScheme(cleanUrl)) {
         return false; // Invalid scheme
       }
-      if (urlObj.hostname.toLowerCase().includes('warmthly.org')) {
+      // SECURITY: Validate hostname properly instead of substring matching
+      const hostname = urlObj.hostname.toLowerCase();
+      const isWarmthlyDomain =
+        hostname === 'warmthly.org' ||
+        hostname === 'www.warmthly.org' ||
+        (hostname.endsWith('.warmthly.org') && hostname.split('.').length === 3);
+      if (isWarmthlyDomain) {
         // Internal URL - extract path
         filePath = urlObj.pathname;
       } else {
@@ -172,7 +175,7 @@ function checkInternalFile(url: string, basePath: string): boolean {
       const apps = ['main', 'mint', 'post', 'admin'];
       for (const app of apps) {
         const fullPath = join(projectRoot, 'apps', app, pathWithoutSlash);
-        
+
         // Validate resolved path is still within project
         if (!validatePath(fullPath)) {
           continue;
@@ -230,7 +233,7 @@ function checkInternalFile(url: string, basePath: string): boolean {
       // Relative path from current file
       const dir = dirname(basePath);
       const fullPath = join(dir, filePath);
-      
+
       // Validate path
       if (!validatePath(fullPath)) {
         return false;
@@ -256,7 +259,9 @@ function checkInternalFile(url: string, basePath: string): boolean {
     }
   } catch (error) {
     // Log error for debugging but don't fail the check
-    console.warn(`Warning: Error checking file ${url}: ${error}`);
+    console.warn(
+      `Warning: Error checking file ${url}: ${error instanceof Error ? error.message : String(error)}`
+    );
     return false;
   }
 }
@@ -309,11 +314,24 @@ async function detectBrokenLinks(): Promise<void> {
     links.forEach(link => {
       // Use case-insensitive check to prevent bypasses
       const normalizedUrl = link.url.trim().toLowerCase();
-      const isExternal = normalizedUrl.startsWith('http://') || normalizedUrl.startsWith('https://');
+      const isExternal =
+        normalizedUrl.startsWith('http://') || normalizedUrl.startsWith('https://');
 
       if (isExternal) {
         // External links - check later
-        if (link.url.includes('warmthly.org')) {
+        // SECURITY: Validate URL properly instead of substring matching
+        let isWarmthlyDomain = false;
+        try {
+          const urlObj = new URL(link.url);
+          const hostname = urlObj.hostname.toLowerCase();
+          isWarmthlyDomain =
+            hostname === 'warmthly.org' ||
+            hostname === 'www.warmthly.org' ||
+            (hostname.endsWith('.warmthly.org') && hostname.split('.').length === 3);
+        } catch {
+          // Invalid URL, skip
+        }
+        if (isWarmthlyDomain) {
           // Internal URL but external format
           if (!checkInternalFile(link.url, file)) {
             brokenLinks.push({
@@ -360,7 +378,7 @@ async function detectBrokenLinks(): Promise<void> {
   for (let i = 0; i < Math.min(externalLinks.length, 20); i++) {
     const link = externalLinks[i];
     if (!link) continue;
-    
+
     const result = await checkExternalUrl(link.url);
 
     if (!result.valid) {

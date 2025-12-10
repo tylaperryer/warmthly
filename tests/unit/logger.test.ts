@@ -18,7 +18,7 @@ describe('Logger', () => {
 
   it('should export logger object', async () => {
     const { logger } = await import('@api/utils/index.js');
-    expect(logger).toBeDefined();
+    (expect(logger) as any).toBeDefined();
     expect(typeof logger.log).toBe('function');
     expect(typeof logger.warn).toBe('function');
     expect(typeof logger.error).toBe('function');
@@ -30,7 +30,7 @@ describe('Logger', () => {
     if (typeof process !== 'undefined' && process.env) {
       (process.env as any).NODE_ENV = 'development';
     }
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy: any = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const { logger } = await import('@api/utils/index.js');
 
@@ -44,13 +44,13 @@ describe('Logger', () => {
     if (typeof process !== 'undefined' && process.env) {
       (process.env as any).NODE_ENV = 'production';
     }
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy: any = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const { logger } = await import('@api/utils/index.js');
 
     logger.log('test message');
     // In test environment, may still log - this is acceptable
-    // expect(consoleSpy).not.toHaveBeenCalled();
+    // (expect(consoleSpy) as any).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });
@@ -59,7 +59,7 @@ describe('Logger', () => {
     if (typeof process !== 'undefined' && process.env) {
       (process.env as any).NODE_ENV = 'production';
     }
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy: any = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const { logger } = await import('@api/utils/index.js');
 
@@ -73,7 +73,7 @@ describe('Logger', () => {
     if (typeof process !== 'undefined' && process.env) {
       (process.env as any).NODE_ENV = 'development';
     }
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy: any = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const { logger } = await import('@api/utils/index.js');
 

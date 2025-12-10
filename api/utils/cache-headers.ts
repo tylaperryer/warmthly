@@ -56,19 +56,33 @@ export function createCacheControl(config: CacheHeaderConfig): string {
   const directives: string[] = [];
 
   // Handle predefined cache control
-  if (config.cacheControl === CacheControl.NO_CACHE) {
-    return CacheControl.NO_CACHE;
-  }
+  const cacheControlValue = config.cacheControl;
 
-  if (config.cacheControl === CacheControl.PRIVATE) {
-    directives.push('private');
-  } else if (config.cacheControl === CacheControl.PUBLIC) {
-    directives.push('public');
-  } else if (config.cacheControl === CacheControl.IMMUTABLE) {
-    return CacheControl.IMMUTABLE;
+  // Type guard to check if value is a CacheControl enum
+  const isCacheControlEnum = (value: string | CacheControl): value is CacheControl => {
+    return (
+      value === (CacheControl.NO_CACHE as string) ||
+      value === (CacheControl.PRIVATE as string) ||
+      value === (CacheControl.PUBLIC as string) ||
+      value === (CacheControl.IMMUTABLE as string)
+    );
+  };
+
+  if (isCacheControlEnum(cacheControlValue)) {
+    // TypeScript now knows cacheControlValue is CacheControl, not string
+    if (cacheControlValue === CacheControl.NO_CACHE) {
+      return CacheControl.NO_CACHE;
+    }
+    if (cacheControlValue === CacheControl.PRIVATE) {
+      directives.push('private');
+    } else if (cacheControlValue === CacheControl.PUBLIC) {
+      directives.push('public');
+    } else if (cacheControlValue === CacheControl.IMMUTABLE) {
+      return CacheControl.IMMUTABLE;
+    }
   } else {
     // Custom cache control string
-    directives.push(config.cacheControl);
+    directives.push(cacheControlValue);
   }
 
   // Add max-age if specified
@@ -125,9 +139,7 @@ export function setCacheHeaders(
 
   if (config.lastModified) {
     const lastModifiedDate =
-      config.lastModified instanceof Date
-        ? config.lastModified
-        : new Date(config.lastModified);
+      config.lastModified instanceof Date ? config.lastModified : new Date(config.lastModified);
     res.setHeader('Last-Modified', lastModifiedDate.toUTCString());
   }
 }
@@ -192,4 +204,3 @@ export function generateETag(data: unknown): string {
   }
   return `"${Math.abs(hash).toString(16)}"`;
 }
-

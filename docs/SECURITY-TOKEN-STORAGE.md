@@ -44,12 +44,10 @@ Warmthly implements a **world-class cookie-less token storage solution** using t
 ### Encryption Flow
 
 1. **Backend Authentication**
-
    - User authenticates with password
    - Server returns JWT access token (`T_access`)
 
 2. **Client-Side Encryption**
-
    - Client generates encryption key (`K_mem`) using Web Crypto API
    - Key is stored only in JavaScript variable (memory)
    - Token is encrypted: `T_encrypted = AES-GCM-Encrypt(T_access, K_mem)`

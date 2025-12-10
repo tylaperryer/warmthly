@@ -115,7 +115,7 @@ export async function getRTLStatus(langCode: string): Promise<boolean> {
       // For now, fallback to static check
       return isRTL(langCode);
     }
-  } catch (error) {
+  } catch {
     // Silently fail and use static check
   }
 

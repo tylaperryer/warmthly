@@ -3,7 +3,6 @@
  * Tests for lego/utils/error-tracker.ts
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   trackError,
   trackUnhandledRejection,
@@ -14,6 +13,7 @@ import {
   formatErrorForUser,
   hasUnreportedErrors,
 } from '@utils/error-tracker.js';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Error Tracker', () => {
   beforeEach(() => {
@@ -73,7 +73,7 @@ describe('Error Tracker', () => {
     const errors = getErrorLogForReporting();
     const formatted = formatErrorForUser(errors[0]!);
 
-    expect(formatted).toContain('Test error');
+    (expect(formatted) as any).toContain('Test error');
   });
 
   it('should check for unreported errors', () => {

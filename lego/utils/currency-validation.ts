@@ -59,7 +59,7 @@ export function isValidCurrency(currency: string): boolean {
   if (!currency || typeof currency !== 'string') {
     return false;
   }
-  return ALLOWED_CURRENCIES.includes(currency.toUpperCase() as typeof ALLOWED_CURRENCIES[number]);
+  return ALLOWED_CURRENCIES.includes(currency.toUpperCase());
 }
 
 /**
@@ -69,7 +69,9 @@ export function isValidCurrency(currency: string): boolean {
  */
 export function validateCurrency(currency: string): void {
   if (!isValidCurrency(currency)) {
-    throw new Error(`Invalid currency code: ${currency}. Allowed currencies: ${ALLOWED_CURRENCIES.join(', ')}`);
+    throw new Error(
+      `Invalid currency code: ${currency}. Allowed currencies: ${ALLOWED_CURRENCIES.join(', ')}`
+    );
   }
 }
 
@@ -85,4 +87,3 @@ export function normalizeCurrency(currency: string): string | null {
   const normalized = currency.trim().toUpperCase();
   return isValidCurrency(normalized) ? normalized : null;
 }
-

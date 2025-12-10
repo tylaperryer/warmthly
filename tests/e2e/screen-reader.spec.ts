@@ -54,23 +54,23 @@ function getBaseUrl(app: string, baseURL: string = 'http://localhost:3000'): str
 /**
  * Test that page is accessible to screen readers
  */
-test.describe('Screen Reader Accessibility Testing', () => {
+describe('Screen Reader Accessibility Testing', () => {
   for (const page of TEST_PAGES) {
-    test.describe(`${page.name}`, () => {
+    describe(`${page.name}`, () => {
       test('should have proper heading hierarchy', async ({
         page: browserPage,
         baseURL,
       }: {
         page: Page;
-        baseURL: string | undefined;
-      }) => {
+        baseURL?: string | undefined;
+      } = {} as any) => {
         const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
         await browserPage.goto(`${appUrl}${page.url}`);
-        await browserPage.waitForLoadState('networkidle');
+        await (browserPage as any).waitForLoadState('networkidle');
 
         // Check heading hierarchy (h1 should come before h2, etc.)
         type HeadingInfo = { tag: string; text: string; level: number };
-        const headings = (await browserPage.evaluate(() => {
+        const headings = (await (browserPage as any).evaluate(() => {
           const headingElements = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
           return headingElements.map(h => ({
             tag: h.tagName.toLowerCase(),
@@ -80,16 +80,16 @@ test.describe('Screen Reader Accessibility Testing', () => {
         })) as HeadingInfo[];
 
         // Should have at least one h1
-        expect(headings.length).toBeGreaterThan(0);
+        (expect(headings.length) as any).toBeGreaterThan(0);
         const h1Count = headings.filter(h => h.level === 1).length;
-        expect(h1Count).toBeGreaterThanOrEqual(1);
+        (expect(h1Count) as any).toBeGreaterThanOrEqual(1);
 
         // Check heading hierarchy (no skipping levels)
         let previousLevel = 0;
         for (const heading of headings) {
           if (previousLevel > 0) {
             // Allow same level or one level deeper, but not skipping
-            expect(heading.level).toBeLessThanOrEqual(previousLevel + 1);
+            (expect(heading.level) as any).toBeLessThanOrEqual(previousLevel + 1);
           }
           previousLevel = heading.level;
         }
@@ -100,14 +100,14 @@ test.describe('Screen Reader Accessibility Testing', () => {
         baseURL,
       }: {
         page: Page;
-        baseURL: string | undefined;
-      }) => {
+        baseURL?: string | undefined;
+      } = {} as any) => {
         const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
         await browserPage.goto(`${appUrl}${page.url}`);
-        await browserPage.waitForLoadState('networkidle');
+        await (browserPage as any).waitForLoadState('networkidle');
 
         // Check that all form inputs have associated labels
-        const formCheck = await browserPage.evaluate(() => {
+        const formCheck = await (browserPage as any).evaluate(() => {
           const inputs = Array.from(document.querySelectorAll('input, select, textarea'));
           const unlabeled: string[] = [];
 
@@ -156,14 +156,14 @@ test.describe('Screen Reader Accessibility Testing', () => {
         baseURL,
       }: {
         page: Page;
-        baseURL: string | undefined;
-      }) => {
+        baseURL?: string | undefined;
+      } = {} as any) => {
         const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
         await browserPage.goto(`${appUrl}${page.url}`);
-        await browserPage.waitForLoadState('networkidle');
+        await (browserPage as any).waitForLoadState('networkidle');
 
         // Check that all buttons have accessible names
-        const buttonCheck = await browserPage.evaluate(() => {
+        const buttonCheck = await (browserPage as any).evaluate(() => {
           const buttons = Array.from(document.querySelectorAll('button, [role="button"]'));
           const unnamed: string[] = [];
 
@@ -201,14 +201,14 @@ test.describe('Screen Reader Accessibility Testing', () => {
         baseURL,
       }: {
         page: Page;
-        baseURL: string | undefined;
-      }) => {
+        baseURL?: string | undefined;
+      } = {} as any) => {
         const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
         await browserPage.goto(`${appUrl}${page.url}`);
-        await browserPage.waitForLoadState('networkidle');
+        await (browserPage as any).waitForLoadState('networkidle');
 
         // Check that all links have descriptive text
-        const linkCheck = await browserPage.evaluate(() => {
+        const linkCheck = await (browserPage as any).evaluate(() => {
           const links = Array.from(document.querySelectorAll('a[href]'));
           const undescriptive: string[] = [];
 
@@ -250,14 +250,14 @@ test.describe('Screen Reader Accessibility Testing', () => {
         baseURL,
       }: {
         page: Page;
-        baseURL: string | undefined;
-      }) => {
+        baseURL?: string | undefined;
+      } = {} as any) => {
         const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
         await browserPage.goto(`${appUrl}${page.url}`);
-        await browserPage.waitForLoadState('networkidle');
+        await (browserPage as any).waitForLoadState('networkidle');
 
         // Check for skip link
-        const skipLink = await browserPage.evaluate(() => {
+        const skipLink = await (browserPage as any).evaluate(() => {
           const link = document.querySelector('.skip-link, a[href="#main"], a[href="#content"]');
           if (!link) return null;
 
@@ -265,15 +265,15 @@ test.describe('Screen Reader Accessibility Testing', () => {
             exists: true,
             text: link.textContent?.trim() || '',
             href: link.getAttribute('href') || '',
-            visible: window.getComputedStyle(link as Element).display !== 'none',
+            visible: window.getComputedStyle(link).display !== 'none',
           };
         });
 
         // Skip link should exist
-        expect(skipLink).not.toBeNull();
+        (expect(skipLink) as any).not.toBeNull();
         if (skipLink) {
           expect(skipLink.exists).toBe(true);
-          expect(skipLink.text.length).toBeGreaterThan(0);
+          (expect(skipLink.text.length) as any).toBeGreaterThan(0);
         }
       });
 
@@ -282,14 +282,14 @@ test.describe('Screen Reader Accessibility Testing', () => {
         baseURL,
       }: {
         page: Page;
-        baseURL: string | undefined;
-      }) => {
+        baseURL?: string | undefined;
+      } = {} as any) => {
         const appUrl = getBaseUrl(page.app, baseURL || 'http://localhost:3000');
         await browserPage.goto(`${appUrl}${page.url}`);
-        await browserPage.waitForLoadState('networkidle');
+        await (browserPage as any).waitForLoadState('networkidle');
 
         // Check for common ARIA issues
-        const ariaCheck = await browserPage.evaluate(() => {
+        const ariaCheck = await (browserPage as any).evaluate(() => {
           const issues: string[] = [];
 
           // Check for aria-hidden="true" on interactive elements

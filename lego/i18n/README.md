@@ -133,20 +133,17 @@ const currentLang = getLanguage();
 ## How It Works
 
 1. **Initial Load**:
-
    - Checks IndexedDB cache first
    - If cached, uses immediately (fast!)
    - If online, fetches fresh from API in background
 
 2. **Online Fetching**:
-
    - Fetches translation keys list
    - Loads translations in small chunks (50 keys per packet)
    - Caches each chunk as it arrives
    - Updates page as chunks load
 
 3. **Offline Mode**:
-
    - Uses cached translations from IndexedDB
    - Works completely offline after initial load
    - Auto-refreshes when connection restored

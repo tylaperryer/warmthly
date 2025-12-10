@@ -35,6 +35,10 @@
   </script>
   <script type="module" src="/lego/components/warmthly-head.js"></script>
   <script type="module" src="/lego/utils/init.js"></script>
+  <!-- Static title for SEO and accessibility - will be updated by warmthly-head component -->
+  <title>Easy Read Version - Warmthly</title>
+  <meta name="description" content="Easy read version of Warmthly content designed for accessibility and readability. Simplified language and clear formatting.">
+  
   <warmthly-head 
     title="Easy Read - Warmthly"
     description="Easy to read version of Warmthly - simplified language for better understanding"
@@ -251,9 +255,14 @@
                   .replace(/</g, '&lt;')
                   .replace(/>/g, '&gt;');
               };
+              // SECURITY: Use DOM methods instead of innerHTML to prevent XSS
               const escapedEmail = escapeHtmlAttribute(email);
-              const displayEmail = escapeHtml(email.replace('@', ' [at] ').replace(/\./g, ' [dot] '));
-              el.innerHTML = `<a href="mailto:${escapedEmail}">${displayEmail}</a>`;
+              const displayEmail = email.replace('@', ' [at] ').replace(/\./g, ' [dot] ');
+              el.textContent = ''; // Clear existing content
+              const link = document.createElement('a');
+              link.href = `mailto:${escapedEmail}`;
+              link.textContent = displayEmail;
+              el.appendChild(link);
             }
           });
         });

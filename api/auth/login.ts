@@ -167,4 +167,7 @@ async function loginHandler(req: LoginRequest, res: Response): Promise<Response>
 }
 
 // Export the handler with rate limiting
-export default withRateLimit(loginHandler as (req: Request, res: Response) => Promise<unknown>, loginRateLimitOptions);
+export default withRateLimit(
+  loginHandler as (req: Request, res: Response) => Promise<unknown>,
+  loginRateLimitOptions
+);

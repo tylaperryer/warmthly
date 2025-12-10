@@ -11,11 +11,13 @@ The Yoco SDK is currently loaded **without SRI** due to the unavailability of th
 ## Security Implications
 
 **Without SRI:**
+
 - If Yoco's CDN is compromised, malicious code could be injected
 - No verification that the script hasn't been tampered with
 - Supply chain attack risk
 
 **Current Mitigations:**
+
 - ✅ HTTPS-only loading (enforced)
 - ✅ Version-pinned URL (`/sdk/v1/yoco-sdk-web.js`)
 - ✅ Cross-origin restrictions
@@ -46,21 +48,25 @@ The Yoco SDK is currently loaded **without SRI** due to the unavailability of th
 ### Option 2: Generate Hash Locally (Not Recommended)
 
 **⚠️ Warning:** This method is less secure because:
+
 - The hash must be regenerated every time Yoco updates the SDK
 - No guarantee the file hasn't been tampered with before you download it
 - Manual process prone to errors
 
 **Steps:**
+
 1. Download the SDK file:
+
    ```bash
    curl -o yoco-sdk-web.js https://js.yoco.com/sdk/v1/yoco-sdk-web.js
    ```
 
 2. Generate SHA-384 hash:
+
    ```bash
    # macOS/Linux
    openssl dgst -sha384 -binary yoco-sdk-web.js | openssl base64 -A
-   
+
    # Windows (PowerShell)
    $file = Get-Content yoco-sdk-web.js -Raw -Encoding Byte
    $hash = [System.Security.Cryptography.SHA384]::Create().ComputeHash($file)
@@ -87,6 +93,7 @@ The Yoco SDK is currently loaded **without SRI** due to the unavailability of th
 Once you have the SRI hash, update the code in `warmthly/apps/main/index.html`:
 
 **Current Code (lines 1081-1086):**
+
 ```javascript
 // SECURITY: Subresource Integrity (SRI) hash
 // TODO: Contact Yoco support to obtain the SRI hash for this specific version
@@ -97,6 +104,7 @@ Once you have the SRI hash, update the code in `warmthly/apps/main/index.html`:
 ```
 
 **Updated Code:**
+
 ```javascript
 // SECURITY: Subresource Integrity (SRI) hash
 // Hash obtained from Yoco support on [DATE]
@@ -181,4 +189,3 @@ The payment flow includes multiple security layers:
 **Status:** ⚠️ Pending - SRI hash not yet obtained from Yoco  
 **Priority:** High  
 **Assigned To:** Development Team
-

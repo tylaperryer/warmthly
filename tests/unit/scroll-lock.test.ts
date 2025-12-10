@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   lockBodyScroll,
   forceUnlockScroll,
   cleanupYocoState,
   initYocoStyleObserver,
 } from '@utils/scroll-lock.js';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 describe('Scroll Lock', () => {
   beforeEach(() => {
@@ -14,19 +14,19 @@ describe('Scroll Lock', () => {
     document.body.className = '';
     document.documentElement.className = '';
     window.scrollTo(0, 0);
-    vi.clearAllTimers();
-    vi.useFakeTimers();
+    (vi as any).clearAllTimers();
+    (vi as any).useFakeTimers();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    (vi as any).useRealTimers();
   });
 
   it('should lock body scroll and save position', () => {
     window.scrollTo(0, 100);
     const savedPosition = lockBodyScroll();
 
-    expect(savedPosition).toBeGreaterThanOrEqual(0);
+    (expect(savedPosition) as any).toBeGreaterThanOrEqual(0);
     expect(document.body.classList.contains('modal-open')).toBe(true);
     expect(document.body.style.position).toBe('fixed');
     expect(document.body.style.overflow).toBe('hidden');
@@ -37,7 +37,7 @@ describe('Scroll Lock', () => {
     lockBodyScroll();
 
     forceUnlockScroll();
-    vi.advanceTimersByTime(400);
+    (vi as any).advanceTimersByTime(400);
 
     expect(document.body.classList.contains('modal-open')).toBe(false);
     expect(document.body.style.position).toBe('');
@@ -49,9 +49,9 @@ describe('Scroll Lock', () => {
     document.head.appendChild(yocoStyle);
 
     forceUnlockScroll();
-    vi.advanceTimersByTime(400);
+    (vi as any).advanceTimersByTime(400);
 
-    expect(document.getElementById('yc-injected-styles')).toBeNull();
+    (expect(document.getElementById('yc-injected-styles')) as any).toBeNull();
   });
 
   it('should cleanup Yoco state', () => {
@@ -66,7 +66,7 @@ describe('Scroll Lock', () => {
     document.body.appendChild(embed);
 
     cleanupYocoState();
-    vi.advanceTimersByTime(400);
+    (vi as any).advanceTimersByTime(400);
 
     expect(button.style.display).toBe('inline-block');
     expect(embed.style.display).toBe('none');
@@ -80,22 +80,20 @@ describe('Scroll Lock', () => {
     yocoStyle.id = 'yc-injected-styles';
     document.head.appendChild(yocoStyle);
 
-    vi.advanceTimersByTime(100);
+    (vi as any).advanceTimersByTime(100);
 
     // Style should be removed
-    expect(document.getElementById('yc-injected-styles')).toBeNull();
+    (expect(document.getElementById('yc-injected-styles')) as any).toBeNull();
   });
 
   it('should handle errors gracefully', () => {
-    // @ts-expect-error - Testing error handling
     (globalThis as any).document = undefined;
 
-    expect(() => lockBodyScroll()).not.toThrow();
-    expect(() => forceUnlockScroll()).not.toThrow();
-    expect(() => cleanupYocoState()).not.toThrow();
-    expect(() => initYocoStyleObserver()).not.toThrow();
+    (expect(() => lockBodyScroll()) as any).not.toThrow();
+    (expect(() => forceUnlockScroll()) as any).not.toThrow();
+    (expect(() => cleanupYocoState()) as any).not.toThrow();
+    (expect(() => initYocoStyleObserver()) as any).not.toThrow();
 
-    // @ts-expect-error - Restore
     (globalThis as any).document = window.document;
   });
 });

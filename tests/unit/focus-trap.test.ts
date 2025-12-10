@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { trapFocus } from '@utils/focus-trap.js';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('Focus Trap', () => {
   beforeEach(() => {
@@ -9,7 +9,7 @@ describe('Focus Trap', () => {
   it('should return no-op cleanup for null element', () => {
     const cleanup = trapFocus(null);
     expect(typeof cleanup).toBe('function');
-    expect(() => cleanup()).not.toThrow();
+    (expect(() => cleanup()) as any).not.toThrow();
   });
 
   it('should trap focus within element', () => {
@@ -46,10 +46,10 @@ describe('Focus Trap', () => {
     document.body.appendChild(container);
 
     trapFocus(container);
-    buttons[0].focus();
+    buttons[0]!.focus();
 
     // Tab from last to first
-    buttons[2].focus();
+    buttons[2]!.focus();
     const tabEvent = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
     container.dispatchEvent(tabEvent);
 
@@ -66,7 +66,7 @@ describe('Focus Trap', () => {
     document.body.appendChild(container);
 
     trapFocus(container);
-    buttons[0].focus();
+    buttons[0]!.focus();
 
     // Shift+Tab from first to last
     const shiftTabEvent = new KeyboardEvent('keydown', {

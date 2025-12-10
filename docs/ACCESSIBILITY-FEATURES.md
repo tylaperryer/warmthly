@@ -51,7 +51,6 @@ Warmthly implements a comprehensive reading level transformation system that pro
 #### Components
 
 1. **Reading Level Utility** (`lego/utils/reading-level.ts`)
-
    - Content transformation algorithms
    - Word simplification dictionary (200+ words)
    - Sentence breaking logic
@@ -359,14 +358,12 @@ A web component that provides all multimedia accessibility features in one place
 #### Multimedia Accessibility
 
 1. **Provide all formats** when possible:
-
    - Sign language video
    - Audio description
    - Full transcript
    - Captions
 
 2. **Quality matters**:
-
    - Clear sign language videos
    - Detailed audio descriptions
    - Accurate transcripts

@@ -35,7 +35,7 @@ async function validateLanguageCode(langCode: string): Promise<boolean> {
       const availableLanguages: string[] = data.languages || [];
       return availableLanguages.includes(normalized);
     }
-  } catch (error) {
+  } catch {
     // If API fails, allow the code (will be validated by translation service)
     return true;
   }
@@ -50,7 +50,7 @@ class WarmthlyI18n extends HTMLElement {
 
   connectedCallback() {
     try {
-      this.init();
+      void this.init();
       this.setupLanguageSwitcher();
       this.translatePage();
 
@@ -185,23 +185,25 @@ class WarmthlyI18n extends HTMLElement {
       return;
     }
 
-    switcher.addEventListener('change', async e => {
+    switcher.addEventListener('change', e => {
       const target = e.target as HTMLSelectElement;
       const newLang = target.value;
 
       // Validate language code
-      const isValid = await validateLanguageCode(newLang);
-      if (!isValid) {
-        // Phase 7 Issue 7.6: Environment-aware logging
-        if (import.meta.env?.DEV) {
-          console.warn(`[i18n] Invalid language code: ${newLang}`);
+      void (async () => {
+        const isValid = await validateLanguageCode(newLang);
+        if (!isValid) {
+          // Phase 7 Issue 7.6: Environment-aware logging
+          if (import.meta.env?.DEV) {
+            console.warn(`[i18n] Invalid language code: ${newLang}`);
+          }
+          // Reset to current language
+          (switcher as HTMLSelectElement).value = this.currentLanguage;
+          return;
         }
-        // Reset to current language
-        (switcher as HTMLSelectElement).value = this.currentLanguage;
-        return;
-      }
 
-      await this.handleLanguageChange(newLang);
+        await this.handleLanguageChange(newLang);
+      })();
     });
 
     // Set current language

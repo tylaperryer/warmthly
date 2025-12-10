@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Mock redis module
-vi.mock('redis', () => {
+(vi as any).mock('redis', () => {
   const mockClient = {
     isOpen: false,
     connect: vi.fn(),
@@ -65,11 +65,11 @@ describe('Redis Client', () => {
     const client = await getRedisClient();
 
     expect(createClient).toHaveBeenCalledWith(
-      expect.objectContaining({
+      (expect as any).objectContaining({
         url: 'redis://localhost:6379',
       })
     );
-    expect(client).toBeDefined();
+    (expect(client) as any).toBeDefined();
   });
 
   it('should return existing client if already connected', async () => {
@@ -86,7 +86,7 @@ describe('Redis Client', () => {
     const client2 = await getRedisClient();
 
     expect(client1).toBe(client2);
-    expect(createClient).toHaveBeenCalledTimes(1);
+    (expect(createClient) as any).toHaveBeenCalledTimes(1);
   });
 
   it('should handle connection errors', async () => {
@@ -101,7 +101,7 @@ describe('Redis Client', () => {
         : 'redis://invalid:6379';
     const mockClient = createClient({ url: redisUrl });
 
-    (mockClient.connect as ReturnType<typeof vi.fn>).mockRejectedValue(
+    (mockClient.connect as ReturnType<typeof vi.fn> as any).mockRejectedValue(
       new Error('Connection failed')
     );
 
@@ -127,8 +127,8 @@ describe('Redis Client', () => {
     const { getRedisClient } = await import('@api/redis-client.js');
     await getRedisClient();
 
-    expect(mockClient.on).toHaveBeenCalledWith('error', expect.any(Function));
-    expect(mockClient.on).toHaveBeenCalledWith('connect', expect.any(Function));
-    expect(mockClient.on).toHaveBeenCalledWith('ready', expect.any(Function));
+    expect(mockClient.on).toHaveBeenCalledWith('error', (expect as any).any(Function));
+    expect(mockClient.on).toHaveBeenCalledWith('connect', (expect as any).any(Function));
+    expect(mockClient.on).toHaveBeenCalledWith('ready', (expect as any).any(Function));
   });
 });

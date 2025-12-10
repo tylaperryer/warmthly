@@ -3,15 +3,15 @@
  * Tests for lego/core/error-boundary.ts
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { getContainer, resetContainer } from '@core/di-container.js';
 import {
   ErrorBoundary,
   ErrorSeverity,
   ContextualError,
   getErrorBoundary,
 } from '@core/error-boundary.js';
-import { getContainer, resetContainer } from '@core/di-container.js';
 import { ServiceIdentifiers, createLoggerService } from '@core/services/index.js';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Error Boundary', () => {
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe('Error Boundary', () => {
 
   it('should create error boundary instance', () => {
     const boundary = new ErrorBoundary();
-    expect(boundary).toBeInstanceOf(ErrorBoundary);
+    (expect(boundary) as any).toBeInstanceOf(ErrorBoundary);
   });
 
   it('should handle error with default strategy', async () => {
@@ -42,7 +42,7 @@ describe('Error Boundary', () => {
     const customStrategy = {
       canHandle: () => true,
       recover: vi.fn().mockResolvedValue(undefined),
-    };
+    } as any;
 
     boundary.addStrategy(customStrategy);
 

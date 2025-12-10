@@ -9,6 +9,8 @@ import { readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
+import { load } from 'cheerio';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = join(__dirname, '..');
@@ -52,9 +54,7 @@ function findHTMLFiles(dir: string, fileList: string[] = []): string[] {
 /**
  * Extract external links from HTML
  */
-function extractExternalLinks(
-  content: string
-): Array<{
+function extractExternalLinks(content: string): Array<{
   url: string;
   line: number;
   anchorText: string;
@@ -78,13 +78,35 @@ function extractExternalLinks(
       if (!url) continue;
       const attributes = match[2] || '';
       const anchorTextMatch = match[3];
-      const anchorText = anchorTextMatch ? anchorTextMatch.replace(/<\/?[a-z][\s\S]*?>/giu, '').trim() : '';
+      // SECURITY: Use Cheerio to safely extract text instead of regex
+      let anchorText = '';
+      if (anchorTextMatch) {
+        try {
+          const $ = load(anchorTextMatch);
+          anchorText = $.text().trim();
+        } catch {
+          // Fallback: basic text extraction if Cheerio fails
+          anchorText = anchorTextMatch.replace(/<\/?[a-z][\s\S]*?>/giu, '').trim();
+        }
+      }
 
       // Only external links - use case-insensitive check
       const normalizedUrl = url.trim().toLowerCase();
       if (normalizedUrl.startsWith('http://') || normalizedUrl.startsWith('https://')) {
+        // SECURITY: Validate URL properly instead of substring matching
+        let isWarmthlyDomain = false;
+        try {
+          const urlObj = new URL(url);
+          const hostname = urlObj.hostname.toLowerCase();
+          isWarmthlyDomain =
+            hostname === 'warmthly.org' ||
+            hostname === 'www.warmthly.org' ||
+            (hostname.endsWith('.warmthly.org') && hostname.split('.').length === 3);
+        } catch {
+          // Invalid URL, skip
+        }
         // Skip internal warmthly.org links
-        if (!normalizedUrl.includes('warmthly.org')) {
+        if (!isWarmthlyDomain) {
           links.push({
             url,
             line: index + 1,

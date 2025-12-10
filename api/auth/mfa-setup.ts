@@ -6,7 +6,12 @@
 
 import jwt from 'jsonwebtoken';
 
-import { withRateLimit, apiRateLimitOptions, type Request, type Response } from '../middleware/rate-limit.js';
+import {
+  withRateLimit,
+  apiRateLimitOptions,
+  type Request,
+  type Response,
+} from '../middleware/rate-limit.js';
 import logger from '../utils/logger.js';
 
 import { generateTOTPSecret, generateTOTPQRCode, storeTOTPSecret } from './totp.js';

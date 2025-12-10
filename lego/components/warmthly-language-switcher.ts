@@ -346,7 +346,7 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
         e.preventDefault();
         const code = option.dataset.code;
         if (code) {
-          this.selectLanguage(code);
+          void this.selectLanguage(code);
         }
       }
     });
@@ -376,9 +376,7 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
         return;
       }
 
-      const options = Array.from(
-        this.querySelectorAll('.language-switcher__option')
-      ) ;
+      const options = Array.from(this.querySelectorAll('.language-switcher__option'));
       const currentIndex = options.findIndex(opt => opt === document.activeElement);
 
       switch (e.key) {
@@ -390,17 +388,19 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
           (this.querySelector('.language-switcher__button') as HTMLElement)?.focus();
           break;
 
-        case 'ArrowDown':
+        case 'ArrowDown': {
           e.preventDefault();
           const nextIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
           (options[nextIndex] as HTMLElement)?.focus();
           break;
+        }
 
-        case 'ArrowUp':
+        case 'ArrowUp': {
           e.preventDefault();
           const prevIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
           (options[prevIndex] as HTMLElement)?.focus();
           break;
+        }
 
         case 'Enter':
         case ' ':
@@ -408,7 +408,7 @@ class WarmthlyLanguageSwitcher extends HTMLElement {
           if (document.activeElement?.classList.contains('language-switcher__option')) {
             const code = (document.activeElement as HTMLElement).dataset.code;
             if (code) {
-              this.selectLanguage(code);
+              void this.selectLanguage(code);
             }
           }
           break;

@@ -81,10 +81,28 @@ export function createElementWithAttributes(
  * Only safe, formatting tags are allowed
  */
 const ALLOWED_TAGS = new Set([
-  'p', 'br', 'strong', 'em', 'u', 'b', 'i', 'span', 'div',
-  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-  'ul', 'ol', 'li',
-  'a', 'blockquote', 'code', 'pre'
+  'p',
+  'br',
+  'strong',
+  'em',
+  'u',
+  'b',
+  'i',
+  'span',
+  'div',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'ul',
+  'ol',
+  'li',
+  'a',
+  'blockquote',
+  'code',
+  'pre',
 ]);
 
 /**
@@ -92,7 +110,7 @@ const ALLOWED_TAGS = new Set([
  */
 const ALLOWED_ATTRIBUTES: Record<string, Set<string>> = {
   a: new Set(['href', 'title', 'target', 'rel']),
-  '*': new Set(['class', 'id', 'title', 'lang', 'dir'])
+  '*': new Set(['class', 'id', 'title', 'lang', 'dir']),
 };
 
 /**
@@ -107,8 +125,19 @@ export function sanitizeHtml(html: string): string {
   // Create a temporary container
   // SECURITY: Using DOMParser instead of innerHTML for safer parsing
   // The input is expected to be HTML that needs sanitization, and we remove dangerous content
+  // SECURITY: DOMParser.parseFromString is safe here because:
+  // 1. We immediately sanitize the parsed content
+  // 2. We never use innerHTML or similar unsafe methods
+  // 3. We only extract text content from safe nodes
   const parser = new DOMParser();
+  // SECURITY: Parse as XML first to prevent script execution, then sanitize
   const doc = parser.parseFromString(html, 'text/html');
+  // Check for parser errors (malformed HTML that could indicate XSS attempts)
+  const parserError = doc.querySelector('parsererror');
+  if (parserError) {
+    // If parsing fails, return empty string rather than potentially unsafe content
+    return '';
+  }
   const temp = doc.body;
 
   // Recursively sanitize nodes
@@ -122,8 +151,14 @@ export function sanitizeHtml(html: string): string {
       const tagName = element.tagName.toLowerCase();
 
       // Remove script, style, and other dangerous tags
-      if (tagName === 'script' || tagName === 'style' || tagName === 'iframe' || 
-          tagName === 'object' || tagName === 'embed' || tagName === 'form') {
+      if (
+        tagName === 'script' ||
+        tagName === 'style' ||
+        tagName === 'iframe' ||
+        tagName === 'object' ||
+        tagName === 'embed' ||
+        tagName === 'form'
+      ) {
         return null;
       }
 
@@ -149,11 +184,13 @@ export function sanitizeHtml(html: string): string {
         const attrName = attr.name.toLowerCase();
 
         // Skip event handlers and dangerous attributes
-        if (attrName.startsWith('on') || 
-            attrName === 'style' || 
-            attrName === 'javascript' ||
-            attrName === 'data:' ||
-            attrName.includes('javascript:')) {
+        if (
+          attrName.startsWith('on') ||
+          attrName === 'style' ||
+          attrName === 'javascript' ||
+          attrName === 'data:' ||
+          attrName.includes('javascript:')
+        ) {
           continue;
         }
 

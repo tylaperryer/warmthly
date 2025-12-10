@@ -5,13 +5,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
+
 import { generateCSRFToken, validateCSRFToken } from '../../../api/security/csrf.js';
 
 describe('CSRF Protection', () => {
   describe('generateCSRFToken', () => {
     it('should generate a token', () => {
       const token = generateCSRFToken();
-      expect(token).toBeDefined();
+      (expect(token) as any).toBeDefined();
       expect(typeof token).toBe('string');
       expect(token.length).toBe(64); // 32 bytes = 64 hex characters
     });
@@ -19,12 +20,12 @@ describe('CSRF Protection', () => {
     it('should generate unique tokens', () => {
       const token1 = generateCSRFToken();
       const token2 = generateCSRFToken();
-      expect(token1).not.toBe(token2);
+      (expect(token1) as any).not.toBe(token2);
     });
 
     it('should generate tokens with valid hex characters', () => {
       const token = generateCSRFToken();
-      expect(token).toMatch(/^[0-9a-f]{64}$/);
+      (expect(token) as any).toMatch(/^[0-9a-f]{64}$/);
     });
   });
 
@@ -79,8 +80,7 @@ describe('CSRF Protection', () => {
       // Times should be similar (within 10ms) for constant-time comparison
       // Note: This is a basic check; true constant-time verification requires more sophisticated testing
       const timeDiff = Math.abs(timeMatch - timeMismatch);
-      expect(timeDiff).toBeLessThan(10);
+      (expect(timeDiff) as any).toBeLessThan(10);
     });
   });
 });
-

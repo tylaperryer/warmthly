@@ -6,8 +6,11 @@
  */
 
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
-import { join, extname, basename, dirname } from 'path';
+import { join, extname, basename, dirname, resolve, normalize } from 'path';
 import { fileURLToPath } from 'url';
+
+import { load } from 'cheerio';
+
 import { extractTextContent } from './utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -58,6 +61,7 @@ function findHTMLFiles(dir: string, fileList: string[] = []): string[] {
 
 /**
  * Extract keywords from content
+ * SECURITY: Uses Cheerio HTML parser instead of regex to prevent XSS bypasses
  */
 function extractKeywords(content: string, title: string): string[] {
   const keywords: string[] = [];
@@ -66,25 +70,30 @@ function extractKeywords(content: string, title: string): string[] {
   const titleWords = title.toLowerCase().match(/\b\w{4,}\b/g) || [];
   keywords.push(...titleWords);
 
-  // Extract from headings - improved to handle multi-byte characters
-  const headings = content.match(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/giu) || [];
-  headings.forEach(heading => {
-    // Remove all HTML tags, not just first level - Unicode-aware
-    let text = heading.replace(/<\/?[a-z][\s\S]*?>/giu, '').toLowerCase();
-    // Handle multi-byte word boundaries better
-    const words = text.match(/[\p{L}\p{N}]{4,}/gu) || [];
-    keywords.push(...words);
-  });
+  try {
+    // Use Cheerio to safely parse HTML and extract text
+    const $ = load(content);
 
-  // Extract from strong/em tags - improved to handle multi-byte characters
-  const emphasis = content.match(/<(strong|em|b)[^>]*>([\s\S]*?)<\/(strong|em|b)>/giu) || [];
-  emphasis.forEach(em => {
-    // Remove all HTML tags, not just first level - Unicode-aware
-    let text = em.replace(/<\/?[a-z][\s\S]*?>/giu, '').toLowerCase();
-    // Handle multi-byte word boundaries better
-    const words = text.match(/[\p{L}\p{N}]{4,}/gu) || [];
-    keywords.push(...words);
-  });
+    // Extract from headings - safely parse with Cheerio
+    $('h1, h2, h3, h4, h5, h6').each(function () {
+      const text = $(this).text().toLowerCase();
+      const words = text.match(/[\p{L}\p{N}]{4,}/gu) || [];
+      keywords.push(...words);
+    });
+
+    // Extract from strong/em tags - safely parse with Cheerio
+    $('strong, em, b').each(function () {
+      const text = $(this).text().toLowerCase();
+      const words = text.match(/[\p{L}\p{N}]{4,}/gu) || [];
+      keywords.push(...words);
+    });
+  } catch (error) {
+    // Fallback: if parsing fails, skip keyword extraction from HTML
+    console.warn(
+      '[extractKeywords] Failed to parse HTML:',
+      error instanceof Error ? error.message : String(error)
+    );
+  }
 
   // Remove duplicates and common words
   const commonWords = [
@@ -107,9 +116,20 @@ function extractKeywords(content: string, title: string): string[] {
 
 /**
  * Get URL from file path
+ * SECURITY: Validates and normalizes file paths to prevent path traversal
  */
 function getUrlFromPath(filePath: string): string {
-  const relative = filePath.replace(projectRoot, '').replace(/\\/g, '/');
+  // Normalize and resolve path to prevent path traversal attacks
+  const normalizedPath = normalize(resolve(projectRoot, filePath));
+  const normalizedRoot = normalize(resolve(projectRoot));
+
+  // Ensure the resolved path is within the project root
+  if (!normalizedPath.startsWith(normalizedRoot)) {
+    console.warn(`[getUrlFromPath] Path outside project root: ${filePath}`);
+    return '';
+  }
+
+  const relative = normalizedPath.replace(normalizedRoot, '').replace(/\\/g, '/');
 
   if (relative.includes('/apps/main/')) {
     const path = relative.replace('/apps/main', '');
@@ -141,7 +161,6 @@ function getUrlFromPath(filePath: string): string {
 
   return relative;
 }
-
 
 /**
  * Calculate relevance score between content and potential link
@@ -188,10 +207,31 @@ function generateSuggestions(): void {
   // Build page index
   const pages: PageContent[] = [];
   htmlFiles.forEach(file => {
-    const content = readFileSync(file, 'utf-8');
+    // SECURITY: Validate file path before reading
+    const normalizedFile = normalize(resolve(projectRoot, file));
+    const normalizedRoot = normalize(resolve(projectRoot));
+    if (!normalizedFile.startsWith(normalizedRoot)) {
+      console.warn(`[generateSuggestions] Skipping file outside project root: ${file}`);
+      return;
+    }
+
+    const content = readFileSync(normalizedFile, 'utf-8');
     const textContent = extractTextContent(content);
-    const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/i);
-    const title = titleMatch ? titleMatch[1] : basename(file, '.html');
+
+    // SECURITY: Use Cheerio to safely extract title
+    let title = basename(file, '.html');
+    try {
+      const $ = load(content);
+      const titleElement = $('title').first();
+      if (titleElement.length > 0) {
+        title = titleElement.text().trim() || title;
+      }
+    } catch (error) {
+      console.warn(
+        `[generateSuggestions] Failed to extract title from ${file}:`,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
 
     pages.push({
       file: file.replace(projectRoot, '').replace(/\\/g, '/'),

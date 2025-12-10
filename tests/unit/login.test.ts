@@ -6,14 +6,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock jsonwebtoken
-vi.mock('jsonwebtoken', () => ({
+(vi as any).mock('jsonwebtoken', () => ({
   default: {
     sign: vi.fn((_payload: unknown, _secret: unknown, _options: unknown) => 'mock-jwt-token'),
   },
 }));
 
 // Mock rate-limit
-vi.mock('@api/middleware/rate-limit.js', () => ({
+(vi as any).mock('@api/middleware/rate-limit.js', () => ({
   withRateLimit: vi.fn((handler: unknown) => handler),
   loginRateLimitOptions: {},
 }));

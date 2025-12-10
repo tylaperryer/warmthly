@@ -137,7 +137,11 @@ class WarmthlyButton extends BaseComponent {
         this.loadingSpinner = document.createElement('span');
         this.loadingSpinner.className = 'button-spinner';
         this.loadingSpinner.setAttribute('aria-hidden', 'true');
-        this.loadingSpinner.innerHTML = '<span class="spinner"></span>';
+        // SECURITY: Use DOM methods instead of innerHTML
+        this.loadingSpinner.textContent = '';
+        const spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        this.loadingSpinner.appendChild(spinner);
       }
 
       // Replace content with spinner

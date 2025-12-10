@@ -120,7 +120,8 @@ class WarmthlyModal extends BaseComponent {
     const closeButton = document.createElement('button');
     closeButton.className = 'modal-close';
     closeButton.setAttribute('aria-label', 'Close dialog');
-    closeButton.innerHTML = '×';
+    // SECURITY: Use textContent instead of innerHTML
+    closeButton.textContent = '×';
     closeButton.addEventListener('click', () => this.close());
     this.dialogElement.appendChild(closeButton);
 

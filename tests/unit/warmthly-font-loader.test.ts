@@ -10,7 +10,7 @@ describe('WarmthlyFontLoader Component', () => {
     await import('@components/warmthly-font-loader.js');
 
     const element = document.createElement('warmthly-font-loader');
-    expect(element).toBeDefined();
+    (expect(element) as any).toBeDefined();
   });
 
   it('should initialize font loader on connection', async () => {
@@ -22,15 +22,14 @@ describe('WarmthlyFontLoader Component', () => {
     // Component should initialize font loader
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    expect(element).toBeDefined();
+    (expect(element) as any).toBeDefined();
   });
 
   it('should handle errors gracefully', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy: any = vi.spyOn(console, 'error').mockImplementation(() => {});
     await import('@components/warmthly-font-loader.js');
 
     const element = document.createElement('warmthly-font-loader');
-    // @ts-expect-error - Testing error handling
     (globalThis as any).document = undefined;
 
     try {
@@ -44,7 +43,6 @@ describe('WarmthlyFontLoader Component', () => {
       // Expected
     }
 
-    // @ts-expect-error - Restore
     (globalThis as any).document = window.document;
     consoleSpy.mockRestore();
   });

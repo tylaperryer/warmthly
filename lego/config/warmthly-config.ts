@@ -182,9 +182,9 @@ export const WARMTHLY_CONFIG: WarmthlyConfig = {
  * @param app - Application name
  * @returns Application URL, falls back to main URL if invalid
  */
-export function getAppUrl(app: AppName | string): string {
+export function getAppUrl(app: AppName): string {
   if (app in WARMTHLY_CONFIG.urls) {
-    return WARMTHLY_CONFIG.urls[app as AppName];
+    return WARMTHLY_CONFIG.urls[app];
   }
   return WARMTHLY_CONFIG.urls.main;
 }
@@ -194,9 +194,9 @@ export function getAppUrl(app: AppName | string): string {
  * @param key - Path configuration key
  * @returns Path string, empty string if key not found
  */
-export function getPath(key: PathKey | string): string {
+export function getPath(key: PathKey): string {
   if (key in WARMTHLY_CONFIG.paths) {
-    return WARMTHLY_CONFIG.paths[key as PathKey];
+    return WARMTHLY_CONFIG.paths[key];
   }
   return '';
 }
@@ -206,9 +206,9 @@ export function getPath(key: PathKey | string): string {
  * @param app - Application name
  * @returns Array of navigation items, falls back to main navigation if invalid
  */
-export function getNavigation(app: AppName | string): readonly NavigationItem[] {
+export function getNavigation(app: AppName): readonly NavigationItem[] {
   if (app in WARMTHLY_CONFIG.navigation) {
-    return WARMTHLY_CONFIG.navigation[app as AppName];
+    return WARMTHLY_CONFIG.navigation[app];
   }
   return WARMTHLY_CONFIG.navigation.main;
 }

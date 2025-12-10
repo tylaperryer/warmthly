@@ -131,7 +131,8 @@ function validateRobots(): void {
 
     // Check for invalid directives
     const validDirectives = ['user-agent', 'disallow', 'allow', 'sitemap', 'crawl-delay', 'host'];
-    const directive = trimmed.split(':')[0].toLowerCase().trim();
+    const directiveParts = trimmed.split(':');
+    const directive = directiveParts[0]?.toLowerCase().trim();
     if (directive && !validDirectives.includes(directive) && !trimmed.startsWith('#')) {
       issues.push({
         line: lineNum,

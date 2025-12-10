@@ -1,7 +1,7 @@
 /**
  * Authentication Endpoints
  * Centralized exports for all auth endpoints
- * 
+ *
  * Usage:
  *   import { login } from '@api/auth/index.js';
  *   // or
@@ -19,4 +19,3 @@ export {
   getTOTPSecret,
   isMFAEnabled,
 } from './totp.js';
-

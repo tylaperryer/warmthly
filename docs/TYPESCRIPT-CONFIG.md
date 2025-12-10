@@ -17,15 +17,18 @@ warmthly/
 ## Config File Purposes
 
 ### 1. Root `tsconfig.json`
+
 **Purpose:** Main TypeScript configuration for the entire project  
 **Used by:** Vite, IDE, general type checking  
 **Includes:**
+
 - `lego/**/*` - Component library
 - `apps/**/*.ts` - Application code
 - `api/**/*.ts` - API code
 - `scripts/**/*.ts` - Scripts (via include)
 
 **Excludes:**
+
 - `scripts/**/*` - Excluded to prevent conflicts (scripts have own config)
 - `**/*.test.ts` - Test files (tests have own config)
 - `dist`, `build`, `coverage` - Build outputs
@@ -33,40 +36,49 @@ warmthly/
 **Note:** While `scripts/**/*.ts` is included in the `include` array, it's also excluded. This is intentional - scripts use their own config that extends root.
 
 ### 2. `.config/tsconfig.json`
+
 **Purpose:** TypeScript config for files in `.config/` directory  
 **Used by:** Vite config, Vitest config, Playwright config  
 **Includes:**
+
 - `../scripts/**/*.ts` - Scripts (for config files that reference scripts)
 - `../lego/**/*` - Component library
 - `../apps/**/*.ts` - Application code
 
 **Why separate?**
+
 - Config files in `.config/` need to reference scripts
 - Different `baseUrl` and path resolution
 - Prevents circular dependencies
 
 ### 3. `tests/tsconfig.json`
+
 **Purpose:** Test-specific TypeScript configuration  
 **Used by:** Vitest, test files  
 **Extends:** Root `tsconfig.json`  
 **Special settings:**
+
 - `noEmit: true` - Tests don't need output
 - `types: []` - No default types (Vitest provides its own)
 - `moduleResolution: "node"` - Node.js-style resolution for tests
 
 **Includes:**
+
 - All test files (`**/*.ts`, `**/*.tsx`)
 - `types.d.ts` - Test type definitions
 
 ### 4. `scripts/tsconfig.json`
+
 **Purpose:** Script-specific TypeScript configuration  
 **Used by:** Build scripts, validation scripts, automation scripts  
 **Extends:** Root `tsconfig.json`  
 **Special settings:**
+
 - `noEmit: true` - Scripts run directly via tsx
 - `moduleResolution: "bundler"` - Modern module resolution
 
 **Includes:**
+
 - All script files (`**/*.ts`)
 
 ## Why Multiple Configs?
@@ -122,12 +134,15 @@ npm run type-check
 ## Common Issues
 
 ### Issue: Scripts not type-checked
+
 **Solution:** Scripts have their own config. Run scripts via `tsx` which uses `scripts/tsconfig.json`.
 
 ### Issue: Config files can't find scripts
+
 **Solution:** `.config/tsconfig.json` includes scripts explicitly. This is intentional.
 
 ### Issue: Tests have type errors
+
 **Solution:** Tests use `tests/tsconfig.json` which extends root but has different settings. Check that test types are correct.
 
 ## Best Practices
@@ -143,4 +158,3 @@ npm run type-check
 - `warmthly/tests/tsconfig.json` - Test configuration
 - `warmthly/scripts/tsconfig.json` - Script configuration
 - `warmthly/.config/tsconfig.json` - Config directory configuration
-
