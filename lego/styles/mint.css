@@ -1,5 +1,14 @@
 /* Mint App Specific Styles */
 
+/* Ensure proper background */
+body {
+  background: var(--warmthly-background) !important;
+}
+
+html {
+  background: var(--warmthly-background) !important;
+}
+
 /* Mint-specific header text color */
 .top-left-heading .mint-text {
   color: var(--warmthly-orange);
@@ -14,6 +23,9 @@
 /* Database Section */
 .database-section {
   margin: 3rem 0;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .database-header {
@@ -56,17 +68,21 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
   margin-bottom: 3rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .stat-item {
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+  background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 2rem;
-  border: 1px solid rgba(255,140,66,0.12);
+  border: 1px solid rgba(255,140,66,0.15);
   box-shadow: 0 4px 24px rgba(0,0,0,0.04);
   text-align: center;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .stat-value {
@@ -88,7 +104,7 @@
 /* Donation Pool Container */
 .donation-pool-container {
   position: relative;
-  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 24px;
@@ -223,7 +239,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 16px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.2);
   touch-action: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -380,7 +396,7 @@
 
 .communication-pool-container {
   position: relative;
-  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 24px;
@@ -397,7 +413,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 16px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.2);
   touch-action: none;
   -webkit-overflow-scrolling: touch;
 }
