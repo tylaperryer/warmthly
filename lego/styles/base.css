@@ -63,7 +63,8 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   color: var(--text-color);
-  background: var(--warmthly-background);
+  background-color: #fff6f1;
+  background: #fff6f1;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
