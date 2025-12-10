@@ -1540,8 +1540,10 @@
           const gradientHeight = bodyBefore.height;
           const isFixed = bodyBefore.position === 'fixed';
           const contentExceedsViewport = documentHeight > viewportHeight;
+          const bodyBeforeContent = bodyBefore.content;
+          const gradientRemoved = bodyBeforeContent === 'none' || bodyBeforeContent === 'normal' || !hasGradient;
           
-          fetch('http://127.0.0.1:7242/ingest/d5b70cef-0776-4ac0-864b-289eb71a6fa1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:1510',message:'Page load - gradient visibility check',data:{viewportHeight,documentHeight,contentExceedsViewport,hasGradient,gradientHeight,isFixed,htmlBg:htmlStyles.backgroundColor,bodyBg:bodyStyles.backgroundColor},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'B'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/d5b70cef-0776-4ac0-864b-289eb71a6fa1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:1510',message:'Page load - gradient visibility check (post-fix)',data:{viewportHeight,documentHeight,contentExceedsViewport,hasGradient,gradientHeight,isFixed,bodyBeforeContent,gradientRemoved,htmlBg:htmlStyles.backgroundColor,bodyBg:bodyStyles.backgroundColor},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
         } catch(e) {}
       }, 500);
     })();
