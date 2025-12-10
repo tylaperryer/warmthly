@@ -45,20 +45,24 @@ function copyRecursive(src: string, dest: string) {
 async function copyLegoToApps() {
   console.log('📋 Copying lego directory...');
 
+  // dist/lego/ should exist at root after preserve-lego.ts restore
+  // This is where Cloudflare Pages will serve /lego/ from
   if (!existsSync(distLegoDir)) {
-    console.warn('⚠️  dist/lego directory not found, nothing to copy');
-    return;
+    console.error('❌ dist/lego directory not found at root!');
+    console.error('   This should have been restored by preserve-lego.ts');
+    console.error('   Check that the build process completed successfully.');
+    process.exit(1);
   }
 
-  // Ensure dist/lego/ exists at root for Cloudflare Pages (serves /lego/ from root)
-  // Note: preserve-lego.ts should have already restored this, but we verify it exists
-  const rootLegoDir = join(rootDir, 'dist', 'lego');
-  if (!existsSync(rootLegoDir)) {
-    console.log('  Creating dist/lego/ at root for Cloudflare Pages...');
-    copyRecursive(distLegoDir, rootLegoDir);
-  } else {
-    console.log('  ✓ dist/lego/ already exists at root (preserved by preserve-lego.ts)');
+  // Verify that dist/lego has actual files
+  const legoComponentsDir = join(distLegoDir, 'components');
+  if (!existsSync(legoComponentsDir)) {
+    console.error('❌ dist/lego/components directory not found!');
+    console.error('   The lego directory may not have been compiled correctly.');
+    process.exit(1);
   }
+
+  console.log('  ✓ dist/lego/ exists at root (for Cloudflare Pages /lego/ paths)');
 
   // Copy to each app's directory for relative path support
   for (const app of apps) {
@@ -75,6 +79,7 @@ async function copyLegoToApps() {
   }
 
   console.log('✅ Lego directory available at root and all apps');
+  console.log(`   Root: ${distLegoDir}`);
 }
 
 // Run if called directly
