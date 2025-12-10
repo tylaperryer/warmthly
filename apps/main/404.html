@@ -1,1608 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
-  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
-  <warmthly-head 
-    title="Warmthly - Rehumanize Our World"
-    description="Warmthly is a global movement to make empathy a measurable part of our systems."
-    app="main"
-    viewport="0.75"
-    preconnects="https://mint.warmthly.org, https://post.warmthly.org">
-  </warmthly-head>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found</title>
   <style>
-    /* Hide body until CSS loads - base.css handles the animation */
-    body:not(.css-loaded) {
-      visibility: hidden;
-      opacity: 0;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    :root { color-scheme: light; }
-    html {
-      background-color: #fff6f1;
-      min-height: 100vh;
+    
+    @font-face {
+      font-family: 'Cormorant Garamond';
+      font-style: normal;
+      font-weight: 300 700;
+      font-display: swap;
+      src: url('/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype');
     }
-    body.fonts-loaded {
-      opacity: 1;
-      visibility: visible;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: var(--spacing-24) var(--spacing-6) var(--spacing-10);
-      text-align: center;
-      color: var(--text-color-light);
-      position: relative;
-      z-index: 1;
-    }
-    .logo {
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-2xl);
-      font-weight: 600;
-      line-height: var(--line-height-tight);
-      margin-bottom: var(--spacing-4);
-      color: var(--warmthly-orange);
-      letter-spacing: var(--letter-spacing-tight);
-    }
-    .subtitle {
-      font-size: var(--font-size-base);
-      color: var(--text-color-light);
-      font-weight: 400;
-      line-height: var(--line-height-base);
-      margin-bottom: var(--spacing-12);
-      font-family: 'Inter', sans-serif;
-    }
-    .video-section {
-      margin: var(--spacing-12) 0;
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-      box-shadow: 0 var(--spacing-2) var(--spacing-8) rgba(0, 0, 0, 0.1);
-    }
-    .video-container {
-      position: relative;
-      padding-bottom: 56.25%;
-      height: 0;
-      overflow: hidden;
-      background: #000;
-      border-radius: var(--radius-xl);
-    }
-    .video-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
+    
+    html, body {
       height: 100%;
-      border: none;
-      border-radius: var(--radius-xl);
+      width: 100%;
+      overflow: hidden;
     }
-    .method-section {
+    
+    body {
+      background-color: #0078d7;
+      color: #ffffff;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      padding: 0;
+      position: relative;
+    }
+    
+    .warmthly-logo {
+      position: fixed;
+      top: 1.5rem;
+      left: 1.5rem;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 700;
+      font-size: 2.5rem;
+      line-height: 1.2;
+      color: #ffffff;
+      user-select: none;
+      text-decoration: none;
+      letter-spacing: normal;
+      z-index: 1000;
+    }
+    
+    .warmthly-logo:hover {
+      opacity: 0.9;
+    }
+    
+    .bsod-container {
+      padding: 100px 0 60px 80px;
       text-align: left;
-      margin: var(--spacing-16) auto;
-      padding: var(--spacing-12);
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: var(--radius-xl);
-      border: 1px solid rgba(255, 140, 66, 0.15);
-      max-width: 700px;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1),
-                  transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
     
-    .method-section.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .method-section .section-title {
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-xl);
-      font-weight: 600;
-      line-height: var(--line-height-tight);
-      color: var(--text-color-light);
-      margin-bottom: var(--spacing-4);
-      text-align: center;
-    }
-    .method-section .section-subtitle {
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-lg);
-      font-weight: 600;
-      line-height: var(--line-height-tight);
-      color: var(--text-color-light);
-      margin-top: var(--spacing-12);
-      margin-bottom: var(--spacing-6);
-      text-align: center;
-    }
-    .method-section .section-subtitle:first-of-type {
-      margin-top: var(--spacing-8);
-    }
-    .method-section .intro-paragraph {
-      text-align: center;
-      font-size: var(--font-size-lg);
-      line-height: var(--line-height-base);
-      color: var(--text-color-light);
-      margin-bottom: var(--spacing-10);
-    }
-    .method-section .intro-paragraph strong {
-      color: var(--text-color-light);
-      font-weight: 600;
-    }
-    .method-step {
-      margin-bottom: var(--spacing-8);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s,
-                  transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s;
+    .sad-face {
+      font-size: 90px;
+      line-height: 1;
+      margin-bottom: 30px;
+      font-weight: normal;
     }
     
-    .method-section.visible .method-step {
-      opacity: 1;
-      transform: translateY(0);
+    .main-message {
+      font-size: 26px;
+      line-height: 1.4;
+      margin-bottom: 30px;
+      font-weight: 300;
     }
     
-    .method-section.visible .method-step:nth-child(2) {
-      transition-delay: 0.3s;
+    .progress-section {
+      margin-bottom: 30px;
     }
     
-    .method-section.visible .method-step:nth-child(3) {
-      transition-delay: 0.4s;
+    .progress-text {
+      font-size: 20px;
+      margin-bottom: 50px;
+      font-weight: 300;
     }
     
-    .method-section.visible .method-step:nth-child(4) {
-      transition-delay: 0.5s;
+    .info-text {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      font-weight: 300;
     }
     
-    .method-step:last-child {
-      margin-bottom: 0;
-    }
-    .method-step h3 {
-      font-family: 'Inter', sans-serif;
-      font-size: var(--font-size-lg);
-      font-weight: 600;
-      line-height: var(--line-height-tight);
-      color: var(--text-color-light);
-      margin-bottom: var(--spacing-2);
-    }
-    .method-step h3 span {
-      color: var(--text-color-light);
-      margin-right: var(--spacing-2);
-    }
-    .method-step p {
-      font-size: var(--font-size-lg);
-      color: var(--text-color-light);
-      line-height: var(--line-height-base);
-      padding-left: var(--spacing-10);
-    }
-    .method-step ul,
-    .method-step li {
-      color: var(--text-color-light);
-    }
-    .method-step b,
-    .method-step strong {
-      color: var(--text-color-light);
-      font-weight: 600;
-    }
-    .footer {
-      margin-top: var(--spacing-16);
-      opacity: 0.7;
-      font-size: var(--font-size-sm);
-      line-height: var(--line-height-base);
+    .support-info {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 30px;
+      font-weight: 300;
     }
     
-    .donation-section {
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-    
-    .donation-section.expanding {
-      margin-bottom: var(--spacing-24);
+    .stop-code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-weight: 400;
     }
     
     @media (max-width: 768px) {
-      .container {
-        padding-top: var(--spacing-20);
-        padding-left: var(--spacing-4);
-        padding-right: var(--spacing-4);
+      .warmthly-logo {
+        font-size: 2rem;
+        top: 1rem;
+        left: 1rem;
       }
-      .logo {
-        font-size: var(--font-size-xl);
-        margin-top: var(--spacing-16);
+      
+      .bsod-container {
+        padding: 80px 0 40px 30px;
       }
-      .subtitle {
-        font-size: var(--font-size-base);
+      
+      .sad-face {
+        font-size: 70px;
+        margin-bottom: 25px;
       }
-      .method-section {
-        padding: var(--spacing-6);
-        margin: var(--spacing-12) var(--spacing-4);
+      
+      .main-message {
+        font-size: 20px;
+        margin-bottom: 25px;
       }
-      .method-section .section-title {
-        font-size: var(--font-size-lg);
+      
+      .progress-text {
+        font-size: 18px;
+        margin-bottom: 35px;
       }
-      .method-step p {
-        padding-left: 0;
+      
+      .info-text {
+        font-size: 14px;
+      }
+      
+      .support-info {
+        font-size: 12px;
       }
     }
   </style>
 </head>
-<body class="fonts-loading">
-  <a href="#main-content" class="skip-link">Skip to main content</a>
-  <header class="header">
-    <div class="header-left">
-        <a href="/" class="brand-logo" id="main-brand-logo">Warmthly</a>
-    </div>
-    <div class="header-right">
-        <warmthly-stoplight app="main"></warmthly-stoplight>
-    </div>
-  </header>
+<body>
+  <a href="#" class="warmthly-logo" id="warmthly-logo">Warmthly</a>
   
-  <main id="main-content" role="main" aria-label="Main content">
-  <div class="container">
-    <h1 class="logo">Rehumanize Our World.</h1>
-    <p class="subtitle">Warmthly is a global movement to make empathy a measurable part of our systems.</p>
-    <div class="video-section">
-      <div class="video-container" id="video-container">
-        <iframe src="https://www.youtube-nocookie.com/embed/kVausES-mjk" title="Warmthly Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-      </div>
+  <div class="bsod-container">
+    <div class="sad-face">:(</div>
+    
+    <div class="main-message">
+      Your PC ran into a problem and needs to restart. We're<br>
+      just collecting some error info, and then we'll restart for<br>
+      you.
     </div>
-    <div class="method-section">
-        <p class="intro-paragraph">
-            We are raising $20,000 to legally launch a global movement and demonstrate that empathy is the most powerful force for change.
-        </p>
-        <p class="intro-paragraph">
-            Warmthly is an international movement dedicated to bringing empathy into the concrete of global systems. We rehumanize sectors, starting with mental health and education, to make sure that people are no longer treated like numbers. We aim to make empathy a measurable design principle. With your support, we can go from proof-of-concept to international scale in one winter. Join us in building your future.
-        </p>
-        
-        <h3 class="section-subtitle">Who are we? What's this about?</h3>
-        <p class="method-step">
-            I'm Tyla Perryer, 15 (7/13/2010), from Gauteng, South Africa. I've seen too much indifference to sit around, so I'm starting with Warmthly. While my adults cover the legalities, I am the driving vision.
-        </p>
-        <p class="method-step">
-            My team supports me:
-        </p>
-        <ul class="method-step" style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
-            <li>My mother, Janine Perryer, is in administration</li>
-            <li>My stepfather, Darryl Linington, is the internal PR</li>
-        </ul>
-        <p class="method-step">
-            <b>My vow:</b> I am not taking a single cent, clap of applause or like on socials as compensation. These funds cover the operational needs for our mission, and my time is volunteer pro bono.
-        </p>
-        
-        <h3 class="section-subtitle">Our Launch: Tbilisi, Georgia, Europe</h3>
-        <p class="method-step">
-            Warmthly will launch with a first focus on mental health through an empathy-first lens. To maximise the impact of your every cent and speed up our timeline, we are following our launch and initial proof-of-concept in Tbilisi, Georgia.
-        </p>
-        <p class="method-step">
-            This allows us to:
-        </p>
-        <div class="method-step">
-            <h3><span>1. Speed up efficiency:</span></h3>
-            <p>Georgia offers visa-free entry for South African citizens for up to 365 days.</p>
-        </div>
-        <div class="method-step">
-            <h3><span>2. Speed up legal status:</span></h3>
-            <p>We are actively seeking a fiscal sponsor, which is an established U.S. 501(c)(3) non-profit, to accept tax-deductible donations and allow us to operate within Georgia legally from day one.</p>
-        </div>
-        
-        <h3 class="section-subtitle">Our flagship pilot: Where Wildflowers Bloom.</h3>
-        <p class="method-step">
-            Our pilot redesigns local mental health facilities with an empathy-first lens, backed by studies in environmental psychology. We will work on light, colour, and personalisation to improve patient experiences.
-        </p>
-        
-        <h3 class="section-subtitle">Where Your $20,000 Goes</h3>
-        <p class="method-step">
-            This "seed" funding covers "startup" costs and develops our pilot. Every cent will be tracked on a public, live transparency archive, showing all our donations, expenses, and receipts.
-        </p>
-        
-        <div class="method-step">
-            <h3><span>Launch trip (ZA → Tbilisi, Georgia) - 22 Nights</span></h3>
-            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
-                <li>Flights (ZA → Tbilisi, return for two): $1,300.00</li>
-                <li>Accommodation (22 nights for two): $1,000.00</li>
-                <li>Meals (22 days @ $40/day for two): $880.00</li>
-                <li>Local transport: $500.00</li>
-                <li>Professional attire: $150.00</li>
-                <li>Personal items (toiletries, etc.): $100.00</li>
-            </ul>
-        </div>
-        
-        <div class="method-step">
-            <h3><span>Legal & operational setup</span></h3>
-            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
-                <li>Fiscal sponsorship fee (Initial): $500.00</li>
-                <li>Initial operations: $1,000.00</li>
-                <li>Work equipment: $1,698.00</li>
-            </ul>
-        </div>
-        
-        <div class="method-step">
-            <h3><span>The pilot</span></h3>
-            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
-                <li>"Where Wildflowers Bloom" Pilot: $4,500.00</li>
-                <li style="list-style: none; margin-top: 0.5rem; font-size: 0.9em; opacity: 0.8;">Funds for hand-made, DIY upgrades for a mental health facility in Georgia.</li>
-            </ul>
-        </div>
-        
-        <p class="method-step" style="margin-top: 2rem;">
-            <b>Subtotal of Essential Costs:</b> $11,628.00<br>
-            <b>Contingency:</b> $8,372.00<br>
-            <b>Total:</b> $20,000.00
-        </p>
-        
-        <h3 class="section-subtitle">FAQ</h3>
-        
-        <div class="method-step">
-            <h3><span>Why trust a 15 year old?</span></h3>
-            <p>I want to build the future that I want to grow up in. One where we all hear each other, where we can all see eye to eye, where we can all sit down and handle conflict. While I lead with vision, I'm supported by adults with many years of experience. A full board will be built post-pilot.</p>
-        </div>
-        
-        <div class="method-step">
-            <h3><span>Why Georgia, Europe, instead of ZA?</span></h3>
-            <p>We are focusing on global reach. The Georgia launch is designed to secure the legal status and maximise the impact of our first pilot with the seed funding. We will pursue U.S. 501(c)(3) status for long-term funding.</p>
-        </div>
-        
-        <div class="method-step">
-            <h3><span>How will you measure impact?</span></h3>
-            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
-                <li>Patient surveys and incident logs.</li>
-                <li>20% improvement in measured stress levels.</li>
-            </ul>
-            <p style="margin-top: 1rem;">We pre-commit to publishing a detailed, academic-style report on the pilot's findings, which will serve as the proof-of-concept for larger funding.</p>
-        </div>
-        
-        <div class="method-step">
-            <h3><span>What is the Dissolution Clause?</span></h3>
-            <p>Should Warmthly fail to stand up to its values and/or achieve its initial launch or pilot goals, a formal, transparent dissolution vote is held on our website. Don't like what we're doing? 100,000 votes dissolves us. We ensure your funds will be handled with the right hands, in open-air, even in the worst of circumstances.</p>
-        </div>
-        
-        <div class="method-step">
-            <h3><span>What's after my $20,000?</span></h3>
-            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
-                <li><b>Phase 1 (Winter 25):</b> Legal fiscal sponor setup in the U.S., operating in Georgia, pilot initiation, building partnerships.</li>
-                <li><b>Phase 2 (Early 26):</b> Expand board, secure larger funding and donations on pilot success, begin U.S. 501(c)(3) application, refine applications.</li>
-                <li><b>Phase 3 (26 onwards):</b> Scale programs to schools, hospitals and policies internationally.</li>
-            </ul>
-        </div>
-        
-        <div class="method-step">
-            <h3><span>Sources for our pilot:</span></h3>
-            <ul style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
-                <li>The Impact of Color in Healthcare Environments, 2024.</li>
-                <li>Li, W., et al. (2024). The efficacy of personalized psychological interventions in adolescents... Frontiers in Psychology.</li>
-            </ul>
-        </div>
-        
-        <h3 class="section-subtitle">Lend us a hand</h3>
-        <p class="intro-paragraph">
-            Let's rethink our world with empathy. For just $20,000, you can help us:
-        </p>
-        <ul class="method-step" style="text-align: left; max-width: 600px; margin: 0 auto; padding-left: 2rem;">
-            <li>Legally launch Warmthly with radical transparency and accountability</li>
-            <li>Prove that empathy works with a pilot</li>
-            <li>And open doors to larger funding with our proven models</li>
-        </ul>
-        <p class="method-step">
-            Follow @bewarmthly on Yt, our only social media presence.
-        </p>
-        <p class="intro-paragraph" style="margin-top: 2rem; font-size: 1.2em;">
-            ❤️ Donate today. Let's thaw frozen systems, together.
-        </p>
+    
+    <div class="progress-section">
+      <div class="progress-text">85% complete</div>
     </div>
-    <div id="donationSection" class="donation-section" style="margin: var(--spacing-12) 0;">
-      <button class="donate-button" id="donateButton" aria-label="Donate to support Warmthly's mission to rehumanize our world" type="button">🤍 Support the Mission</button>
-      <div id="yocoPaymentEmbed" style="display: none; margin-top: var(--spacing-8); max-width: 600px; margin-left: auto; margin-right: auto;">
-        <div style="background: white; padding: var(--spacing-8); border-radius: var(--radius-xl); box-shadow: 0 var(--spacing-1) var(--spacing-4) rgba(0,0,0,0.1);">
-          <h3 style="font-family: 'Inter', sans-serif; color: var(--warmthly-orange); margin-bottom: var(--spacing-4); text-align: center; font-size: var(--font-size-xl);">Complete Your Donation</h3>
-          <div id="yocoEmbedContainer" style="width: 100%; min-height: 500px;">
-          </div>
-          <button id="cancelPayment" class="cancel-button" style="margin-top: var(--spacing-4); width: 100%;">Cancel</button>
-        </div>
-      </div>
+    
+    <div class="info-text">
+      For more information about this issue and possible fixes, visit our website.
     </div>
-    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer">GitHub</a>. Our work is not ours, it's yours.</p>
-  </div>
-  
-  <div class="donation-modal" id="donationModal" aria-hidden="true" role="dialog" aria-labelledby="donationModalTitle" aria-modal="true">
-    <div class="donation-modal-content">
-      <div id="donationForm">
-        <h2 id="donationModalTitle">Support Warmthly</h2>
-        <p>Choose an amount or enter a custom donation. All amounts will be converted to South African Rand (ZAR) using current exchange rates:</p>
-        <div class="currency-selector-wrapper">
-          <label style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-color); opacity: 0.8; margin-right: 0.5rem;">Currency:</label>
-          <div class="custom-currency-dropdown" id="currencyDropdown">
-            <div class="custom-currency-select" id="currencySelect">
-              <span class="currency-display">USD ($)</span>
-              <span class="currency-arrow">▼</span>
-            </div>
-            <div class="custom-currency-options" id="currencyOptions">
-              <div class="currency-option" data-value="USD">USD ($)</div>
-              <div class="currency-option" data-value="EUR">EUR (€)</div>
-              <div class="currency-option" data-value="GBP">GBP (£)</div>
-              <div class="currency-option" data-value="CAD">CAD (C$)</div>
-              <div class="currency-option" data-value="AUD">AUD (A$)</div>
-              <div class="currency-option" data-value="JPY">JPY (¥)</div>
-              <div class="currency-option" data-value="CHF">CHF (Fr)</div>
-              <div class="currency-option" data-value="NZD">NZD (NZ$)</div>
-              <div class="currency-option" data-value="SEK">SEK (kr)</div>
-              <div class="currency-option" data-value="NOK">NOK (kr)</div>
-              <div class="currency-option" data-value="DKK">DKK (kr)</div>
-              <div class="currency-option" data-value="SGD">SGD (S$)</div>
-              <div class="currency-option" data-value="HKD">HKD (HK$)</div>
-              <div class="currency-option" data-value="ZAR">ZAR (R)</div>
-            </div>
-          </div>
-        </div>
-        <div class="donation-amounts">
-          <button class="amount-btn" data-amount="1000">$10</button>
-          <button class="amount-btn" data-amount="2500">$25</button>
-          <button class="amount-btn" data-amount="5000">$50</button>
-          <button class="amount-btn" data-amount="10000">$100</button>
-        </div>
-        <input type="number" id="customAmount" placeholder="Custom amount" min="1" step="1">
-        <p id="conversionNotice" style="font-size: 0.85rem; color: var(--text-color); opacity: 0.7; margin-top: 0.5rem; text-align: center; font-family: 'Inter', sans-serif; display: none;">
-          💱 Amounts will be converted to South African Rand (ZAR) at current exchange rates
-        </p>
-        <div class="donation-modal-actions">
-          <button id="proceedDonation" class="donate-button">Proceed to Payment</button>
-          <button id="cancelDonation" class="cancel-button">Cancel</button>
-        </div>
-      </div>
-      
-      <div id="yocoPaymentContainer" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h2 style="margin: 0;">Complete Your Donation</h2>
-          <button id="backToAmount" class="cancel-button" style="padding: 0.5rem 1rem; font-size: 0.9rem;">← Back</button>
-        </div>
-        <div id="yocoIframeContainer" style="width: 100%; height: 600px; border: none; border-radius: 10px; overflow: hidden;">
-        </div>
-      </div>
+    
+    <div class="support-info">
+      If you call a support person, give them this info:<br>
+      Stop code: <span class="stop-code">0x00003007</span>
     </div>
   </div>
   
-  <div class="success-popup" id="successPopup" role="alert" aria-live="polite" aria-atomic="true" aria-hidden="true">
-    <div class="success-popup-content">
-      <span class="success-icon" aria-hidden="true">✓</span>
-      <h2>Thank You!</h2>
-      <p>Your donation of <strong id="successAmount">R0.00</strong> was successful!</p>
-      <p style="font-size: 1rem; opacity: 0.9;">Your support helps us rehumanize our world, one space at a time.</p>
-      <button class="success-popup-button" id="successPopupButton">Continue</button>
-    </div>
-  </div>
-  
-  <div class="error-popup" id="errorPopup" role="alert" aria-live="assertive" aria-atomic="true" aria-hidden="true">
-    <div class="error-popup-content">
-      <h2>Payment Not Completed</h2>
-      <p id="errorMessage">Payment was not completed. If you encountered an error, please try again or use a different payment method.</p>
-      <button class="error-popup-button" id="errorPopupButton">Try Again</button>
-    </div>
-  </div>
-  
-  <button class="cookie-button" id="cookieButton" aria-label="View privacy and cookie information" style="display: none;">
-    <span aria-hidden="true">🥠</span>
-    <span class="sr-only">Privacy & Cookie Information</span>
-  </button>
-  <div class="cookie-popup" id="cookiePopup" role="dialog" aria-label="Cookie information">
-    <div style="line-height: 1.6;">
-      <p><strong>Privacy Notice:</strong></p>
-      <p>We don't use tracking cookies or analytics. We only store locally:</p>
-      <ul style="text-align: left; margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.85rem;">
-        <li>Your preference that you've seen this message</li>
-        <li>Vote cooldown data if you vote (30 days)</li>
-      </ul>
-      <p style="font-size: 0.85rem; margin-top: 0.5rem;">No data is sent to third parties.</p>
-    </div>
-  </div>
-
   <script type="module">
-    import { trapFocus } from '/lego/utils/focus-trap.js';
-    import { ariaAnnouncer } from '/lego/utils/aria-announcer.js';
-    
-    window.trapFocus = trapFocus;
-    window.ariaAnnouncer = ariaAnnouncer;
-  </script>
-  <script>
-    // #region agent log
-    (function() {
-      try {
-        const bodyBefore = window.getComputedStyle(document.body, '::before');
-        const htmlBg = window.getComputedStyle(document.documentElement).backgroundColor;
-        const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-        const viewportHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-        const bodyBeforeHeight = bodyBefore.height;
-        const bodyBeforePosition = bodyBefore.position;
-        const bodyBeforeBackground = bodyBefore.background;
-        
-        fetch('http://127.0.0.1:7242/ingest/d5b70cef-0776-4ac0-864b-289eb71a6fa1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:500',message:'Gradient analysis - body::before styles',data:{bodyBeforeHeight,bodyBeforePosition,hasGradient:bodyBeforeBackground.includes('gradient'),viewportHeight,documentHeight,htmlBg,bodyBg},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A'})}).catch(()=>{});
-      } catch(e) {}
-    })();
-    // #endregion
-  </script>
-  <script>
-    let savedScrollPosition = 0;
-    
-    window.lockBodyScroll = function() {
-      try {
-        savedScrollPosition = window.scrollY || document.documentElement.scrollTop || 0;
-        document.body.classList.add('modal-open');
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${savedScrollPosition}px`;
-        document.body.style.width = '100%';
-        document.body.style.overflow = 'hidden';
-        
-        return savedScrollPosition;
-      } catch (error) {
-        return 0;
-      }
-    };
-    
-    window.forceUnlockScroll = function() {
-      try {
-        const yocoStyles = document.querySelectorAll(
-          '#yc-injected-styles, ' +
-          'style[id*="yoco" i], ' +
-          'style[id*="yc-" i], ' +
-          'style[class*="yoco" i]'
-        );
-        
-        yocoStyles.forEach((styleTag) => {
-          styleTag.remove();
-        });
-        document.body.classList.remove('modal-open', 'yoco-active');
-        document.documentElement.classList.remove('modal-open', 'yoco-active');
-        document.body.classList.add('force-scroll-unlock', 'scroll-unlocked');
-        document.documentElement.classList.add('force-scroll-unlock', 'scroll-unlocked');
-        const elementsToReset = [document.body, document.documentElement];
-        elementsToReset.forEach(el => {
-          el.style.position = '';
-          el.style.top = '';
-          el.style.left = '';
-          el.style.width = '';
-          el.style.height = '';
-          el.style.overflow = '';
-          el.style.overflowX = '';
-          el.style.overflowY = '';
-        });
-        
-        void document.body.offsetHeight;
-        
-        if (savedScrollPosition > 0) {
-          window.scrollTo(0, savedScrollPosition);
-          savedScrollPosition = 0;
-        }
-        
-        setTimeout(() => {
-          document.body.classList.remove('force-scroll-unlock');
-          document.documentElement.classList.remove('force-scroll-unlock');
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
-        }, 100);
-        
-        setTimeout(() => {
-          if (document.body.classList.contains('modal-open') || 
-              document.body.classList.contains('yoco-active')) {
-            document.body.classList.remove('modal-open', 'yoco-active');
-            document.documentElement.classList.remove('modal-open', 'yoco-active');
-          }
-          
-          const currentScroll = window.scrollY || 0;
-          if (currentScroll === 0 && savedScrollPosition > 0) {
-            window.scrollTo(0, savedScrollPosition);
-          }
-        }, 300);
-        
-      } catch (error) {
-        document.body.className = document.body.className
-          .replace(/modal-open|yoco-active/g, '')
-          .trim();
-        document.body.style.cssText = '';
-        document.documentElement.style.cssText = '';
-      }
-    };
-    
-    window.cleanupYocoState = function() {
-      try {
-        window.forceUnlockScroll();
-        const donateButton = document.getElementById('donateButton');
-        const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-        const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
-        
-        if (donateButton) donateButton.style.display = 'inline-block';
-        if (yocoPaymentEmbed) yocoPaymentEmbed.style.display = 'none';
-        if (yocoEmbedContainer) yocoEmbedContainer.innerHTML = '';
-        
-      } catch (error) {
-        window.forceUnlockScroll();
-      }
-    };
-    
-    window.showPaymentErrorPopup = function(message) {
-      try {
-        
-        const errorPopup = document.getElementById('errorPopup');
-        const errorMessage = document.getElementById('errorMessage');
-        
-        // Set custom message if provided
-        if (message && errorMessage) {
-          errorMessage.textContent = message;
-        }
-        
-        if (errorPopup) {
-          errorPopup.style.display = 'flex';
-          errorPopup.style.zIndex = '100000';
-          errorPopup.classList.add('active');
-          errorPopup.setAttribute('aria-hidden', 'false');
-          
-          if (window.ariaAnnouncer) {
-            const announcementMessage = message || 'Payment was not processed. Please try again.';
-            window.ariaAnnouncer.announce(announcementMessage, 'assertive');
-          }
-          
-          const closeErrorPopup = () => {
-            errorPopup.classList.remove('active');
-            errorPopup.style.display = 'none';
-            errorPopup.setAttribute('aria-hidden', 'true');
-            
-            if (errorMessage) {
-              errorMessage.textContent = 'Your payment was not processed. This could be due to insufficient funds, a declined card, or the payment was cancelled.';
-            }
-            
-            window.forceUnlockScroll();
-          };
-          
-          const errorButton = document.getElementById('errorPopupButton');
-          if (errorButton) {
-            // Remove old listeners
-            errorButton.onclick = null;
-            // Add new listener
-            errorButton.onclick = closeErrorPopup;
-          }
-          
-          const handleErrorClickOutside = (e) => {
-            if (e.target === errorPopup) {
-              closeErrorPopup();
-              errorPopup.removeEventListener('click', handleErrorClickOutside);
-            }
-          };
-          errorPopup.addEventListener('click', handleErrorClickOutside);
-          
-          const errorContent = errorPopup.querySelector('.error-popup-content');
-          if (errorContent) {
-            errorContent.addEventListener('click', (e) => {
-              e.stopPropagation();
-            });
-          }
-          
-          setTimeout(closeErrorPopup, 8000);
-        }
-        
-      } catch (error) {
-        alert('Payment was not completed. Please try again.');
-      }
-    };
-    
-    const yocoStyleObserver = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach((node) => {
-            // Check if this is a Yoco style injection
-            if (node.nodeType === 1 && node.tagName === 'STYLE') {
-              const isYocoStyle = 
-                node.id === 'yc-injected-styles' ||
-                (node.id && node.id.toLowerCase().includes('yoco')) ||
-                (node.className && node.className.toLowerCase().includes('yoco')) ||
-                (node.textContent && node.textContent.toLowerCase().includes('yoco'));
-              
-              if (isYocoStyle) {
-                node.remove();
-                setTimeout(() => {
-                  window.forceUnlockScroll();
-                }, 50);
-              }
-            }
-          });
-        }
-      });
-    });
-    
-    // Observe both head and body for style injections
-    yocoStyleObserver.observe(document.head, { childList: true, subtree: true });
-    yocoStyleObserver.observe(document.body, { childList: true, subtree: true });
-    
-    const yocoStyleChecker = setInterval(() => {
-      const yocoStyles = document.querySelectorAll(
-        '#yc-injected-styles, ' +
-        'style[id*="yoco" i], ' +
-        'style[id*="yc-" i]'
-      );
-      
-      if (yocoStyles.length > 0) {
-        yocoStyles.forEach(style => style.remove());
-        window.forceUnlockScroll();
-      }
-    }, 500);
-    
-    setTimeout(() => {
-      clearInterval(yocoStyleChecker);
-    }, 30000);
-    
-    (function() {
-      function prefetchPages() {
-        const pagesToPrefetch = [
-          '/post/index.html',
-          '/mint/index.html',
-          '/post/vote.html',
-          '/mint/research.html'
-        ];
-        
-        pagesToPrefetch.forEach(page => {
-          const link = document.createElement('link');
-          link.rel = 'prefetch';
-          link.href = page;
-          link.as = 'document';
-          document.head.appendChild(link);
-        });
-      }
-      
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => {
-          setTimeout(prefetchPages, 1000);
-        });
-      } else {
-        setTimeout(prefetchPages, 2000);
-      }
-      
-      document.addEventListener('mouseover', function(e) {
-        const link = e.target.closest('a');
-        if (link && link.href && link.href.startsWith(window.location.origin)) {
-          const url = new URL(link.href);
-          if (url.pathname.endsWith('.html') || !url.pathname.includes('.')) {
-            const prefetchLink = document.createElement('link');
-            prefetchLink.rel = 'prefetch';
-            prefetchLink.href = link.href;
-            prefetchLink.as = 'document';
-            document.head.appendChild(prefetchLink);
-          }
-        }
-      }, { passive: true });
-    })();
-    
-    (function() {
-      const donateButton = document.getElementById('donateButton');
-      const donationModal = document.getElementById('donationModal');
-      const proceedButton = document.getElementById('proceedDonation');
-      const cancelButton = document.getElementById('cancelDonation');
-      const customAmountInput = document.getElementById('customAmount');
-      const amountButtons = document.querySelectorAll('.amount-btn');
-      const conversionNotice = document.getElementById('conversionNotice');
-      const currencyDropdown = document.getElementById('currencyDropdown');
-      const currencySelect = document.getElementById('currencySelect');
-      const currencyOptions = document.getElementById('currencyOptions');
-      const currencyDisplay = currencySelect ? currencySelect.querySelector('.currency-display') : null;
-      
-      let selectedAmount = null;
-      let convertedAmount = null;
-      let currentCurrency = 'USD';
-      
-      const currencyDisplayNames = {
-        USD: 'USD ($)',
-        EUR: 'EUR (€)',
-        GBP: 'GBP (£)',
-        CAD: 'CAD (C$)',
-        AUD: 'AUD (A$)',
-        JPY: 'JPY (¥)',
-        CHF: 'CHF (Fr)',
-        NZD: 'NZD (NZ$)',
-        SEK: 'SEK (kr)',
-        NOK: 'NOK (kr)',
-        DKK: 'DKK (kr)',
-        SGD: 'SGD (S$)',
-        HKD: 'HKD (HK$)',
-        ZAR: 'ZAR (R)'
-      };
-      
-      const currencyInfo = {
-        USD: { symbol: '$', name: 'USD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        EUR: { symbol: '€', name: 'EUR', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        GBP: { symbol: '£', name: 'GBP', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        CAD: { symbol: 'C$', name: 'CAD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        AUD: { symbol: 'A$', name: 'AUD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        JPY: { symbol: '¥', name: 'JPY', usesCents: false, defaultAmounts: [1000, 2500, 5000, 10000] },
-        CHF: { symbol: 'Fr', name: 'CHF', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        NZD: { symbol: 'NZ$', name: 'NZD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        SEK: { symbol: 'kr', name: 'SEK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        NOK: { symbol: 'kr', name: 'NOK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        DKK: { symbol: 'kr', name: 'DKK', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        SGD: { symbol: 'S$', name: 'SGD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        HKD: { symbol: 'HK$', name: 'HKD', usesCents: true, defaultAmounts: [1000, 2500, 5000, 10000] },
-        ZAR: { symbol: 'R', name: 'ZAR', usesCents: true, defaultAmounts: [10000, 25000, 50000, 100000] }
-      };
-      
-      let paymentSucceeded = false;
-      let paymentAttempted = false;
-
-      function formatAmount(amount, currency) {
-        const info = currencyInfo[currency];
-        if (!info) return amount.toString();
-        
-        const displayAmount = info.usesCents ? (amount / 100) : amount;
-        const formatted = displayAmount.toLocaleString('en-US', { 
-          minimumFractionDigits: info.usesCents ? 2 : 0,
-          maximumFractionDigits: info.usesCents ? 2 : 0
-        });
-        return `${info.symbol}${formatted}`;
-      }
-
-      function updateButtonLabels() {
-        const info = currencyInfo[currentCurrency];
-        amountButtons.forEach((btn, index) => {
-          const amount = info.defaultAmounts[index] || info.defaultAmounts[0];
-          btn.dataset.amount = amount;
-          btn.textContent = formatAmount(amount, currentCurrency);
-        });
-        
-        // Update placeholder
-        customAmountInput.placeholder = `Custom amount (${info.symbol})`;
-      }
-
-      function updateConversionNotice() {
-        if (selectedAmount && selectedAmount > 0 && convertedAmount) {
-          const info = currencyInfo[currentCurrency];
-          const originalAmount = info.usesCents ? (selectedAmount / 100) : selectedAmount;
-          const zarAmount = (convertedAmount / 100).toFixed(2);
-          const formattedOriginal = originalAmount.toLocaleString('en-US', {
-            minimumFractionDigits: info.usesCents ? 2 : 0,
-            maximumFractionDigits: info.usesCents ? 2 : 0
-          });
-          conversionNotice.textContent = `💱 ${info.symbol}${formattedOriginal} ${currentCurrency} will be converted to approximately R${zarAmount} ZAR at current exchange rates`;
-          conversionNotice.style.display = 'block';
-        } else if (selectedAmount && selectedAmount > 0) {
-          conversionNotice.textContent = '💱 Amounts will be converted to South African Rand (ZAR) at current exchange rates';
-          conversionNotice.style.display = 'block';
-        } else {
-          conversionNotice.style.display = 'none';
-        }
-      }
-
-      async function convertToZAR(amountInCents, fromCurrency) {
-        try {
-          const response = await fetch(`/api/convert-currency?amount=${amountInCents}&from=${fromCurrency}&to=ZAR`);
-          if (!response.ok) {
-            throw new Error('Failed to convert currency');
-          }
-          const data = await response.json();
-          return {
-            zarCents: data.convertedAmount,
-            rate: data.rate,
-            formattedOriginal: data.formattedOriginal,
-            formattedZAR: data.formattedConverted
-          };
-        } catch (error) {
-          const fallbackRates = {
-            USD: 17, EUR: 18, GBP: 21, CAD: 12, AUD: 11, JPY: 0.11,
-            CHF: 19, NZD: 10, SEK: 1.5, NOK: 1.5, DKK: 2.3, SGD: 12, HKD: 2.2, ZAR: 1
-          };
-          const fallbackRate = fallbackRates[fromCurrency] || 17;
-          return {
-            zarCents: Math.round(amountInCents * fallbackRate),
-            rate: fallbackRate,
-            formattedOriginal: (amountInCents / 100).toFixed(2),
-            formattedZAR: ((amountInCents * fallbackRate) / 100).toFixed(2)
-          };
-        }
-      }
-
-      currencySelect.addEventListener('click', (e) => {
-        e.stopPropagation();
-        currencySelect.classList.toggle('active');
-        currencyOptions.classList.toggle('show');
-      });
-      
-      document.addEventListener('click', (e) => {
-        if (!currencyDropdown.contains(e.target)) {
-          currencySelect.classList.remove('active');
-          currencyOptions.classList.remove('show');
-        }
-      });
-      
-      currencyOptions.querySelectorAll('.currency-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const value = option.dataset.value;
-          currentCurrency = value;
-          if (currencyDisplay) {
-            currencyDisplay.textContent = currencyDisplayNames[value];
-          }
-          if (currencyOptions) {
-            currencyOptions.querySelectorAll('.currency-option').forEach(opt => {
-              opt.classList.remove('selected');
-            });
-          }
-          option.classList.add('selected');
-          currencySelect.classList.remove('active');
-          currencyOptions.classList.remove('show');
-          updateButtonLabels();
-          selectedAmount = null;
-          convertedAmount = null;
-          customAmountInput.value = '';
-          amountButtons.forEach(b => {
-            b.classList.remove('selected');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          updateConversionNotice();
-        });
-      });
-      
-      const selectedCurrencyOption = currencyOptions.querySelector(`[data-value="${currentCurrency}"]`);
-      if (selectedCurrencyOption) {
-        selectedCurrencyOption.classList.add('selected');
-      }
-      updateButtonLabels();
-
-      amountButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          amountButtons.forEach(b => {
-            b.classList.remove('selected');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          btn.classList.add('selected');
-          btn.setAttribute('aria-pressed', 'true');
-          selectedAmount = parseInt(btn.dataset.amount) || 0;
-          customAmountInput.value = '';
-          updateConversionNotice();
-          convertToZAR(selectedAmount, currentCurrency).then(result => {
-            convertedAmount = result.zarCents;
-            updateConversionNotice();
-          });
-        });
-      });
-
-      customAmountInput.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        if (value && value > 0) {
-          const info = currencyInfo[currentCurrency];
-          selectedAmount = info.usesCents ? Math.round(value * 100) : Math.round(value);
-          amountButtons.forEach(b => {
-            b.classList.remove('selected');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          updateConversionNotice();
-          convertToZAR(selectedAmount, currentCurrency).then(result => {
-            convertedAmount = result.zarCents;
-            updateConversionNotice();
-          });
-        } else {
-          selectedAmount = null;
-          convertedAmount = null;
-          updateConversionNotice();
-        }
-      });
-
-      donateButton.addEventListener('click', () => {
-        try {
-          if (proceedButton) {
-            proceedButton.disabled = false;
-            proceedButton.textContent = 'Proceed to Payment';
-          }
-          window.lockBodyScroll();
-          donationModal.classList.add('active');
-          donationModal.setAttribute('aria-hidden', 'false');
-          donationModal.setAttribute('role', 'dialog');
-          donationModal.setAttribute('aria-labelledby', 'donationModalTitle');
-          
-          const modalTitle = donationModal.querySelector('h2');
-          if (modalTitle && !modalTitle.id) {
-            modalTitle.id = 'donationModalTitle';
-          }
-          
-          if (window.trapFocus) {
-            window.donationModalFocusTrap = window.trapFocus(donationModal);
-          }
-          
-          const firstFocusable = donationModal.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
-          if (firstFocusable) {
-            setTimeout(() => firstFocusable.focus(), 100);
-          }
-          
-          if (window.ariaAnnouncer) {
-            window.ariaAnnouncer.announce('Donation modal opened', 'polite');
-          }
-        } catch (error) {
-        }
-      });
-
-      function closeModal() {
-        try {
-          const donationModal = document.getElementById('donationModal');
-          
-          if (donationModal) {
-            donationModal.classList.remove('active');
-            donationModal.setAttribute('aria-hidden', 'true');
-          }
-          
-          if (window.donationModalFocusTrap) {
-            window.donationModalFocusTrap();
-            window.donationModalFocusTrap = null;
-          }
-          
-          if (donateButton) {
-            donateButton.focus();
-          }
-          
-          setTimeout(() => {
-            window.forceUnlockScroll();
-          }, 100);
-          
-          selectedAmount = null;
-          convertedAmount = null;
-          if (customAmountInput) {
-            customAmountInput.value = '';
-          }
-          amountButtons.forEach(b => {
-            b.classList.remove('selected');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          if (proceedButton) {
-            proceedButton.disabled = false;
-            proceedButton.textContent = 'Proceed to Payment';
-          }
-          if (currencyDisplay) {
-            currentCurrency = 'USD';
-            currencyDisplay.textContent = currencyDisplayNames['USD'];
-          }
-          if (currencyOptions) {
-            currencyOptions.querySelectorAll('.currency-option').forEach(opt => {
-              opt.classList.remove('selected');
-            });
-            const usdOption = currencyOptions.querySelector('[data-value="USD"]');
-            if (usdOption) {
-              usdOption.classList.add('selected');
-            }
-            updateButtonLabels();
-          }
-          updateConversionNotice();
-          
-          const donationForm = document.getElementById('donationForm');
-          const yocoPaymentContainer = document.getElementById('yocoPaymentContainer');
-          const yocoIframeContainer = document.getElementById('yocoIframeContainer');
-          
-          if (donationForm) donationForm.style.display = 'block';
-          if (yocoPaymentContainer) yocoPaymentContainer.style.display = 'none';
-          if (yocoIframeContainer) yocoIframeContainer.innerHTML = '';
-          
-        } catch (error) {
-          window.forceUnlockScroll();
-        }
-      }
-
-      cancelButton.addEventListener('click', closeModal);
-
-      donationModal.addEventListener('click', (e) => {
-        if (e.target === donationModal) {
-          closeModal();
-        }
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && donationModal.classList.contains('active')) {
-          closeModal();
-        }
-      });
-
-      proceedButton.addEventListener('click', async () => {
-        const info = currencyInfo[currentCurrency];
-        const minAmount = info.usesCents ? 100 : 1; // Minimum 1 unit
-        if (!selectedAmount || selectedAmount < minAmount) {
-          const minDisplay = info.usesCents ? '1.00' : '1';
-          alert(`Please select or enter an amount (minimum ${info.symbol}${minDisplay})`);
-          return;
-        }
-
-        proceedButton.disabled = true;
-        proceedButton.textContent = 'Converting...';
-        proceedButton.setAttribute('aria-busy', 'true');
-        
-        if (window.ariaAnnouncer) {
-          window.ariaAnnouncer.announce('Converting currency, please wait', 'polite');
-        }
-        
-        let conversionResult;
-        try {
-          conversionResult = await convertToZAR(selectedAmount, currentCurrency);
-          convertedAmount = conversionResult.zarCents;
-          proceedButton.setAttribute('aria-busy', 'false');
-        } catch (error) {
-          proceedButton.disabled = false;
-          proceedButton.textContent = 'Proceed to Payment';
-          proceedButton.setAttribute('aria-busy', 'false');
-          if (window.ariaAnnouncer) {
-            window.ariaAnnouncer.announce('Failed to convert currency. Please try again.', 'assertive');
-          }
-          alert('Failed to convert currency. Please try again.');
-          return;
-        }
-
-        if (!proceedButton) {
-          return;
-        }
-
-        const originalText = proceedButton.textContent;
-        proceedButton.textContent = 'Processing...';
-
-        let yocoSDK = null;
-
-        try {
-          if (typeof window.YocoSDK === 'undefined') {
-            throw new Error('Yoco SDK not loaded. Please refresh the page and try again.');
-          }
-
-          let publicKey;
-          try {
-            const keyResponse = await fetch('/api/get-yoco-public-key');
-            if (!keyResponse.ok) {
-              throw new Error('Failed to fetch public key from server');
-            }
-            const keyData = await keyResponse.json();
-            publicKey = keyData.publicKey;
-            if (!publicKey) {
-              throw new Error('Public key not returned from server');
-            }
-          } catch (keyError) {
-            throw new Error('Yoco public key is not configured. Please contact support.');
-          }
-
-          try {
-            yocoSDK = new window.YocoSDK({
-              publicKey: publicKey
-            });
-          } catch (sdkError) {
-            throw new Error('Failed to initialize Yoco SDK: ' + (sdkError.message || 'Unknown error'));
-          }
-
-          savedScrollPosition = window.lockBodyScroll();
-          donationModal.classList.remove('active');
-          
-          const donationSection = document.getElementById('donationSection');
-          const donateButton = document.getElementById('donateButton');
-          const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-          const yocoEmbedContainer = document.getElementById('yocoEmbedContainer');
-          
-          if (!donationSection || !donateButton || !yocoPaymentEmbed || !yocoEmbedContainer) {
-            throw new Error('Required payment elements not found on page.');
-          }
-          
-          donateButton.style.display = 'none';
-          yocoPaymentEmbed.style.display = 'block';
-          yocoEmbedContainer.innerHTML = '';
-          
-          setTimeout(() => {
-            try {
-              yocoPaymentEmbed.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } catch (scrollError) {
-            }
-          }, 100);
-          
-          const callbackUrl = window.location.origin + window.location.pathname + '?payment=success';
-          const cancelUrl = window.location.origin + window.location.pathname + '?payment=cancelled';
-          document.body.classList.add('yoco-active');
-          paymentSucceeded = false;
-          paymentAttempted = true;
-          
-          try {
-            const zarAmount = (convertedAmount / 100).toFixed(2);
-            const info = currencyInfo[currentCurrency];
-            const originalAmount = info.usesCents ? (selectedAmount / 100) : selectedAmount;
-            const formattedOriginal = originalAmount.toLocaleString('en-US', {
-              minimumFractionDigits: info.usesCents ? 2 : 0,
-              maximumFractionDigits: info.usesCents ? 2 : 0
-            });
-            
-            yocoSDK.showPopup({
-              amountInCents: Math.round(convertedAmount),
-              currency: 'ZAR',
-              name: 'Warmthly Donation',
-              description: `Pay R${zarAmount} (${info.symbol}${formattedOriginal} ${currentCurrency} converted at current rate) - Thank you for supporting our mission to rehumanize our world!`,
-              callbackUrl: callbackUrl,
-              cancelUrl: cancelUrl,
-              metadata: {
-                source: 'website_donation',
-                originalAmountUSD: selectedAmount,
-                convertedAmountZAR: convertedAmount,
-                conversionRate: conversionResult.rate
-              },
-              onClose: () => {
-                setTimeout(() => {
-                  try {
-                    if (paymentAttempted && !paymentSucceeded) {
-                      window.showPaymentErrorPopup(
-                        'Payment was not completed. If you encountered an error, please try again or use a different payment method.'
-                      );
-                    }
-                    
-                    paymentSucceeded = false;
-                    paymentAttempted = false;
-                    window.cleanupYocoState();
-                    
-                    if (proceedButton) {
-                      proceedButton.disabled = false;
-                      proceedButton.textContent = originalText;
-                    }
-                    
-                    const donationModal = document.getElementById('donationModal');
-                    if (donationModal && donationModal.classList.contains('active')) {
-                      donationModal.classList.remove('active');
-                    }
-                    
-                    setTimeout(() => {
-                      window.forceUnlockScroll();
-                    }, 200);
-                    
-                  } catch (error) {
-                    window.forceUnlockScroll();
-                  }
-                }, 300);
-              },
-              onSuccess: (data) => {
-                paymentSucceeded = true;
-                paymentAttempted = true;
-                
-                try {
-                  const amount = (selectedAmount / 100).toFixed(2);
-                  window.cleanupYocoState();
-                  
-                  const successPopup = document.getElementById('successPopup');
-                  const successAmount = document.getElementById('successAmount');
-                  
-                  if (successAmount) {
-                    successAmount.textContent = `R${amount}`;
-                  }
-                  
-                  if (successPopup) {
-                    successPopup.style.display = 'flex';
-                    successPopup.style.zIndex = '100000';
-                    successPopup.classList.add('active');
-                    successPopup.setAttribute('aria-hidden', 'false');
-                    
-                    if (window.ariaAnnouncer) {
-                      window.ariaAnnouncer.announce(`Thank you! Your donation of R${amount} was successful!`, 'polite');
-                    }
-                    
-                    const closeSuccessPopup = () => {
-                      successPopup.classList.remove('active');
-                      successPopup.style.display = 'none';
-                      successPopup.setAttribute('aria-hidden', 'true');
-                      const donateButton = document.getElementById('donateButton');
-                      if (donateButton) {
-                        donateButton.style.display = 'inline-block';
-                      }
-                      window.forceUnlockScroll();
-                    };
-                    
-                    const successButton = document.getElementById('successPopupButton');
-                    if (successButton) {
-                      successButton.onclick = closeSuccessPopup;
-                    }
-                    
-                    const handleSuccessClickOutside = (e) => {
-                      if (e.target === successPopup) {
-                        closeSuccessPopup();
-                        successPopup.removeEventListener('click', handleSuccessClickOutside);
-                      }
-                    };
-                    successPopup.addEventListener('click', handleSuccessClickOutside);
-                    
-                    const successContent = successPopup.querySelector('.success-popup-content');
-                    if (successContent) {
-                      successContent.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                      });
-                    }
-                    
-                    setTimeout(closeSuccessPopup, 5000);
-                  }
-                  
-                  if (proceedButton) {
-                    proceedButton.disabled = false;
-                    proceedButton.textContent = originalText;
-                  }
-                  
-                  const donationModal = document.getElementById('donationModal');
-                  if (donationModal) {
-                    donationModal.classList.remove('active');
-                  }
-                  
-                  setTimeout(() => {
-                    window.forceUnlockScroll();
-                  }, 300);
-                  
-                } catch (error) {
-                  window.forceUnlockScroll();
-                }
-              },
-              onError: (error) => {
-                try {
-                  paymentAttempted = true;
-                  paymentSucceeded = false;
-                  const errorMsg = error.message || 'A technical error occurred. Please try again.';
-                  window.showPaymentErrorPopup(errorMsg);
-                  window.cleanupYocoState();
-                  window.forceUnlockScroll();
-                  
-                  if (proceedButton) {
-                    proceedButton.disabled = false;
-                    proceedButton.textContent = originalText;
-                  }
-                  
-                } catch (handlerError) {
-                  window.cleanupYocoState();
-                  window.forceUnlockScroll();
-                  alert('Payment error. Please try again.');
-                }
-              }
-            });
-          } catch (popupError) {
-            throw new Error('Failed to show Yoco payment popup: ' + (popupError.message || 'Unknown error'));
-          }
-          
-          setTimeout(() => {
-            try {
-              const yocoElements = document.querySelectorAll('[class*="yoco" i], [id*="yoco" i], iframe[src*="yoco" i]');
-              yocoElements.forEach(el => {
-                try {
-                  const style = window.getComputedStyle(el);
-                  if (style.position === 'fixed') {
-                    el.style.zIndex = '999999';
-                  }
-                } catch (elError) {
-                }
-              });
-            } catch (zIndexError) {
-            }
-          }, 100);
-
-        } catch (error) {
-          window.cleanupYocoState();
-          window.forceUnlockScroll();
-          const errorMessage = error.message || 'An unexpected error occurred. Please try again or contact support if the problem persists.';
-          alert('Sorry, there was an error processing your donation:\n\n' + errorMessage);
-          
-          const donateButton = document.getElementById('donateButton');
-          const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-          if (donateButton) {
-            donateButton.style.display = 'inline-block';
-          }
-          if (yocoPaymentEmbed) {
-            yocoPaymentEmbed.style.display = 'none';
-          }
-          
-          if (proceedButton) {
-            proceedButton.disabled = false;
-            proceedButton.textContent = originalText;
-          }
-        }
-      });
-      
-      const cancelPaymentBtn = document.getElementById('cancelPayment');
-      if (cancelPaymentBtn) {
-        cancelPaymentBtn.addEventListener('click', () => {
-          try {
-            window.cleanupYocoState();
-            const donateButton = document.getElementById('donateButton');
-            const yocoPaymentEmbed = document.getElementById('yocoPaymentEmbed');
-            if (donateButton) {
-              donateButton.style.display = 'inline-block';
-            }
-            if (yocoPaymentEmbed) {
-              yocoPaymentEmbed.style.display = 'none';
-            }
-          } catch (error) {
-            console.error('Error canceling payment:', error);
-            window.cleanupYocoState();
-          }
-        });
-      }
-    })();
-    
-    (function() {
-      try {
-        setTimeout(() => {
-          if (typeof window.forceUnlockScroll === 'function') {
-            window.forceUnlockScroll();
-          }
-        }, 100);
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const paymentStatus = urlParams.get('payment');
-        
-        if (paymentStatus === 'success') {
-          setTimeout(() => {
-            const successPopup = document.getElementById('successPopup');
-            const successAmount = document.getElementById('successAmount');
-            
-            if (successPopup && successAmount) {
-              const amount = urlParams.get('amount') || '0.00';
-              successAmount.textContent = 'R' + parseFloat(amount).toFixed(2);
-              successPopup.style.display = 'flex';
-              successPopup.style.zIndex = '100000';
-              successPopup.classList.add('active');
-              
-              const closeSuccessPopup = () => {
-                successPopup.classList.remove('active');
-                successPopup.style.display = 'none';
-                window.history.replaceState({}, document.title, window.location.pathname);
-                const donateButton = document.getElementById('donateButton');
-                if (donateButton) {
-                  donateButton.style.display = 'inline-block';
-                }
-                if (typeof window.forceUnlockScroll === 'function') {
-                  window.forceUnlockScroll();
-                }
-              };
-              
-              const successButton = document.getElementById('successPopupButton');
-              if (successButton) {
-                successButton.onclick = closeSuccessPopup;
-              }
-              
-              const handleSuccessClickOutside = (e) => {
-                if (e.target === successPopup) {
-                  closeSuccessPopup();
-                  successPopup.removeEventListener('click', handleSuccessClickOutside);
-                }
-              };
-              successPopup.addEventListener('click', handleSuccessClickOutside);
-              
-              const successContent = successPopup.querySelector('.success-popup-content');
-              if (successContent) {
-                successContent.addEventListener('click', (e) => {
-                  e.stopPropagation();
-                });
-              }
-              
-              setTimeout(closeSuccessPopup, 5000);
-            }
-          }, 500);
-          
-          window.history.replaceState({}, document.title, window.location.pathname);
-        } else if (paymentStatus === 'cancelled') {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        
-        if (typeof window.forceUnlockScroll === 'function') {
-          window.forceUnlockScroll();
-        }
-        setTimeout(() => {
-          if (typeof window.forceUnlockScroll === 'function') {
-            window.forceUnlockScroll();
-          }
-        }, 500);
-      } catch (error) {
-        try {
-          window.history.replaceState({}, document.title, window.location.pathname);
-          if (typeof window.forceUnlockScroll === 'function') {
-            window.forceUnlockScroll();
-          }
-        } catch (cleanupError) {
-        }
-      }
-    })();
-    
-    (function() {
-      const methodSection = document.querySelector('.method-section');
-      if (!methodSection) return;
-      
-      // Fallback: Show immediately if already in viewport
-      const checkVisibility = () => {
-        const rect = methodSection.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-        if (isVisible) {
-          methodSection.classList.add('visible');
-          return true;
-        }
-        return false;
-      };
-      
-      // Check immediately
-      if (checkVisibility()) return;
-      
-      // Use IntersectionObserver as primary method
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, {
-        threshold: 0.1,
-        rootMargin: '100px 0px 100px 0px'
-      });
-      
-      observer.observe(methodSection);
-      
-      // Fallback timeout: show after 1 second if observer hasn't triggered
-      setTimeout(() => {
-        if (!methodSection.classList.contains('visible')) {
-          methodSection.classList.add('visible');
-        }
-      }, 1000);
-    })();
-    
-    // #region agent log
-    (function() {
-      setTimeout(() => {
-        try {
-          const viewportHeight = window.innerHeight;
-          const documentHeight = document.documentElement.scrollHeight;
-          const bodyStyles = window.getComputedStyle(document.body);
-          const htmlStyles = window.getComputedStyle(document.documentElement);
-          const bodyBefore = window.getComputedStyle(document.body, '::before');
-          const hasGradient = bodyBefore.backgroundImage && bodyBefore.backgroundImage !== 'none';
-          const gradientHeight = bodyBefore.height;
-          const isFixed = bodyBefore.position === 'fixed';
-          const contentExceedsViewport = documentHeight > viewportHeight;
-          
-          fetch('http://127.0.0.1:7242/ingest/d5b70cef-0776-4ac0-864b-289eb71a6fa1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:1510',message:'Page load - gradient visibility check',data:{viewportHeight,documentHeight,contentExceedsViewport,hasGradient,gradientHeight,isFixed,htmlBg:htmlStyles.backgroundColor,bodyBg:bodyStyles.backgroundColor},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'B'})}).catch(()=>{});
-        } catch(e) {}
-      }, 500);
-    })();
-    // #endregion
-
-    import('/lego/config/warmthly-config.js').then(module => {
-      const brandLogo = document.getElementById('main-brand-logo');
-      if (brandLogo) {
-        brandLogo.href = module.WARMTHLY_CONFIG.urls.main;
-      }
-    });
-    
-    const cookieButton = document.getElementById('cookieButton');
-    const cookiePopup = document.getElementById('cookiePopup');
-    const hasSeenCookiePopup = localStorage.getItem('warmthly_cookie_popup_seen') === 'true';
-    
-    if (!hasSeenCookiePopup) {
-      setTimeout(() => {
-        cookieButton.style.display = 'flex';
-        setTimeout(() => {
-          cookieButton.classList.add('visible');
-        }, 100);
-      }, 1000);
-      
-      cookieButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        cookiePopup.classList.toggle('visible');
-      });
-      
-      document.addEventListener('click', (e) => {
-        if (!cookieButton.contains(e.target) && !cookiePopup.contains(e.target)) {
-          if (cookiePopup.classList.contains('visible')) {
-            cookiePopup.classList.remove('visible');
-            localStorage.setItem('warmthly_cookie_popup_seen', 'true');
-            setTimeout(() => {
-              cookieButton.classList.remove('visible');
-              setTimeout(() => {
-                cookieButton.style.display = 'none';
-              }, 300);
-            }, 200);
-          }
-        }
-      });
-      
-      cookiePopup.addEventListener('click', (e) => {
-        cookiePopup.classList.remove('visible');
-        localStorage.setItem('warmthly_cookie_popup_seen', 'true');
-        setTimeout(() => {
-          cookieButton.classList.remove('visible');
-          setTimeout(() => {
-            cookieButton.style.display = 'none';
-          }, 300);
-        }, 200);
-      });
+    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    const logo = document.getElementById('warmthly-logo');
+    if (logo) {
+      logo.href = WARMTHLY_CONFIG.urls.main;
     }
   </script>
-  
-  </main>
-  
-  <warmthly-font-loader></warmthly-font-loader>
-  <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
-  
-  </body>
+</body>
 </html>
