@@ -1142,18 +1142,18 @@ if (methodSection) {
 const videoContainer = document.getElementById('video-container');
 if (videoContainer) {
   const iframe = document.createElement('iframe');
-  iframe.src = 'https://www.youtube-nocookie.com/embed/kVausES-mjk';
+  iframe.src = 'https://www.youtube-nocookie.com/embed/kVausES-mjk?modestbranding=1&rel=0&origin=' + encodeURIComponent(window.location.origin);
   iframe.title = 'Warmthly Video';
-  iframe.allow =
-    'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+  iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
   iframe.allowFullscreen = true;
   iframe.loading = 'lazy';
-  // SECURITY: Add sandbox attribute with restrictive permissions
+  // SECURITY: Isolate YouTube with strict sandbox - no cookies, no tracking
   iframe.setAttribute(
     'sandbox',
-    'allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox'
+    'allow-scripts allow-same-origin allow-presentation'
   );
-  iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+  iframe.referrerPolicy = 'no-referrer';
+  iframe.setAttribute('credentialless', 'true');
   iframe.style.position = 'absolute';
   iframe.style.top = '0';
   iframe.style.left = '0';
