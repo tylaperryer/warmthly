@@ -17,7 +17,7 @@ export const WARMTHLY_CONFIG = {
     inter: '/fonts/Inter-VariableFont_opsz,wght.ttf',
     cormorant: '/fonts/CormorantGaramond-VariableFont_wght.ttf'
   },
-  favicon: '/favicon.svg',
+  favicon: '/Oalien.svg',
   navigation: {
     main: [
       { label: 'Post', url: 'https://post.warmthly.org' },
