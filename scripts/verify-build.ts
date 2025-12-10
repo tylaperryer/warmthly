@@ -143,6 +143,28 @@ async function verifyAllApps(): Promise<VerificationResult> {
     result.warnings.push('Shared assets directory is empty: dist/assets');
   }
 
+  // Check for lego directory at root (required for /lego/ paths)
+  const legoDir = resolve(__dirname, '../dist/lego');
+  if (!(await exists(legoDir))) {
+    result.success = false;
+    result.errors.push('Lego directory missing at root: dist/lego (required for Cloudflare Pages /lego/ paths)');
+  } else if (!(await isNotEmpty(legoDir))) {
+    result.success = false;
+    result.errors.push('Lego directory is empty at root: dist/lego');
+  } else {
+    // Verify key lego files exist
+    const legoComponentsDir = join(legoDir, 'components');
+    if (!(await exists(legoComponentsDir))) {
+      result.success = false;
+      result.errors.push('Lego components directory missing: dist/lego/components');
+    }
+    const legoUtilsDir = join(legoDir, 'utils');
+    if (!(await exists(legoUtilsDir))) {
+      result.success = false;
+      result.errors.push('Lego utils directory missing: dist/lego/utils');
+    }
+  }
+
   // Verify each app
   for (const app of APPS) {
     const appResult = await verifyApp(app);
