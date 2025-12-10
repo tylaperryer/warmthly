@@ -42,7 +42,6 @@
   <script type="module" src="/lego/components/warmthly-stoplight.js"></script>
   <script type="module" src="/lego/components/warmthly-font-loader.js"></script>
   <script type="module" src="/lego/components/warmthly-reading-level.js"></script>
-  <script type="module" src="/lego/components/warmthly-media-accessibility.js"></script>
   <script type="module" src="/lego/components/warmthly-breadcrumb.js"></script>
   <script type="module" src="/lego/components/warmthly-language-switcher.js"></script>
   <script type="module" src="/lego/utils/init.js"></script>
@@ -69,6 +68,7 @@
     preconnects="https://mint.warmthly.org, https://post.warmthly.org">
   </warmthly-head>
 
+  <link rel="stylesheet" href="/lego/styles/common.css">
   <link rel="stylesheet" href="/lego/styles/main.css">
 </head>
 <body class="fonts-loading">
@@ -79,7 +79,6 @@
     </div>
     <div class="header-right">
         <warmthly-language-switcher></warmthly-language-switcher>
-        <warmthly-reading-level></warmthly-reading-level>
         <warmthly-stoplight app="main"></warmthly-stoplight>
     </div>
   </header>
@@ -161,23 +160,16 @@
         </p>
     </div>
     
-    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer" aria-label="View Warmthly source code on GitHub">GitHub</a>. Our work is not ours, it's yours. <a href="/privacy.html">Privacy Policy</a> | <a href="/easy-read.html">Easy Read Version</a></p>
+    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer" aria-label="View Warmthly source code on GitHub">GitHub</a>. Our work is not ours, it's yours. <a href="/easy-read">Easy Read Version</a></p>
   </div>
   
   </main>
   
-  <script type="module" src="/lego/components/warmthly-last-updated.js"></script>
-  <warmthly-last-updated date="2025-01-15"></warmthly-last-updated>
-  
-  <script type="module" src="/lego/components/warmthly-social-share.js"></script>
-  <warmthly-social-share></warmthly-social-share>
+  <div style="position: fixed; bottom: 1rem; right: 1rem; z-index: 1000; display: flex; gap: 0.5rem; align-items: center;">
+    <warmthly-reading-level></warmthly-reading-level>
+  </div>
   
   <warmthly-font-loader></warmthly-font-loader>
-  
-  <script type="module">
-    import { initSourcePage } from '/lego/utils/init-source-page.js';
-    initSourcePage();
-  </script>
   
   </body>
 </html>
