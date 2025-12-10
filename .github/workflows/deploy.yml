@@ -143,6 +143,21 @@ jobs:
           echo "✓ Verified dist/lego/ exists with components and utils"
           echo "  Components: $(find dist/lego/components -name '*.js' | wc -l) .js files"
           echo "  Utils: $(find dist/lego/utils -name '*.js' | wc -l) .js files"
+          
+          # Check for unresolved path aliases
+          echo ""
+          echo "🔍 Checking for unresolved path aliases..."
+          UNRESOLVED=$(find dist/lego -name "*.js" -type f -exec grep -l "@config/\|@utils/\|@core/\|@components/\|@styles/\|@lego/\|@api/" {} \; 2>/dev/null | grep -v "README.md" || true)
+          if [ -n "$UNRESOLVED" ]; then
+            echo "❌ ERROR: Found files with unresolved path aliases:"
+            echo "$UNRESOLVED"
+            echo ""
+            echo "This will cause the website to show a blank screen!"
+            echo "The resolve-imports.ts script should have fixed these."
+            exit 1
+          else
+            echo "✅ No unresolved imports found in dist/lego/"
+          fi
 
       - name: Organize Vite output for subdomains
         continue-on-error: true
@@ -280,6 +295,20 @@ jobs:
           done
           
           echo "✅ All apps organized for deployment"
+          
+          # Final check for unresolved imports in build output
+          echo ""
+          echo "🔍 Final verification: Checking for unresolved imports in build output..."
+          UNRESOLVED_BUILD=$(find build -name "*.js" -type f -exec grep -l "@config/\|@utils/\|@core/\|@components/\|@styles/\|@lego/\|@api/" {} \; 2>/dev/null | grep -v "README.md" || true)
+          if [ -n "$UNRESOLVED_BUILD" ]; then
+            echo "❌ ERROR: Found files with unresolved path aliases in build output:"
+            echo "$UNRESOLVED_BUILD"
+            echo ""
+            echo "This will cause the website to show a blank screen!"
+            exit 1
+          else
+            echo "✅ No unresolved imports found in build output"
+          fi
 
       - name: Verify build outputs
         continue-on-error: true
