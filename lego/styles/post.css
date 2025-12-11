@@ -606,35 +606,89 @@ html.popup-open {
   }
 }
 
-/* Vote Page Styles */
-.vote-section {
-  margin: 3rem 0;
+/* Vote Page Styles - Simplified */
+.vote-bar-simple-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 3rem auto;
 }
 
-.vote-note {
-  text-align: center;
-  margin-top: 1.5rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
-  color: var(--text-color);
-  opacity: 0.7;
-}
-
-.error-message {
-  display: none;
-  padding: 1rem;
-  background: rgba(216, 0, 12, 0.1);
-  border: 1px solid var(--error-color);
+.vote-bar-simple-wrapper {
+  width: 100%;
+  height: 50px;
+  background: rgba(255,255,255,0.3);
   border-radius: 12px;
-  color: var(--error-color);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  text-align: center;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid rgba(255,140,66,0.2);
 }
 
-.error-message.visible {
-  display: block;
+.vote-bar-simple {
+  height: 100%;
+  background: linear-gradient(90deg, var(--warmthly-orange), #ff6b1a);
+  border-radius: 12px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 1rem;
+  box-sizing: border-box;
+  min-width: 60px;
+  box-shadow: 0 2px 8px rgba(255,140,66,0.3);
+}
+
+.vote-bar-simple-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  white-space: nowrap;
+}
+
+.vote-buttons-simple {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin: 3rem 0;
+  flex-wrap: wrap;
+}
+
+.vote-button-simple {
+  padding: 1.25rem 2.5rem;
+  border: none;
+  border-radius: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--warmthly-orange);
+  color: white;
+  box-shadow: 0 4px 16px rgba(255,140,66,0.3);
+  min-width: 200px;
+}
+
+.vote-button-simple:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,140,66,0.4);
+  background: #ff6b1a;
+}
+
+.vote-button-simple:disabled,
+.vote-button-simple.voted {
+  background: #999;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.vote-button-simple:disabled:hover,
+.vote-button-simple.voted:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 /* Vote Bar Chart */
@@ -955,37 +1009,19 @@ html.popup-open {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .vote-chart-container {
-    padding: 1.5rem;
+  .vote-bar-simple-wrapper {
+    height: 40px;
   }
   
-  .vote-bar-wrapper {
-    height: 50px;
-  }
-  
-  .vote-bar-label {
-    font-size: 1rem;
-    flex-wrap: wrap;
-  }
-  
-  .vote-bar-count {
-    font-size: 1.25rem;
-    min-width: 60px;
-  }
-  
-  .vote-bar-fill-text {
+  .vote-bar-simple-text {
     font-size: 0.95rem;
   }
   
-  .vote-total-value {
-    font-size: 1.5rem;
-  }
-  
-  .vote-buttons {
+  .vote-buttons-simple {
     flex-direction: column;
   }
   
-  .vote-button {
+  .vote-button-simple {
     width: 100%;
   }
 }
@@ -994,7 +1030,8 @@ html.popup-open {
 .timeline-card:focus-visible,
 .book-card:focus-visible,
 .chronicle-popup-close:focus-visible,
-.vote-button:focus-visible {
+.vote-button:focus-visible,
+.vote-button-simple:focus-visible {
   outline: 2px solid var(--warmthly-orange);
   outline-offset: 3px;
   border-radius: 4px;
