@@ -1,1034 +1,405 @@
-/* Post App Specific Styles */
-
-/* Ensure proper background */
-body {
-  background: var(--warmthly-background) !important;
-}
-
-html {
-  background: var(--warmthly-background) !important;
-}
-
-/* Post-specific container - match homepage exactly */
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: var(--spacing-24) var(--spacing-6) var(--spacing-10);
-  text-align: center;
-}
-
-/* Post-specific header - match homepage exactly */
-.top-left-heading {
-  font-size: var(--font-size-3xl) !important;
-}
-
-/* Post-specific header text color */
-.top-left-heading .post-text {
-  color: #87ceeb;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.top-left-heading .post-text:hover {
-  color: #6bb6d6;
-}
-
-/* Hero Section */
-.hero-section {
-  margin-top: 0;
-  margin-bottom: var(--spacing-12);
-}
-
-.page-title {
-  font-family: 'Inter', sans-serif;
-  font-size: var(--font-size-2xl);
-  color: var(--warmthly-orange);
-  margin-bottom: var(--spacing-4);
-  font-weight: 600;
-  text-align: center;
-  letter-spacing: var(--letter-spacing-tight);
-  line-height: var(--line-height-tight);
-}
-
-.subtitle {
-  font-family: 'Inter', sans-serif;
-  font-size: var(--font-size-base);
-  color: var(--text-color-light);
-  margin-bottom: var(--spacing-12);
-  line-height: var(--line-height-base);
-  text-align: center;
-  font-weight: 400;
-}
-
-/* Section Styles */
-.section {
-  background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25));
-  padding: 3.5rem;
-  border-radius: 28px;
-  border: 1px solid rgba(255,140,66,0.15);
-  margin: 4rem 0;
-  text-align: left;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 100%;
-}
-
-.section-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 2rem;
-  color: var(--warmthly-orange);
-  margin-bottom: 2rem;
-  font-weight: 600;
-  text-align: center;
-  letter-spacing: -0.02em;
-}
-
-.section p {
-  opacity: 0.7;
-  line-height: 1.85;
-  margin-bottom: 1.25rem;
-  font-weight: 400;
-}
-
-.section strong {
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.info-box {
-  background: rgba(255,140,66,0.08);
-  border-left: 4px solid var(--warmthly-orange);
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin: 2rem 0;
-}
-
-.info-box p {
-  margin: 0;
-  opacity: 0.9;
-}
-
-/* Timeline Styles */
-.timeline-line {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1.5px;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 140, 66, 0.15) 0%,
-    rgba(255, 140, 66, 0.3) 20%,
-    rgba(255, 140, 66, 0.3) 80%,
-    rgba(255, 140, 66, 0.15) 100%
-  );
-  transform: translateX(-50%);
-  z-index: 0;
-  pointer-events: none;
-  will-change: transform;
-}
-
-.timeline-wrapper {
-  position: relative;
-  min-height: 100vh;
-}
-
-.timeline-container {
-  position: relative;
-  max-width: 1000px;
-  margin: 6rem auto;
-  padding: 0 32px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.timeline-entry {
-  position: relative;
-  margin: 8rem 0;
-  display: flex;
-  align-items: center;
-  min-height: 140px;
-}
-
-.timeline-entry:nth-child(even) {
-  flex-direction: row-reverse;
-}
-
-.timeline-marker {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) translateZ(0);
-  -webkit-transform: translate(-50%, -50%) translateZ(0);
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--warmthly-orange);
-  border: 3px solid var(--warmthly-background);
-  box-shadow: 
-    0 2px 8px rgba(0,0,0,0.12),
-    0 0 0 1px rgba(255,140,66,0.15);
-  z-index: 10;
-  pointer-events: none;
-}
-
-.timeline-marker.orange { background: var(--warmthly-orange); }
-.timeline-marker.green { background: var(--green-dot); }
-.timeline-marker.red { background: #87ceeb; }
-.timeline-marker.blue { background: #5f27cd; }
-
-.timeline-card {
-  width: calc(50% - 48px);
-  background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 20px;
-  padding: 2rem;
-  border: 1px solid rgba(255,140,66,0.15);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  z-index: 5;
-  transform: translateZ(0) scale(1);
-  -webkit-transform: translateZ(0) scale(1);
-  box-sizing: border-box;
-}
-
-.timeline-card:hover {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  border-color: rgba(255,140,66,0.25);
-}
-
-.timeline-card-date {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
-  color: var(--warmthly-orange);
-  font-weight: 500;
-  margin-bottom: 0.75rem;
-  opacity: 0.7;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.timeline-card-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.5rem;
-  color: #1a1a1a;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-.timeline-card-description {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
-  color: var(--text-color);
-  opacity: 0.65;
-  line-height: 1.7;
-  font-weight: 400;
-}
-
-.timeline-card-read-more {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
-  color: var(--warmthly-orange);
-  font-weight: 500;
-  margin-top: 1rem;
-  display: inline-block;
-  opacity: 0.6;
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: 0.01em;
-}
-
-.timeline-card:hover .timeline-card-read-more {
-  opacity: 1;
-}
-
-.timeline-connector {
-  position: absolute;
-  top: 50%;
-  height: 1.5px;
-  transform: translateY(-50%);
-  z-index: 1;
-  pointer-events: none;
-}
-
-.timeline-entry:nth-child(odd) .timeline-connector {
-  left: calc(50% + 9px);
-  width: calc(50% - 57px);
-  background: linear-gradient(to right, rgba(255, 140, 66, 0.25), transparent);
-}
-
-.timeline-entry:nth-child(even) .timeline-connector {
-  right: calc(50% - 9px);
-  width: calc(50% - 57px);
-  background: linear-gradient(to left, rgba(255, 140, 66, 0.25), transparent);
-}
-
-.timeline-books {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: row;
-  gap: 0;
-  align-items: center;
-  z-index: 15;
-  pointer-events: none;
-}
-
-.timeline-entry:nth-child(odd) .timeline-books {
-  left: calc(50% + 20px);
-}
-
-.timeline-entry:nth-child(even) .timeline-books {
-  right: calc(50% + 20px);
-  flex-direction: row-reverse;
-}
-
-.book-card {
-  cursor: pointer;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  font-size: 1.5rem;
-  line-height: 1;
-  pointer-events: auto;
-  margin: 0 6px;
-  transform: translateZ(0) scale(1);
-  -webkit-transform: translateZ(0) scale(1);
-}
-
-.book-card:hover {
-  transform: scale(1.25);
-}
-
-.book-popup {
-  position: absolute;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  border-radius: 12px;
-  padding: 1rem;
-  border: 1px solid rgba(255,255,255,0.25);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.4);
-  z-index: 100;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(10px) scale(0.9);
-  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
-  pointer-events: none;
-  min-width: 200px;
-  max-width: 280px;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
-  color: var(--text-color);
-  line-height: 1.6;
-}
-
-.book-popup::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.7;
-}
-
-.book-card:hover .book-popup,
-.book-popup:hover {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-
-.timeline-books .book-card .book-popup {
-  bottom: calc(100% + 0.75rem);
-  left: 50%;
-  transform: translateX(-50%) translateY(10px) scale(0.9);
-}
-
-.timeline-books .book-card:hover .book-popup,
-.timeline-books .book-popup:hover {
-  transform: translateX(-50%) translateY(0) scale(1);
-}
-
-.timeline-entry:nth-child(even) .timeline-books .book-card .book-popup {
-  left: 50%;
-  right: auto;
-}
-
-.book-popup-heading {
-  font-weight: 600;
-  color: var(--warmthly-orange);
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  line-height: 1.3;
-}
-
-.book-popup-description {
-  opacity: 0.85;
-  font-size: 0.8rem;
-  line-height: 1.5;
-}
-
-/* Chronicle Popup */
-.chronicle-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.96);
-  background: rgba(255, 251, 247, 0.98);
-  border: 1px solid rgba(255, 140, 66, 0.2);
-  border-radius: 28px;
-  padding: 3rem 3.5rem 2.5rem;
-  max-width: 900px;
-  width: calc(100% - 48px);
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
-  z-index: var(--z-popup);
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  /* Ensure popup stays within viewport */
-  margin: 24px;
-  box-sizing: border-box;
-}
-
-.chronicle-popup::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-/* Prevent body scroll when popup is open - but don't change scroll position */
-body.popup-open.css-loaded,
-body.popup-open.fonts-loaded {
-  overflow: hidden !important;
-}
-
-html.popup-open {
-  overflow: hidden !important;
-}
-
-.chronicle-popup::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 24px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.05));
-  pointer-events: none;
-  z-index: -1;
-}
-
-.chronicle-popup.active {
-  opacity: 1;
-  visibility: visible;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.chronicle-popup-header {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
-  color: var(--warmthly-orange);
-  font-weight: 500;
-  margin-bottom: 0.75rem;
-  opacity: 0.7;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.chronicle-popup-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 2rem;
-  color: #1a1a1a;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  line-height: 1.2;
-  letter-spacing: -0.03em;
-}
-
-.chronicle-popup-content {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.05rem;
-  color: var(--text-color);
-  line-height: 1.85;
-  opacity: 0.7;
-  font-weight: 400;
-}
-
-.chronicle-popup-content p {
-  margin-bottom: 1.5rem;
-}
-
-.chronicle-popup-content p:last-child {
-  margin-bottom: 0;
-}
-
-.chronicle-popup-content a {
-  color: var(--warmthly-orange);
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.chronicle-popup-content a:hover {
-  color: var(--warmthly-orange-hover);
-}
-
-.chronicle-popup-close {
-  position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: rgba(255,255,255,0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  color: var(--text-color);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10;
-  opacity: 0.7;
-}
-
-.chronicle-popup-close:hover {
-  background: rgba(255,255,255,0.4);
-  transform: scale(1.05);
-  opacity: 1;
-}
-
-.chronicle-popup-close:active {
-  transform: scale(0.98);
-}
-
-/* World Map Container */
-.world-map-container {
-  width: 100%;
-  max-width: 100%;
-  margin: 3rem auto;
-  padding: 0 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .container {
-    padding-top: 100px;
-    padding-left: 20px;
-    padding-right: 20px;
-    width: 100%;
-    box-sizing: border-box;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type="module" src="/lego/web-components/warmthly-head.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-header.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
+  <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
+  <warmthly-head 
+    title="Post - Warmthly"
+    description="Post-transaction transparency and reporting. View detailed breakdowns of how donations are used and report any concerns."
+    app="post"
+    viewport="1.0"
+    preconnects="https://www.warmthly.org, https://post.warmthly.org">
+  </warmthly-head>
   
-  .page-title {
-    font-size: 2.5rem;
-  }
+  <style>
+    /* Hide body until CSS loads - base.css handles the animation */
+    body:not(.css-loaded) {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body.css-loaded {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
+    body.fonts-loaded {
+      opacity: 1;
+      visibility: visible;
+    }
+  </style>
   
-  .subtitle {
-    font-size: 1.1rem;
-    margin-bottom: 4rem;
-  }
-  
-  .timeline-container {
-    padding: 0 20px;
-    margin: 5rem auto;
-  }
-  
-  .timeline-entry {
-    flex-direction: column !important;
-    margin: 6rem 0;
-  }
-  
-  .timeline-card {
-    width: calc(100% - 40px);
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding: 2rem 1.75rem;
-  }
-  
-  .timeline-books {
-    position: relative !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    transform: none !important;
-    flex-direction: row !important;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 1.5rem 0;
-    justify-content: center;
-  }
-  
-  .timeline-connector {
-    display: none;
-  }
-  
-  .timeline-marker {
-    position: relative;
-    left: auto;
-    transform: none;
-    margin: 1.5rem auto;
-  }
-  
-  .chronicle-popup {
-    padding: 2rem 1.75rem;
-    max-width: 95%;
-    margin: 16px;
-    max-height: calc(100vh - 32px);
-  }
-  
-  .chronicle-popup-title {
-    font-size: 1.75rem;
-  }
-}
+</head>
+<body class="fonts-loading">
+    <warmthly-header app="post"></warmthly-header>
+    
+    <nav class="header-right" role="navigation" aria-label="Main navigation">
+      <warmthly-stoplight app="post"></warmthly-stoplight>
+    </nav>
 
-/* Vote Page Styles */
-.vote-section {
-  margin: 3rem 0;
-}
+    <div class="container">
+      <div class="hero-section">
+        <h1 class="page-title">Post</h1>
+        <p class="subtitle">
+          Warmthly is a global movement to make empathy a measurable part of our systems.
+        </p>
+      </div>
+      
+      <!-- World Map SVG (Web Component with custom SVG) -->
+      <div class="world-map-container">
+        <world-map-svg></world-map-svg>
+      </div>
+      
+      <div class="timeline-wrapper">
+        <div class="timeline-line" aria-hidden="true"></div>
+        <div class="timeline-container" id="timeline-container">
+        </div>
+      </div>
+      <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer">GitHub</a>. Our work is not ours, it's yours.</p>
+    </div>
+    
+    <div class="chronicle-popup" id="chronicle-popup">
+      <button class="chronicle-popup-close" id="popup-close" aria-label="Close popup">×</button>
+      <div class="chronicle-popup-header" id="popup-date"></div>
+      <h2 class="chronicle-popup-title" id="popup-title"></h2>
+      <div class="chronicle-popup-content" id="popup-content"></div>
+    </div>
 
-.vote-note {
-  text-align: center;
-  margin-top: 1.5rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
-  color: var(--text-color);
-  opacity: 0.7;
-}
+  <warmthly-font-loader></warmthly-font-loader>
 
-.error-message {
-  display: none;
-  padding: 1rem;
-  background: rgba(216, 0, 12, 0.1);
-  border: 1px solid var(--error-color);
-  border-radius: 12px;
-  color: var(--error-color);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  text-align: center;
-}
+  <script type="module">
+    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    
+    const bookEmojis = ['📕', '📗', '📘', '📙'];
+    
+    function getRandomBookEmoji() {
+      return bookEmojis[Math.floor(Math.random() * bookEmojis.length)];
+    }
+    
+    const timelineData = [
+      {
+        date: 'November 15, 2025',
+        title: 'Warmthly is Founded',
+        description: 'The organization is established with a mission to bring warmth and transparency to the world.',
+        marker: 'orange',
+        signature: true,
+        content: `
+          <p>Warmthly was founded on the principle that organizations should operate with complete transparency and genuine care for their communities. Our mission is to bring warmth—both literal and metaphorical—to those who need it most.</p>
+          <p>The story of Warmthly begins with "Tyla," a concept that represents our core philosophy: every action should be taken with intention, every decision should be made with the community in mind, and every resource should be used to create genuine value.</p>
+          <p>From day one, we committed to radical transparency. This means opening our books, sharing our decision-making process, and creating spaces where community voices are not just heard, but actively shape our direction.</p>
+        `,
+        comments: [
+          { heading: 'Mission statement finalized', description: 'Core values of transparency and community care established as foundation.' },
+          { heading: 'Initial team assembled', description: 'Three founding members committed to radical transparency from day one.' },
+          { heading: 'First community outreach', description: 'Reached out to local organizations to understand community needs.' }
+        ]
+      },
+      {
+        date: 'November 27, 2025',
+        title: 'The Mint Initiative is Launched',
+        description: 'We launch our financial tracking system, making every expense visible to the public.',
+        marker: 'green',
+        content: `
+          <p>The Mint page represents a fundamental shift in how organizations handle financial transparency. Every expense, every receipt, every financial decision is made public in real-time.</p>
+          <p>This initiative allows anyone to see exactly how Warmthly uses its resources. We believe that financial transparency is not just about accountability—it's about building trust and demonstrating that we take our responsibility to donors and the community seriously.</p>
+          <p><a href="${WARMTHLY_CONFIG.urls.mint}" target="_blank">Visit the Mint page →</a></p>
+        `,
+        comments: [
+          { heading: '10% improved cost efficiency', description: 'Streamlined expense tracking reduced administrative overhead significantly.' },
+          { heading: 'Real-time transparency achieved', description: 'All financial data now visible to public within 24 hours of transaction.' },
+          { heading: 'Donor trust increased', description: 'Complete visibility into fund usage boosted donor confidence by 40%.' }
+        ]
+      },
+      {
+        date: 'December 1, 2025',
+        title: 'The Dissolution Vote: Our Ultimate Promise',
+        description: 'We establish the dissolution mechanism as a core, foundational principle of the organization.',
+        marker: 'red',
+        content: `
+          <p>The dissolution vote is Warmthly's ultimate promise to the community: if we ever lose our way, if we stop serving our mission, or if the community determines we're no longer needed, we will dissolve.</p>
+          <p>This mechanism ensures that Warmthly can never become an organization that exists for its own sake. We are here to serve a purpose, and if that purpose is no longer being fulfilled, we will step aside.</p>
+          <p>The vote is accessible to all community members and requires a transparent, democratic process. This is not just a safety mechanism—it's a commitment to staying true to our values, no matter what.</p>
+          <p><a href="${WARMTHLY_CONFIG.urls.post}${WARMTHLY_CONFIG.routes.post.vote}" target="_blank">Learn more about the dissolution vote →</a></p>
+        `,
+        comments: [
+          { heading: 'Dissolution mechanism designed', description: 'Community voting system created to ensure organizational accountability.' },
+          { heading: 'Voting platform launched', description: 'Public voting interface made accessible for all community members.' },
+          { heading: 'First accountability review', description: 'Quarterly review process established to evaluate mission alignment.' }
+        ]
+      },
+      {
+        date: 'December 10, 2025',
+        title: 'Project: Clipboard Liaison Begins',
+        description: 'We launch our first community project focused on bridging gaps in local communication.',
+        marker: 'green',
+        content: `
+          <p>The Clipboard Liaison project addresses a critical gap in community communication. Many important local announcements, resources, and opportunities are shared on physical bulletin boards, community centers, and local gathering places—but these don't always reach everyone who needs them.</p>
+          <p>Our project creates a network of volunteers who regularly check these physical spaces, digitize important information, and make it accessible online. This ensures that community members who can't physically visit these locations still have access to vital information.</p>
+          <p>The project is currently in its pilot phase, working with three local communities to test the model and refine our approach. Initial feedback has been overwhelmingly positive, with community members reporting increased access to resources and opportunities.</p>
+          <p><a href="${WARMTHLY_CONFIG.urls.mint}" target="_blank">View project expenses on Mint →</a></p>
+        `,
+        comments: [
+          { heading: 'We made the clipboard liaison today', description: 'Launched pilot program in three local communities to digitize physical bulletin boards.' },
+          { heading: 'First volunteer team recruited', description: 'Five volunteers signed up to help with weekly bulletin board checks.' },
+          { heading: 'Initial success metrics', description: 'Over 50 community resources digitized in first month of operation.' }
+        ]
+      },
+      {
+        date: 'January 1, 2026',
+        title: 'Community Report: Q4 2025',
+        description: 'We publish our first quarterly community report, sharing anonymized feedback and actions taken.',
+        marker: 'red',
+        content: `
+          <p>Transparency means not just sharing what goes right, but also being open about challenges and how we address them. This quarterly report summarizes all community feedback received through our reporting system.</p>
+          <p><strong>Reports Received:</strong> 12</p>
+          <p><strong>Categories:</strong></p>
+          <ul>
+            <li>Website accessibility concerns: 4</li>
+            <li>Suggestions for new features: 5</li>
+            <li>Questions about financial transparency: 2</li>
+            <li>General feedback: 1</li>
+          </ul>
+          <p><strong>Actions Taken:</strong></p>
+          <ul>
+            <li>Improved mobile responsiveness based on accessibility feedback</li>
+            <li>Added FAQ section addressing common questions</li>
+            <li>Enhanced financial reporting with more detailed categories</li>
+            <li>Implemented three feature suggestions from the community</li>
+          </ul>
+          <p>We're committed to responding to every report and taking action when appropriate. Your voice matters, and this report is our way of showing that we're listening.</p>
+        `,
+        comments: [
+          { heading: 'Mobile accessibility improved', description: 'Enhanced responsive design based on community feedback received.' },
+          { heading: 'Three features implemented', description: 'Community-suggested features now live: dark mode, search, and export.' },
+          { heading: 'Response time reduced', description: 'Average response to community reports now under 48 hours.' }
+        ]
+      }
+    ];
+    
+    const timelineContainer = document.getElementById('timeline-container');
+    const popup = document.getElementById('chronicle-popup');
+    const popupClose = document.getElementById('popup-close');
+    const popupDate = document.getElementById('popup-date');
+    const popupTitle = document.getElementById('popup-title');
+    const popupContent = document.getElementById('popup-content');
+    
+    // Create timeline entries
+    timelineData.forEach((entry, index) => {
+      const entryElement = document.createElement('div');
+      entryElement.className = 'timeline-entry';
+      entryElement.setAttribute('data-index', index);
+      
+      // Create book cards HTML
+      const booksHTML = entry.comments ? entry.comments.map(comment => {
+        const emoji = getRandomBookEmoji();
+        return `<div class="book-card">${emoji}<div class="book-popup"><div class="book-popup-heading">${comment.heading}</div><div class="book-popup-description">${comment.description}</div></div></div>`;
+      }).join('') : '';
+      
+      entryElement.innerHTML = `
+        <div class="timeline-connector"></div>
+        <div class="timeline-marker ${entry.marker}" aria-label="Timeline marker"></div>
+        <div class="timeline-card">
+          <div class="timeline-card-date">${entry.date}</div>
+          <h3 class="timeline-card-title">${entry.title}</h3>
+          <p class="timeline-card-description">${entry.description}</p>
+          <span class="timeline-card-read-more">Read more →</span>
+        </div>
+        ${entry.comments ? `<div class="timeline-books">${booksHTML}</div>` : ''}
+      `;
+      
+      const card = entryElement.querySelector('.timeline-card');
+      card.addEventListener('click', () => openPopup(entry));
+      
+      if (entry.signature) {
+        const sig = document.createElement('img');
+        sig.src = '/global/images/signature.png';
+        sig.alt = "Founder's handwritten signature";
+        sig.style.cssText = `
+          max-height: 60px;
+          margin: 1.5rem auto 0;
+          display: block;
+          opacity: 0.85;
+          filter: brightness(1.1);
+        `;
+        entryElement.querySelector('.timeline-card').appendChild(sig);
+      }
+      
+      const bookCards = entryElement.querySelectorAll('.book-card');
+      const isEven = index % 2 === 1;
+      
+      bookCards.forEach(bookCard => {
+        const bookPopup = bookCard.querySelector('.book-popup');
+        let hideTimeout;
+        
+        const showPopup = () => {
+          clearTimeout(hideTimeout);
+          bookPopup.style.opacity = '1';
+          bookPopup.style.visibility = 'visible';
+          if (isEven) {
+            bookPopup.style.transform = 'translateY(0) scale(1)';
+          } else {
+            bookPopup.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+          }
+          bookPopup.style.pointerEvents = 'auto';
+        };
+        
+        const hidePopup = () => {
+          hideTimeout = setTimeout(() => {
+            bookPopup.style.opacity = '0';
+            bookPopup.style.visibility = 'hidden';
+            if (isEven) {
+              bookPopup.style.transform = 'translateY(10px) scale(0.9)';
+            } else {
+              bookPopup.style.transform = 'translateX(-50%) translateY(10px) scale(0.9)';
+            }
+            bookPopup.style.pointerEvents = 'none';
+          }, 300);
+        };
+        
+        bookCard.addEventListener('mouseenter', showPopup);
+        bookCard.addEventListener('mouseleave', hidePopup);
+        bookPopup.addEventListener('mouseenter', showPopup);
+        bookPopup.addEventListener('mouseleave', hidePopup);
+      });
+      
+      timelineContainer.appendChild(entryElement);
+    });
+    
+    function openPopup(entry) {
+      popupDate.textContent = entry.date;
+      popupTitle.textContent = entry.title;
+      popupContent.innerHTML = entry.content;
+      
+      popup.classList.add('active');
+      document.body.classList.add('popup-open');
+      document.documentElement.classList.add('popup-open');
+      popupClose.focus();
+    }
+    
+    function closePopup() {
+      popup.classList.remove('active');
+      document.body.classList.remove('popup-open');
+      document.documentElement.classList.remove('popup-open');
+    }
+    
+    popupClose.addEventListener('click', closePopup);
+    
+    document.addEventListener('click', (e) => {
+      if (popup.classList.contains('active') && !popup.contains(e.target) && !e.target.closest('.timeline-card')) {
+        closePopup();
+      }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && popup.classList.contains('active')) {
+        closePopup();
+      }
+    });
+    
+    popup.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    
+    class WorldMapSVG extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
 
-.error-message.visible {
-  display: block;
-}
+        // State
+        this.svgContainer = null;
+        this.svg = null;
+      }
 
-/* Parliamentary Layout */
-.parliamentary-chamber {
-  position: relative;
-  width: 100%;
-  max-width: 1200px;
-  margin: 3rem auto;
-  padding: 2rem;
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2));
-  backdrop-filter: blur(10px);
-  border-radius: 28px;
-  border: 1px solid rgba(255,140,66,0.15);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
-  min-height: 600px;
-  box-sizing: border-box;
-}
+      connectedCallback() {
+        this.init();
+      }
 
-.chamber-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
+      disconnectedCallback() {
+        this.destroy();
+      }
 
-.chamber-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--warmthly-orange);
-  margin-bottom: 0.5rem;
-}
+      async init() {
+        this.createContainer();
+        await this.loadSVG();
+      }
 
-.chamber-subtitle {
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  color: var(--text-color);
-  opacity: 0.7;
-}
+      createContainer() {
+        const style = document.createElement('style');
+        style.textContent = `
+          .world-map-svg-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+          }
+          
+          .world-map-svg-container svg {
+            display: block;
+            width: 100%;
+            height: auto;
+          }
+          
+          .dot {
+            fill: #FFB88C;
+            opacity: 0.6;
+          }
+        `;
+        this.shadowRoot.appendChild(style);
+        
+        const container = document.createElement('div');
+        container.className = 'world-map-svg-container';
+        this.shadowRoot.appendChild(container);
+        this.svgContainer = container;
+      }
 
-.parliamentary-seats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  margin-bottom: 3rem;
-  position: relative;
-}
+      async loadSVG() {
+        try {
+          const paths = ['/global/images/worlddots.svg'];
+          let svgText = null;
+          
+          for (const path of paths) {
+            try {
+              const response = await fetch(path);
+              if (response.ok) {
+                svgText = await response.text();
+                break;
+              }
+            } catch (err) {
+              // Ignore fetch errors
+            }
+          }
+          
+          if (!svgText) {
+            throw new Error('SVG file not found.');
+          }
+          
+          this.svgContainer.innerHTML = svgText;
+          this.svg = this.svgContainer.querySelector('svg');
+          
+          if (!this.svg) {
+            throw new Error('SVG element not found in loaded content');
+          }
+          
+          if (!this.svg.getAttribute('viewBox')) {
+            this.svg.setAttribute('viewBox', '0 0 3129 1736');
+          }
+          
+          this.svg.querySelectorAll('circle').forEach(circle => {
+            circle.setAttribute('fill', '#FFB88C');
+            circle.setAttribute('opacity', '0.6');
+          });
+          
+        } catch (error) {
+          this.svgContainer.innerHTML = '<p style="color: red;">Error loading map.</p>';
+        }
+      }
 
-.parliamentary-seats::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, transparent, rgba(255,140,66,0.3), transparent);
-  transform: translateX(-50%);
-}
+      destroy() {
+      }
+    }
 
-.seats-section {
-  position: relative;
-}
-
-.seats-section.yes-section {
-  text-align: right;
-}
-
-.seats-section.no-section {
-  text-align: left;
-}
-
-.section-label {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.yes-section .section-label {
-  justify-content: flex-end;
-  color: #87ceeb;
-}
-
-.no-section .section-label {
-  justify-content: flex-start;
-  color: var(--green-dot);
-}
-
-.section-label-icon {
-  font-size: 1.5rem;
-}
-
-.seats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  gap: 0.75rem;
-  padding: 1.5rem;
-  background: rgba(255,255,255,0.2);
-  border-radius: 16px;
-  min-height: 300px;
-  align-items: start;
-}
-
-.yes-section .seats-grid {
-  justify-items: end;
-}
-
-.no-section .seats-grid {
-  justify-items: start;
-}
-
-.seat {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  cursor: default;
-  animation: seatAppear 0.5s ease-out backwards;
-}
-
-@keyframes seatAppear {
-  from {
-    opacity: 0;
-    transform: scale(0.5) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.seat.yes-seat {
-  background: linear-gradient(135deg, rgba(135, 206, 235, 0.15), rgba(135, 206, 235, 0.08));
-  border: 2px solid rgba(135, 206, 235, 0.3);
-  color: #87ceeb;
-}
-
-.seat.no-seat {
-  background: linear-gradient(135deg, rgba(46, 213, 115, 0.15), rgba(46, 213, 115, 0.08));
-  border: 2px solid rgba(46, 213, 115, 0.3);
-  color: var(--green-dot);
-}
-
-.seat:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.vote-stats {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background: rgba(255,255,255,0.2);
-  border-radius: 16px;
-  font-family: 'Inter', sans-serif;
-}
-
-.vote-count {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.vote-count-label {
-  font-size: 0.85rem;
-  opacity: 0.7;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.vote-count-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--warmthly-orange);
-}
-
-.vote-threshold {
-  font-size: 0.9rem;
-  opacity: 0.6;
-  text-align: center;
-}
-
-.vote-buttons {
-  display: flex;
-  gap: 1.5rem;
-  justify-content: center;
-  margin: 2rem 0;
-  flex-wrap: wrap;
-}
-
-.vote-button {
-  padding: 1.25rem 2.5rem;
-  border: none;
-  border-radius: 16px;
-  font-family: 'Inter', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  min-width: 200px;
-}
-
-.vote-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.vote-button:active::before {
-  width: 300px;
-  height: 300px;
-}
-
-.vote-button#yesButton {
-  background: linear-gradient(135deg, #87ceeb, #6bb6d6);
-  color: white;
-  box-shadow: 0 4px 16px rgba(135, 206, 235, 0.3);
-}
-
-.vote-button#yesButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(135, 206, 235, 0.4);
-}
-
-.vote-button#yesButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.vote-button#noButton {
-  background: linear-gradient(135deg, var(--green-dot), #27ae60);
-  color: white;
-  box-shadow: 0 4px 16px rgba(46, 213, 115, 0.3);
-}
-
-.vote-button#noButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(46, 213, 115, 0.4);
-}
-
-.vote-button#noButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.progress-indicator {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background: rgba(255,255,255,0.15);
-  border-radius: 16px;
-}
-
-.progress-bar-container {
-  width: 100%;
-  height: 12px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 6px;
-  overflow: hidden;
-  margin-bottom: 1rem;
-  position: relative;
-}
-
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #87ceeb, #6bb6d6);
-  border-radius: 6px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.progress-bar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* Submit Button - Sky Blue for Post Pages */
-.submit-button {
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #87ceeb, #6bb6d6);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(135, 206, 235, 0.3);
-}
-
-.submit-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #6bb6d6, #5aa5c4);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(135, 206, 235, 0.4);
-}
-
-.submit-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .parliamentary-chamber {
-    padding: 1.5rem;
-  }
-  
-  .parliamentary-seats {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-  
-  .parliamentary-seats::before {
-    display: none;
-  }
-  
-  .seats-section.yes-section,
-  .seats-section.no-section {
-    text-align: center;
-  }
-  
-  .yes-section .section-label,
-  .no-section .section-label {
-    justify-content: center;
-  }
-  
-  .yes-section .seats-grid,
-  .no-section .seats-grid {
-    justify-items: center;
-  }
-  
-  .seats-grid {
-    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-    gap: 0.5rem;
-  }
-  
-  .seat {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
-  }
-  
-  .vote-buttons {
-    flex-direction: column;
-  }
-  
-  .vote-button {
-    width: 100%;
-  }
-  
-  .vote-stats {
-    flex-direction: column;
-    gap: 1rem;
-  }
-}
-
-/* Accessibility */
-.timeline-card:focus-visible,
-.book-card:focus-visible,
-.chronicle-popup-close:focus-visible,
-.vote-button:focus-visible {
-  outline: 2px solid var(--warmthly-orange);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
+    customElements.define('world-map-svg', WorldMapSVG);
+  </script>
+</body>
+</html>
