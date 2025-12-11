@@ -244,9 +244,9 @@ async function ensureFirebase() {
     firebaseReadyPromise = (async () => {
       try {
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
-        const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+        const { getDatabase } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
         const app = initializeApp(FIREBASE_CONFIG);
-        const db = getFirestore(app);
+        const db = getDatabase(app);
         window.firebaseApp = app;
         window.firebaseDb = db;
         return db;
@@ -263,11 +263,10 @@ async function fetchFirebaseVotes() {
   try {
     const db = await ensureFirebase();
     if (!db) return null;
-    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-    const ref = doc(db, 'votes', 'dissolution');
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return { yes: 0, no: 0 };
-    return snap.data();
+    const { get, ref } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
+    const snapshot = await get(ref(db, 'votes/dissolution'));
+    if (!snapshot.exists()) return { yes: 0, no: 0 };
+    return snapshot.val();
   } catch (e) {
     return null;
   }
@@ -277,15 +276,14 @@ async function submitFirebaseVote(type) {
   try {
     const db = await ensureFirebase();
     if (!db) return null;
-    const { doc, getDoc, setDoc, updateDoc, increment } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-    const ref = doc(db, 'votes', 'dissolution');
-    try {
-      await updateDoc(ref, { [type]: increment(1) });
-    } catch (err) {
-      await setDoc(ref, { yes: 0, no: 0, [type]: 1 }, { merge: true });
-    }
-    const snap = await getDoc(ref);
-    return snap.exists() ? snap.data() : null;
+    const { ref, runTransaction } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
+    const voteRef = ref(db, 'votes/dissolution');
+    const result = await runTransaction(voteRef, (currentData) => {
+      const data = currentData || { yes: 0, no: 0 };
+      const nextValue = Math.max(0, (data[type] || 0) + 1);
+      return { yes: data.yes || 0, no: data.no || 0, [type]: nextValue };
+    });
+    return result?.snapshot?.val() || null;
   } catch (e) {
     return null;
   }
@@ -334,17 +332,23 @@ function setupVoteUI({ votePanelId, voteToggleId, voteBarId, voteStatusId, voteC
     voteButtons.forEach(btn => btn.disabled = true);
     status.textContent = 'Recording vote...';
 
-    let voteData = await submitFirebaseVote(type);
-    if (!voteData) {
-      const localData = getLocalVoteData();
-      localData[type] = (localData[type] || 0) + 1;
-      saveLocalVoteData(localData);
-      voteData = localData;
+    try {
+      let voteData = await submitFirebaseVote(type);
+      if (!voteData) {
+        const localData = getLocalVoteData();
+        localData[type] = (localData[type] || 0) + 1;
+        saveLocalVoteData(localData);
+        voteData = localData;
+      }
+      saveUserVote();
+      renderVotes(voteData);
+      status.textContent = 'Vote recorded.';
+    } catch (error) {
+      status.textContent = 'Could not record your vote. Please try again.';
+    } finally {
+      isSubmitting = false;
+      voteButtons.forEach(btn => btn.disabled = !canUserVote());
     }
-    saveUserVote();
-    renderVotes(voteData);
-    status.textContent = 'Vote recorded.';
-    isSubmitting = false;
   }
 
   toggle.addEventListener('click', (e) => {
