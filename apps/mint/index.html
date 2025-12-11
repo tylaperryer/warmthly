@@ -52,7 +52,7 @@
   </nav>
 
   <main class="container" id="main-content" role="main">
-    <h1 class="page-title">Mint</h1>
+    <h1 class="page-title">Show, don't tell</h1>
     <p class="main-text">
       <b>We track your every cent and our every decision right before you.</b> It is our commitment to you that we will forever track and provide utmost transparency for our every action and your every donation. Given the nature of our organization, you are able to fork and copy-paste our processes for your refining, those are also available on this page.
     </p>
@@ -3000,11 +3000,12 @@
                   
                   this.engine = Engine.create();
                   this.world = this.engine.world;
-                  this.world.gravity.y = 0.8;
+                  this.world.gravity.y = 1;
                   
                   this.engine.enableSleeping = true;
                   this.engine.positionIterations = 10;
                   this.engine.velocityIterations = 8;
+                  this.engine.timing.timeScale = 1.0;
                   
                   const commMouse = Mouse.create(this.pool);
                   const mouseConstraint = MouseConstraint.create(this.engine, {
@@ -3024,13 +3025,51 @@
                         }
                   }, { passive: false });
                   
-                  Events.on(mouseConstraint, 'startdrag', () => {
+                  this.pool.addEventListener('touchstart', (e) => {
+                        if (e.touches.length === 1) {
+                              this._touchStartY = e.touches[0].clientY;
+                        }
+                  }, { passive: true });
+                  
+                  Events.on(mouseConstraint, 'startdrag', (event) => {
                         this.isDragging = true;
+                        this.draggedBody = event.body;
+                        if (this.draggedBody && Matter.Sleeping) {
+                              Matter.Sleeping.set(this.draggedBody, false);
+                        }
                   });
                   
                   Events.on(mouseConstraint, 'enddrag', () => {
                         this.isDragging = false;
                         this.draggedBody = null;
+                  });
+                  
+                  let lastWakeUpTime = 0;
+                  const WAKE_UP_THROTTLE = 50;
+                  
+                  Events.on(this.engine, 'collisionStart', (event) => {
+                        if (!this.isDragging || !this.draggedBody) return;
+                        
+                        const now = Date.now();
+                        if (now - lastWakeUpTime < WAKE_UP_THROTTLE) return;
+                        lastWakeUpTime = now;
+                        
+                        const pairs = event.pairs;
+                        for (let i = 0; i < pairs.length; i++) {
+                              const pair = pairs[i];
+                              const bodyA = pair.bodyA;
+                              const bodyB = pair.bodyB;
+                              
+                              if (bodyA === this.draggedBody) {
+                                    if (Matter.Sleeping && Matter.Sleeping.get(bodyB)) {
+                                          Matter.Sleeping.set(bodyB, false);
+                                    }
+                              } else if (bodyB === this.draggedBody) {
+                                    if (Matter.Sleeping && Matter.Sleeping.get(bodyA)) {
+                                          Matter.Sleeping.set(bodyA, false);
+                                    }
+                              }
+                        }
                   });
                   
                   const wallThickness = 50;
@@ -3060,8 +3099,9 @@
                               if (item.body && item.element) {
                                     const { x, y } = item.body.position;
                                     const angle = item.body.angle;
-                                    item.element.style.left = (x - 30) + 'px';
-                                    item.element.style.top = (y - 30) + 'px';
+                                    const radius = item.body.circleRadius || 30;
+                                    item.element.style.left = (x - radius) + 'px';
+                                    item.element.style.top = (y - radius) + 'px';
                                     item.element.style.transform = `translate(-50%, -50%) rotate(${angle}rad)`;
                               }
                         });
@@ -3088,8 +3128,8 @@
                               const startY = -radius;
                               
                               const body = Bodies.circle(startX, startY, radius, {
-                                    restitution: 0.3,
-                                    friction: 0.7,
+                                    restitution: 0.2,
+                                    friction: 0.8,
                                     density: 0.001,
                                     label: 'communication-emoji'
                               });
@@ -3191,8 +3231,8 @@
                               const startY = -radius;
                               
                               const body = Bodies.circle(startX, startY, radius, {
-                                    restitution: 0.3,
-                                    friction: 0.7,
+                                    restitution: 0.2,
+                                    friction: 0.8,
                                     density: 0.001,
                                     label: 'communication-emoji'
                               });
