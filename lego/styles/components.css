@@ -284,6 +284,14 @@ body > nav.header-right .stoplight-container {
   border-radius: var(--radius-sm);
   position: relative;
   z-index: 2;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-menu button.dropdown-item {
+  width: 100%;
+  text-align: left;
 }
 
 .dropdown-item:hover {
