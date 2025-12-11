@@ -68,10 +68,15 @@ body {
   -ms-overflow-style: none;
 }
 
-/* Hide body until fonts load - prevent FOUC */
-body:not(.fonts-loaded) {
+/* Hide body until CSS and fonts load - prevent FOUC */
+body:not(.css-loaded):not(.fonts-loaded) {
   visibility: hidden;
   opacity: 0;
+}
+
+body.css-loaded:not(.fonts-loaded) {
+  visibility: visible;
+  opacity: 1;
 }
 
 /* Smooth fade-in animation when fonts are loaded */
