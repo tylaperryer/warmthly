@@ -6,8 +6,8 @@
   <script type="module" src="/lego/web-components/warmthly-stoplight.js"></script>
   <script type="module" src="/lego/web-components/warmthly-font-loader.js"></script>
   <warmthly-head 
-    title="Post - Warmthly"
-    description="Post-transaction transparency and reporting. View detailed breakdowns of how donations are used and report any concerns."
+    title="Vote - Warmthly"
+    description="Participate in organizational decisions and dissolution votes"
     app="post"
     viewport="1.0"
     preconnects="https://www.warmthly.org, https://post.warmthly.org">
@@ -32,374 +32,326 @@
   
 </head>
 <body class="fonts-loading">
-    <warmthly-header app="post"></warmthly-header>
-    
-    <nav class="header-right" role="navigation" aria-label="Main navigation">
-      <warmthly-stoplight app="post"></warmthly-stoplight>
-    </nav>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <warmthly-header app="post"></warmthly-header>
+  
+  <warmthly-stoplight app="post"></warmthly-stoplight>
 
-    <div class="container">
-      <div class="hero-section">
-        <h1 class="page-title">Post</h1>
-        <p class="subtitle">
-          Warmthly is a global movement to make empathy a measurable part of our systems.
+  <div class="container container-narrow" id="main-content" role="main">
+    <h1 class="page-title">The Dissolution Vote</h1>
+    <p class="main-text">
+      Our commitment is to our mission and values: Transparency, Honesty, Humility, and Empathy. If we fail to uphold them, we believe we should cease to exist. This page is our community-held kill switch.
+    </p>
+
+    <div class="section">
+        <h2 class="section-title">A Legally Binding Promise</h2>
+        <p>
+            This is not a survey. The Dissolution Vote is a legally binding mechanism enshrined in the bylaws of our organization. Should the vote count reach <strong>100,000</strong>, it will trigger a formal, legally mandated process to dissolve Warmthly. All remaining assets will be transferred to a predetermined successor charity dedicated to mental health and empathy, ensuring our mission outlives our organization. Your vote is your power.
         </p>
-      </div>
+    </div>
+    
+    <div class="section vote-section">
+      <h2 class="section-title">Should Warmthly be dissolved?</h2>
       
-      <!-- World Map SVG (Web Component with custom SVG) -->
-      <div class="world-map-container">
-        <world-map-svg></world-map-svg>
-      </div>
-      
-      <div class="timeline-wrapper">
-        <div class="timeline-line" aria-hidden="true"></div>
-        <div class="timeline-container" id="timeline-container">
+      <!-- Vote Bar Chart -->
+      <div class="vote-chart-container">
+        <!-- Yes Votes Bar -->
+        <div class="vote-bar-section">
+          <div class="vote-bar-label">
+            <span class="vote-bar-icon">❌</span>
+            <span class="vote-bar-text">Yes, Dissolve</span>
+            <span class="vote-bar-count" id="yesVoteCount">0</span>
+          </div>
+          <div class="vote-bar-wrapper">
+            <div class="vote-bar vote-bar-yes" id="yesBar" style="width: 0%">
+              <span class="vote-bar-fill-text" id="yesBarText">0</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- No Votes Bar -->
+        <div class="vote-bar-section">
+          <div class="vote-bar-label">
+            <span class="vote-bar-icon">✅</span>
+            <span class="vote-bar-text">No, Continue</span>
+            <span class="vote-bar-count" id="noVoteCount">0</span>
+          </div>
+          <div class="vote-bar-wrapper">
+            <div class="vote-bar vote-bar-no" id="noBar" style="width: 0%">
+              <span class="vote-bar-fill-text" id="noBarText">0</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Total Votes -->
+        <div class="vote-total">
+          <span class="vote-total-label">Total Votes:</span>
+          <span class="vote-total-value" id="totalVoteCount">0</span>
+        </div>
+        
+        <!-- Threshold Info -->
+        <div class="vote-threshold-info">
+          <strong>100,000</strong> votes required for dissolution
         </div>
       </div>
+
+      <!-- Vote Buttons -->
+      <div class="vote-buttons">
+        <button class="vote-button" id="yesButton" aria-label="Yes, dissolve Warmthly">Yes, dissolve.</button>
+        <button class="vote-button" id="noButton" aria-label="No, continue Warmthly">No, continue.</button>
+      </div>
+
+      <p class="vote-note" id="voteStatus">Please cast your vote.</p>
+      <div id="errorMessage" class="error-message" role="alert" aria-live="polite"></div>
       <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer">GitHub</a>. Our work is not ours, it's yours.</p>
     </div>
-    
-    <div class="chronicle-popup" id="chronicle-popup">
-      <button class="chronicle-popup-close" id="popup-close" aria-label="Close popup">×</button>
-      <div class="chronicle-popup-header" id="popup-date"></div>
-      <h2 class="chronicle-popup-title" id="popup-title"></h2>
-      <div class="chronicle-popup-content" id="popup-content"></div>
-    </div>
-
-  <warmthly-font-loader></warmthly-font-loader>
-
+  </div>
+  
+  <!-- Firebase SDK for Realtime Database -->
   <script type="module">
-    import { WARMTHLY_CONFIG } from '/lego/config/warmthly-config.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getDatabase, ref, onValue, set, get, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
     
-    const bookEmojis = ['📕', '📗', '📘', '📙'];
-    
-    function getRandomBookEmoji() {
-      return bookEmojis[Math.floor(Math.random() * bookEmojis.length)];
-    }
-    
-    const timelineData = [
-      {
-        date: 'November 15, 2025',
-        title: 'Warmthly is Founded',
-        description: 'The organization is established with a mission to bring warmth and transparency to the world.',
-        marker: 'orange',
-        signature: true,
-        content: `
-          <p>Warmthly was founded on the principle that organizations should operate with complete transparency and genuine care for their communities. Our mission is to bring warmth—both literal and metaphorical—to those who need it most.</p>
-          <p>The story of Warmthly begins with "Tyla," a concept that represents our core philosophy: every action should be taken with intention, every decision should be made with the community in mind, and every resource should be used to create genuine value.</p>
-          <p>From day one, we committed to radical transparency. This means opening our books, sharing our decision-making process, and creating spaces where community voices are not just heard, but actively shape our direction.</p>
-        `,
-        comments: [
-          { heading: 'Mission statement finalized', description: 'Core values of transparency and community care established as foundation.' },
-          { heading: 'Initial team assembled', description: 'Three founding members committed to radical transparency from day one.' },
-          { heading: 'First community outreach', description: 'Reached out to local organizations to understand community needs.' }
-        ]
-      },
-      {
-        date: 'November 27, 2025',
-        title: 'The Mint Initiative is Launched',
-        description: 'We launch our financial tracking system, making every expense visible to the public.',
-        marker: 'green',
-        content: `
-          <p>The Mint page represents a fundamental shift in how organizations handle financial transparency. Every expense, every receipt, every financial decision is made public in real-time.</p>
-          <p>This initiative allows anyone to see exactly how Warmthly uses its resources. We believe that financial transparency is not just about accountability—it's about building trust and demonstrating that we take our responsibility to donors and the community seriously.</p>
-          <p><a href="${WARMTHLY_CONFIG.urls.mint}" target="_blank">Visit the Mint page →</a></p>
-        `,
-        comments: [
-          { heading: '10% improved cost efficiency', description: 'Streamlined expense tracking reduced administrative overhead significantly.' },
-          { heading: 'Real-time transparency achieved', description: 'All financial data now visible to public within 24 hours of transaction.' },
-          { heading: 'Donor trust increased', description: 'Complete visibility into fund usage boosted donor confidence by 40%.' }
-        ]
-      },
-      {
-        date: 'December 1, 2025',
-        title: 'The Dissolution Vote: Our Ultimate Promise',
-        description: 'We establish the dissolution mechanism as a core, foundational principle of the organization.',
-        marker: 'red',
-        content: `
-          <p>The dissolution vote is Warmthly's ultimate promise to the community: if we ever lose our way, if we stop serving our mission, or if the community determines we're no longer needed, we will dissolve.</p>
-          <p>This mechanism ensures that Warmthly can never become an organization that exists for its own sake. We are here to serve a purpose, and if that purpose is no longer being fulfilled, we will step aside.</p>
-          <p>The vote is accessible to all community members and requires a transparent, democratic process. This is not just a safety mechanism—it's a commitment to staying true to our values, no matter what.</p>
-          <p><a href="${WARMTHLY_CONFIG.urls.post}${WARMTHLY_CONFIG.routes.post.vote}" target="_blank">Learn more about the dissolution vote →</a></p>
-        `,
-        comments: [
-          { heading: 'Dissolution mechanism designed', description: 'Community voting system created to ensure organizational accountability.' },
-          { heading: 'Voting platform launched', description: 'Public voting interface made accessible for all community members.' },
-          { heading: 'First accountability review', description: 'Quarterly review process established to evaluate mission alignment.' }
-        ]
-      },
-      {
-        date: 'December 10, 2025',
-        title: 'Project: Clipboard Liaison Begins',
-        description: 'We launch our first community project focused on bridging gaps in local communication.',
-        marker: 'green',
-        content: `
-          <p>The Clipboard Liaison project addresses a critical gap in community communication. Many important local announcements, resources, and opportunities are shared on physical bulletin boards, community centers, and local gathering places—but these don't always reach everyone who needs them.</p>
-          <p>Our project creates a network of volunteers who regularly check these physical spaces, digitize important information, and make it accessible online. This ensures that community members who can't physically visit these locations still have access to vital information.</p>
-          <p>The project is currently in its pilot phase, working with three local communities to test the model and refine our approach. Initial feedback has been overwhelmingly positive, with community members reporting increased access to resources and opportunities.</p>
-          <p><a href="${WARMTHLY_CONFIG.urls.mint}" target="_blank">View project expenses on Mint →</a></p>
-        `,
-        comments: [
-          { heading: 'We made the clipboard liaison today', description: 'Launched pilot program in three local communities to digitize physical bulletin boards.' },
-          { heading: 'First volunteer team recruited', description: 'Five volunteers signed up to help with weekly bulletin board checks.' },
-          { heading: 'Initial success metrics', description: 'Over 50 community resources digitized in first month of operation.' }
-        ]
-      },
-      {
-        date: 'January 1, 2026',
-        title: 'Community Report: Q4 2025',
-        description: 'We publish our first quarterly community report, sharing anonymized feedback and actions taken.',
-        marker: 'red',
-        content: `
-          <p>Transparency means not just sharing what goes right, but also being open about challenges and how we address them. This quarterly report summarizes all community feedback received through our reporting system.</p>
-          <p><strong>Reports Received:</strong> 12</p>
-          <p><strong>Categories:</strong></p>
-          <ul>
-            <li>Website accessibility concerns: 4</li>
-            <li>Suggestions for new features: 5</li>
-            <li>Questions about financial transparency: 2</li>
-            <li>General feedback: 1</li>
-          </ul>
-          <p><strong>Actions Taken:</strong></p>
-          <ul>
-            <li>Improved mobile responsiveness based on accessibility feedback</li>
-            <li>Added FAQ section addressing common questions</li>
-            <li>Enhanced financial reporting with more detailed categories</li>
-            <li>Implemented three feature suggestions from the community</li>
-          </ul>
-          <p>We're committed to responding to every report and taking action when appropriate. Your voice matters, and this report is our way of showing that we're listening.</p>
-        `,
-        comments: [
-          { heading: 'Mobile accessibility improved', description: 'Enhanced responsive design based on community feedback received.' },
-          { heading: 'Three features implemented', description: 'Community-suggested features now live: dark mode, search, and export.' },
-          { heading: 'Response time reduced', description: 'Average response to community reports now under 48 hours.' }
-        ]
-      }
-    ];
-    
-    const timelineContainer = document.getElementById('timeline-container');
-    const popup = document.getElementById('chronicle-popup');
-    const popupClose = document.getElementById('popup-close');
-    const popupDate = document.getElementById('popup-date');
-    const popupTitle = document.getElementById('popup-title');
-    const popupContent = document.getElementById('popup-content');
-    
-    // Create timeline entries
-    timelineData.forEach((entry, index) => {
-      const entryElement = document.createElement('div');
-      entryElement.className = 'timeline-entry';
-      entryElement.setAttribute('data-index', index);
-      
-      // Create book cards HTML
-      const booksHTML = entry.comments ? entry.comments.map(comment => {
-        const emoji = getRandomBookEmoji();
-        return `<div class="book-card">${emoji}<div class="book-popup"><div class="book-popup-heading">${comment.heading}</div><div class="book-popup-description">${comment.description}</div></div></div>`;
-      }).join('') : '';
-      
-      entryElement.innerHTML = `
-        <div class="timeline-connector"></div>
-        <div class="timeline-marker ${entry.marker}" aria-label="Timeline marker"></div>
-        <div class="timeline-card">
-          <div class="timeline-card-date">${entry.date}</div>
-          <h3 class="timeline-card-title">${entry.title}</h3>
-          <p class="timeline-card-description">${entry.description}</p>
-          <span class="timeline-card-read-more">Read more →</span>
-        </div>
-        ${entry.comments ? `<div class="timeline-books">${booksHTML}</div>` : ''}
-      `;
-      
-      const card = entryElement.querySelector('.timeline-card');
-      card.addEventListener('click', () => openPopup(entry));
-      
-      if (entry.signature) {
-        const sig = document.createElement('img');
-        sig.src = '/global/images/signature.png';
-        sig.alt = "Founder's handwritten signature";
-        sig.style.cssText = `
-          max-height: 60px;
-          margin: 1.5rem auto 0;
-          display: block;
-          opacity: 0.85;
-          filter: brightness(1.1);
-        `;
-        entryElement.querySelector('.timeline-card').appendChild(sig);
-      }
-      
-      const bookCards = entryElement.querySelectorAll('.book-card');
-      const isEven = index % 2 === 1;
-      
-      bookCards.forEach(bookCard => {
-        const bookPopup = bookCard.querySelector('.book-popup');
-        let hideTimeout;
-        
-        const showPopup = () => {
-          clearTimeout(hideTimeout);
-          bookPopup.style.opacity = '1';
-          bookPopup.style.visibility = 'visible';
-          if (isEven) {
-            bookPopup.style.transform = 'translateY(0) scale(1)';
-          } else {
-            bookPopup.style.transform = 'translateX(-50%) translateY(0) scale(1)';
-          }
-          bookPopup.style.pointerEvents = 'auto';
-        };
-        
-        const hidePopup = () => {
-          hideTimeout = setTimeout(() => {
-            bookPopup.style.opacity = '0';
-            bookPopup.style.visibility = 'hidden';
-            if (isEven) {
-              bookPopup.style.transform = 'translateY(10px) scale(0.9)';
-            } else {
-              bookPopup.style.transform = 'translateX(-50%) translateY(10px) scale(0.9)';
-            }
-            bookPopup.style.pointerEvents = 'none';
-          }, 300);
-        };
-        
-        bookCard.addEventListener('mouseenter', showPopup);
-        bookCard.addEventListener('mouseleave', hidePopup);
-        bookPopup.addEventListener('mouseenter', showPopup);
-        bookPopup.addEventListener('mouseleave', hidePopup);
-      });
-      
-      timelineContainer.appendChild(entryElement);
-    });
-    
-    function openPopup(entry) {
-      popupDate.textContent = entry.date;
-      popupTitle.textContent = entry.title;
-      popupContent.innerHTML = entry.content;
-      
-      popup.classList.add('active');
-      document.body.classList.add('popup-open');
-      document.documentElement.classList.add('popup-open');
-      popupClose.focus();
-    }
-    
-    function closePopup() {
-      popup.classList.remove('active');
-      document.body.classList.remove('popup-open');
-      document.documentElement.classList.remove('popup-open');
-    }
-    
-    popupClose.addEventListener('click', closePopup);
-    
-    document.addEventListener('click', (e) => {
-      if (popup.classList.contains('active') && !popup.contains(e.target) && !e.target.closest('.timeline-card')) {
-        closePopup();
-      }
-    });
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && popup.classList.contains('active')) {
-        closePopup();
-      }
-    });
-    
-    popup.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-    
-    class WorldMapSVG extends HTMLElement {
-      constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+    // ============================================
+    // FIREBASE CONFIGURATION
+    // ============================================
+    // Replace these values with your Firebase project details:
+    // 1. Go to https://console.firebase.google.com/
+    // 2. Create a new project (or select existing)
+    // 3. Go to Project Settings (gear icon)
+    // 4. Scroll down to "Your apps" section
+    // 5. Click the web icon (</>) to add a web app
+    // 6. Copy the config values from there
+    // 7. Also enable Realtime Database in Firebase Console:
+    //    - Go to "Realtime Database" in left menu
+    //    - Click "Create Database"
+    //    - Choose your region
+    //    - Start in "Test mode" (we'll set rules below)
+    // ============================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDexgT1qa34GPGnpmZ1iCvr3jigiwvZ5eE",
+      authDomain: "post-vote-59ed2.firebaseapp.com",
+      databaseURL: "https://post-vote-59ed2-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "post-vote-59ed2",
+      storageBucket: "post-vote-59ed2.firebasestorage.app",
+      messagingSenderId: "170079221674",
+      appId: "1:170079221674:web:58097403f2a85f829b5dd3"
+    };
 
-        // State
-        this.svgContainer = null;
-        this.svg = null;
-      }
+    const VOTE_THRESHOLD = 100000;
+    const THIRTY_DAYS_IN_MILLIS = 30 * 24 * 60 * 60 * 1000;
 
-      connectedCallback() {
-        this.init();
-      }
-
-      disconnectedCallback() {
-        this.destroy();
-      }
-
-      async init() {
-        this.createContainer();
-        await this.loadSVG();
-      }
-
-      createContainer() {
-        const style = document.createElement('style');
-        style.textContent = `
-          .world-map-svg-container {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0;
-          }
-          
-          .world-map-svg-container svg {
-            display: block;
-            width: 100%;
-            height: auto;
-          }
-          
-          .dot {
-            fill: #FFB88C;
-            opacity: 0.6;
-          }
-        `;
-        this.shadowRoot.appendChild(style);
-        
-        const container = document.createElement('div');
-        container.className = 'world-map-svg-container';
-        this.shadowRoot.appendChild(container);
-        this.svgContainer = container;
-      }
-
-      async loadSVG() {
+    // Generate a unique browser ID for tracking votes
+    function getBrowserId() {
+      let browserId = localStorage.getItem('warmthly_browser_id');
+      if (!browserId) {
+        browserId = 'browser_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         try {
-          const paths = ['/global/images/worlddots.svg'];
-          let svgText = null;
-          
-          for (const path of paths) {
-            try {
-              const response = await fetch(path);
-              if (response.ok) {
-                svgText = await response.text();
-                break;
-              }
-            } catch (err) {
-              // Ignore fetch errors
-            }
-          }
-          
-          if (!svgText) {
-            throw new Error('SVG file not found.');
-          }
-          
-          this.svgContainer.innerHTML = svgText;
-          this.svg = this.svgContainer.querySelector('svg');
-          
-          if (!this.svg) {
-            throw new Error('SVG element not found in loaded content');
-          }
-          
-          if (!this.svg.getAttribute('viewBox')) {
-            this.svg.setAttribute('viewBox', '0 0 3129 1736');
-          }
-          
-          this.svg.querySelectorAll('circle').forEach(circle => {
-            circle.setAttribute('fill', '#FFB88C');
-            circle.setAttribute('opacity', '0.6');
-          });
-          
-        } catch (error) {
-          this.svgContainer.innerHTML = '<p style="color: red;">Error loading map.</p>';
+          localStorage.setItem('warmthly_browser_id', browserId);
+        } catch (e) {
+          browserId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
       }
+      return browserId;
+    }
 
-      destroy() {
+    function showError(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      const voteStatus = document.getElementById('voteStatus');
+      if (errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.classList.add('visible');
+        if (voteStatus) voteStatus.style.display = 'none';
       }
     }
 
-    customElements.define('world-map-svg', WorldMapSVG);
+    function hideError() {
+      const errorMessage = document.getElementById('errorMessage');
+      const voteStatus = document.getElementById('voteStatus');
+      if (errorMessage) {
+        errorMessage.classList.remove('visible');
+        if (voteStatus) voteStatus.style.display = 'block';
+      }
+    }
+
+    // Check if Firebase is configured
+    if (firebaseConfig.apiKey === "YOUR_API_KEY" || 
+        firebaseConfig.databaseURL === "YOUR_DATABASE_URL" ||
+        firebaseConfig.projectId === "YOUR_PROJECT_ID") {
+      showError('Firebase is not configured. Please update the firebaseConfig object with your Firebase project details.');
+    } else {
+      try {
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        
+        // Database references
+        const votesRef = ref(database, 'dissolution/votes');
+        const userVotesRef = ref(database, 'dissolution/userVotes');
+
+        // Update the bar chart display
+        function updateBarChart(voteData) {
+          const yesCount = voteData.yes || 0;
+          const noCount = voteData.no || 0;
+          const totalVotes = yesCount + noCount;
+          
+          const yesBar = document.getElementById('yesBar');
+          const noBar = document.getElementById('noBar');
+          const yesBarText = document.getElementById('yesBarText');
+          const noBarText = document.getElementById('noBarText');
+          const yesVoteCount = document.getElementById('yesVoteCount');
+          const noVoteCount = document.getElementById('noVoteCount');
+          const totalVoteCount = document.getElementById('totalVoteCount');
+
+          // Calculate percentages (for display, max 100%)
+          const maxVotes = Math.max(yesCount, noCount, 1);
+          const yesPercentage = totalVotes > 0 ? (yesCount / maxVotes) * 100 : 0;
+          const noPercentage = totalVotes > 0 ? (noCount / maxVotes) * 100 : 0;
+
+          // Update bars with animation
+          setTimeout(() => {
+            if (yesBar) yesBar.style.width = `${yesPercentage}%`;
+            if (noBar) noBar.style.width = `${noPercentage}%`;
+          }, 10);
+
+          // Update text
+          if (yesBarText) yesBarText.textContent = yesCount.toLocaleString();
+          if (noBarText) noBarText.textContent = noCount.toLocaleString();
+          if (yesVoteCount) yesVoteCount.textContent = yesCount.toLocaleString();
+          if (noVoteCount) noVoteCount.textContent = noCount.toLocaleString();
+          if (totalVoteCount) totalVoteCount.textContent = totalVotes.toLocaleString();
+        }
+
+        // Check if user can vote
+        async function canUserVote() {
+          const browserId = getBrowserId();
+          try {
+            const userVoteSnapshot = await get(ref(database, `dissolution/userVotes/${browserId}`));
+            if (!userVoteSnapshot.exists()) {
+              return true;
+            }
+            
+            const userVote = userVoteSnapshot.val();
+            const timeSinceVote = Date.now() - userVote.timestamp;
+            return timeSinceVote >= THIRTY_DAYS_IN_MILLIS;
+          } catch (error) {
+            console.error('Error checking user vote:', error);
+            return true; // Allow vote if check fails
+          }
+        }
+
+        // Update UI based on vote status
+        async function updateUIBasedOnVote() {
+          const yesButton = document.getElementById('yesButton');
+          const noButton = document.getElementById('noButton');
+          const voteStatus = document.getElementById('voteStatus');
+          const browserId = getBrowserId();
+
+          try {
+            const userVoteSnapshot = await get(ref(database, `dissolution/userVotes/${browserId}`));
+            
+            if (!userVoteSnapshot.exists() || await canUserVote()) {
+              if (voteStatus) voteStatus.textContent = "Please cast your vote.";
+              if (yesButton) yesButton.disabled = false;
+              if (noButton) noButton.disabled = false;
+            } else {
+              const userVote = userVoteSnapshot.val();
+              const timeSinceVote = Date.now() - userVote.timestamp;
+              const daysRemaining = Math.ceil((THIRTY_DAYS_IN_MILLIS - timeSinceVote) / (1000 * 60 * 60 * 24));
+              if (voteStatus) {
+                voteStatus.textContent = `Thank you for your vote. You can cast a new vote in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}.`;
+              }
+              if (yesButton) yesButton.disabled = true;
+              if (noButton) noButton.disabled = true;
+            }
+          } catch (error) {
+            console.error('Error updating UI:', error);
+            if (voteStatus) voteStatus.textContent = "Please cast your vote.";
+            if (yesButton) yesButton.disabled = false;
+            if (noButton) noButton.disabled = false;
+          }
+        }
+
+        // Cast a vote
+        async function castVote(voteType) {
+          if (!(await canUserVote())) {
+            showError('You have already voted. Please wait 30 days before voting again.');
+            return false;
+          }
+
+          const browserId = getBrowserId();
+          const voteRef = ref(database, `dissolution/votes/${voteType}`);
+          const userVoteRef = ref(database, `dissolution/userVotes/${browserId}`);
+
+          try {
+            // Increment vote count
+            const currentSnapshot = await get(voteRef);
+            const currentCount = currentSnapshot.exists() ? currentSnapshot.val() : 0;
+            await set(voteRef, currentCount + 1);
+
+            // Record user vote with timestamp
+            await set(userVoteRef, {
+              vote: voteType,
+              timestamp: Date.now(),
+              browserId: browserId
+            });
+
+            hideError();
+            await updateUIBasedOnVote();
+            return true;
+          } catch (error) {
+            console.error('Error casting vote:', error);
+            showError('Failed to cast vote. Please try again.');
+            return false;
+          }
+        }
+
+        // Listen for real-time vote updates
+        onValue(votesRef, (snapshot) => {
+          const voteData = snapshot.val() || { yes: 0, no: 0 };
+          updateBarChart(voteData);
+          hideError();
+        }, (error) => {
+          console.error('Error listening to votes:', error);
+          showError('Could not connect to voting service. Please refresh the page.');
+        });
+
+        // Initialize UI
+        document.addEventListener('DOMContentLoaded', () => {
+          const yesButton = document.getElementById('yesButton');
+          const noButton = document.getElementById('noButton');
+
+          // Initial UI update
+          updateUIBasedOnVote();
+
+          // Vote button handlers
+          if (yesButton) {
+            yesButton.addEventListener('click', async () => {
+              if (yesButton.disabled) return;
+              yesButton.disabled = true;
+              await castVote('yes');
+              yesButton.disabled = false;
+            });
+          }
+
+          if (noButton) {
+            noButton.addEventListener('click', async () => {
+              if (noButton.disabled) return;
+              noButton.disabled = true;
+              await castVote('no');
+              noButton.disabled = false;
+            });
+          }
+        });
+
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+        showError('Failed to initialize voting service. Please check your Firebase configuration.');
+      }
+    }
   </script>
+  
+  <warmthly-font-loader></warmthly-font-loader>
 </body>
 </html>
+
