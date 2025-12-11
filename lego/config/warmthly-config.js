@@ -31,7 +31,6 @@ export const WARMTHLY_CONFIG = {
     post: [
       { label: 'Home', url: 'https://www.warmthly.org' },
       { label: 'Mint', url: 'https://mint.warmthly.org' },
-      { label: 'Dissolution', url: 'https://post.warmthly.org/vote' },
       { label: 'Report', url: 'https://post.warmthly.org/report', class: 'dropdown-item-red' }
     ],
     admin: [
@@ -43,8 +42,7 @@ export const WARMTHLY_CONFIG = {
   routes: {
     post: {
       report: '/report/',
-      yourData: '/your-data/',
-      vote: '/vote/'
+      yourData: '/your-data/'
     },
     admin: {
       emails: '/emails/',
