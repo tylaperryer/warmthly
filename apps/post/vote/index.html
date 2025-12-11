@@ -37,318 +37,170 @@
   
   <warmthly-stoplight app="post"></warmthly-stoplight>
 
-  <div class="container container-narrow" id="main-content" role="main">
-    <h1 class="page-title">The Dissolution Vote</h1>
-    <p class="main-text">
-      Our commitment is to our mission and values: Transparency, Honesty, Humility, and Empathy. If we fail to uphold them, we believe we should cease to exist. This page is our community-held kill switch.
-    </p>
-
-    <div class="section">
-        <h2 class="section-title">A Legally Binding Promise</h2>
-        <p>
-            This is not a survey. The Dissolution Vote is a legally binding mechanism enshrined in the bylaws of our organization. Should the vote count reach <strong>100,000</strong>, it will trigger a formal, legally mandated process to dissolve Warmthly. All remaining assets will be transferred to a predetermined successor charity dedicated to mental health and empathy, ensuring our mission outlives our organization. Your vote is your power.
-        </p>
+  <div class="container" id="main-content" role="main">
+    <div class="hero-section">
+      <h1 class="page-title">Vote</h1>
+      <p class="subtitle">
+        Our commitment is to our mission and values: Transparency, Honesty, Humility, and Empathy. If we fail to uphold them, we believe we should cease to exist. This is our community-held dissolution vote—a legally binding mechanism that will trigger Warmthly's dissolution if it reaches 100,000 votes. All remaining assets will be transferred to a predetermined successor charity dedicated to mental health and empathy.
+      </p>
     </div>
-    
-    <div class="section vote-section">
-      <h2 class="section-title">Should Warmthly be dissolved?</h2>
-      
-      <!-- Vote Bar Chart -->
-      <div class="vote-chart-container">
-        <!-- Yes Votes Bar -->
-        <div class="vote-bar-section">
-          <div class="vote-bar-label">
-            <span class="vote-bar-icon">❌</span>
-            <span class="vote-bar-text">Yes, Dissolve</span>
-            <span class="vote-bar-count" id="yesVoteCount">0</span>
-          </div>
-          <div class="vote-bar-wrapper">
-            <div class="vote-bar vote-bar-yes" id="yesBar" style="width: 0%">
-              <span class="vote-bar-fill-text" id="yesBarText">0</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- No Votes Bar -->
-        <div class="vote-bar-section">
-          <div class="vote-bar-label">
-            <span class="vote-bar-icon">✅</span>
-            <span class="vote-bar-text">No, Continue</span>
-            <span class="vote-bar-count" id="noVoteCount">0</span>
-          </div>
-          <div class="vote-bar-wrapper">
-            <div class="vote-bar vote-bar-no" id="noBar" style="width: 0%">
-              <span class="vote-bar-fill-text" id="noBarText">0</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Total Votes -->
-        <div class="vote-total">
-          <span class="vote-total-label">Total Votes:</span>
-          <span class="vote-total-value" id="totalVoteCount">0</span>
-        </div>
-        
-        <!-- Threshold Info -->
-        <div class="vote-threshold-info">
-          <strong>100,000</strong> votes required for dissolution
+
+    <!-- Simple Vote Bar -->
+    <div class="vote-bar-simple-container">
+      <div class="vote-bar-simple-wrapper">
+        <div class="vote-bar-simple" id="voteBar" style="width: 0%">
+          <span class="vote-bar-simple-text" id="voteBarText">0</span>
         </div>
       </div>
-
-      <!-- Vote Buttons -->
-      <div class="vote-buttons">
-        <button class="vote-button" id="yesButton" aria-label="Yes, dissolve Warmthly">Yes, dissolve.</button>
-        <button class="vote-button" id="noButton" aria-label="No, continue Warmthly">No, continue.</button>
-      </div>
-
-      <p class="vote-note" id="voteStatus">Please cast your vote.</p>
-      <div id="errorMessage" class="error-message" role="alert" aria-live="polite"></div>
-      <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer">GitHub</a>. Our work is not ours, it's yours.</p>
     </div>
+
+    <!-- Vote Buttons -->
+    <div class="vote-buttons-simple">
+      <button class="vote-button-simple" id="yesButton" aria-label="Yes, dissolve Warmthly">Yes, dissolve.</button>
+      <button class="vote-button-simple" id="noButton" aria-label="No, continue Warmthly">No, continue.</button>
+    </div>
+
+    <p class="site-footer-inline">CC BY-NC-SA Warmthly 2025. Sourced from <a href="https://github.com/tylaperryer/warmthly" target="_blank" rel="noopener noreferrer">GitHub</a>. Our work is not ours, it's yours.</p>
   </div>
   
-  <!-- Firebase SDK for Realtime Database -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getDatabase, ref, onValue, set, get, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-    
-    // ============================================
-    // FIREBASE CONFIGURATION
-    // ============================================
-    // Replace these values with your Firebase project details:
-    // 1. Go to https://console.firebase.google.com/
-    // 2. Create a new project (or select existing)
-    // 3. Go to Project Settings (gear icon)
-    // 4. Scroll down to "Your apps" section
-    // 5. Click the web icon (</>) to add a web app
-    // 6. Copy the config values from there
-    // 7. Also enable Realtime Database in Firebase Console:
-    //    - Go to "Realtime Database" in left menu
-    //    - Click "Create Database"
-    //    - Choose your region
-    //    - Start in "Test mode" (we'll set rules below)
-    // ============================================
-    const firebaseConfig = {
-      apiKey: "AIzaSyDexgT1qa34GPGnpmZ1iCvr3jigiwvZ5eE",
-      authDomain: "post-vote-59ed2.firebaseapp.com",
-      databaseURL: "https://post-vote-59ed2-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "post-vote-59ed2",
-      storageBucket: "post-vote-59ed2.firebasestorage.app",
-      messagingSenderId: "170079221674",
-      appId: "1:170079221674:web:58097403f2a85f829b5dd3"
-    };
-
+  <script>
+    const VOTE_STORAGE_KEY = 'warmthly_dissolution_votes';
+    const USER_VOTE_KEY = 'warmthly_user_vote';
     const VOTE_THRESHOLD = 100000;
-    const THIRTY_DAYS_IN_MILLIS = 30 * 24 * 60 * 60 * 1000;
 
-    // Generate a unique browser ID for tracking votes
-    function getBrowserId() {
-      let browserId = localStorage.getItem('warmthly_browser_id');
-      if (!browserId) {
-        browserId = 'browser_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        try {
-          localStorage.setItem('warmthly_browser_id', browserId);
-        } catch (e) {
-          browserId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-      }
-      return browserId;
-    }
-
-    function showError(message) {
-      const errorMessage = document.getElementById('errorMessage');
-      const voteStatus = document.getElementById('voteStatus');
-      if (errorMessage) {
-        errorMessage.textContent = message;
-        errorMessage.classList.add('visible');
-        if (voteStatus) voteStatus.style.display = 'none';
-      }
-    }
-
-    function hideError() {
-      const errorMessage = document.getElementById('errorMessage');
-      const voteStatus = document.getElementById('voteStatus');
-      if (errorMessage) {
-        errorMessage.classList.remove('visible');
-        if (voteStatus) voteStatus.style.display = 'block';
-      }
-    }
-
-    // Check if Firebase is configured
-    if (firebaseConfig.apiKey === "YOUR_API_KEY" || 
-        firebaseConfig.databaseURL === "YOUR_DATABASE_URL" ||
-        firebaseConfig.projectId === "YOUR_PROJECT_ID") {
-      showError('Firebase is not configured. Please update the firebaseConfig object with your Firebase project details.');
-    } else {
+    // Get vote data from localStorage
+    function getVoteData() {
       try {
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        
-        // Database references
-        const votesRef = ref(database, 'dissolution/votes');
-        const userVotesRef = ref(database, 'dissolution/userVotes');
-
-        // Update the bar chart display
-        function updateBarChart(voteData) {
-          const yesCount = voteData.yes || 0;
-          const noCount = voteData.no || 0;
-          const totalVotes = yesCount + noCount;
-          
-          const yesBar = document.getElementById('yesBar');
-          const noBar = document.getElementById('noBar');
-          const yesBarText = document.getElementById('yesBarText');
-          const noBarText = document.getElementById('noBarText');
-          const yesVoteCount = document.getElementById('yesVoteCount');
-          const noVoteCount = document.getElementById('noVoteCount');
-          const totalVoteCount = document.getElementById('totalVoteCount');
-
-          // Calculate percentages (for display, max 100%)
-          const maxVotes = Math.max(yesCount, noCount, 1);
-          const yesPercentage = totalVotes > 0 ? (yesCount / maxVotes) * 100 : 0;
-          const noPercentage = totalVotes > 0 ? (noCount / maxVotes) * 100 : 0;
-
-          // Update bars with animation
-          setTimeout(() => {
-            if (yesBar) yesBar.style.width = `${yesPercentage}%`;
-            if (noBar) noBar.style.width = `${noPercentage}%`;
-          }, 10);
-
-          // Update text
-          if (yesBarText) yesBarText.textContent = yesCount.toLocaleString();
-          if (noBarText) noBarText.textContent = noCount.toLocaleString();
-          if (yesVoteCount) yesVoteCount.textContent = yesCount.toLocaleString();
-          if (noVoteCount) noVoteCount.textContent = noCount.toLocaleString();
-          if (totalVoteCount) totalVoteCount.textContent = totalVotes.toLocaleString();
+        const data = localStorage.getItem(VOTE_STORAGE_KEY);
+        if (data) {
+          return JSON.parse(data);
         }
+      } catch (e) {
+        console.error('Error reading vote data:', e);
+      }
+      return { yes: 0, no: 0 };
+    }
 
-        // Check if user can vote
-        async function canUserVote() {
-          const browserId = getBrowserId();
-          try {
-            const userVoteSnapshot = await get(ref(database, `dissolution/userVotes/${browserId}`));
-            if (!userVoteSnapshot.exists()) {
-              return true;
-            }
-            
-            const userVote = userVoteSnapshot.val();
-            const timeSinceVote = Date.now() - userVote.timestamp;
-            return timeSinceVote >= THIRTY_DAYS_IN_MILLIS;
-          } catch (error) {
-            console.error('Error checking user vote:', error);
-            return true; // Allow vote if check fails
-          }
-        }
-
-        // Update UI based on vote status
-        async function updateUIBasedOnVote() {
-          const yesButton = document.getElementById('yesButton');
-          const noButton = document.getElementById('noButton');
-          const voteStatus = document.getElementById('voteStatus');
-          const browserId = getBrowserId();
-
-          try {
-            const userVoteSnapshot = await get(ref(database, `dissolution/userVotes/${browserId}`));
-            
-            if (!userVoteSnapshot.exists() || await canUserVote()) {
-              if (voteStatus) voteStatus.textContent = "Please cast your vote.";
-              if (yesButton) yesButton.disabled = false;
-              if (noButton) noButton.disabled = false;
-            } else {
-              const userVote = userVoteSnapshot.val();
-              const timeSinceVote = Date.now() - userVote.timestamp;
-              const daysRemaining = Math.ceil((THIRTY_DAYS_IN_MILLIS - timeSinceVote) / (1000 * 60 * 60 * 24));
-              if (voteStatus) {
-                voteStatus.textContent = `Thank you for your vote. You can cast a new vote in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}.`;
-              }
-              if (yesButton) yesButton.disabled = true;
-              if (noButton) noButton.disabled = true;
-            }
-          } catch (error) {
-            console.error('Error updating UI:', error);
-            if (voteStatus) voteStatus.textContent = "Please cast your vote.";
-            if (yesButton) yesButton.disabled = false;
-            if (noButton) noButton.disabled = false;
-          }
-        }
-
-        // Cast a vote
-        async function castVote(voteType) {
-          if (!(await canUserVote())) {
-            showError('You have already voted. Please wait 30 days before voting again.');
-            return false;
-          }
-
-          const browserId = getBrowserId();
-          const voteRef = ref(database, `dissolution/votes/${voteType}`);
-          const userVoteRef = ref(database, `dissolution/userVotes/${browserId}`);
-
-          try {
-            // Increment vote count
-            const currentSnapshot = await get(voteRef);
-            const currentCount = currentSnapshot.exists() ? currentSnapshot.val() : 0;
-            await set(voteRef, currentCount + 1);
-
-            // Record user vote with timestamp
-            await set(userVoteRef, {
-              vote: voteType,
-              timestamp: Date.now(),
-              browserId: browserId
-            });
-
-            hideError();
-            await updateUIBasedOnVote();
-            return true;
-          } catch (error) {
-            console.error('Error casting vote:', error);
-            showError('Failed to cast vote. Please try again.');
-            return false;
-          }
-        }
-
-        // Listen for real-time vote updates
-        onValue(votesRef, (snapshot) => {
-          const voteData = snapshot.val() || { yes: 0, no: 0 };
-          updateBarChart(voteData);
-          hideError();
-        }, (error) => {
-          console.error('Error listening to votes:', error);
-          showError('Could not connect to voting service. Please refresh the page.');
-        });
-
-        // Initialize UI
-        document.addEventListener('DOMContentLoaded', () => {
-          const yesButton = document.getElementById('yesButton');
-          const noButton = document.getElementById('noButton');
-
-          // Initial UI update
-          updateUIBasedOnVote();
-
-          // Vote button handlers
-          if (yesButton) {
-            yesButton.addEventListener('click', async () => {
-              if (yesButton.disabled) return;
-              yesButton.disabled = true;
-              await castVote('yes');
-              yesButton.disabled = false;
-            });
-          }
-
-          if (noButton) {
-            noButton.addEventListener('click', async () => {
-              if (noButton.disabled) return;
-              noButton.disabled = true;
-              await castVote('no');
-              noButton.disabled = false;
-            });
-          }
-        });
-
-      } catch (error) {
-        console.error('Firebase initialization error:', error);
-        showError('Failed to initialize voting service. Please check your Firebase configuration.');
+    // Save vote data to localStorage
+    function saveVoteData(voteData) {
+      try {
+        localStorage.setItem(VOTE_STORAGE_KEY, JSON.stringify(voteData));
+        return true;
+      } catch (e) {
+        console.error('Error saving vote data:', e);
+        return false;
       }
     }
+
+    // Check if user has voted
+    function hasUserVoted() {
+      try {
+        const data = localStorage.getItem(USER_VOTE_KEY);
+        return data !== null;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // Save user vote
+    function saveUserVote() {
+      try {
+        localStorage.setItem(USER_VOTE_KEY, 'true');
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // Update the bar display
+    function updateBar() {
+      const voteData = getVoteData();
+      const totalVotes = voteData.yes + voteData.no;
+      const percentage = Math.min((totalVotes / VOTE_THRESHOLD) * 100, 100);
+      
+      const voteBar = document.getElementById('voteBar');
+      const voteBarText = document.getElementById('voteBarText');
+
+      if (voteBar) {
+        setTimeout(() => {
+          voteBar.style.width = `${percentage}%`;
+        }, 10);
+      }
+
+      if (voteBarText) {
+        voteBarText.textContent = totalVotes.toLocaleString();
+      }
+    }
+
+    // Update UI based on vote status
+    function updateUI() {
+      const yesButton = document.getElementById('yesButton');
+      const noButton = document.getElementById('noButton');
+      const hasVoted = hasUserVoted();
+
+      if (hasVoted) {
+        if (yesButton) {
+          yesButton.disabled = true;
+          yesButton.classList.add('voted');
+        }
+        if (noButton) {
+          noButton.disabled = true;
+          noButton.classList.add('voted');
+        }
+      } else {
+        if (yesButton) {
+          yesButton.disabled = false;
+          yesButton.classList.remove('voted');
+        }
+        if (noButton) {
+          noButton.disabled = false;
+          noButton.classList.remove('voted');
+        }
+      }
+    }
+
+    // Cast a vote
+    function castVote(voteType) {
+      if (hasUserVoted()) {
+        return false;
+      }
+
+      const voteData = getVoteData();
+      voteData[voteType] = (voteData[voteType] || 0) + 1;
+
+      if (saveVoteData(voteData) && saveUserVote()) {
+        updateBar();
+        updateUI();
+        return true;
+      }
+
+      return false;
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      const yesButton = document.getElementById('yesButton');
+      const noButton = document.getElementById('noButton');
+
+      // Initial display
+      updateBar();
+      updateUI();
+
+      // Vote button handlers
+      if (yesButton) {
+        yesButton.addEventListener('click', () => {
+          if (yesButton.disabled) return;
+          castVote('yes');
+        });
+      }
+
+      if (noButton) {
+        noButton.addEventListener('click', () => {
+          if (noButton.disabled) return;
+          castVote('no');
+        });
+      }
+    });
   </script>
   
   <warmthly-font-loader></warmthly-font-loader>
