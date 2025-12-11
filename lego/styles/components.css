@@ -103,11 +103,11 @@ body > nav.header-right .stoplight-container {
 }
 
 .top-left-heading .post-text {
-  color: var(--red-dot);
+  color: #87ceeb;
 }
 
 .top-left-heading .post-text:hover {
-  color: #ee3542;
+  color: #6bb6d6;
 }
 
 /* ===== STOPLIGHT MENU ===== */
