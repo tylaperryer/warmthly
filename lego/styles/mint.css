@@ -14,8 +14,25 @@ html {
   --mint-green: #33CE79;
 }
 
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-20) var(--spacing-6) var(--spacing-12);
+}
+
 .page-title {
   color: var(--mint-green) !important;
+  text-align: center;
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--spacing-4);
+}
+
+.main-text {
+  max-width: 900px;
+  margin: 0 auto var(--spacing-10);
+  text-align: center;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-base);
 }
 
 /* Mint-specific header text color */
@@ -31,8 +48,9 @@ html {
 
 /* Database Section */
 .database-section {
-  margin: 3rem 0;
+  margin: 3rem auto;
   width: 100%;
+  max-width: 1100px;
   box-sizing: border-box;
   position: relative;
 }
@@ -117,12 +135,12 @@ html {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 24px;
-  padding: 2rem;
+  padding: 1.5rem;
   border: 1px solid rgba(255,140,66,0.15);
   box-shadow: 0 8px 32px rgba(0,0,0,0.06);
-  min-height: 500px;
-  margin-bottom: 2rem;
-  max-width: 100%;
+  min-height: 440px;
+  margin: 0 auto 2rem;
+  max-width: 1100px;
   box-sizing: border-box;
   width: 100%;
 }
@@ -345,7 +363,8 @@ html {
 
 /* Communication Section */
 .communication-section {
-  margin: 3rem 0;
+  margin: 3rem auto;
+  max-width: 1100px;
 }
 
 .communication-header {
