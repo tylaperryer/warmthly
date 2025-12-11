@@ -92,10 +92,64 @@ ${preconnectLinks ? `  ${preconnectLinks}\n` : ''}  <link rel="icon" type="image
   <link rel="apple-touch-icon" href="${WARMTHLY_CONFIG.favicon}?v=2">
   <link rel="shortcut icon" href="${WARMTHLY_CONFIG.favicon}?v=2">
   <link rel="manifest" href="/manifest.json">
-  <link rel="preload" href="${WARMTHLY_CONFIG.fonts.inter}" as="font" type="font/ttf" crossorigin="anonymous">
-  <link rel="preload" href="${WARMTHLY_CONFIG.fonts.cormorant}" as="font" type="font/ttf" crossorigin="anonymous">
+  <link rel="preload" href="/fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+  <link rel="preload" href="/fonts/CormorantGaramond-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 ${cssPreloadLinks}
 ${cssLinks}
+  <script>
+    // Mark CSS as loaded when stylesheets are ready
+    (function() {
+      function markCSSLoaded() {
+        document.body.classList.add('css-loaded');
+      }
+      
+      // Check if stylesheets are already loaded
+      if (document.styleSheets.length > 0) {
+        let allLoaded = true;
+        for (let i = 0; i < document.styleSheets.length; i++) {
+          try {
+            if (document.styleSheets[i].cssRules === null) {
+              allLoaded = false;
+              break;
+            }
+          } catch (e) {
+            allLoaded = false;
+            break;
+          }
+        }
+        if (allLoaded) {
+          markCSSLoaded();
+          return;
+        }
+      }
+      
+      // Wait for stylesheets to load
+      const checkInterval = setInterval(() => {
+        let allLoaded = true;
+        for (let i = 0; i < document.styleSheets.length; i++) {
+          try {
+            if (document.styleSheets[i].cssRules === null) {
+              allLoaded = false;
+              break;
+            }
+          } catch (e) {
+            allLoaded = false;
+            break;
+          }
+        }
+        if (allLoaded) {
+          clearInterval(checkInterval);
+          markCSSLoaded();
+        }
+      }, 10);
+      
+      // Fallback timeout
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        markCSSLoaded();
+      }, 1000);
+    })();
+  </script>
   <script>
     // Inline early blocker to catch Cloudflare Insights before it loads
     (function(){'use strict';const b=['cloudflareinsights.com','static.cloudflareinsights.com'];function s(u){if(!u)return false;return b.some(d=>u.includes(d));}const of=window.fetch;window.fetch=function(...a){const u=typeof a[0]==='string'?a[0]:a[0].url;if(s(u)){return Promise.reject(new Error('Tracker blocked'));}return of.apply(this,a);};const ox=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u,...r){if(s(u)){throw new Error('Tracker blocked');}return ox.apply(this,[m,u,...r]);};const oc=document.createElement;document.createElement=function(t,...r){const e=oc.call(this,t,...r);if(t.toLowerCase()==='script'){const sa=e.setAttribute;e.setAttribute=function(n,v){if(n==='src'&&s(v)){return;}return sa.call(this,n,v);};}return e;};const mo=new MutationObserver(function(m){m.forEach(function(mu){mu.addedNodes.forEach(function(n){if(n.nodeType===1&&n.tagName==='SCRIPT'){const src=n.src||n.getAttribute('src')||'';if(s(src)||(n.innerHTML||'').includes('cloudflareinsights')){n.remove();}}}});});mo.observe(document.documentElement||document.body||document,{childList:true,subtree:true});if(document.querySelector){document.querySelectorAll('script[src*="cloudflareinsights"]').forEach(s=>s.remove());}})();
