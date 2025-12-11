@@ -750,16 +750,82 @@
 
             async setupAirtableListener() {
                   try {
-                        // Load initial donations
-                        await this.fetchAirtableDonations(true);
-                        
+                        await this.fetchSupabaseDonations(true);
                         this.airtablePollInterval = setInterval(() => {
-                              this.fetchAirtableDonations(false).catch(err => {
-                              });
+                              this.fetchSupabaseDonations(false).catch(() => {});
                         }, airtableConfig.pollInterval);
+                  } catch (supabaseError) {
+                        await this.fetchAirtableDonations(true);
+                        this.airtablePollInterval = setInterval(() => {
+                              this.fetchAirtableDonations(false).catch(() => {});
+                        }, airtableConfig.pollInterval);
+                  }
+            }
+
+            processDonationRecords(records, isInitialLoad = false) {
+                  let newDonations = 0;
+                  records.forEach(record => {
+                        const donationId = record.id;
+                        
+                        if (!this.processedDonations.has(donationId)) {
+                              this.processedDonations.add(donationId);
+                              newDonations++;
+                              
+                              const fields = record.fields || {};
+                              const donation = {
+                                    amount: this.parseAmount(fields[airtableConfig.fieldMappings.amount]),
+                                    donor: fields[airtableConfig.fieldMappings.donor] || 'Anonymous',
+                                    date: this.parseDate(fields[airtableConfig.fieldMappings.date]),
+                                    purpose: fields[airtableConfig.fieldMappings.purpose] || 'N/A',
+                                    category: fields[airtableConfig.fieldMappings.category] || 'General',
+                                    transactionId: fields[airtableConfig.fieldMappings.transactionId] || record.id
+                              };
+                              
+                              if (this.validateDonation(donation)) {
+                                    this.addDonation(donation, donationId, isInitialLoad);
+                              }
+                        }
+                  });
+                  this.hideError();
+                  return newDonations;
+            }
+
+            async fetchSupabaseDonations(isInitialLoad = false) {
+                  if (this.isProcessingDonations) {
+                        return;
+                  }
+
+                  this.isProcessingDonations = true;
+
+                  try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), airtableConfig.requestTimeout);
+
+                        const response = await fetch('/api/donations?limit=1000', {
+                              method: 'GET',
+                              headers: { 'Content-Type': 'application/json' },
+                              signal: controller.signal
+                        });
+
+                        clearTimeout(timeoutId);
+
+                        if (!response.ok) {
+                              const errorData = await response.json().catch(() => ({}));
+                              const message = errorData.error?.message || `Supabase API error: ${response.status} ${response.statusText}`;
+                              throw new Error(message);
+                        }
+
+                        const data = await response.json();
+                        const records = data.records || [];
+                        this.processDonationRecords(records, isInitialLoad);
+                        return true;
                   } catch (error) {
-                        this.showError('Failed to connect to donation database. Please check your connection and refresh.');
+                        if (isInitialLoad) {
+                              this.showError('Could not reach Supabase donations. Falling back to backup source.');
+                        }
                         throw error;
+                  } finally {
+                        this.isProcessingDonations = false;
                   }
             }
 
@@ -810,31 +876,7 @@
                         const data = await response.json();
                         const records = data.records || [];
 
-                        let newDonations = 0;
-                        records.forEach(record => {
-                              const donationId = record.id;
-                              
-                              if (!this.processedDonations.has(donationId)) {
-                                    this.processedDonations.add(donationId);
-                                    newDonations++;
-                                    
-                                    const fields = record.fields || {};
-                                    const donation = {
-                                          amount: this.parseAmount(fields[airtableConfig.fieldMappings.amount]),
-                                          donor: fields[airtableConfig.fieldMappings.donor] || 'Anonymous',
-                                          date: this.parseDate(fields[airtableConfig.fieldMappings.date]),
-                                          purpose: fields[airtableConfig.fieldMappings.purpose] || 'N/A',
-                                          category: fields[airtableConfig.fieldMappings.category] || 'General',
-                                          transactionId: fields[airtableConfig.fieldMappings.transactionId] || record.id
-                                    };
-                                    
-                                    if (this.validateDonation(donation)) {
-                                          this.addDonation(donation, donationId, isInitialLoad);
-                                    }
-                              }
-                        });
-                        
-                        this.hideError();
+                        this.processDonationRecords(records, isInitialLoad);
                   } catch (error) {
                         let errorMessage = 'Error loading donations. ';
                         if (error.name === 'AbortError') {
