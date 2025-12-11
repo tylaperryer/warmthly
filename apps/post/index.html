@@ -15,13 +15,14 @@
   
   <style>
     /* Hide body until CSS loads - base.css handles the animation */
-    body:not(.css-loaded):not(.fonts-loaded) {
+    body:not(.css-loaded) {
       visibility: hidden;
       opacity: 0;
     }
-    body.css-loaded:not(.fonts-loaded) {
+    body.css-loaded {
       visibility: visible;
       opacity: 1;
+      transition: opacity 0.2s ease-in-out;
     }
   </style>
   
@@ -266,14 +267,27 @@
       popupTitle.textContent = entry.title;
       popupContent.innerHTML = entry.content;
       
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      
       popup.classList.add('active');
       document.body.classList.add('popup-open');
+      document.documentElement.classList.add('popup-open');
       popupClose.focus();
     }
     
     function closePopup() {
       popup.classList.remove('active');
       document.body.classList.remove('popup-open');
+      document.documentElement.classList.remove('popup-open');
+      
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.top = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     }
     
     popupClose.addEventListener('click', closePopup);
