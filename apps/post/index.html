@@ -279,12 +279,16 @@
     
     function closePopup() {
       popup.classList.remove('active');
+      
+      // Restore scroll position before removing classes
+      const scrollY = document.body.style.top;
       document.body.classList.remove('popup-open');
       document.documentElement.classList.remove('popup-open');
-      
-      // Restore scroll position
-      const scrollY = document.body.style.top;
       document.body.style.top = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      
       if (scrollY) {
         window.scrollTo(0, parseInt(scrollY || '0') * -1);
       }
