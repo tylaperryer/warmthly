@@ -227,11 +227,44 @@ function canUserVote() {
   return timeSinceVote >= THIRTY_DAYS_IN_MILLIS;
 }
 
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyDexgT1qa34GPGnpmZ1iCvr3jigiwvZ5eE',
+  authDomain: 'post-vote-59ed2.firebaseapp.com',
+  databaseURL: 'https://post-vote-59ed2-default-rtdb.europe-west1.firebasedatabase.app',
+  projectId: 'post-vote-59ed2',
+  storageBucket: 'post-vote-59ed2.firebasestorage.app',
+  messagingSenderId: '170079221674',
+  appId: '1:170079221674:web:58097403f2a85f829b5dd3'
+};
+
+let firebaseReadyPromise = null;
+async function ensureFirebase() {
+  if (window.firebaseDb) return window.firebaseDb;
+  if (!firebaseReadyPromise) {
+    firebaseReadyPromise = (async () => {
+      try {
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+        const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+        const app = initializeApp(FIREBASE_CONFIG);
+        const db = getFirestore(app);
+        window.firebaseApp = app;
+        window.firebaseDb = db;
+        return db;
+      } catch (e) {
+        console.warn('Firebase init failed, falling back to local storage.', e);
+        return null;
+      }
+    })();
+  }
+  return firebaseReadyPromise;
+}
+
 async function fetchFirebaseVotes() {
   try {
-    if (!window.firebaseDb) return null;
+    const db = await ensureFirebase();
+    if (!db) return null;
     const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-    const ref = doc(window.firebaseDb, 'votes', 'dissolution');
+    const ref = doc(db, 'votes', 'dissolution');
     const snap = await getDoc(ref);
     if (!snap.exists()) return { yes: 0, no: 0 };
     return snap.data();
@@ -242,9 +275,10 @@ async function fetchFirebaseVotes() {
 
 async function submitFirebaseVote(type) {
   try {
-    if (!window.firebaseDb) return null;
+    const db = await ensureFirebase();
+    if (!db) return null;
     const { doc, getDoc, setDoc, updateDoc, increment } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-    const ref = doc(window.firebaseDb, 'votes', 'dissolution');
+    const ref = doc(db, 'votes', 'dissolution');
     try {
       await updateDoc(ref, { [type]: increment(1) });
     } catch (err) {
