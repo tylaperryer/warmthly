@@ -399,8 +399,9 @@ html {
   padding: 3rem 2.5rem 2.5rem;
   max-width: 680px;
   width: calc(100% - 48px);
-  max-height: 90vh;
+  max-height: calc(100vh - 48px);
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
   z-index: var(--z-popup);
   opacity: 0;
@@ -408,12 +409,27 @@ html {
   transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
   -ms-overflow-style: none;
   scrollbar-width: none;
+  /* Ensure popup stays within viewport */
+  margin: 24px;
+  box-sizing: border-box;
 }
 
 .chronicle-popup::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
+}
+
+/* Prevent body scroll when popup is open */
+body.popup-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+html.popup-open {
+  overflow: hidden;
 }
 
 .chronicle-popup::before {
@@ -587,6 +603,8 @@ html {
   .chronicle-popup {
     padding: 2rem 1.75rem;
     max-width: 95%;
+    margin: 16px;
+    max-height: calc(100vh - 32px);
   }
   
   .chronicle-popup-title {
