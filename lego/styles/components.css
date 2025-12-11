@@ -313,8 +313,8 @@ body > nav.header-right .stoplight-container {
 }
 
 .dropdown-item.dropdown-ellipsis:hover {
-  color: var(--text-color);
-  background: rgba(0, 0, 0, 0.04);
+  color: var(--warmthly-orange);
+  background: transparent;
 }
 
 .stoplight-vote {
@@ -380,15 +380,15 @@ body > nav.header-right .stoplight-container {
 }
 
 .stoplight-vote-btn.yes {
-  background: linear-gradient(135deg, #c15b2b, #e67e22);
+  background: var(--warmthly-orange);
   color: #fffaf3;
   box-shadow: 0 6px 12px rgba(193, 91, 43, 0.25);
 }
 
 .stoplight-vote-btn.no {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
-  color: #f8fafc;
-  box-shadow: 0 6px 12px rgba(75, 85, 99, 0.25);
+  background: var(--warmthly-orange);
+  color: #fffaf3;
+  box-shadow: 0 6px 12px rgba(193, 91, 43, 0.25);
 }
 
 .stoplight-vote-btn:hover:not(:disabled) {
