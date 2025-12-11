@@ -54,7 +54,7 @@ class WarmthlyStoplight extends HTMLElement {
           </button>
           <div class="stoplight-vote" id="${votePanelId}" role="group" aria-label="Warmthly dissolution vote" hidden>
             <div class="stoplight-vote-row">
-              <span class="stoplight-vote-label">Dissolution vote</span>
+              <span class="stoplight-vote-label">Dissolve us?</span>
               <span class="stoplight-vote-count" id="${voteCountId}">Loading…</span>
             </div>
             <div class="stoplight-vote-bar" aria-hidden="true">
