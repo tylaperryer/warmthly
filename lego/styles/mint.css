@@ -9,6 +9,15 @@ html {
   background: var(--warmthly-background) !important;
 }
 
+/* Mint green color */
+:root {
+  --mint-green: #33CE79;
+}
+
+.page-title {
+  color: var(--mint-green) !important;
+}
+
 /* Mint-specific header text color */
 .top-left-heading .mint-text {
   color: var(--warmthly-orange);
@@ -113,6 +122,9 @@ html {
   box-shadow: 0 8px 32px rgba(0,0,0,0.06);
   min-height: 500px;
   margin-bottom: 2rem;
+  max-width: 100%;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .pool-legend-toggle {
