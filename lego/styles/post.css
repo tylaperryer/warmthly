@@ -9,14 +9,17 @@ html {
   background: var(--warmthly-background) !important;
 }
 
-/* Post-specific container - add top padding for spacing */
+/* Post-specific container - match homepage exactly */
 .container {
-  padding-top: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-24) var(--spacing-6) var(--spacing-10);
+  text-align: center;
 }
 
-/* Post-specific header - make it bigger */
+/* Post-specific header - match homepage exactly */
 .top-left-heading {
-  font-size: var(--font-size-2xl) !important;
+  font-size: var(--font-size-3xl) !important;
 }
 
 /* Post-specific header text color */
@@ -33,7 +36,7 @@ html {
 /* Hero Section */
 .hero-section {
   margin-top: 0;
-  margin-bottom: 8rem;
+  margin-bottom: var(--spacing-12);
 }
 
 .page-title {
@@ -923,6 +926,33 @@ html {
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
+}
+
+/* Submit Button - Sky Blue for Post Pages */
+.submit-button {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #87ceeb, #6bb6d6);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(135, 206, 235, 0.3);
+}
+
+.submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #6bb6d6, #5aa5c4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(135, 206, 235, 0.4);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Responsive */
