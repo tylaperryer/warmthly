@@ -20,6 +20,11 @@ class WarmthlyStoplight extends HTMLElement {
     const instanceId = `stoplight-${Math.random().toString(36).substr(2, 9)}`;
     const stoplightId = `stoplight-${instanceId}`;
     const menuId = `dropdown-menu-${instanceId}`;
+    const votePanelId = `stoplight-vote-${instanceId}`;
+    const voteToggleId = `stoplight-vote-toggle-${instanceId}`;
+    const voteBarId = `stoplight-vote-bar-${instanceId}`;
+    const voteCountId = `stoplight-vote-count-${instanceId}`;
+    const voteStatusId = `stoplight-vote-status-${instanceId}`;
     
     this.innerHTML = `
       <div class="stoplight-container">
@@ -38,13 +43,42 @@ class WarmthlyStoplight extends HTMLElement {
         </button>
         <nav class="dropdown-menu" id="${menuId}" role="menu" aria-label="Navigation menu">
           ${menuItems}
+          <button 
+            class="dropdown-item dropdown-ellipsis" 
+            id="${voteToggleId}" 
+            type="button" 
+            role="menuitem" 
+            aria-expanded="false" 
+            aria-controls="${votePanelId}">
+            …
+          </button>
+          <div class="stoplight-vote" id="${votePanelId}" role="group" aria-label="Warmthly dissolution vote" hidden>
+            <div class="stoplight-vote-row">
+              <span class="stoplight-vote-label">Dissolution vote</span>
+              <span class="stoplight-vote-count" id="${voteCountId}">Loading…</span>
+            </div>
+            <div class="stoplight-vote-bar" aria-hidden="true">
+              <div class="stoplight-vote-bar-fill" id="${voteBarId}" style="width: 0%"></div>
+            </div>
+            <div class="stoplight-vote-actions">
+              <button class="stoplight-vote-btn yes" data-vote="yes" type="button" role="menuitem">Yes</button>
+              <button class="stoplight-vote-btn no" data-vote="no" type="button" role="menuitem">No</button>
+            </div>
+            <div class="stoplight-vote-status" id="${voteStatusId}" aria-live="polite"></div>
+          </div>
         </nav>
       </div>
     `;
     
     try {
       const { initStoplight } = await import('../components/stoplight/stoplight.js');
-      initStoplight(stoplightId, menuId);
+      initStoplight(stoplightId, menuId, {
+        votePanelId,
+        voteToggleId,
+        voteBarId,
+        voteStatusId,
+        voteCountId
+      });
     } catch (error) {
       const menu = document.getElementById(menuId);
       if (menu) {
