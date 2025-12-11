@@ -727,8 +727,11 @@
 
             updateContainerSize() {
                   this.containerRect = this.container.getBoundingClientRect();
-                  this.poolWidth = this.containerRect.width;
-                  this.poolHeight = this.containerRect.height;
+                  this.poolWidth = Math.max(this.containerRect.width, 320);
+                  this.poolHeight = Math.max(this.containerRect.height, 360);
+                  if (this.pool) {
+                        this.pool.style.height = `${this.poolHeight}px`;
+                  }
                   
                   // Update physics world boundaries if initialized
                   if (this.world) {
