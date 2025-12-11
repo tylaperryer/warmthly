@@ -11,7 +11,7 @@ html {
 
 /* Post-specific container - add top padding for spacing */
 .container {
-  padding-top: 8rem;
+  padding-top: 2rem;
 }
 
 /* Post-specific header - make it bigger */
@@ -21,18 +21,18 @@ html {
 
 /* Post-specific header text color */
 .top-left-heading .post-text {
-  color: var(--red-dot);
+  color: #87ceeb;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .top-left-heading .post-text:hover {
-  color: #ee3542;
+  color: #6bb6d6;
 }
 
 /* Hero Section */
 .hero-section {
-  margin-top: 4rem;
+  margin-top: 0;
   margin-bottom: 8rem;
 }
 
@@ -178,7 +178,7 @@ html {
 
 .timeline-marker.orange { background: var(--warmthly-orange); }
 .timeline-marker.green { background: var(--green-dot); }
-.timeline-marker.red { background: var(--red-dot); }
+.timeline-marker.red { background: #87ceeb; }
 .timeline-marker.blue { background: #5f27cd; }
 
 .timeline-card {
@@ -701,7 +701,7 @@ html {
 
 .yes-section .section-label {
   justify-content: flex-end;
-  color: var(--red-dot);
+  color: #87ceeb;
 }
 
 .no-section .section-label {
@@ -758,9 +758,9 @@ html {
 }
 
 .seat.yes-seat {
-  background: linear-gradient(135deg, rgba(216, 0, 12, 0.15), rgba(216, 0, 12, 0.08));
-  border: 2px solid rgba(216, 0, 12, 0.3);
-  color: var(--red-dot);
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.15), rgba(135, 206, 235, 0.08));
+  border: 2px solid rgba(135, 206, 235, 0.3);
+  color: #87ceeb;
 }
 
 .seat.no-seat {
@@ -852,14 +852,14 @@ html {
 }
 
 .vote-button#yesButton {
-  background: linear-gradient(135deg, var(--red-dot), #ee3542);
+  background: linear-gradient(135deg, #87ceeb, #6bb6d6);
   color: white;
-  box-shadow: 0 4px 16px rgba(216, 0, 12, 0.3);
+  box-shadow: 0 4px 16px rgba(135, 206, 235, 0.3);
 }
 
 .vote-button#yesButton:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(216, 0, 12, 0.4);
+  box-shadow: 0 6px 20px rgba(135, 206, 235, 0.4);
 }
 
 .vote-button#yesButton:disabled {
@@ -902,7 +902,7 @@ html {
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--red-dot), #ff6b6b);
+  background: linear-gradient(90deg, #87ceeb, #6bb6d6);
   border-radius: 6px;
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
